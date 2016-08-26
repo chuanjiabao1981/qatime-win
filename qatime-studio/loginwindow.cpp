@@ -82,11 +82,6 @@ void LoginWindow::loginFinished()
 	{
 		User *user = new User();
 		user->readJson(data);
-// 		MainWindow *mainWin = new MainWindow();
-// 		mainWin->setCurrentUser(user);
-// 		mainWin->setRemeberToken(data["remember_token"].toString());
-// 		mainWin->initCourses();
-//		mainWin->show();
 		UIMainWindow* mainWin = new UIMainWindow();
 		mainWin->show();
 		mainWin->setWindowFlags(Qt::FramelessWindowHint);
