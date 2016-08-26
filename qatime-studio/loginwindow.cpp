@@ -89,6 +89,7 @@ void LoginWindow::loginFinished()
 //		mainWin->show();
 		UIMainWindow* mainWin = new UIMainWindow();
 		mainWin->show();
+		mainWin->setWindowFlags(Qt::FramelessWindowHint);
 		this->destroy();
 	}
 	else
