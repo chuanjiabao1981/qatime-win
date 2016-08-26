@@ -1,4 +1,5 @@
 #include "loginwindow.h"
+#include "uimainwindow.h"
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QJsonDocument>
@@ -86,6 +87,8 @@ void LoginWindow::loginFinished()
 // 		mainWin->setRemeberToken(data["remember_token"].toString());
 // 		mainWin->initCourses();
 //		mainWin->show();
+		UIMainWindow* mainWin = new UIMainWindow();
+		mainWin->show();
 		this->destroy();
 	}
 	else
