@@ -1,4 +1,7 @@
 <RCC>
-    <qresource prefix="LoginWindow">
-    </qresource>
+  <qresource prefix="LoginWindow">
+    <file>images/close.png</file>
+    <file>images/min.png</file>
+    <file>images/camera.png</file>
+  </qresource>
 </RCC>
