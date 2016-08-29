@@ -7,6 +7,8 @@
 #include "user.h"
 #include "windows.h"
 #include "ShellApi.h"
+#include <QHBoxLayout>
+#include <string.h>
 
 LoginWindow::LoginWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -19,6 +21,11 @@ LoginWindow::LoginWindow(QWidget *parent)
 	connect(ui.findPassword_pushBtn, SIGNAL(clicked()), this, SLOT(FindPassword()));
 	connect(ui.min_pushBtn, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.close_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
+
+	ui.UserName_Edit->setTextMargins(30, 3, 20, 3);
+	ui.UserPass_Edit->setTextMargins(30, 3, 20, 3);
+
+	ReadSetting();
 }
 
 LoginWindow::~LoginWindow()
@@ -51,15 +58,27 @@ void LoginWindow::mouseReleaseEvent(QMouseEvent *e)
 // 开始登陆
 void LoginWindow::OnLogIn()
 {
-	if (ui.UserName_Edit->text().isEmpty() || ui.UserPass_Edit->text().isEmpty())
+	if (ui.UserName_Edit->text().isEmpty())
 	{
-		ui.ErrorTip_Label->setText(QString("用户名或者密码为空"));
+		ui.ErrorTip_Label->setText(QString("用户名为空"));
+		ui.UserName_Edit->setText(QString(""));
+		ui.UserPass_Edit->setText(QString(""));
+		return;
+	}
+	else if (ui.UserPass_Edit->text().isEmpty())
+	{
+		ui.ErrorTip_Label->setText(QString("密码为空"));
 		ui.UserName_Edit->setText(QString(""));
 		ui.UserPass_Edit->setText(QString(""));
 		return;
 	}
 
+#ifdef _DEBUG
+	url = QUrl("http://testing.qatime.cn/api/v1/sessions");
+#else
 	url = QUrl("http://qatime.cn/api/v1/sessions");
+#endif
+	
 	QByteArray append("client_type=pc");
 	append.append("&email=");
 	append += ui.UserName_Edit->text();
@@ -83,8 +102,8 @@ void LoginWindow::loginFinished()
 		User *user = new User();
 		user->readJson(data);
 		UIMainWindow* mainWin = new UIMainWindow();
-		mainWin->show();
 		mainWin->setWindowFlags(Qt::FramelessWindowHint);
+		mainWin->show();
 		this->destroy();
 	}
 	else
@@ -108,7 +127,7 @@ void LoginWindow::RegisterAccount()
 
 void LoginWindow::FindPassword()
 {
-	ShellExecute(NULL, L"open", L"http://cn.bing.com", NULL, NULL, SW_SHOW);
+	ShellExecute(NULL, L"open", L"http://qatime.cn/passwords/new", NULL, NULL, SW_SHOW);
 }
 
 void LoginWindow::MinDialog()
@@ -119,4 +138,28 @@ void LoginWindow::MinDialog()
 void LoginWindow::CloseDialog()
 {
 	close();
+}
+
+void LoginWindow::ReadSetting()
+{
+	TCHAR szTempPath[MAX_PATH] = { 0 };
+
+	GetCurrentDirectory(MAX_PATH, szTempPath);
+	lstrcat(szTempPath, L"\\test.ini");
+	MessageBox(NULL, szTempPath, L"", MB_OK);
+
+	char username[128] = "";
+	char password[128] = "";
+
+	WritePrivateProfileString(L"TEST", L"USERNAME", L"xiedesheng", szTempPath);
+	WritePrivateProfileString(L"TEST", L"PASSWORD", L"123", szTempPath);
+// 	TCHAR szTempPath[MAX_PATH] = { 0 };
+// 	DWORD dwResult = ::GetTempPath(MAX_PATH, szTempPath);
+// 	strcat(szTempPath, "test.ini");
+// 	char username[128] = "";
+// 	char password[128] = "";
+// 	GetPrivateProfileString("CONFIG", "USERNAME", "", username, 128, szTempPath);
+// 	GetPrivateProfileString("TEST", "PASSWORD", "", password, 64, szTempPath);
+// 	Edit1->Text = username;
+// 	Edit2->Text = password;
 }

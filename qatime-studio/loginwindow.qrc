@@ -1,7 +1,17 @@
 <RCC>
   <qresource prefix="LoginWindow">
+    <file>images/homepage.png</file>
+    <file>images/logoTime.png</file>
+    <file>images/username.png</file>
+    <file>images/userpass.png</file>
+    <file>images/logo.png</file>
+    <file>images/chat.png</file>
+    <file>images/video.png</file>
+    <file>images/expansion.png</file>
     <file>images/close.png</file>
-    <file>images/min.png</file>
     <file>images/camera.png</file>
+    <file>images/close.png</file>
+    <file>images/camera.png</file>
+    <file>images/minsize.png</file>
   </qresource>
 </RCC>
