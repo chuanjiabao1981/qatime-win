@@ -8,7 +8,10 @@
 #include "windows.h"
 #include "ShellApi.h"
 #include <QHBoxLayout>
-#include <string.h>
+
+TCHAR m_pathHomePage[MAX_PATH] = {0};
+TCHAR m_pathRegisterAccount[MAX_PATH] = { 0 };
+TCHAR m_pathFindPassword[MAX_PATH] = { 0 };
 
 LoginWindow::LoginWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -117,17 +120,17 @@ void LoginWindow::loginFinished()
 
 void LoginWindow::BrowseHomePage()
 {
-	ShellExecute(NULL, L"open", L"http://qatime.cn", NULL, NULL, SW_SHOW);
+	ShellExecute(NULL, L"open", m_pathHomePage, NULL, NULL, SW_SHOW);
 }
 
 void LoginWindow::RegisterAccount()
 {
-	ShellExecute(NULL, L"open", L"http://qatime.cn/teachers/new", NULL, NULL, SW_SHOW);
+	ShellExecute(NULL, L"open", m_pathRegisterAccount, NULL, NULL, SW_SHOW);
 }
 
 void LoginWindow::FindPassword()
 {
-	ShellExecute(NULL, L"open", L"http://qatime.cn/passwords/new", NULL, NULL, SW_SHOW);
+	ShellExecute(NULL, L"open", m_pathFindPassword, NULL, NULL, SW_SHOW);
 }
 
 void LoginWindow::MinDialog()
@@ -145,21 +148,9 @@ void LoginWindow::ReadSetting()
 	TCHAR szTempPath[MAX_PATH] = { 0 };
 
 	GetCurrentDirectory(MAX_PATH, szTempPath);
-	lstrcat(szTempPath, L"\\test.ini");
-	MessageBox(NULL, szTempPath, L"", MB_OK);
+	lstrcat(szTempPath, L"\\config.ini");
 
-	char username[128] = "";
-	char password[128] = "";
-
-	WritePrivateProfileString(L"TEST", L"USERNAME", L"xiedesheng", szTempPath);
-	WritePrivateProfileString(L"TEST", L"PASSWORD", L"123", szTempPath);
-// 	TCHAR szTempPath[MAX_PATH] = { 0 };
-// 	DWORD dwResult = ::GetTempPath(MAX_PATH, szTempPath);
-// 	strcat(szTempPath, "test.ini");
-// 	char username[128] = "";
-// 	char password[128] = "";
-// 	GetPrivateProfileString("CONFIG", "USERNAME", "", username, 128, szTempPath);
-// 	GetPrivateProfileString("TEST", "PASSWORD", "", password, 64, szTempPath);
-// 	Edit1->Text = username;
-// 	Edit2->Text = password;
+	GetPrivateProfileString(L"CONFIG_PATH", L"HOMEPAGE", L"", m_pathHomePage, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"REGISTERACCOUNT", L"", m_pathRegisterAccount, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"FINDPASSWORD", L"", m_pathFindPassword, MAX_PATH, szTempPath);
 }

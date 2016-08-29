@@ -6,6 +6,9 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include "ui_loginwindow.h"
+#include "UIButton.h"
+#include <string.h>
+#include <wtypes.h>
 
 #pragma execution_character_set("utf-8")
 
@@ -39,6 +42,14 @@ private slots :
 
 private:
 	void loginFinished();		// 登陆完成的返回事件
+
+protected:
+	void ReadSetting();			// 读取配置文件路径信息
+
+private:
+	CButton* m_MinBtn;
+	CButton* m_CloseBtn;
+
 };
 
 #endif // LOGINWINDOW_H
