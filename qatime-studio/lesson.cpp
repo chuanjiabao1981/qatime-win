@@ -41,3 +41,42 @@ QString Lesson::LessonStatus()
 {
 	return mStatus;
 }
+
+QString Lesson::ChinaLessonStatus()
+{
+	QString strChinaStatus;
+	if (mStatus == "init")
+	{
+		strChinaStatus = "未开始";
+	}
+	else if (mStatus == "ready")
+	{
+		strChinaStatus = "进行中";
+	}
+	else if (mStatus == "teaching")
+	{
+		strChinaStatus = "进行中";
+	}
+	else if (mStatus == "paused")
+	{
+		strChinaStatus = "进行中";
+	}
+	else if (mStatus == "closed")
+	{
+		strChinaStatus = "已结束";
+	}
+	else if (mStatus == "finished")
+	{
+		strChinaStatus = "已结束";
+	}
+	else if (mStatus == "billing")
+	{
+		strChinaStatus = "待结算";
+	}
+	else if (mStatus == "completed")
+	{
+		strChinaStatus = "已结算";
+	}
+
+	return strChinaStatus;
+}

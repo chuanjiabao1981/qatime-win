@@ -3,6 +3,8 @@
 
 #include <QJsonObject>
 
+#pragma execution_character_set("utf-8")
+
 class Lesson
 {
 public:
@@ -13,6 +15,7 @@ public:
     QString name();
 	QString LessonTime();
 	QString LessonStatus();
+	QString ChinaLessonStatus();
 private:
     int mId;
     int mCourseId;

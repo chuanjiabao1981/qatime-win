@@ -5,7 +5,6 @@
 #include <QJsonArray>
 #include <QRect>
 #include "windows.h"
-#include <QMouseEvent>
 
 UIMainWindow::UIMainWindow(QWidget *parent)
 	: QWidget(parent)
@@ -174,7 +173,6 @@ void UIMainWindow::setNetworkPic(const QString &szUrl)
 	QNetworkAccessManager manager;
 	QEventLoop loop;
 
-	// qDebug() << "Reading picture form " << url; 
 	QNetworkReply *reply = manager.get(QNetworkRequest(url));
 	//请求结束并下载完成后，退出子事件循环 
 	QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -185,27 +183,6 @@ void UIMainWindow::setNetworkPic(const QString &szUrl)
 	QPixmap pixmap;
 	pixmap.loadFromData(jpegData);
 	ui.teacherPhoto_Label->setPixmap(pixmap);
-}
-
-void UIMainWindow::mousePressEvent(QMouseEvent *e)
-{
-	last = e->globalPos();
-}
-
-void UIMainWindow::mouseMoveEvent(QMouseEvent *e)
-{
-	int dx = e->globalX() - last.x();
-	int dy = e->globalY() - last.y();
-
-	last = e->globalPos();
-}
-
-void UIMainWindow::mouseReleaseEvent(QMouseEvent *e)
-{
-	int dx = e->globalX() - last.x();
-	int dy = e->globalY() - last.y();
-
-	move(x() + dx, y() + dy);
 }
 
 void UIMainWindow::Expansion()
@@ -220,4 +197,26 @@ void UIMainWindow::Expansion()
 		ui.teacherInfo_widget->setVisible(true);
 		ui.expansion_pushBtn->move(QPoint(145, 290));
 	}	
+}
+
+void UIMainWindow::mousePressEvent(QMouseEvent *e)
+{
+	last = e->globalPos();
+}
+
+void UIMainWindow::mouseMoveEvent(QMouseEvent *e)
+{
+	int dx = e->globalX() - last.x();
+	int dy = e->globalY() - last.y();
+
+	last = e->globalPos();
+	move(x() + dx, y() + dy);
+}
+
+void UIMainWindow::mouseReleaseEvent(QMouseEvent *e)
+{
+	int dx = e->globalX() - last.x();
+	int dy = e->globalY() - last.y();
+
+	move(x() + dx, y() + dy);
 }

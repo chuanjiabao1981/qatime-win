@@ -49,7 +49,7 @@ void UILesson::setLessonInfo(QJsonObject &objBig)
 		ui.Lesson_tableWidget->setItem(nNum - 1, 2, pItemName);
 
 		// ¿Î³Ì×´Ì¬
-		QTableWidgetItem *pItemStatus = new QTableWidgetItem(pLesson->LessonStatus());
+		QTableWidgetItem *pItemStatus = new QTableWidgetItem(pLesson->ChinaLessonStatus());
 		pItemStatus->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 		ui.Lesson_tableWidget->setItem(nNum - 1, 3, pItemStatus);
 	}

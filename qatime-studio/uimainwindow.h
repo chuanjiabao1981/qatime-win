@@ -10,6 +10,7 @@
 #include "user.h"
 #include "UIAuxiliary.h"
 #include "UILesson.h"
+#include <QMouseEvent>
 
 #pragma execution_character_set("utf-8")
 
