@@ -63,14 +63,14 @@ void LoginWindow::OnLogIn()
 {
 	if (ui.UserName_Edit->text().isEmpty())
 	{
-		ui.ErrorTip_Label->setText(QString("用户名为空"));
+		ui.ErrorTip_Label->setText(QString("请输入用户名"));
 		ui.UserName_Edit->setText(QString(""));
 		ui.UserPass_Edit->setText(QString(""));
 		return;
 	}
 	else if (ui.UserPass_Edit->text().isEmpty())
 	{
-		ui.ErrorTip_Label->setText(QString("密码为空"));
+		ui.ErrorTip_Label->setText(QString("请输入密码"));
 		ui.UserName_Edit->setText(QString(""));
 		ui.UserPass_Edit->setText(QString(""));
 		return;
@@ -102,16 +102,16 @@ void LoginWindow::loginFinished()
 	QJsonObject data = obj["data"].toObject();
 	if (obj["status"].toInt() == 1 && data.contains("remember_token"))
 	{
-		User *user = new User();
-		user->readJson(data);
 		UIMainWindow* mainWin = new UIMainWindow();
 		mainWin->setWindowFlags(Qt::FramelessWindowHint);
+		mainWin->setTeacherInfo(data["user"].toObject());
+		mainWin->setRemeberToken(data["remember_token"].toString());
 		mainWin->show();
 		this->destroy();
 	}
 	else
 	{
-		QString str = QString("用户名或者密码不匹配");
+		QString str = QString("用户名或密码不正确");
 		ui.ErrorTip_Label->setText(str);
 		ui.UserName_Edit->setText(QString(""));
 		ui.UserPass_Edit->setText(QString(""));

@@ -83,7 +83,7 @@
    <widget class="QPushButton" name="homepage_pushBtn">
     <property name="geometry">
      <rect>
-      <x>790</x>
+      <x>770</x>
       <y>41</y>
       <width>70</width>
       <height>30</height>
@@ -98,7 +98,7 @@
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(85, 170, 255);</string>
+     <string notr="true"/>
     </property>
     <property name="text">
      <string>访问主页</string>
@@ -599,7 +599,7 @@
     <property name="geometry">
      <rect>
       <x>13</x>
-      <y>2</y>
+      <y>-10</y>
       <width>191</width>
       <height>81</height>
      </rect>
@@ -643,7 +643,7 @@
    <widget class="QLabel" name="label_19">
     <property name="geometry">
      <rect>
-      <x>780</x>
+      <x>760</x>
       <y>46</y>
       <width>20</width>
       <height>20</height>
