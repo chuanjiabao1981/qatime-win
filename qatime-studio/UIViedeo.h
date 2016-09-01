@@ -26,18 +26,24 @@ private:
 	static ST_NLSS_VIDEO_SAMPLER	m_SvideoSampler;
 	QTimer*							m_refreshTimer;
 	static  QMutex					m_mutex;
-	EN_NLSS_VIDEOIN_TYPE			m_videoSourceType;  // 视频源类型
-	EN_NLSS_AUDIOIN_TYPE			m_audioSourceType;	// 音频源类型
 	bool							m_bPreviewing;		// 预览
 	QString							m_strUrl;			// 推流地址
-	int								m_iVideoDeviceNum;	// 视频设备个数
-	int								m_iAudioDeviceNum;	// 音频设备个数
-	ST_NLSS_INDEVICE_INF*			m_pVideoDevices;	// 视频设备
-	ST_NLSS_INDEVICE_INF*			m_pAudioDevices;	// 音频设备
 	bool							m_bInited;			// 初始化
 	QString							m_errMsg;			// 错误信息
-
 	EN_NLSS_VIDEOQUALITY_LVL		m_videoQ;			// 画面清晰度
+	int								m_iAppChangeIndex;	// 应用路径
+
+public:
+	EN_NLSS_VIDEOIN_TYPE			m_videoSourceType;  // 视频源类型
+	EN_NLSS_AUDIOIN_TYPE			m_audioSourceType;	// 音频源类型
+
+	int								m_iVideoDeviceNum;	// 视频设备个数
+	int								m_iAudioDeviceNum;	// 音频设备个数
+	int								m_iAppWindNum;		// 其他应用个数
+	ST_NLSS_INDEVICE_INF*			m_pVideoDevices;	// 视频设备
+	ST_NLSS_INDEVICE_INF*			m_pAudioDevices;	// 音频设备
+	ST_NLSS_INDEVICE_INF*			m_pAppWinds;		// 其他应用
+
 #ifdef STARTLS_ASYNC
 	Worker* m_pWorker;
 #endif
@@ -64,11 +70,14 @@ private slots:
 #endif
 
 public:
-	void LiveVideo();									// 开始直播
+	void StartLiveVideo();								// 开始直播
+	void StopLiveVideo();								// 停止直播
 	bool InitMediaCapture();							// 初始化直播参数
 	void SetMediaCapture(_HNLSSERVICE hNlssService);														
 	static void SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler);
 	static void OnLiveStreamStatusNty(EN_NLSS_STATUS enStatus, EN_NLSS_ERRCODE enErrCode);
+	void ChangeAppPath(int index);						// 改变应用
+	bool IsCurrentPreview();							// 当前是否预览
 
 };
 

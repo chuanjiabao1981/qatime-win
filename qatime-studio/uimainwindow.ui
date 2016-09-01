@@ -261,11 +261,11 @@
      <x>420</x>
      <y>640</y>
      <width>71</width>
-     <height>51</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>播放</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
@@ -284,6 +284,38 @@
     <string/>
    </property>
   </widget>
+  <widget class="QComboBox" name="videosource_comboBox">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>640</y>
+     <width>90</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="baseSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="app_comboBox">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>640</y>
+     <width>115</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="baseSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
+  </widget>
   <zorder>label</zorder>
   <zorder>label_2</zorder>
   <zorder>mainclose_pushBtn</zorder>
@@ -294,6 +326,8 @@
   <zorder>expansion_pushBtn</zorder>
   <zorder>Live_pushBtn</zorder>
   <zorder>label_4</zorder>
+  <zorder>videosource_comboBox</zorder>
+  <zorder>app_comboBox</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>

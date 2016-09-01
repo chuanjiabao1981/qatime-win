@@ -8,7 +8,6 @@
 
 UIMainWindow::UIMainWindow(QWidget *parent)
 	: QWidget(parent)
-	, m_hNlssService(NULL)
 	, m_AuxiliaryInfo(NULL)
 	, m_LessonInfo(NULL)
 	, m_VideoInfo(NULL)
@@ -21,6 +20,8 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(ui.Lesson_pushBtn, SIGNAL(clicked()), this, SLOT(ShowLesson()));
 	connect(ui.expansion_pushBtn, SIGNAL(clicked()), this, SLOT(Expansion()));
 	connect(ui.Live_pushBtn, SIGNAL(clicked()), this, SLOT(slot_startOrStopLiveStream()));
+	connect(ui.videosource_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(VideoSourceChange(int)));
+	connect(ui.app_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(VideoAppChange(int)));
 
 	m_AuxiliaryInfo = new UIAuxiliary(this);
 	m_AuxiliaryInfo->setWindowFlags(Qt::FramelessWindowHint);
@@ -32,7 +33,23 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	m_VideoInfo = new UIViedeo(this);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
+	m_VideoInfo->move(165, 60);
 	m_VideoInfo->hide();
+
+	// 设置视频源
+	QFile file("styles/ComboBox.qss");
+	file.open(QFile::ReadOnly);
+	QString styleSheet = file.readAll();
+	ui.videosource_comboBox->setStyleSheet(styleSheet);
+	ui.videosource_comboBox->addItem(QString("摄像头"));
+	ui.videosource_comboBox->addItem(QString("全屏桌面"));
+	ui.videosource_comboBox->addItem(QString("其他APP"));
+	ui.videosource_comboBox->setCurrentIndex(0);
+
+	// 设置其他应用
+	ui.app_comboBox->setStyleSheet(styleSheet);
+
+	ui.Live_pushBtn->setText("播放");
 }
 
 UIMainWindow::~UIMainWindow()
@@ -48,8 +65,6 @@ UIMainWindow::~UIMainWindow()
 		delete m_LessonInfo;
 		m_LessonInfo = NULL;
 	}
-
-	m_hNlssService = NULL;
 }
 
 void UIMainWindow::MinDialog()
@@ -59,7 +74,7 @@ void UIMainWindow::MinDialog()
 
 void UIMainWindow::CloseDialog()
 {
-	close();
+	exit(0);
 }
 
 void UIMainWindow::setTeacherInfo(QJsonObject &data)
@@ -236,18 +251,69 @@ void UIMainWindow::mouseReleaseEvent(QMouseEvent *e)
 	move(x() + dx, y() + dy);
 }
 
-void UIMainWindow::SetNlsService(_HNLSSERVICE hNlssService)
+void UIMainWindow::slot_startOrStopLiveStream()
 {
 	if (m_VideoInfo)
 	{
-		m_VideoInfo->SetMediaCapture(hNlssService);
+		if (m_VideoInfo->IsCurrentPreview())
+		{
+			ui.Live_pushBtn->setText("播放");
+			ui.videosource_comboBox->setEnabled(true);
+//			ui.app_comboBox->setEnabled(true);
+			m_VideoInfo->StopLiveVideo();
+		}
+		else
+		{
+			ui.Live_pushBtn->setText("停止");
+			ui.videosource_comboBox->setEnabled(false);
+//			ui.app_comboBox->setEnabled(false);
+			m_VideoInfo->StartLiveVideo();
+		}
+
+		ui.video_widget->hide();
+		m_VideoInfo->show();
 	}
 }
 
-void UIMainWindow::slot_startOrStopLiveStream()
+void UIMainWindow::VideoSourceChange(int index)
 {
-	QPoint pt = ui.video_widget->pos();
-	m_VideoInfo->move(165,60);
-	m_VideoInfo->show();
-	m_VideoInfo->LiveVideo();
+	switch (index)
+	{
+	case 0:
+		m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_CAMERA;
+		break;
+	case 1:
+		m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_FULLSCREEN;
+		break;
+	case 2:
+		{
+			m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_APP;
+			SetSourceAppPath();
+			break;
+		}
+	default:
+		break;
+	}
+}
+
+void UIMainWindow::VideoAppChange(int index)
+{
+	if (m_VideoInfo)
+	{
+		m_VideoInfo->ChangeAppPath(index);
+	}
+}
+
+void UIMainWindow::SetSourceAppPath()
+{
+	for (int i = 0; i < m_VideoInfo->m_iAppWindNum; i++)
+	{
+		QString qStrPath = m_VideoInfo->m_pAppWinds[i].paFriendlyName;
+		ui.app_comboBox->addItem(qStrPath);
+	}
+	
+	if (m_VideoInfo->m_iAppWindNum != 0)
+	{
+		ui.app_comboBox->setCurrentIndex(0);
+	}
 }

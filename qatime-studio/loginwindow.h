@@ -9,7 +9,6 @@
 #include "UIButton.h"
 #include <string.h>
 #include <wtypes.h>
-#include "nlss_type.h"
 
 #pragma execution_character_set("utf-8")
 
@@ -50,9 +49,6 @@ private:
 	QUrl url;
 	QNetworkAccessManager manager;
 	QNetworkReply *reply;
-
-	_HNLSSERVICE m_hNlssService;
-
 };
 
 #endif // LOGINWINDOW_H

@@ -12,6 +12,13 @@ UIViedeo::UIViedeo(QWidget *parent)
 	, m_bPreviewing(false)
 	, m_hNlssService(NULL)
 	, m_videoQ(EN_NLSS_VIDEOQUALITY_MIDDLE)
+	, m_iAppWindNum(0)
+	, m_iAudioDeviceNum(0)
+	, m_iVideoDeviceNum(0)
+	, m_iAppChangeIndex(0)
+	, m_pVideoDevices(NULL)
+	, m_pAudioDevices(NULL)
+	, m_pAppWinds(NULL)
 {
 	ui.setupUi(this);
 
@@ -37,6 +44,14 @@ UIViedeo::UIViedeo(QWidget *parent)
 
 	// 初始化推流URL
 	InitPlugFlowUrl();
+
+	//创建mediacapture类，失败抛出错	
+	if (NLSS_OK != Nlss_Create(NULL, &m_hNlssService))
+	{
+		MessageBox(NULL, L"创建直播失败，请关闭程序重新启动", L"", MB_OK);
+	}
+
+	SetMediaCapture(m_hNlssService);
 }
 
 UIViedeo::~UIViedeo()
@@ -56,7 +71,12 @@ UIViedeo::~UIViedeo()
 		m_refreshTimer = NULL;
 	}
 
-	m_hNlssService = NULL;
+	//销毁mediacapture类
+	if (m_hNlssService != NULL)
+	{
+		Nlss_Destroy(m_hNlssService);
+		m_hNlssService = NULL;
+	}
 }
 
 void UIViedeo::InitPlugFlowUrl()
@@ -64,14 +84,12 @@ void UIViedeo::InitPlugFlowUrl()
 #ifdef _DEBUG
 	m_strUrl = "rtmp://pa0a19f55.live.126.net/live/ae753e52ec6741fbb94ed4c0aea672c6?wsSecret=cacb5b393123f706e6f7b6e6a8291259&wsTime=1472695026";
 #else
-	// 待编写，正常需要从服务端获取
+	// 待编写，需要从服务端获取
 #endif
 }
 
 void UIViedeo::SetMediaCapture(_HNLSSERVICE hNlssService)
 {
-	m_hNlssService = hNlssService;
-
 	PFN_NLSS_STATUS_NTY notify = UIViedeo::OnLiveStreamStatusNty;
 	Nlss_SetStatusCB(hNlssService, notify);
 
@@ -87,7 +105,11 @@ void UIViedeo::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
 		if (pSampler->iWidth * pSampler->iHeight > m_SvideoSampler.iWidth * m_SvideoSampler.iHeight)
 		{
 			if (m_SvideoSampler.puaData)
+			{
 				delete[]m_SvideoSampler.puaData;
+				m_SvideoSampler.puaData = NULL;
+			}
+				
 			m_SvideoSampler.puaData = new unsigned char[pSampler->iWidth * pSampler->iHeight * 4];
 		}
 
@@ -167,12 +189,12 @@ bool UIViedeo::InitMediaCapture()
 		stParam.stVideoParam.iOutBitrate = 1000000;
 		stParam.stVideoParam.iOutFps = 10;
 
-// 		if (m_pAppWinds != NULL)
-// 		{
-// 			stParam.stVideoParam.u.stInApp.paAppPath = (char *)m_pAppWinds[m_iChosenCameraIndex].paPath;
-// 		}
-// 		else
-// 			have_video_source = false;
+		if (m_pAppWinds != NULL)
+		{
+			stParam.stVideoParam.u.stInApp.paAppPath = (char *)m_pAppWinds[m_iAppChangeIndex].paPath;
+		}
+		else
+			have_video_source = false;
 
 		break;
 	case EN_NLSS_VIDEOIN_NONE:
@@ -267,11 +289,29 @@ void UIViedeo::EnumAvailableMediaDevices()
 			m_pAudioDevices[i].paFriendlyName = new char[1024];
 		}
 	}
-
+	// 获取视频和音频设备
 	Nlss_GetFreeDeviceInf(m_pVideoDevices, m_pAudioDevices);
+
+	GetAvailableAppWindNum(&m_iAppWindNum);
+	if (m_iAppWindNum <= 0)
+	{
+//		ui.app_comboBox->addItem(QString("请选择其他视频源"));
+	}
+	else
+	{
+		m_pAppWinds = new ST_NLSS_INDEVICE_INF[m_iAppWindNum];
+		for (int i = 0; i < m_iAppWindNum; i++)
+		{
+			m_pAppWinds[i].paPath = new char[1024];
+			m_pAppWinds[i].paFriendlyName = new char[1024];
+		}
+	}
+
+	GetAvailableAppWind(m_pAppWinds);
+
 }
 
-void UIViedeo::LiveVideo()
+void UIViedeo::StartLiveVideo()
 {
 	if (m_hNlssService == NULL)
 	{
@@ -279,7 +319,7 @@ void UIViedeo::LiveVideo()
 		return;
 	}
 
-	if (!m_bPreviewing)//如果source源发生切换，或者不在preview状态，先打开preview，再点击，这个button，才进入直播
+	if (!m_bPreviewing)//不在preview状态，先打开preview，再点击，这个button，才进入直播
 	{
 
 		Nlss_UninitParam(m_hNlssService);
@@ -288,12 +328,6 @@ void UIViedeo::LiveVideo()
 		if (!InitMediaCapture())
 		{
 			MessageBox(NULL, L"初始化参数失败", L"答疑时间", MB_OK);
-		}
-
-		if (m_bPreviewing)
-		{
-			Nlss_StopVideoPreview(m_hNlssService);
-			Nlss_StopVideoCapture(m_hNlssService);
 		}
 
 		Nlss_SetVideoWaterMark(m_hNlssService, NULL);
@@ -310,22 +344,40 @@ void UIViedeo::LiveVideo()
 			MessageBox(NULL, L"打开视频预览出错，具体错误信息请看返回值", L"答疑时间", MB_OK);
 		}
 
+		if (m_strUrl.isEmpty())
+		{
+			MessageBox(NULL, L"推流地址为空，推流参数初始化失败", L"答疑时间", MB_OK);
+		}
+
+// 		m_pWorker->SetMediaCapture(m_hNlssService);
+// 		emit sig_StartLiveStream();
+		Nlss_StartLiveStream(m_hNlssService);
 		m_bPreviewing = true;
-		m_pWorker->SetMediaCapture(m_hNlssService);
-		emit sig_StartLiveStream();
 		return;
 	}
-
-	if (m_strUrl.isEmpty())
-	{
-		MessageBox(NULL, L"推流地址为空，推流参数初始化失败", L"答疑时间", MB_OK);
-	}
 	//可以写在非ui线程，毕竟startLivestream中的socket 连接需要一定的时间，耗时2s左右
-#ifdef STARTLS_ASYNC
-	m_pWorker->SetMediaCapture(m_hNlssService);
-	emit sig_StartLiveStream();
-#endif
-	return;
+// #ifdef STARTLS_ASYNC
+// 	m_pWorker->SetMediaCapture(m_hNlssService);
+// 	emit sig_StartLiveStream();
+// #endif
+// 	return;
+}
+
+void UIViedeo::StopLiveVideo()
+{
+	if (m_bPreviewing)
+	{
+		m_bPreviewing = false;
+
+//		emit sig_StopLiveStream();
+		Nlss_StopLiveStream(m_hNlssService);
+
+		if (m_hNlssService != NULL)
+		{
+			Nlss_StopVideoPreview(m_hNlssService);
+			Nlss_StopVideoCapture(m_hNlssService);
+		}
+	}
 }
 
 void UIViedeo::slot_onRefreshTimeout()
@@ -350,3 +402,16 @@ void UIViedeo::slot_FinishStopLiveStream(int iRet)
 	return;
 }
 #endif
+
+void UIViedeo::ChangeAppPath(int index)
+{
+	m_iAppChangeIndex = index;
+
+	StopLiveVideo();
+	StartLiveVideo();
+}
+
+bool UIViedeo::IsCurrentPreview()
+{
+	return m_bPreviewing;
+}

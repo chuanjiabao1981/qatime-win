@@ -11,9 +11,6 @@
 #include "UIAuxiliary.h"
 #include "UILesson.h"
 #include <QMouseEvent>
-#include "nlss_type.h"
-#include "nlss_api.h"
-#include <QTimer>
 #include "UIViedeo.h"
 
 #pragma execution_character_set("utf-8")
@@ -39,28 +36,31 @@ private:
 	UIViedeo*						m_VideoInfo;		// 直播窗口
 	QString							m_teacherID;		// 老师ID
 
-	_HNLSSERVICE					m_hNlssService;
-
 private slots :
-	void MinDialog();							// 最小化对话框
-	void CloseDialog();							// 关闭对话框
-	void ShowAuxiliary();						// 显示辅导班
-	void ShowLesson();							// 显示课程
-	void setNetworkPic(const QString &szUrl);	// 显示网络图片
-	void Expansion();							// 收缩面板
-	void slot_startOrStopLiveStream();			// 直播
+	void MinDialog();									// 最小化对话框
+	void CloseDialog();									// 关闭对话框
+	void ShowAuxiliary();								// 显示辅导班
+	void ShowLesson();									// 显示课程
+	void setNetworkPic(const QString &szUrl);			// 显示网络图片
+	void Expansion();									// 收缩面板
+	void slot_startOrStopLiveStream();					// 开始直播
+	void VideoSourceChange(int index);					// 视频源变化
+	void VideoAppChange(int index);						// APP应用发生变化
 
 protected:
 	void mousePressEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);
 	void mouseReleaseEvent(QMouseEvent *e);
 
+private:
+	void SetSourceAppPath();							// 当视频源选中其他应用时，设置APP路径名称
+
 public:
 	void setTeacherInfo(QJsonObject& data);					// 设置老师信息
 	void setRemeberToken(const QString &name);				// 设置Token
 	void AuxiliaryRequestFinished();						// 辅导班http请求
 	void LessonRequestFinished();							// 课程http请求
-	void SetNlsService(_HNLSSERVICE hNlssService);
+	void EnumAvailableMediaDevices();						// 枚举设备
 };
 
 #endif // UIMAINWINDOW_H
