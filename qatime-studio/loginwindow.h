@@ -9,6 +9,7 @@
 #include "UIButton.h"
 #include <string.h>
 #include <wtypes.h>
+#include "nlss_type.h"
 
 #pragma execution_character_set("utf-8")
 
@@ -24,13 +25,6 @@ protected:
 	void mousePressEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);
 	void mouseReleaseEvent(QMouseEvent *e);
-
-private:
-	Ui::LoginWindowClass ui;
-	QPoint last;
-	QUrl url;
-	QNetworkAccessManager manager;
-	QNetworkReply *reply;
 
 private slots :
 	void OnLogIn();				// Á¢¼´µÇÂ½
@@ -49,6 +43,15 @@ protected:
 private:
 	CButton* m_MinBtn;
 	CButton* m_CloseBtn;
+
+private:
+	Ui::LoginWindowClass ui;
+	QPoint last;
+	QUrl url;
+	QNetworkAccessManager manager;
+	QNetworkReply *reply;
+
+	_HNLSSERVICE m_hNlssService;
 
 };
 

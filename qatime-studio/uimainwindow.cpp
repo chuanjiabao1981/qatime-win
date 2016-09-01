@@ -8,6 +8,10 @@
 
 UIMainWindow::UIMainWindow(QWidget *parent)
 	: QWidget(parent)
+	, m_hNlssService(NULL)
+	, m_AuxiliaryInfo(NULL)
+	, m_LessonInfo(NULL)
+	, m_VideoInfo(NULL)
 {
 	ui.setupUi(this);
 
@@ -16,16 +20,19 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(ui.Auxiliary_pushBtn, SIGNAL(clicked()), this, SLOT(ShowAuxiliary()));
 	connect(ui.Lesson_pushBtn, SIGNAL(clicked()), this, SLOT(ShowLesson()));
 	connect(ui.expansion_pushBtn, SIGNAL(clicked()), this, SLOT(Expansion()));
+	connect(ui.Live_pushBtn, SIGNAL(clicked()), this, SLOT(slot_startOrStopLiveStream()));
 
-	m_AuxiliaryInfo = NULL;
 	m_AuxiliaryInfo = new UIAuxiliary(this);
 	m_AuxiliaryInfo->setWindowFlags(Qt::FramelessWindowHint);
 	m_AuxiliaryInfo->hide();
 
-	m_LessonInfo = NULL;
 	m_LessonInfo = new UILesson(this);
 	m_LessonInfo->setWindowFlags(Qt::FramelessWindowHint);
 	m_LessonInfo->hide();
+
+	m_VideoInfo = new UIViedeo(this);
+	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
+	m_VideoInfo->hide();
 }
 
 UIMainWindow::~UIMainWindow()
@@ -41,6 +48,8 @@ UIMainWindow::~UIMainWindow()
 		delete m_LessonInfo;
 		m_LessonInfo = NULL;
 	}
+
+	m_hNlssService = NULL;
 }
 
 void UIMainWindow::MinDialog()
@@ -191,11 +200,17 @@ void UIMainWindow::Expansion()
 	{
 		ui.teacherInfo_widget->setVisible(false);
 		ui.expansion_pushBtn->move(QPoint(10, 290));
+
+		m_VideoInfo->move(20, 60);
+		m_VideoInfo->resize(725, 560);
 	}
 	else
 	{
 		ui.teacherInfo_widget->setVisible(true);
 		ui.expansion_pushBtn->move(QPoint(145, 290));
+
+		m_VideoInfo->move(165, 60);
+		m_VideoInfo->resize(580, 560);
 	}	
 }
 
@@ -219,4 +234,20 @@ void UIMainWindow::mouseReleaseEvent(QMouseEvent *e)
 	int dy = e->globalY() - last.y();
 
 	move(x() + dx, y() + dy);
+}
+
+void UIMainWindow::SetNlsService(_HNLSSERVICE hNlssService)
+{
+	if (m_VideoInfo)
+	{
+		m_VideoInfo->SetMediaCapture(hNlssService);
+	}
+}
+
+void UIMainWindow::slot_startOrStopLiveStream()
+{
+	QPoint pt = ui.video_widget->pos();
+	m_VideoInfo->move(165,60);
+	m_VideoInfo->show();
+	m_VideoInfo->LiveVideo();
 }

@@ -109,12 +109,12 @@
     <string/>
    </property>
   </widget>
-  <widget class="QWidget" name="widget" native="true">
+  <widget class="QWidget" name="video_widget" native="true">
    <property name="geometry">
     <rect>
-     <x>168</x>
+     <x>165</x>
      <y>60</y>
-     <width>581</width>
+     <width>580</width>
      <height>560</height>
     </rect>
    </property>
@@ -122,29 +122,13 @@
     <string notr="true">border-image: url(:/LoginWindow/images/video.png);</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>770</x>
-     <y>60</y>
-     <width>240</width>
-     <height>640</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-image: url(:/LoginWindow/images/chat.png);</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QWidget" name="teacherInfo_widget" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>60</y>
-     <width>151</width>
-     <height>561</height>
+     <width>150</width>
+     <height>560</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -271,15 +255,45 @@
     </property>
    </widget>
   </widget>
+  <widget class="QPushButton" name="Live_pushBtn">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>640</y>
+     <width>71</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>播放</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>5</y>
+     <width>130</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-image: url(:/LoginWindow/images/logoTime.png);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
   <zorder>label</zorder>
   <zorder>label_2</zorder>
   <zorder>mainclose_pushBtn</zorder>
   <zorder>mainmin_pushBtn</zorder>
   <zorder>line</zorder>
-  <zorder>widget</zorder>
-  <zorder>label_3</zorder>
+  <zorder>video_widget</zorder>
   <zorder>teacherInfo_widget</zorder>
   <zorder>expansion_pushBtn</zorder>
+  <zorder>Live_pushBtn</zorder>
+  <zorder>label_4</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>

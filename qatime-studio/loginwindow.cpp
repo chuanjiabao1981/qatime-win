@@ -8,6 +8,7 @@
 #include "windows.h"
 #include "ShellApi.h"
 #include <QHBoxLayout>
+#include "nlss_api.h"
 
 TCHAR m_pathHomePage[MAX_PATH] = {0};
 TCHAR m_pathRegisterAccount[MAX_PATH] = { 0 };
@@ -15,6 +16,7 @@ TCHAR m_pathFindPassword[MAX_PATH] = { 0 };
 
 LoginWindow::LoginWindow(QWidget *parent)
 	: QMainWindow(parent)
+	, m_hNlssService(NULL)
 {
 	ui.setupUi(this);
 
@@ -29,6 +31,12 @@ LoginWindow::LoginWindow(QWidget *parent)
 	ui.UserPass_Edit->setTextMargins(30, 3, 20, 3);
 
 	ReadSetting();
+
+	//创建mediacapture类，失败抛出错	
+	if (NLSS_OK != Nlss_Create(NULL, &m_hNlssService))
+	{
+		MessageBox(NULL, L"创建直播失败，请关闭程序重新启动", L"", MB_OK);
+	}
 }
 
 LoginWindow::~LoginWindow()
@@ -106,6 +114,7 @@ void LoginWindow::loginFinished()
 		mainWin->setWindowFlags(Qt::FramelessWindowHint);
 		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->setRemeberToken(data["remember_token"].toString());
+		mainWin->SetNlsService(m_hNlssService);
 		mainWin->show();
 		this->destroy();
 	}
