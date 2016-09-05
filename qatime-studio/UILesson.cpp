@@ -4,6 +4,8 @@
 #include <QJsonArray>
 #include "windows.h"
 
+#define QT_USERDATA			100
+
 UILesson::UILesson(QWidget *parent)
 	: QWidget(parent)
 {
@@ -11,7 +13,7 @@ UILesson::UILesson(QWidget *parent)
 	ui.Lesson_frame->setStyleSheet("border: 1px solid white;border-radius:8px");
 	ui.Lesson_tableWidget->setFocusPolicy(Qt::NoFocus);
 
-	bool bsuc = connect(ui.Lesson_tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(Test()));
+	bool bsuc = connect(ui.Lesson_tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(SelectionChanged()));
 }
 
 UILesson::~UILesson()
@@ -36,6 +38,7 @@ void UILesson::setLessonInfo(QJsonObject &objBig)
 		// 显示编号
 		QString strNum = QString::number(nNum);
 		QTableWidgetItem *pItemNum = new QTableWidgetItem(strNum);
+		pItemNum->setData(QT_USERDATA, pLesson->LessonID());
 		pItemNum->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 		ui.Lesson_tableWidget->setItem(nNum - 1, 0, pItemNum);
 
@@ -88,7 +91,17 @@ void UILesson::initLesson()
 		"QHeaderView::section{padding-left:4px; border:3px solid white; }"); //设置表头背景色
 }
 
-void UILesson::Test()
+void UILesson::SelectionChanged()
 {
-	MessageBox(NULL, L"", L"", MB_OK);
+	int row = ui.Lesson_tableWidget->currentRow();
+	QTableWidgetItem* CurItem = ui.Lesson_tableWidget->item(row, 0);
+	if (CurItem)
+	{
+		m_sLessonID = CurItem->data(QT_USERDATA).toString();
+	}
+}
+
+QString UILesson::GetSelectedLessonId()
+{
+	return m_sLessonID;
 }

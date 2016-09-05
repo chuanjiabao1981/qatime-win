@@ -42,6 +42,11 @@ QString Lesson::LessonStatus()
 	return mStatus;
 }
 
+QString Lesson::LessonID()
+{
+	return QString::number(mId);
+}
+
 QString Lesson::ChinaLessonStatus()
 {
 	QString strChinaStatus;
@@ -67,7 +72,7 @@ QString Lesson::ChinaLessonStatus()
 	}
 	else if (mStatus == "finished")
 	{
-		strChinaStatus = "已结束";
+		strChinaStatus = "已完成";
 	}
 	else if (mStatus == "billing")
 	{

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>UIViedeo</class>
- <widget class="QWidget" name="UIViedeo">
+ <class>UIVideo</class>
+ <widget class="QWidget" name="UIVideo">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>UIViedeo</string>
+   <string>UIVideo</string>
   </property>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

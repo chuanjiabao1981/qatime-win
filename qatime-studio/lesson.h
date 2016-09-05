@@ -16,6 +16,7 @@ public:
 	QString LessonTime();
 	QString LessonStatus();
 	QString ChinaLessonStatus();
+	QString LessonID();
 private:
     int mId;
     int mCourseId;

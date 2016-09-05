@@ -10,8 +10,6 @@
 #include <QHBoxLayout>
 
 TCHAR m_pathHomePage[MAX_PATH] = {0};
-TCHAR m_pathRegisterAccount[MAX_PATH] = { 0 };
-TCHAR m_pathFindPassword[MAX_PATH] = { 0 };
 
 LoginWindow::LoginWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -106,8 +104,9 @@ void LoginWindow::loginFinished()
 		mainWin->setWindowFlags(Qt::FramelessWindowHint);
 		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->setRemeberToken(data["remember_token"].toString());
+		mainWin->ShowAuxiliary();
 		mainWin->show();
-		this->destroy();
+		this->hide();
 	}
 	else
 	{
@@ -125,12 +124,14 @@ void LoginWindow::BrowseHomePage()
 
 void LoginWindow::RegisterAccount()
 {
-	ShellExecute(NULL, L"open", m_pathRegisterAccount, NULL, NULL, SW_SHOW);
+	lstrcat(m_pathHomePage, L"//teachers//new");
+	ShellExecute(NULL, L"open", m_pathHomePage, NULL, NULL, SW_SHOW);
 }
 
 void LoginWindow::FindPassword()
 {
-	ShellExecute(NULL, L"open", m_pathFindPassword, NULL, NULL, SW_SHOW);
+	lstrcat(m_pathHomePage, L"//passwords//new");
+	ShellExecute(NULL, L"open", m_pathHomePage, NULL, NULL, SW_SHOW);
 }
 
 void LoginWindow::MinDialog()
@@ -151,6 +152,4 @@ void LoginWindow::ReadSetting()
 	lstrcat(szTempPath, L"\\config.ini");
 
 	GetPrivateProfileString(L"CONFIG_PATH", L"HOMEPAGE", L"", m_pathHomePage, MAX_PATH, szTempPath);				//访问主页路径
-	GetPrivateProfileString(L"CONFIG_PATH", L"REGISTERACCOUNT", L"", m_pathRegisterAccount, MAX_PATH, szTempPath);	//注册用户路径
-	GetPrivateProfileString(L"CONFIG_PATH", L"FINDPASSWORD", L"", m_pathFindPassword, MAX_PATH, szTempPath);		//找回密码路径
 }

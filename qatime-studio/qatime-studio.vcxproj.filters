@@ -118,13 +118,22 @@
     <ClCompile Include="GeneratedFiles\Release\moc_UIWorkThread.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="UIViedeo.cpp">
+    <ClCompile Include="UIVideo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UIViedeo.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIVideo.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UIViedeo.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_UIVideo.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="UIAuxiliaryPanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIAuxiliaryPanel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UIAuxiliaryPanel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -165,10 +174,16 @@
     <CustomBuild Include="UIWorkThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="UIViedeo.h">
+    <CustomBuild Include="UIVideo.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="UIViedeo.ui">
+    <CustomBuild Include="UIVideo.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIAuxiliaryPanel.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIAuxiliaryPanel.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -194,7 +209,10 @@
     <ClInclude Include="lesson.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UIViedeo.h">
+    <ClInclude Include="GeneratedFiles\ui_UIVideo.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UIAuxiliaryPanel.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -18,6 +18,9 @@ void Course::readJson(const QJsonObject &json)
 	mProgress = QString::number(completed_lesson);
 	mProgress += "/";
 	mProgress += QString::number(preset_lesson);
+
+	// ¿Î³Ì
+	mJsonArray = json["lessons"].toArray();
 }
 
 QString Course::id()
@@ -38,4 +41,9 @@ QString Course::progress() const
 int Course::status()
 {
     return mStatus;
+}
+
+QJsonArray Course::JsonLesson()
+{
+	return mJsonArray;
 }

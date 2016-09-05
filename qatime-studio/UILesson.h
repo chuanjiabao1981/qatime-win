@@ -17,12 +17,15 @@ public:
 private:
 	Ui::UILesson ui;
 
+	QString		m_sLessonID;
+
 private slots :
-	void Test();
+	void SelectionChanged();
 
 public:
-	void initLesson();
-	void setLessonInfo(QJsonObject &obj);
+	void	initLesson();
+	void	setLessonInfo(QJsonObject &obj);
+	QString GetSelectedLessonId();
 };
 
 #endif // UILESSON_H

@@ -1,8 +1,8 @@
-#ifndef UIVIEDEO_H
-#define UIVIEDEO_H
+#ifndef UIVideo_H
+#define UIVideo_H
 
 #include <QWidget>
-#include "ui_UIViedeo.h"
+#include "ui_UIVideo.h"
 #include "nlss_type.h"
 #include "nlss_api.h"
 #include <QTimer>
@@ -11,16 +11,16 @@
 
 #define STARTLS_ASYNC
 
-class UIViedeo : public QWidget
+class UIVideo : public QWidget
 {
 	Q_OBJECT
 
 public:
-	UIViedeo(QWidget *parent = 0);
-	~UIViedeo();
+	UIVideo(QWidget *parent = 0);
+	~UIVideo();
 
 private:
-	Ui::UIViedeo ui;
+	Ui::UIVideo ui;
 
 	_HNLSSERVICE					m_hNlssService;
 	static ST_NLSS_VIDEO_SAMPLER	m_SvideoSampler;
@@ -36,7 +36,6 @@ private:
 public:
 	EN_NLSS_VIDEOIN_TYPE			m_videoSourceType;  // 视频源类型
 	EN_NLSS_AUDIOIN_TYPE			m_audioSourceType;	// 音频源类型
-
 	int								m_iVideoDeviceNum;	// 视频设备个数
 	int								m_iAudioDeviceNum;	// 音频设备个数
 	int								m_iAppWindNum;		// 其他应用个数
@@ -78,7 +77,11 @@ public:
 	static void OnLiveStreamStatusNty(EN_NLSS_STATUS enStatus, EN_NLSS_ERRCODE enErrCode);
 	void ChangeAppPath(int index);						// 改变应用
 	bool IsCurrentPreview();							// 当前是否预览
-
+	void SetPauseVideo();								// 暂停视频发送
+	void SetResumeVideo();								// 恢复视频发送
+	void SetPauseAudio();								// 暂停音频发送
+	void SetResumeAudio();								// 恢复音频发送;
+	void ChangeLiveVideo();								// 改变视频源
 };
 
-#endif // UIVIEDEO_H
+#endif // UIVideo_H

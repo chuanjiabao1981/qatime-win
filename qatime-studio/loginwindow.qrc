@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="LoginWindow">
+    <file>images/drawback.png</file>
+    <file>images/AuxiliaryPanelBack.png</file>
     <file>images/teacherPhoto.png</file>
     <file>images/lesson.png</file>
     <file>images/AuxiliaryBtn.png</file>
