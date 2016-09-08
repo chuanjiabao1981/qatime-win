@@ -97,6 +97,9 @@
       <bold>false</bold>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="styleSheet">
      <string notr="true"/>
     </property>
@@ -184,6 +187,9 @@
        <family>微软雅黑</family>
        <pointsize>9</pointsize>
       </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="styleSheet">
       <string notr="true">color:rgb(85, 170, 255)</string>
@@ -490,6 +496,9 @@
       <pointsize>9</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string>立即登陆</string>
     </property>
@@ -559,6 +568,9 @@
       <pointsize>9</pointsize>
      </font>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="text">
      <string>我要注册</string>
     </property>
@@ -571,6 +583,9 @@
       <width>25</width>
       <height>25</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="styleSheet">
      <string notr="true">border-image: url(:/LoginWindow/images/minsize.png);</string>
@@ -587,6 +602,9 @@
       <width>25</width>
       <height>25</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="styleSheet">
      <string notr="true">border-image: url(:/LoginWindow/images/close.png);</string>

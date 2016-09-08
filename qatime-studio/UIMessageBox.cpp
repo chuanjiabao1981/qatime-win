@@ -5,7 +5,6 @@
 *	Brief        
 *   Notice       
 */
-#include <windowsx.h>
 #include <qt_windows.h>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QVBoxLayout>
@@ -37,7 +36,7 @@ protected:
 
 		QRect rt = rect();
 		p.setPen(Qt::NoPen);
-		QBrush b(QColor(0x242424));
+		QBrush b(QColor(0x656565));
 		p.setBrush(b);
 		p.drawRect(rt.left(), rt.top(), rt.width(), rt.height());
 	};
@@ -128,8 +127,8 @@ void CMessageBox::initUI()
 
 
 	QPalette pe,pe1;
-	pe.setColor(QPalette::WindowText, QColor(0x999999));
-	pe1.setColor(QPalette::WindowText, QColor(0x656565));
+	pe.setColor(QPalette::WindowText, QColor(0x3f3f3f));
+	pe1.setColor(QPalette::WindowText, QColor(0x3f3f3f));
 
 	QVBoxLayout* pLayout = new QVBoxLayout;
 	if (pLayout)
@@ -143,7 +142,7 @@ void CMessageBox::initUI()
 			m_pLabelIcon = new QLabel(this);
 			if (m_pLabelIcon)
 			{
-				m_pLabelIcon->setPixmap(QPixmap("./images/logo.png"));
+//				m_pLabelIcon->setPixmap(QPixmap("./images/logo.png"));
 				pTopLayout->addWidget(m_pLabelIcon, 0, Qt::AlignLeft);
 
 			}
@@ -160,7 +159,7 @@ void CMessageBox::initUI()
 			m_pBtnClose = new CButton(this);
 			if (m_pBtnClose)
 			{
-				m_pBtnClose->setImage(QString("./images/guanbi.png"), 1);
+				m_pBtnClose->setImage(QString("./images/close.png"), 1);
 				pTopLayout->addWidget(m_pBtnClose, 0, Qt::AlignRight);
 			}
 			pTopLayout->addSpacing(10);
@@ -199,7 +198,7 @@ void CMessageBox::initUI()
 					m_pInnerText->setFont(font);
 
 					QPalette pe1;
-					pe.setColor(QPalette::WindowText, QColor(0xE6E6E6));
+					pe.setColor(QPalette::WindowText, QColor(0x3f3f3f));
 					m_pInnerText->setPalette(pe);
 
 					m_pInnerText->setWordWrap(true);
@@ -218,47 +217,26 @@ void CMessageBox::initUI()
 
 
 		pLayout->addSpacing(10);
-		if (m_qsText.isEmpty())
-		{
-			QLabel* pLabelVersion = new QLabel(this);
-			if (pLabelVersion)
-			{
-				pLabelVersion->setFont(font1);
-				pLabelVersion->setPalette(pe1);
-				pLabelVersion->setText(QString("版本: V1.1.2"));
-				pLayout->addWidget(pLabelVersion);
-			}
-			QLabel* pLabelVersion1 = new QLabel(this);
-			if (pLabelVersion1)
-			{
-				pLabelVersion1->setFont(font1);
-				pLabelVersion1->setPalette(pe1);
-				pLabelVersion1->setText(QString("版本所有:(C) 2015-2016 http://vcloud.163.com/ "));
-				pLayout->addWidget(pLabelVersion1);
-			}
-		}
-		else
-		{
 
-			QHBoxLayout * pBottomLayout = new QHBoxLayout;
-			if (pBottomLayout)
+		QHBoxLayout * pBottomLayout = new QHBoxLayout;
+		if (pBottomLayout)
+		{
+			pBottomLayout->setMargin(0);
+			pBottomLayout->setSpacing(0);
+			pBottomLayout->addStretch(3);
+			for (QList<CButton*>::iterator iter = m_lBtns.begin(); iter != m_lBtns.end(); ++iter)
 			{
-				pBottomLayout->setMargin(0);
-				pBottomLayout->setSpacing(0);
-				pBottomLayout->addStretch(3);
-				for (QList<CButton*>::iterator iter = m_lBtns.begin(); iter != m_lBtns.end(); ++iter)
+				if (*iter)
 				{
-					if (*iter)
-					{
-						pBottomLayout->addWidget((*iter), 0, Qt::AlignCenter);
-						pBottomLayout->addSpacing(4);
-					}
+					pBottomLayout->addWidget((*iter), 0, Qt::AlignCenter);
+					pBottomLayout->addSpacing(4);
 				}
-
-				pLayout->addLayout(pBottomLayout);
 			}
+
+			pLayout->addLayout(pBottomLayout);
 		}
 		pLayout->addSpacing(20);
+
 	}
 	setLayout(pLayout);
 }
@@ -282,20 +260,19 @@ bool CMessageBox::nativeEvent(const QByteArray &eventType, void *message, long *
 		{
 		case WM_NCHITTEST:
 		{
-							 //int x = GET_X_LPARAM(pMsg->lParam) - this->frameGeometry().x();
-							 int y = GET_Y_LPARAM(pMsg->lParam) - this->frameGeometry().y();
+			int y = GET_Y_LPARAM(pMsg->lParam) - this->frameGeometry().y();
 
-							 if (y < MESSAGEBOX_FIXED_TITLE_HEIGHT)
-							 {
-								 QPoint pt = mapFromGlobal(QPoint(GET_X_LPARAM(pMsg->lParam), GET_Y_LPARAM(pMsg->lParam)));
-								 if (!childAt(pt))
-								 {
-									 *result = HTCAPTION;
-									 return true;
-								 }
-							 }
+			if (y < MESSAGEBOX_FIXED_TITLE_HEIGHT)
+			{
+				QPoint pt = mapFromGlobal(QPoint(GET_X_LPARAM(pMsg->lParam), GET_Y_LPARAM(pMsg->lParam)));
+				if (!childAt(pt))
+				{
+					*result = HTCAPTION;
+					return true;
+				}
+			}
 
-							 return false;
+			return false;
 		}
 			break;
 		default:
@@ -314,7 +291,7 @@ void CMessageBox::paintEvent(QPaintEvent *)
 	QRect rt = rect();
 	QPen pen(QColor(0x141415), 0);
 	p.setPen(pen);
-	QBrush b(QColor(0x141415));
+	QBrush b(QColor(0xf9f9f9));
 	p.setBrush(b);
 	p.drawRect(rt.left(), rt.top(), rt.width() - 1, rt.height() - 1);
 }

@@ -79,15 +79,6 @@
     <ClCompile Include="course.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UIAuxiliary.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UIAuxiliary.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UIAuxiliary.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="UIMainwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -95,15 +86,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_UIMainwindow.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="UILesson.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UILesson.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UILesson.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="lesson.cpp">
@@ -136,6 +118,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_UIAuxiliaryPanel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="UIOtherApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIOtherApp.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UIOtherApp.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="loginwindow.h">
@@ -153,22 +144,10 @@
     <CustomBuild Include="UIButton.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="UIAuxiliary.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UIAuxiliary.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="UIMainwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="UIMainwindow.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UILesson.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UILesson.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="UIWorkThread.h">
@@ -186,6 +165,12 @@
     <CustomBuild Include="UIAuxiliaryPanel.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="UIOtherApp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIOtherApp.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_loginwindow.h">
@@ -197,13 +182,7 @@
     <ClInclude Include="course.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UIAuxiliary.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIMainwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UILesson.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="lesson.h">
@@ -213,6 +192,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIAuxiliaryPanel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UIOtherApp.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

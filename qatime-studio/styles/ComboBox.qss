@@ -19,7 +19,7 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
-    image: url(images/drawdown.png);
+ 
 }
 
 QComboBox QAbstractItemView

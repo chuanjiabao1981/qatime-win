@@ -7,8 +7,13 @@ Lesson::Lesson()
 
 void Lesson::readJson(const QJsonObject &json)
 {
+	// 课程ID
     mId = json["id"].toInt();
+
+	// 课程名字
     mName = json["name"].toString();
+
+	// 课程状态
 	mStatus = json["status"].toString();
     
 	// 上课时间

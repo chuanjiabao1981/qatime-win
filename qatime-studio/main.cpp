@@ -4,6 +4,9 @@
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
+	QIcon qIcon("./images/logo.png");
+	a.setWindowIcon(qIcon);
+
 	LoginWindow w;
 	w.setWindowFlags(Qt::FramelessWindowHint);
 

@@ -17,11 +17,12 @@ public:
 	QString LessonStatus();
 	QString ChinaLessonStatus();
 	QString LessonID();
+
 private:
     int mId;
     int mCourseId;
     QString mName;			// 课程名称
-	QString mStatus;	// 课程状态
+	QString mStatus;		// 课程状态
 	QString mStartTime;		// 上课时间
 };
 

@@ -8,7 +8,7 @@
 #ifndef _LS_MEDIACAPTURE_UI_MESSAGEBOX_H_
 #define _LS_MEDIACAPTURE_UI_MESSAGEBOX_H_
 #include <QtWidgets/QDialog>
-
+#include <windowsx.h>
 
 class QLabel;
 class CButton;
