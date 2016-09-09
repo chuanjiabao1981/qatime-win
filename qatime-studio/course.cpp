@@ -21,6 +21,14 @@ void Course::readJson(const QJsonObject &json)
 
 	// 课程
 	mJsonArray = json["lessons"].toArray();
+
+	// 推流地址
+	mURL = json["push_address"].toString();
+}
+
+QString Course::url()
+{
+	return mURL;
 }
 
 QString Course::id()

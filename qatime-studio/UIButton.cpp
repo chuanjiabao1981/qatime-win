@@ -66,6 +66,14 @@ void CButton::setImage(QString qsImage, int nState /*= 4*/)
 		m_nImageWidth = s.width() / nState;
 		m_nImageHeight = s.height();
 		m_nState = nState;
+
+		if (s.height() ==0 && s.width()==0)
+		{
+			setText(qsImage);
+			setStyleSheet("QPushButton{background:url(./images/AuxiliaryPanelBack.png);}");
+			return;
+		}
+
 		setFixedSize(m_nImageWidth, s.height());
 	}
 }

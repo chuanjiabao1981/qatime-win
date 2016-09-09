@@ -7,8 +7,13 @@ Lesson::Lesson()
 
 void Lesson::readJson(const QJsonObject &json)
 {
+	// 课程ID
     mId = json["id"].toInt();
+
+	// 课程名字
     mName = json["name"].toString();
+
+	// 课程状态
 	mStatus = json["status"].toString();
     
 	// 上课时间
@@ -76,11 +81,11 @@ QString Lesson::ChinaLessonStatus()
 	}
 	else if (mStatus == "billing")
 	{
-		strChinaStatus = "待结算";
+		strChinaStatus = "已完成";
 	}
 	else if (mStatus == "completed")
 	{
-		strChinaStatus = "已结算";
+		strChinaStatus = "已完成";
 	}
 
 	return strChinaStatus;

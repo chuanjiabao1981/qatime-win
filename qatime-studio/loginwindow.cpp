@@ -1,5 +1,4 @@
 #include "loginwindow.h"
-#include "uimainwindow.h"
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QJsonDocument>
@@ -9,10 +8,12 @@
 #include "ShellApi.h"
 #include <QHBoxLayout>
 
+//#define _DEBUG
 TCHAR m_pathHomePage[MAX_PATH] = {0};
 
 LoginWindow::LoginWindow(QWidget *parent)
 	: QMainWindow(parent)
+	, mainWin(NULL)
 {
 	ui.setupUi(this);
 
@@ -31,7 +32,11 @@ LoginWindow::LoginWindow(QWidget *parent)
 
 LoginWindow::~LoginWindow()
 {
-	
+	if (mainWin)
+	{
+		delete mainWin;
+		mainWin = NULL;
+	}
 }
 
 void LoginWindow::mousePressEvent(QMouseEvent *e)
@@ -100,8 +105,9 @@ void LoginWindow::loginFinished()
 	QJsonObject data = obj["data"].toObject();
 	if (obj["status"].toInt() == 1 && data.contains("remember_token"))
 	{
-		UIMainWindow* mainWin = new UIMainWindow();
+		mainWin = new UIMainWindow();
 		mainWin->setWindowFlags(Qt::FramelessWindowHint);
+		mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
 		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->setRemeberToken(data["remember_token"].toString());
 		mainWin->ShowAuxiliary();

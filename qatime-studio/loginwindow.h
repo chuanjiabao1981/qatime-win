@@ -9,6 +9,7 @@
 #include "UIButton.h"
 #include <string.h>
 #include <wtypes.h>
+#include "UIMainwindow.h"
 
 #pragma execution_character_set("utf-8")
 
@@ -49,6 +50,7 @@ private:
 	QUrl url;
 	QNetworkAccessManager manager;
 	QNetworkReply *reply;
+	UIMainWindow* mainWin;
 };
 
 #endif // LOGINWINDOW_H
