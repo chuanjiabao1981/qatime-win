@@ -39,6 +39,7 @@ private:
 	QString							m_url;					//当前的推流地址
 	QTableWidgetItem*				m_pCurrentItem;			//当前课程item
 	bool							m_bPreview;				//当前是否是直播状态(决定当前课程的切换)
+	QString							m_lessonName;			//课程名字
 
 private slots:
 	void ChangedID(int index);
@@ -59,6 +60,7 @@ public:
 	QString getLessonID();
 	QString getURL();
 	void setPreview(bool bPreview);
+	QString getLessonName();
 };
 
 #endif // UIAUXILIARYPANEL_H

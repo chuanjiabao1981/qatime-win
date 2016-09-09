@@ -81,11 +81,11 @@ QString Lesson::ChinaLessonStatus()
 	}
 	else if (mStatus == "billing")
 	{
-		strChinaStatus = "待结算";
+		strChinaStatus = "已完成";
 	}
 	else if (mStatus == "completed")
 	{
-		strChinaStatus = "已结算";
+		strChinaStatus = "已完成";
 	}
 
 	return strChinaStatus;

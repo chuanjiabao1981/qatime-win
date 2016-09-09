@@ -18,12 +18,17 @@
 #define MAINWINDOW_Y_MARGIN 6
 #define MAINWINDOW_TITLE_HEIGHT 49
 
+
 UIMainWindow::UIMainWindow(QWidget *parent)
 	: QWidget(parent)
 	, m_OtherAppInfo(NULL)
 	, m_VideoInfo(NULL)
 	, m_iTimerCount(0)
 	, m_bOtherApp(false)
+	, m_AudioChangeInfo(NULL)
+	, m_AuxiliaryPanel(NULL)
+	, m_VideoChangeInfo(NULL)
+	, m_RatioChangeInfo(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
@@ -40,7 +45,9 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(ui.video_checkBox, SIGNAL(stateChanged(int)), this, SLOT(VideoStatus(int)));
 	connect(ui.fullscreen_checkBox, SIGNAL(stateChanged(int)), this, SLOT(FullScreenStatus(int)));
 	connect(ui.app_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(OtherApp(int)));
-	connect(ui.ratio_comboBox, SIGNAL(activated(int)), this, SLOT(ChangeRatio(int)));
+	connect(ui.AudioCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeAudio(int)));
+	connect(ui.videoCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeVideo(int)));
+	connect(ui.ratio_pushBtn, SIGNAL(clicked()), this, SLOT(clickChangeRatio()));
 
 	m_VideoInfo = new UIVideo(this);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
@@ -57,15 +64,20 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_AuxiliaryPanel->move(11, 48);
 	m_AuxiliaryPanel->hide();
 
-	// 设置视频源
-	QFile file("styles/ComboBox.qss");
-	file.open(QFile::ReadOnly);
-	QString styleSheet = file.readAll();
-	ui.ratio_comboBox->setStyleSheet(styleSheet);
-	ui.ratio_comboBox->addItem(QString("标清"));
-	ui.ratio_comboBox->addItem(QString("高清"));
-	ui.ratio_comboBox->setCurrentIndex(0);
-	file.close();
+	m_AudioChangeInfo = new UIAudioChange(this);
+	m_AudioChangeInfo->setWindowFlags(Qt::FramelessWindowHint);
+	m_AudioChangeInfo->setAudioChange(this);
+	m_AudioChangeInfo->hide();
+
+	m_VideoChangeInfo = new UIVideoChange(this);
+	m_VideoChangeInfo->setWindowFlags(Qt::FramelessWindowHint);
+	m_VideoChangeInfo->setVideoChange(this);
+	m_VideoChangeInfo->hide();
+
+	m_RatioChangeInfo = new UIRatio(this);
+	m_RatioChangeInfo->setWindowFlags(Qt::FramelessWindowHint);
+	m_RatioChangeInfo->setVideoChange(this);
+	m_RatioChangeInfo->hide();
 
 	// 直播按钮
 	ui.Live_pushBtn->setText("开始直播");
@@ -107,6 +119,19 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 		"QCheckBox::indicator{width: 32px;height: 32px;}"
 		"QCheckBox::indicator:unchecked{image: url(./images/app.png);}"
 		"QCheckBox::indicator:checked{image: url(./images/app.png);}");
+
+	ui.AudioCorner_pushBtn->setStyleSheet("QCheckBox{spacing: 2px;color: white;}"
+		"QCheckBox::indicator{width: 16px;height: 32px;}"
+		"QCheckBox::indicator:unchecked{image: url(./images/corner.png);}"
+		"QCheckBox::indicator:checked{image: url(./images/corner.png);}");
+
+	ui.videoCorner_pushBtn->setStyleSheet("QCheckBox{spacing: 2px;color: white;}"
+		"QCheckBox::indicator{width: 16px;height: 32px;}"
+		"QCheckBox::indicator:unchecked{image: url(./images/corner.png);}"
+		"QCheckBox::indicator:checked{image: url(./images/corner.png);}");
+
+	InitAudioList();
+	InitVideoList();
 }
 
 UIMainWindow::~UIMainWindow()
@@ -127,6 +152,18 @@ UIMainWindow::~UIMainWindow()
 	{
 		delete m_VideoInfo;
 		m_VideoInfo = NULL;
+	}
+
+	if (m_AudioChangeInfo)
+	{
+		delete m_AudioChangeInfo;
+		m_AudioChangeInfo = NULL;
+	}
+
+	if (m_VideoChangeInfo)
+	{
+		delete m_VideoChangeInfo;
+		m_VideoChangeInfo = NULL;
 	}
 
 	//删除定时器
@@ -231,6 +268,7 @@ void UIMainWindow::AuxiliaryRequestFinished()
 
 void UIMainWindow::Expansion()
 {
+	HideOtherUI();
 	m_AuxiliaryPanel->setVisible(true);
 }
 
@@ -248,6 +286,7 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 
 void UIMainWindow::slot_startOrStopLiveStream()
 {
+	HideOtherUI();
 	if (m_VideoInfo)
 	{
 		bool bLiving = m_VideoInfo->IsCurrentLiving();
@@ -271,6 +310,24 @@ void UIMainWindow::slot_startOrStopLiveStream()
 		}
 		else
 		{
+			if (m_AuxiliaryPanel->getLessonID().isEmpty())
+			{
+				CMessageBox::showMessage(
+					QString("答疑时间"),
+					QString("请选择您要开始的课程再进行直播！"),
+					QString("确定"));
+				return;
+			}
+
+			if (m_AuxiliaryPanel->getURL().isEmpty())
+			{
+				int iStatus = CMessageBox::showMessage(
+					QString("答疑时间"),
+					QString("推流地址为空！"),
+					QString("确定"));
+				return;
+			}
+
 			QString url;
 #ifdef _DEBUG
 			url = "rtmp://pa0a19f55.live.126.net/live/ae753e52ec6741fbb94ed4c0aea672c6?wsSecret=cacb5b393123f706e6f7b6e6a8291259&wsTime=1472695026";
@@ -294,6 +351,7 @@ void UIMainWindow::slot_startOrStopLiveStream()
 
 void UIMainWindow::VideoStatus(int iStatus)
 {	
+	HideOtherUI();
 	if (iStatus)
 	{
 //		m_VideoInfo->SetPauseVideo();
@@ -321,6 +379,7 @@ void UIMainWindow::VideoStatus(int iStatus)
 
 void UIMainWindow::FullScreenStatus(int iStatus)
 {
+	HideOtherUI();
 	if (iStatus)
 	{
 //		m_VideoInfo->SetPauseVideo();
@@ -346,23 +405,80 @@ void UIMainWindow::FullScreenStatus(int iStatus)
 	}
 }
 
-void UIMainWindow::ChangeRatio(int index)
+void UIMainWindow::InitAudioList()
 {
-	switch (index)
+	if (m_VideoInfo)
 	{
-	case 0:
-		m_VideoInfo->m_videoQ = EN_NLSS_VIDEOQUALITY_MIDDLE;
-		break;
-	case 1:
-		m_VideoInfo->m_videoQ = EN_NLSS_VIDEOQUALITY_HIGH;
-		break;
-	default:
-		break;
+		m_AudioChangeInfo->SetAudioInfo(m_VideoInfo->m_iAudioDeviceNum, m_VideoInfo->m_pAudioDevices);
+	}
+	
+}
+
+void UIMainWindow::InitVideoList()
+{
+	if (m_VideoInfo)
+	{
+		m_VideoChangeInfo->SetVideoInfo(m_VideoInfo->m_iVideoDeviceNum, m_VideoInfo->m_pVideoDevices);
+	}
+}
+
+void UIMainWindow::clickChangeAudio(int)
+{
+	HideOtherUI(m_AudioChangeInfo);
+	if (m_AudioChangeInfo && m_VideoInfo)
+	{
+		if (m_AudioChangeInfo->isVisible())
+		{
+			m_AudioChangeInfo->hide();
+			return;
+		}
+		int x = ui.Audio_checkBox->geometry().x();
+		int y = ui.Audio_checkBox->geometry().y();
+		m_AudioChangeInfo->move(QPoint(x - 15, y - 28 - m_VideoInfo->m_iAudioDeviceNum * 30));
+		m_AudioChangeInfo->resize(m_AudioChangeInfo->geometry().width(), m_VideoInfo->m_iAudioDeviceNum * 30);
+		m_AudioChangeInfo->show();
+	}
+}
+
+void UIMainWindow::clickChangeVideo(int)
+{
+	HideOtherUI(m_VideoChangeInfo);
+	if (m_VideoChangeInfo && m_VideoInfo)
+	{
+		if (m_VideoChangeInfo->isVisible())
+		{
+			m_VideoChangeInfo->hide();
+			return;
+		}
+		int x = ui.video_checkBox->geometry().x();
+		int y = ui.video_checkBox->geometry().y();
+		m_VideoChangeInfo->move(QPoint(x - 15, y - 28 - m_VideoInfo->m_iVideoDeviceNum * 30));
+		m_VideoChangeInfo->resize(m_VideoChangeInfo->geometry().width(), m_VideoInfo->m_iVideoDeviceNum * 30);
+		m_VideoChangeInfo->show();
+	}
+}
+
+void UIMainWindow::clickChangeRatio()
+{
+	HideOtherUI(m_RatioChangeInfo);
+	if (m_RatioChangeInfo)
+	{
+		if (m_RatioChangeInfo->isVisible())
+		{
+			m_RatioChangeInfo->hide();
+			return;
+		}
+
+		int x = ui.ratio_pushBtn->geometry().x();
+		int y = ui.ratio_pushBtn->geometry().y();
+		m_RatioChangeInfo->move(QPoint(x - 15, y - 28 - 60));
+		m_RatioChangeInfo->show();
 	}
 }
 
 void UIMainWindow::AudioStatus(int iStatus)
 {
+	HideOtherUI();
 	if (iStatus)
 	{
 		m_VideoInfo->SetPauseAudio();
@@ -375,6 +491,7 @@ void UIMainWindow::AudioStatus(int iStatus)
 
 void UIMainWindow::OtherApp(int i)
 {
+	HideOtherUI();
 	if (m_OtherAppInfo && m_VideoInfo)
 	{
 		QRect MainRect = this->geometry();
@@ -585,5 +702,73 @@ void UIMainWindow::paintEvent(QPaintEvent *event)
 
 void UIMainWindow::focusInEvent(QFocusEvent *e)
 {
-	m_AuxiliaryPanel->hide();
+	HideOtherUI();
+}
+
+void UIMainWindow::HideOtherUI(QWidget* self)
+{
+	if (m_AuxiliaryPanel &&
+		m_RatioChangeInfo &&
+		m_AudioChangeInfo &&
+		m_VideoChangeInfo)
+	{
+		if (self != NULL)
+		{
+			if ( m_RatioChangeInfo != self)
+				m_RatioChangeInfo->hide();
+			if (m_AudioChangeInfo != self)
+				m_AudioChangeInfo->hide();
+			if ( m_VideoChangeInfo != self)
+				m_VideoChangeInfo->hide();
+
+			m_AuxiliaryPanel->hide();
+		}
+		else
+		{
+			m_RatioChangeInfo->hide();
+			m_AudioChangeInfo->hide();
+			m_VideoChangeInfo->hide();
+			m_AuxiliaryPanel->hide();
+		}
+	}
+}
+
+void UIMainWindow::setAudioChangeIndex(int index)
+{
+	if (m_VideoInfo)
+	{
+		m_VideoInfo->m_CurrentMicIndex = index;
+	}
+}
+
+void UIMainWindow::setVideoChangeIndex(int index)
+{
+	if (m_VideoInfo)
+	{
+		m_VideoInfo->m_CurrentVideoIndex = index;
+	}
+}
+
+void UIMainWindow::setRatioChangeIndex(int index)
+{
+	if (m_VideoInfo)
+	{
+		switch (index)
+		{
+		case 0:
+			{
+				ui.ratio_pushBtn->setText("标清");
+				m_VideoInfo->m_videoQ = EN_NLSS_VIDEOQUALITY_MIDDLE;
+				break;
+			}
+		case 1:
+			{
+				ui.ratio_pushBtn->setText("高清");
+				m_VideoInfo->m_videoQ = EN_NLSS_VIDEOQUALITY_HIGH;
+				break;
+			}
+		default:
+			break;
+		}
+	}
 }

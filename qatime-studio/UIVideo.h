@@ -45,6 +45,8 @@ public:
 	ST_NLSS_INDEVICE_INF*			m_pAudioDevices;	// 音频设备
 	ST_NLSS_INDEVICE_INF*			m_pAppWinds;		// 其他应用
 	EN_NLSS_VIDEOQUALITY_LVL		m_videoQ;			// 画面清晰度
+	int								m_CurrentMicIndex;	// 当前麦克风索引
+	int								m_CurrentVideoIndex;		// 当前摄像头索引
 
 #ifdef STARTLS_ASYNC
 	Worker* m_pWorker;
@@ -88,7 +90,8 @@ public:
 	void SetResumeAudio();								// 恢复音频发送;
 	void ChangeLiveVideo();								// 改变视频源
 	void StopCaptureVideo();							// 停止采集
-	void setPlugFlowUrl(QString url);								// 设置推流url
+	void setPlugFlowUrl(QString url);					// 设置推流url
+	void setLessonName(QString strLessonName);
 };
 
 #endif // UIVideo_H

@@ -7,7 +7,6 @@
 #include <QFile>
 #include <QScrollBar>
 #include "UIMessageBox.h"
-//#include "WinUser.h"
 
 #define QT_TOOLBOXINDEX			100				//QTableWidgetItem索引
 #define QT_TOOLBOXCOURSEID		101				//Toolbox对应的辅导班ID
@@ -58,7 +57,9 @@ void UIAuxiliaryPanel::setTeacherID(const QString &teacherID)
 
 void UIAuxiliaryPanel::setTeacherName(const QString &teacherName)
 {
-	ui.teacherName_label->setText(teacherName);
+	QString strTeacher = teacherName;
+	strTeacher += "老师";
+	ui.teacherName_label->setText(strTeacher);
 }
 
 void UIAuxiliaryPanel::setNetworkPic(const QString &szUrl)
@@ -363,6 +364,11 @@ QString UIAuxiliaryPanel::getURL()
 void UIAuxiliaryPanel::setPreview(bool bPreview)
 {
 	m_bPreview = bPreview;
+}
+
+QString UIAuxiliaryPanel::getLessonName()
+{
+	return m_lessonName;
 }
 
 void UIAuxiliaryPanel::SelectionChanged(QTableWidgetItem* pItem)

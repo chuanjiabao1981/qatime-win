@@ -20,6 +20,8 @@ UIVideo::UIVideo(QWidget *parent)
 	, m_pAudioDevices(NULL)
 	, m_pAppWinds(NULL)
 	, m_bLiving(false)
+	, m_CurrentMicIndex(0)
+	, m_CurrentVideoIndex(0)
 {
 	ui.setupUi(this);
 
@@ -172,7 +174,7 @@ bool UIVideo::InitMediaCapture()
 		//获取视频参数
 		if (m_pVideoDevices != NULL)
 		{
-			stParam.stVideoParam.u.stInCamera.paDevicePath = (char *)m_pVideoDevices[0].paPath;
+			stParam.stVideoParam.u.stInCamera.paDevicePath = (char *)m_pVideoDevices[m_CurrentVideoIndex].paPath;
 		}
 		else
 			have_video_source = false;
@@ -213,7 +215,7 @@ bool UIVideo::InitMediaCapture()
 	case EN_NLSS_AUDIOIN_MIC:
 		if (m_pAudioDevices != NULL)
 		{
-			stParam.stAudioParam.paaudioDeviceName = m_pAudioDevices[0].paPath;
+			stParam.stAudioParam.paaudioDeviceName = m_pAudioDevices[m_CurrentMicIndex].paPath;
 		}
 		else
 			have_audio_source = false;
@@ -264,6 +266,7 @@ void UIVideo::EnumAvailableMediaDevices()
 	if (m_iVideoDeviceNum <= 0)
 	{
 		MessageBox(NULL, L"请连接摄像头设备", L"答疑时间", MB_OK);
+		return;
 	}
 	else
 	{
@@ -278,6 +281,7 @@ void UIVideo::EnumAvailableMediaDevices()
 	if (m_iAudioDeviceNum <= 0)
 	{
 		MessageBox(NULL, L"请连接麦克风设备", L"答疑时间", MB_OK);
+		return;
 	}
 	else
 	{
@@ -329,6 +333,7 @@ void UIVideo::StartLiveVideo()
 	if (!InitMediaCapture())
 	{
 		MessageBox(NULL, L"初始化参数失败", L"答疑时间", MB_OK);
+		return;
 	}
 
 	Nlss_SetVideoWaterMark(m_hNlssService, NULL);
@@ -337,16 +342,19 @@ void UIVideo::StartLiveVideo()
 	if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
 	{
 		MessageBox(NULL, L"打开视频采集出错", L"答疑时间", MB_OK);
+		return;
 	}
 
 	if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
 	{
 		MessageBox(NULL, L"打开视频预览出错，具体错误信息请看返回值", L"答疑时间", MB_OK);
+		return;
 	}
 
 	if (m_strUrl.isEmpty())
 	{
 		MessageBox(NULL, L"推流地址为空，推流参数初始化失败", L"答疑时间", MB_OK);
+		return;
 	}
 
 // 		m_StartLiveTimer->start(1000);
@@ -505,4 +513,9 @@ void UIVideo::StopCaptureVideo()
 {
 	Nlss_StopVideoCapture(m_hNlssService);
 	Nlss_StopVideoPreview(m_hNlssService);
+}
+
+void UIVideo::setLessonName(QString strLessonName)
+{
+	ui.lessonName_label->setText(strLessonName);
 }
