@@ -10,6 +10,7 @@
 #include "UIWorkThread.h"
 
 #define STARTLS_ASYNC
+#pragma execution_character_set("utf-8")
 
 class UIVideo : public QWidget
 {
@@ -55,9 +56,6 @@ public:
 protected:
 	virtual void paintEvent(QPaintEvent *);
 
-private:
-	void EnumAvailableMediaDevices();					// 枚举设备
-
 Q_SIGNALS:
 	void sig_changeLiveStatus(bool bTrue);
 #ifdef STARTLS_ASYNC
@@ -92,6 +90,7 @@ public:
 	void StopCaptureVideo();							// 停止采集
 	void setPlugFlowUrl(QString url);					// 设置推流url
 	void setLessonName(QString strLessonName);
+	void EnumAvailableMediaDevices();					// 枚举设备
 };
 
 #endif // UIVideo_H

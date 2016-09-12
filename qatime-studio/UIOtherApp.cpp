@@ -17,7 +17,7 @@ UIOtherApp::UIOtherApp(QWidget *parent)
 	connect(ui.OK_pushBtn, SIGNAL(clicked()), this, SLOT(OK()));
 	connect(ui.Cancel_pushBtn, SIGNAL(clicked()), this, SLOT(CANCEL()));
 
-	bFirstInit = false;
+	initAppPath();
 }
 
 UIOtherApp::~UIOtherApp()
@@ -27,7 +27,9 @@ UIOtherApp::~UIOtherApp()
 
 void UIOtherApp::setAppInfo(ST_NLSS_INDEVICE_INF* m_pAppWinds, int iAppCount)
 {
-	bFirstInit = true;
+	ui.Auxiliary_tableWidget->setRowCount(1);
+	ui.Auxiliary_tableWidget->clearContents();
+
 	for (int i = 0; i < iAppCount;i++)
 	{
 		ui.Auxiliary_tableWidget->insertRow(i+1);
@@ -132,11 +134,6 @@ void UIOtherApp::CANCEL()
 int UIOtherApp::getCurrentIndex()
 {
 	return m_CurrentIndex;
-}
-
-bool UIOtherApp::IsInit()
-{
-	return bFirstInit;
 }
 
 void UIOtherApp::resizeEvent(QResizeEvent *e)

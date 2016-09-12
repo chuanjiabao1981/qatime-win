@@ -123,12 +123,16 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	ui.AudioCorner_pushBtn->setStyleSheet("QCheckBox{spacing: 2px;color: white;}"
 		"QCheckBox::indicator{width: 16px;height: 32px;}"
 		"QCheckBox::indicator:unchecked{image: url(./images/corner.png);}"
-		"QCheckBox::indicator:checked{image: url(./images/corner.png);}");
+		"QCheckBox::indicator:checked{image: url(./images/corner.png);}"
+		"QCheckBox::indicator:unchecked:pressed{image: url(./images/corner_push.png);}"
+		"QCheckBox::indicator:checked:pressed{image: url(./images/corner_push.png);}"); 
 
 	ui.videoCorner_pushBtn->setStyleSheet("QCheckBox{spacing: 2px;color: white;}"
 		"QCheckBox::indicator{width: 16px;height: 32px;}"
 		"QCheckBox::indicator:unchecked{image: url(./images/corner.png);}"
-		"QCheckBox::indicator:checked{image: url(./images/corner.png);}");
+		"QCheckBox::indicator:checked{image: url(./images/corner.png);}"
+		"QCheckBox::indicator:unchecked:pressed{image: url(./images/corner_push.png);}"
+		"QCheckBox::indicator:checked:pressed{image: url(./images/corner_push.png);}");
 
 	InitAudioList();
 	InitVideoList();
@@ -294,6 +298,7 @@ void UIMainWindow::slot_startOrStopLiveStream()
 		{
 			ui.Live_pushBtn->setText("开始直播");
 			m_VideoInfo->StopLiveVideo();
+			m_VideoInfo->setLessonName("");
 			SendStopLiveHttpMsg();
 
 			if (m_CountTimer->isActive())
@@ -321,23 +326,34 @@ void UIMainWindow::slot_startOrStopLiveStream()
 
 			if (m_AuxiliaryPanel->getURL().isEmpty())
 			{
-				int iStatus = CMessageBox::showMessage(
+				CMessageBox::showMessage(
 					QString("答疑时间"),
 					QString("推流地址为空！"),
 					QString("确定"));
 				return;
 			}
 
+			if (m_VideoInfo->m_videoSourceType == EN_NLSS_VIDEOIN_NONE)
+			{
+				CMessageBox::showMessage(
+					QString("答疑时间"),
+					QString("请选择要播放的视频源！"),
+					QString("确定"));
+				return;
+			}
+			
 			QString url;
-#ifdef _DEBUG
-			url = "rtmp://pa0a19f55.live.126.net/live/ae753e52ec6741fbb94ed4c0aea672c6?wsSecret=cacb5b393123f706e6f7b6e6a8291259&wsTime=1472695026";
-#else
+// #ifdef _DEBUG
+// 			url = "rtmp://pa0a19f55.live.126.net/live/ae753e52ec6741fbb94ed4c0aea672c6?wsSecret=cacb5b393123f706e6f7b6e6a8291259&wsTime=1472695026";
+// #else
 			url = m_AuxiliaryPanel->getURL();
-#endif
-			ui.Live_pushBtn->setText("结束直播");
-			SendStartLiveHttpMsg();
+//#endif
+			
 			m_VideoInfo->setPlugFlowUrl(url);
 			m_VideoInfo->StartLiveVideo();
+			m_VideoInfo->setLessonName(m_AuxiliaryPanel->getLessonName());
+			ui.Live_pushBtn->setText("结束直播");
+			SendStartLiveHttpMsg();
 
 			m_CountTimer->start(1000);
 			m_HeartTimer->start(1000*60*5);
@@ -354,7 +370,6 @@ void UIMainWindow::VideoStatus(int iStatus)
 	HideOtherUI();
 	if (iStatus)
 	{
-//		m_VideoInfo->SetPauseVideo();
 		m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_CAMERA;
 		m_VideoInfo->ChangeLiveVideo();
 		m_VideoInfo->show();
@@ -364,7 +379,6 @@ void UIMainWindow::VideoStatus(int iStatus)
 	}
 	else
 	{
-//		m_VideoInfo->SetResumeVideo();
 		if (m_bOtherApp)
 			return;
 
@@ -382,7 +396,6 @@ void UIMainWindow::FullScreenStatus(int iStatus)
 	HideOtherUI();
 	if (iStatus)
 	{
-//		m_VideoInfo->SetPauseVideo();
 		m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_FULLSCREEN;
 		m_VideoInfo->ChangeLiveVideo();
 		m_VideoInfo->show();
@@ -392,7 +405,6 @@ void UIMainWindow::FullScreenStatus(int iStatus)
 	}
 	else
 	{
-//		m_VideoInfo->SetResumeVideo();
 		if (m_bOtherApp)
 			return;
 
@@ -496,7 +508,7 @@ void UIMainWindow::OtherApp(int i)
 	{
 		QRect MainRect = this->geometry();
 		QRect InfoRect = m_OtherAppInfo->geometry();
-		m_OtherAppInfo->initAppPath();
+		m_VideoInfo->EnumAvailableMediaDevices();
 		m_OtherAppInfo->setAppInfo(m_VideoInfo->m_pAppWinds, m_VideoInfo->m_iAppWindNum);
 		m_OtherAppInfo->move((MainRect.width() - InfoRect.width()) / 2, (MainRect.height() - InfoRect.height()) / 2);
 		if (m_OtherAppInfo->exec() != 0)

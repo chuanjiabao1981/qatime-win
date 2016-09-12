@@ -61,7 +61,7 @@ QString Lesson::ChinaLessonStatus()
 	}
 	else if (mStatus == "ready")
 	{
-		strChinaStatus = "进行中";
+		strChinaStatus = "待上课";
 	}
 	else if (mStatus == "teaching")
 	{
@@ -69,24 +69,25 @@ QString Lesson::ChinaLessonStatus()
 	}
 	else if (mStatus == "paused")
 	{
-		strChinaStatus = "进行中";
+		strChinaStatus = "暂停中";
 	}
 	else if (mStatus == "closed")
 	{
-		strChinaStatus = "已结束";
+		strChinaStatus = "进行中";
 	}
 	else if (mStatus == "finished")
 	{
-		strChinaStatus = "已完成";
+		strChinaStatus = "已结束";
 	}
 	else if (mStatus == "billing")
 	{
-		strChinaStatus = "已完成";
+		strChinaStatus = "已结束";
 	}
 	else if (mStatus == "completed")
 	{
-		strChinaStatus = "已完成";
+		strChinaStatus = "已结束";
 	}
+
 
 	return strChinaStatus;
 }

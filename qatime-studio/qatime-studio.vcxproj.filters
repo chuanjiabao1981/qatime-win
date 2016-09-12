@@ -257,4 +257,7 @@
       <Filter>Translation Files</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res.rc" />
+  </ItemGroup>
 </Project>
