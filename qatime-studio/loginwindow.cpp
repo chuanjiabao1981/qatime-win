@@ -10,6 +10,8 @@
 
 //#define _DEBUG
 TCHAR m_pathHomePage[MAX_PATH] = {0};
+TCHAR m_pathUserName[MAX_PATH] = { 0 };
+int	  m_iRemeber = 0;
 
 LoginWindow::LoginWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -23,11 +25,13 @@ LoginWindow::LoginWindow(QWidget *parent)
 	connect(ui.findPassword_pushBtn, SIGNAL(clicked()), this, SLOT(FindPassword()));
 	connect(ui.min_pushBtn, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.close_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
+	connect(ui.remember_checkBox, SIGNAL(stateChanged(int)), this, SLOT(changedRemeber(int)));
 
 	ui.UserName_Edit->setTextMargins(30, 3, 20, 3);
 	ui.UserPass_Edit->setTextMargins(30, 3, 20, 3);
 
 	ReadSetting();
+	InitUserName();
 }
 
 LoginWindow::~LoginWindow()
@@ -94,6 +98,8 @@ void LoginWindow::OnLogIn()
 	QNetworkRequest request(url);
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
+
+	RemeberPassword();
 }
 
 // 返回登陆结果
@@ -158,4 +164,42 @@ void LoginWindow::ReadSetting()
 	lstrcat(szTempPath, L"\\config.ini");
 
 	GetPrivateProfileString(L"CONFIG_PATH", L"HOMEPAGE", L"", m_pathHomePage, MAX_PATH, szTempPath);				//访问主页路径
+	GetPrivateProfileString(L"CONFIG_PATH", L"USERNAME", L"", m_pathUserName, MAX_PATH, szTempPath);
+	m_iRemeber = GetPrivateProfileInt(L"CONFIG_PATH", L"REMEBER", 0, szTempPath);
+}
+
+void LoginWindow::changedRemeber(int i)
+{
+	TCHAR szTempPath[MAX_PATH] = { 0 };
+
+	GetCurrentDirectory(MAX_PATH, szTempPath);
+	lstrcat(szTempPath, L"\\config.ini");
+
+	if (i == 0)
+		WritePrivateProfileString(L"CONFIG_PATH", L"REMEBER", L"0",szTempPath);
+	else
+		WritePrivateProfileString(L"CONFIG_PATH", L"REMEBER", L"1",szTempPath);
+}
+
+void LoginWindow::RemeberPassword()
+{
+	TCHAR szTempPath[MAX_PATH] = { 0 };
+
+	GetCurrentDirectory(MAX_PATH, szTempPath);
+	lstrcat(szTempPath, L"\\config.ini");
+
+	if (ui.remember_checkBox->isChecked())
+	{
+		QString strName = ui.UserName_Edit->text();
+		WritePrivateProfileString(L"CONFIG_PATH", L"USERNAME", (LPCTSTR)strName.utf16(), szTempPath);
+	}
+}
+
+void LoginWindow::InitUserName()
+{
+	if (m_iRemeber == 1)
+	{
+		ui.UserName_Edit->setText(QString::fromStdWString(m_pathUserName));
+		ui.remember_checkBox->setCheckState(Qt::Checked);
+	}
 }
