@@ -10,6 +10,8 @@
 
 //#define _DEBUG
 TCHAR m_pathHomePage[MAX_PATH] = {0};
+TCHAR m_pathUserName[MAX_PATH] = { 0 };
+int	  m_nRemember = 0;
 
 LoginWindow::LoginWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -23,11 +25,15 @@ LoginWindow::LoginWindow(QWidget *parent)
 	connect(ui.findPassword_pushBtn, SIGNAL(clicked()), this, SLOT(FindPassword()));
 	connect(ui.min_pushBtn, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.close_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
+	connect(ui.remember_checkBox, SIGNAL(stateChanged(int)), this, SLOT(RememberChanged(int)));
 
 	ui.UserName_Edit->setTextMargins(30, 3, 20, 3);
 	ui.UserPass_Edit->setTextMargins(30, 3, 20, 3);
 
 	ReadSetting();
+
+	setTabOrder(ui.UserName_Edit, ui.UserPass_Edit);
+	setTabOrder(ui.UserPass_Edit, ui.login_pushBtn);
 }
 
 LoginWindow::~LoginWindow()
@@ -89,11 +95,14 @@ void LoginWindow::OnLogIn()
 	append.append("&email=");
 	append += ui.UserName_Edit->text();
 	append.append("&password=");
+//	append.append("&client_cate=teacher_live");
 	qInfo(append);
 	append += ui.UserPass_Edit->text();
 	QNetworkRequest request(url);
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
+
+	RememberPassword();
 }
 
 // 返回登陆结果
@@ -111,6 +120,7 @@ void LoginWindow::loginFinished()
 		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->setRemeberToken(data["remember_token"].toString());
 		mainWin->ShowAuxiliary();
+		mainWin->setFixedSize(1024,720);
 		mainWin->show();
 		this->hide();
 	}
@@ -158,4 +168,40 @@ void LoginWindow::ReadSetting()
 	lstrcat(szTempPath, L"\\config.ini");
 
 	GetPrivateProfileString(L"CONFIG_PATH", L"HOMEPAGE", L"", m_pathHomePage, MAX_PATH, szTempPath);				//访问主页路径
+	GetPrivateProfileString(L"CONFIG_PATH", L"USERNAME", L"", m_pathUserName, MAX_PATH, szTempPath);
+	m_nRemember = GetPrivateProfileInt(L"CONFIG_PATH", L"REMEMBER", 0, szTempPath);
+
+	if (m_nRemember == 1)
+	{
+		ui.remember_checkBox->setCheckState(Qt::Checked);
+
+		QString name = QString::fromStdWString(m_pathUserName);
+		ui.UserName_Edit->setText(name);
+	}
+}
+
+void LoginWindow::RememberPassword()
+{
+	if (ui.remember_checkBox->isChecked())
+	{
+		QString strUserName = ui.UserName_Edit->text();
+		
+		TCHAR szTempPath[MAX_PATH] = { 0 };
+		GetCurrentDirectory(MAX_PATH, szTempPath);
+		lstrcat(szTempPath, L"\\config.ini");
+
+		WritePrivateProfileString(L"CONFIG_PATH", L"USERNAME", (LPCTSTR)strUserName.utf16(), szTempPath);
+	}
+}
+
+void LoginWindow::RememberChanged(int i)
+{
+	TCHAR szTempPath[MAX_PATH] = { 0 };
+	GetCurrentDirectory(MAX_PATH, szTempPath);
+	lstrcat(szTempPath, L"\\config.ini");
+
+	if (i==0)
+		WritePrivateProfileString(L"CONFIG_PATH", L"REMEMBER", L"0", szTempPath);
+	else
+		WritePrivateProfileString(L"CONFIG_PATH", L"REMEMBER", L"1", szTempPath);
 }

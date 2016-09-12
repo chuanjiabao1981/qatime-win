@@ -1,0 +1,21 @@
+09-12 18:02:40(10528) cos INFO: [Cos_ThreadCreate:99]thread[Cos_InetMgr]:0x6b5e5d8 create OK
+09-12 18:02:40(10528) cos INFO: [Cos_TimerMgrStartProc:135]timer mgr start proc
+09-12 18:02:40(10528) cos INFO: [Cos_ThreadCreate:99]thread[COS_TIMER]:0x6b722a0 create OK
+09-12 18:02:40(10528) cos INFO: [Cos_ThreadCreate:99]thread[COS_PID_MGR]:0x6b73858 create OK
+09-12 18:02:40(10528) cos INFO: [Cos_PidMgrStart:28]Cos_PidMgrStart g_stPidMgr.hPidMgrQueue is : 6b73430
+09-12 18:02:40(10528) cos INFO: [Cos_SysInit:86]Cos init ok
+09-12 18:02:40(10528) PID_BASE INFO: [Cbbs_SysInit:13]sdk init WorkPath:C:\Users\lenovo\qatime\qatime-studio\qatime-studio CachePath:C:\Users\lenovo\qatime\qatime-studio\qatime-studio
+09-12 18:02:40(8512) cos INFO: [Cos_ThreadProc:199]thread[COS_TIMER]:0x6b722a0 , threadid:8512 start ok
+09-12 18:02:40(8512) cos INFO: [Cos_TimerMgrProc:111]timer mgr start proc OK
+09-12 18:02:40(6436) cos INFO: [Cos_ThreadProc:199]thread[Cos_InetMgr]:0x6b5e5d8 , threadid:6436 start ok
+09-12 18:02:40(3468) cos INFO: [Cos_ThreadProc:199]thread[COS_PID_MGR]:0x6b73858 , threadid:3468 start ok
+09-12 18:02:40(3468) cos INFO: [Cos_PidMgrProc:52]pidmgr start OK
+09-12 18:02:43(10528) NLSS_LOG ERR: [Nlss_Destroy:150]enter
+09-12 18:02:43(10528) PID_BASE INFO: [Cbbs_SysDestroy:23]sdk destroy succeeded
+09-12 18:02:43(10528) cos INFO: [Cos_TimerMgrStopProc:157]timer mgr stop proc
+09-12 18:02:43(8512) cos INFO: [Cos_TimerMgrProc:129]timer mgr stop proc OK
+09-12 18:02:43(8512) cos INFO: [Cos_ThreadProc:215]thread[COS_TIMER]:0x6b722a0, threadid:8512 proc complete
+09-12 18:02:43(10528) cos INFO: [Cos_ThreadDelete:151]thread[COS_TIMER]:0x6b722a0 delete ok
+09-12 18:02:43(3468) cos INFO: [Cos_PidMgrProc:63]pidmgr over
+09-12 18:02:43(3468) cos INFO: [Cos_ThreadProc:215]thread[COS_PID_MGR]:0x6b73858, threadid:3468 proc complete
+09-12 18:02:43(10528) cos INFO: [Cos_ThreadDelete:151]thread[COS_PID_MGR]:0x6b73858 delete ok

@@ -4,7 +4,7 @@
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-	QIcon qIcon("./images/logo.png");
+	QIcon qIcon("./images/favicon.png");
 	a.setWindowIcon(qIcon);
 
 	LoginWindow w;

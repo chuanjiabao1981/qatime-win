@@ -166,6 +166,9 @@
        <pointsize>8</pointsize>
       </font>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="echoMode">
       <enum>QLineEdit::Password</enum>
      </property>
@@ -480,12 +483,25 @@
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#a8a8a8;&quot;&gt;———答疑时间&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="remember_checkBox">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>160</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>记住账号</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="login_pushBtn">
     <property name="geometry">
      <rect>
       <x>755</x>
-      <y>261</y>
+      <y>270</y>
       <width>76</width>
       <height>30</height>
      </rect>
@@ -498,6 +514,9 @@
     </property>
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::StrongFocus</enum>
     </property>
     <property name="text">
      <string>立即登陆</string>
@@ -546,6 +565,9 @@
       <pointsize>8</pointsize>
      </font>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::StrongFocus</enum>
+    </property>
     <property name="echoMode">
      <enum>QLineEdit::Normal</enum>
     </property>
@@ -557,7 +579,7 @@
     <property name="geometry">
      <rect>
       <x>650</x>
-      <y>261</y>
+      <y>270</y>
       <width>76</width>
       <height>30</height>
      </rect>

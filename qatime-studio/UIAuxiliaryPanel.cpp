@@ -14,6 +14,7 @@
 #define QT_TOOLBOXLESSONURL		103				//Toolbox对应的课程推流url
 #define QT_TOOLBOXLITEMNAME		104				//QTableWidgetItem 对应的objectname
 #define QT_TOOLBOXLITEMSTATUS	105				//课程状态	
+#define QT_TOOLBOXLESSONNAME	106				//课程名字
 
 UIAuxiliaryPanel::UIAuxiliaryPanel(QWidget *parent)
 	: QWidget(parent)	
@@ -247,11 +248,11 @@ void UIAuxiliaryPanel::setCourseInfo(QJsonArray courses, QString url,QString tab
 //		QIcon qIcon;
 //		GetItemColor(pLesson->LessonStatus(), brush, qIcon);
 
-		if (pLesson->LessonStatus() == "teaching")
-		{
-			bExpand = true;
-			m_lessonID = pLesson->LessonID();
-		}
+//		if (pLesson->LessonStatus() == "teaching")
+//		{
+//			bExpand = true;
+//			m_lessonID = pLesson->LessonID();
+//		}
 
 		// 显示箭头图标
 //		QTableWidgetItem *pItemIcon = new QTableWidgetItem(qIcon, "");
@@ -265,6 +266,7 @@ void UIAuxiliaryPanel::setCourseInfo(QJsonArray courses, QString url,QString tab
 		pItemNum->setData(QT_TOOLBOXLESSONURL, url);
 		pItemNum->setData(QT_TOOLBOXLITEMNAME, tableName);
 		pItemNum->setData(QT_TOOLBOXLITEMSTATUS, pLesson->LessonStatus());
+		pItemNum->setData(QT_TOOLBOXLESSONNAME, pLesson->name());
 		pItemNum->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 //		pItemNum->setBackground(brush);
 		pTableWidget->setItem(nNum - 1, 1, pItemNum);
@@ -275,6 +277,7 @@ void UIAuxiliaryPanel::setCourseInfo(QJsonArray courses, QString url,QString tab
 		pItemTime->setData(QT_TOOLBOXLESSONURL, url);
 		pItemTime->setData(QT_TOOLBOXLITEMNAME, tableName);
 		pItemTime->setData(QT_TOOLBOXLITEMSTATUS, pLesson->LessonStatus());
+		pItemTime->setData(QT_TOOLBOXLESSONNAME, pLesson->name());
 		pItemTime->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 //		pItemTime->setBackground(brush);
 		pTableWidget->setItem(nNum - 1, 2, pItemTime);
@@ -285,7 +288,12 @@ void UIAuxiliaryPanel::setCourseInfo(QJsonArray courses, QString url,QString tab
 		pItemName->setData(QT_TOOLBOXLESSONURL, url);
 		pItemName->setData(QT_TOOLBOXLITEMNAME, tableName);
 		pItemName->setData(QT_TOOLBOXLITEMSTATUS, pLesson->LessonStatus());
+<<<<<<< Updated upstream
 //		pItemName->setBackground(brush);
+=======
+		pItemName->setData(QT_TOOLBOXLESSONNAME, pLesson->name());
+		pItemName->setBackground(brush);
+>>>>>>> Stashed changes
 		pTableWidget->setItem(nNum - 1, 3, pItemName);
 
 		// 课程状态
@@ -294,6 +302,7 @@ void UIAuxiliaryPanel::setCourseInfo(QJsonArray courses, QString url,QString tab
 		pItemStatus->setData(QT_TOOLBOXLESSONURL, url);
 		pItemStatus->setData(QT_TOOLBOXLITEMNAME, tableName);
 		pItemStatus->setData(QT_TOOLBOXLITEMSTATUS, pLesson->LessonStatus());
+		pItemStatus->setData(QT_TOOLBOXLESSONNAME, pLesson->name());
 		pItemStatus->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 //		pItemStatus->setBackground(brush);
 		pTableWidget->setItem(nNum - 1, 4, pItemStatus);
@@ -384,6 +393,16 @@ void UIAuxiliaryPanel::GetItemColor(QString strStatus, QBrush& brush, QIcon& qIc
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "finished")
+	{
+		brush = QColor::fromRgb(255, 255, 255);
+		qIcon = QIcon("./images/empty.png");
+	}
+	else if (strStatus == "billing")
+	{
+		brush = QColor::fromRgb(255, 255, 255);
+		qIcon = QIcon("./images/empty.png");
+	}
+	else if (strStatus == "completed")
 	{
 		brush = QColor::fromRgb(255, 255, 255);
 		qIcon = QIcon("./images/empty.png");
@@ -481,6 +500,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	{
 		m_lessonID = (QString)terrWidget->data(0,QT_TOOLBOXLESSONID).toString();
 		m_url = (QString)terrWidget->data(0, QT_TOOLBOXLESSONURL).toString();
+
 
 		QString tableName = (QString)terrWidget->data(0,QT_TOOLBOXLITEMNAME).toString();
 		QString tabText = terrWidget->parent()->text(0);

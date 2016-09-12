@@ -1,0 +1,22 @@
+09-12 14:13:10(8468) cos INFO: [Cos_ThreadCreate:99]thread[Cos_InetMgr]:0x48a3968 create OK
+09-12 14:13:10(6836) cos INFO: [Cos_ThreadProc:199]thread[Cos_InetMgr]:0x48a3968 , threadid:6836 start ok
+09-12 14:13:10(8468) cos INFO: [Cos_TimerMgrStartProc:135]timer mgr start proc
+09-12 14:13:10(8468) cos INFO: [Cos_ThreadCreate:99]thread[COS_TIMER]:0x4876630 create OK
+09-12 14:13:10(8468) cos INFO: [Cos_ThreadCreate:99]thread[COS_PID_MGR]:0x4876c78 create OK
+09-12 14:13:10(8468) cos INFO: [Cos_PidMgrStart:28]Cos_PidMgrStart g_stPidMgr.hPidMgrQueue is : 48766a8
+09-12 14:13:10(2976) cos INFO: [Cos_ThreadProc:199]thread[COS_TIMER]:0x4876630 , threadid:2976 start ok
+09-12 14:13:10(2976) cos INFO: [Cos_TimerMgrProc:111]timer mgr start proc OK
+09-12 14:13:10(8468) cos INFO: [Cos_SysInit:86]Cos init ok
+09-12 14:13:10(8468) PID_BASE INFO: [Cbbs_SysInit:13]sdk init WorkPath:C:\Users\lenovo\qatime\qatime-studio\qatime-studio CachePath:C:\Users\lenovo\qatime\qatime-studio\qatime-studio
+09-12 14:13:10(9016) cos INFO: [Cos_ThreadProc:199]thread[COS_PID_MGR]:0x4876c78 , threadid:9016 start ok
+09-12 14:13:10(9016) cos INFO: [Cos_PidMgrProc:52]pidmgr start OK
+09-12 14:13:17(8468) NLSS_LOG ERR: [Nlss_UninitParam:251]enter
+09-12 14:13:17(8468) NLSS_LOG ERR: [Nlss_InitParam:182]enter
+09-12 14:13:17(8468) LS_CAPTURE INFO: [CLSMediaCapture::Initialize:177]CLSMediaCapture::Initialize: 
+09-12 14:13:17(8468) NLSS_LOG ERR: [Nlss_StartVideoCapture:264]enter
+09-12 14:13:17(8468) cos INFO: [Cos_ThreadCreate:99]thread[LS_CAPSCREEN]:0xad5a3e8 create OK
+09-12 14:13:17(8468) NLSS_LOG ERR: [Nlss_StartVideoPreview:293]enter
+09-12 14:13:17(8468) NLSS_LOG ERR: [CLSMediaCapture::StartScreenVideoPreview:1006]this:489fa90, m_pVideoCaptureScreen:487a9c8
+09-12 14:13:17(7372) cos INFO: [Cos_ThreadProc:199]thread[LS_CAPSCREEN]:0xad5a3e8 , threadid:7372 start ok
+09-12 14:13:17(7372) NLSS_ALS INFO: [Nlss_VideoInit:68]Cos_MemOwnerCreate pstVideoObj->hMemOwner:0x0
+09-12 14:13:43(8468) NLSS_LOG ERR: [Nlss_StopVideoPreview:333]enter

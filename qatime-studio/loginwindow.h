@@ -33,13 +33,13 @@ private slots :
 	void FindPassword();		// 快速找回密码
 	void MinDialog();			// 最小化对话框
 	void CloseDialog();			// 关闭对话框
-
+	void RememberChanged(int);  // 记住账号
 private:
 	void loginFinished();		// 登陆完成的返回事件
 
 protected:
 	void ReadSetting();			// 读取配置文件路径信息
-
+	void RememberPassword();
 private:
 	CButton* m_MinBtn;
 	CButton* m_CloseBtn;

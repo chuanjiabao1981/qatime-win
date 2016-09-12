@@ -18,7 +18,6 @@ public:
 
 private:
 	Ui::UIOtherApp ui;
-	bool bFirstInit;
 	int m_CurrentIndex;
 
 protected:
@@ -34,7 +33,6 @@ public:
 	void setAppInfo(ST_NLSS_INDEVICE_INF* m_pAppWinds, int iAppCount);
 	void initAppPath();
 	int  getCurrentIndex();
-	bool IsInit();
 };
 
 #endif // UIOtherApp_H

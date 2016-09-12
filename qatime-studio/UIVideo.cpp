@@ -7,7 +7,7 @@ ST_NLSS_VIDEO_SAMPLER UIVideo::m_SvideoSampler;
 
 UIVideo::UIVideo(QWidget *parent)
 	: QWidget(parent)
-	, m_videoSourceType(EN_NLSS_VIDEOIN_CAMERA)
+	, m_videoSourceType(EN_NLSS_VIDEOIN_NONE)
 	, m_audioSourceType(EN_NLSS_AUDIOIN_MIC)
 	, m_bPreviewing(false)
 	, m_hNlssService(NULL)
@@ -167,7 +167,7 @@ bool UIVideo::InitMediaCapture()
 	switch (m_videoSourceType)
 	{
 	case EN_NLSS_VIDEOIN_FULLSCREEN:
-		stParam.stVideoParam.iOutBitrate = 1500000;
+		stParam.stVideoParam.iOutBitrate = 700000;
 		stParam.stVideoParam.iOutFps = 10;
 		break;
 	case EN_NLSS_VIDEOIN_CAMERA:
@@ -185,11 +185,11 @@ bool UIVideo::InitMediaCapture()
 		stParam.stVideoParam.u.stInRectScreen.iRectRight = 500;
 		stParam.stVideoParam.u.stInRectScreen.iRectTop = 100;
 		stParam.stVideoParam.u.stInRectScreen.iRectBottom = 500;
-		stParam.stVideoParam.iOutBitrate = 300000;
+		stParam.stVideoParam.iOutBitrate = 700000;
 
 		break;
 	case EN_NLSS_VIDEOIN_APP:
-		stParam.stVideoParam.iOutBitrate = 1000000;
+		stParam.stVideoParam.iOutBitrate = 700000;
 		stParam.stVideoParam.iOutFps = 10;
 
 		if (m_pAppWinds != NULL)
@@ -266,10 +266,15 @@ void UIVideo::EnumAvailableMediaDevices()
 	if (m_iVideoDeviceNum <= 0)
 	{
 		MessageBox(NULL, L"请连接摄像头设备", L"答疑时间", MB_OK);
-		return;
 	}
 	else
 	{
+		if (m_pVideoDevices)
+		{
+			delete[] m_pVideoDevices;
+			m_pVideoDevices = NULL;
+		}
+
 		m_pVideoDevices = new ST_NLSS_INDEVICE_INF[m_iVideoDeviceNum];
 		for (int i = 0; i < m_iVideoDeviceNum; i++)
 		{
@@ -281,10 +286,15 @@ void UIVideo::EnumAvailableMediaDevices()
 	if (m_iAudioDeviceNum <= 0)
 	{
 		MessageBox(NULL, L"请连接麦克风设备", L"答疑时间", MB_OK);
-		return;
 	}
 	else
 	{
+		if (m_pAudioDevices)
+		{
+			delete[] m_pAudioDevices;
+			m_pAudioDevices = NULL;
+		}
+
 		m_pAudioDevices = new ST_NLSS_INDEVICE_INF[m_iAudioDeviceNum];
 
 		for (int i = 0; i < m_iAudioDeviceNum; i++)
@@ -303,6 +313,12 @@ void UIVideo::EnumAvailableMediaDevices()
 	}
 	else
 	{
+		if (m_pAppWinds)
+		{
+			delete[] m_pAppWinds;
+			m_pAppWinds = NULL;
+		}
+
 		m_pAppWinds = new ST_NLSS_INDEVICE_INF[m_iAppWindNum];
 		for (int i = 0; i < m_iAppWindNum; i++)
 		{
@@ -458,6 +474,7 @@ void UIVideo::ChangeLiveVideo()
 		if (!InitMediaCapture())
 		{
 			MessageBox(NULL, L"初始化参数失败", L"答疑时间", MB_OK);
+			return;
 		}
 
 		Nlss_SetVideoWaterMark(m_hNlssService, NULL);
@@ -467,11 +484,13 @@ void UIVideo::ChangeLiveVideo()
 		if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
 		{
 			MessageBox(NULL, L"打开视频采集出错", L"答疑时间", MB_OK);
+			return;
 		}
 
 		if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
 		{
 			MessageBox(NULL, L"打开视频预览出错，具体错误信息请看返回值", L"答疑时间", MB_OK);
+			return;
 		}
 
  		m_pWorker->SetMediaCapture(m_hNlssService);
@@ -490,6 +509,7 @@ void UIVideo::ChangeLiveVideo()
 		if (!InitMediaCapture())
 		{
 			MessageBox(NULL, L"初始化参数失败", L"答疑时间", MB_OK);
+			return;
 		}
 
 		Nlss_SetVideoWaterMark(m_hNlssService, NULL);
@@ -499,11 +519,13 @@ void UIVideo::ChangeLiveVideo()
 		if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
 		{
 			MessageBox(NULL, L"打开视频采集出错", L"答疑时间", MB_OK);
+			return;
 		}
 
 		if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
 		{
 			MessageBox(NULL, L"打开视频预览出错，具体错误信息请看返回值", L"答疑时间", MB_OK);
+			return;
 		}
 	}
 	m_bPreviewing = true;
@@ -517,5 +539,6 @@ void UIVideo::StopCaptureVideo()
 
 void UIVideo::setLessonName(QString strLessonName)
 {
+	//[当前直播课程]
 	ui.lessonName_label->setText(strLessonName);
 }
