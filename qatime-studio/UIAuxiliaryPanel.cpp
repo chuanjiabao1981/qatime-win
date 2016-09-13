@@ -186,15 +186,13 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 		QWidget *widget = new QWidget();
 		QTableWidget* pTable = new QTableWidget();
 		style(pTable);
-
 		//设置当前索引
 		pTable->setAccessibleDescription(QString::number(nNum));
 
 		QVBoxLayout *layout = new QVBoxLayout();
 		layout->addWidget(pTable);
 		widget->setLayout(layout);
-
-		//向QToolBox中添加抽屉 	
+		
 		QIcon iconFriend("./images/course_back.png");
 		if (nNum == 0)
 		{
@@ -206,16 +204,15 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 		pTable->setObjectName(strItemName);
 		//展开直播中的课程
 		bool bExpand = false;
-
-		//TODO zp begen
+		
 		QTreeWidgetItem *imageItem1 = new QTreeWidgetItem(m_teacher_treewidget, QStringList(QString(course->name())));
-		m_teacher_treewidget->setColumnCount(4);
+		m_teacher_treewidget->setColumnCount(3);
 		m_teacher_treewidget->setWindowIcon(iconFriend);
 		QString str = "课程进度 ";
 		imageItem1->setText(3, str+course->progress());
 		imageItem1->setTextAlignment(3, Qt::AlignRight);
 		imageItem1->setTextAlignment(0, Qt::AlignLeft );
-		m_teacher_treewidget->setColumnWidth(0, 150);
+		m_teacher_treewidget->setColumnWidth(0, 250);
 		m_teacher_treewidget->setColumnWidth(1, 150);
 		imageItem1->setSizeHint(0, QSize(200, 25));		
 		setCourseInfoToTree(course->JsonLesson(), course->url(), strItemName, imageItem1, bExpand, nNum);
@@ -224,14 +221,14 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 		{
 //			m_teacher_treewidget->setCurrentIndex(nNum);
 		}
-		//end
+		
 		delete course;
 		nNum++;		
 	}
 	ui.teacher_verticalLayout->addWidget(m_teacher_treewidget);
 }
 
-//TODO zp 添加树信息
+//TODO  添加树信息
 
 void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QString tableName, QTreeWidgetItem* pTableWidget, bool &bExpand,int num)
 {
@@ -258,8 +255,8 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 
 		// 显示编号
 		QString strNum = QString::number(nNum);		
-		QTreeWidgetItem *imageItem1 = new QTreeWidgetItem(pTableWidget, QStringList(strNum));		
-		for (int i = 0; i <= 3; i++)
+		QTreeWidgetItem *imageItem1 = new QTreeWidgetItem(pTableWidget, QStringList(strNum + "     " + pLesson->name()));
+		for (int i = 0; i < 3; i++)
 		{			
 			imageItem1->setData(0,QT_TOOLBOXLESSONID, pLesson->LessonID());
 			imageItem1->setData(0,QT_TOOLBOXLESSONURL, url);
@@ -269,8 +266,8 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 			imageItem1->setBackground(i, brush);
 		}
 		imageItem1->setText(1, pLesson->LessonTime());
-		imageItem1->setText(2, pLesson->name());
-		imageItem1->setText(3, pLesson->ChinaLessonStatus());	
+//		imageItem1->setText(1, pLesson->name());
+		imageItem1->setText(2, pLesson->ChinaLessonStatus());	
 		imageItem1->setSizeHint(0, QSize(20, 20));
 		imageItem1->setTextAlignment(3, Qt::AlignRight);
 		imageItem1->setTextAlignment(2, Qt::AlignLeft);
@@ -345,7 +342,6 @@ QString UIAuxiliaryPanel::getLessonName()
 {
 	return m_lessonName;
 }
-//TODO zp
 void UIAuxiliaryPanel::on_treeWidget_clicked(QTreeWidgetItem * item, int column)
 {
 	//TODO 单击触发的函数，暂时屏蔽
