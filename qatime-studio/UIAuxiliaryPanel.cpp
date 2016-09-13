@@ -298,27 +298,27 @@ void UIAuxiliaryPanel::GetItemColor(QString strStatus, QBrush& brush, QIcon& qIc
 {
 	if (strStatus == "init")
 	{
-		brush = QColor::fromRgb(255, 243, 231);
+		brush = QColor::fromRgb(255, 255, 255);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "ready")
 	{
-		brush = QColor::fromRgb(255, 243, 231);
+		brush = QColor::fromRgb(255, 243, 200);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "teaching")
 	{
-		brush = QColor::fromRgb(255, 243, 231);
+		brush = QColor::fromRgb(255, 243, 200);
 		qIcon = QIcon("./images/teaching.png");
 	}
 	else if (strStatus == "paused")
 	{
-		brush = QColor::fromRgb(255, 243, 231);
+		brush = QColor::fromRgb(255, 243, 200);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "closed")
 	{
-		brush = QColor::fromRgb(255, 243, 231);
+		brush = QColor::fromRgb(255, 243, 200);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "finished")
@@ -406,15 +406,8 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	{
 		if (!m_pCurrenDoubTree)
 		{				
-				for (int i = 0; i < terrWidget->childCount(); i++)
-				{
-					for (int j = 0; j <= 3; j++)
-					{
-						terrWidget->child(i)->setBackgroundColor(j, QColor("#FFFF00"));
-					}
-				}	
-				m_pCurrenDoubTree = terrWidget;
-				return;
+			m_pCurrenDoubTree = terrWidget;
+			return;
 		}
 		if (terrWidget == m_pCurrenDoubTree)
 		{
@@ -427,13 +420,6 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 				for (int j = 0; j <= 3; j++)
 				{					
 					m_pCurrenDoubTree->child(i)->setBackgroundColor(j, QColor("#FFFFFF"));
-				}
-			}
-			for (int i = 0; i < terrWidget->childCount(); i++)	//在新的选择框里面添加底图颜色
-			{
-				for (int j = 0; j <= 3; j++)
-				{
-					terrWidget->child(i)->setBackgroundColor(j, QColor("#FFFF00"));
 				}
 			}
 
@@ -485,7 +471,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 				m_pTreeCurrentItem = terrWidget;	
 				m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#FF0000"));
 				m_pTreeCurrentItem->parent()->setTextColor(3, QColor("#FF0000"));
-			
+
 	}
 	setFocus();
 }
