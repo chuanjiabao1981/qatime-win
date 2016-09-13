@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="LoginWindow">
+    <file>images/quit.png</file>
+    <file>images/course_back.png</file>
+    <file>images/course_expand.png</file>
     <file>images/corner.png</file>
     <file>images/app.png</file>
     <file>images/drawback.png</file>

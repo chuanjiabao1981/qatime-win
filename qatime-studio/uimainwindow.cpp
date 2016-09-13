@@ -29,6 +29,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, m_AuxiliaryPanel(NULL)
 	, m_VideoChangeInfo(NULL)
 	, m_RatioChangeInfo(NULL)
+	, m_LoginWindow(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
@@ -61,6 +62,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	m_AuxiliaryPanel = new UIAuxiliaryPanel(this);
 	m_AuxiliaryPanel->setWindowFlags(Qt::FramelessWindowHint);
+	m_AuxiliaryPanel->setParent(this);
 	m_AuxiliaryPanel->move(11, 48);
 	m_AuxiliaryPanel->hide();
 
@@ -187,6 +189,9 @@ UIMainWindow::~UIMainWindow()
 		delete m_HeartTimer;
 		m_HeartTimer = NULL;
 	}
+
+	if (m_LoginWindow)
+		m_LoginWindow = NULL;
 }
 
 void UIMainWindow::MinDialog()
@@ -782,5 +787,24 @@ void UIMainWindow::setRatioChangeIndex(int index)
 		default:
 			break;
 		}
+	}
+}
+
+void UIMainWindow::setLoginWindow(LoginWindow* parent)
+{
+	m_LoginWindow = parent;
+}
+
+void UIMainWindow::returnClick()
+{
+	int iStatus = CMessageBox::showMessage(
+		QString("答疑时间"),
+		QString("是否重新登陆！"),
+		QString("确定"),
+		QString("取消"));
+	if (iStatus == 1)
+	{
+		if (m_LoginWindow)
+			m_LoginWindow->ReturnLogin();
 	}
 }

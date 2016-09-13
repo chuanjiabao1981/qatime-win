@@ -100,6 +100,7 @@ void LoginWindow::OnLogIn()
 	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
 
 	RemeberPassword();
+	ui.UserPass_Edit->setText(QString(""));
 }
 
 // ·µ»ØµÇÂ½½á¹û
@@ -117,6 +118,7 @@ void LoginWindow::loginFinished()
 		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->setRemeberToken(data["remember_token"].toString());
 		mainWin->ShowAuxiliary();
+		mainWin->setLoginWindow(this);
 		mainWin->show();
 		this->hide();
 	}
@@ -202,4 +204,14 @@ void LoginWindow::InitUserName()
 		ui.UserName_Edit->setText(QString::fromStdWString(m_pathUserName));
 		ui.remember_checkBox->setCheckState(Qt::Checked);
 	}
+}
+
+void LoginWindow::ReturnLogin()
+{
+	if (mainWin)
+	{
+		delete mainWin;
+		mainWin = NULL;
+	}
+	this->show();
 }
