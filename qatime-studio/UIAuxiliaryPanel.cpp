@@ -198,15 +198,13 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 		QWidget *widget = new QWidget();
 		QTableWidget* pTable = new QTableWidget();
 		style(pTable);
-
 		//设置当前索引
 		pTable->setAccessibleDescription(QString::number(nNum));
 
 		QVBoxLayout *layout = new QVBoxLayout();
 		layout->addWidget(pTable);
 		widget->setLayout(layout);
-
-		//向QToolBox中添加抽屉 	
+		
 		QIcon iconFriend("./images/course_back.png");
 		if (nNum == 0)
 		{
@@ -218,8 +216,7 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 		pTable->setObjectName(strItemName);
 		//展开直播中的课程
 		bool bExpand = false;
-
-		//TODO zp begen
+		
 		QTreeWidgetItem *imageItem1 = new QTreeWidgetItem(m_teacher_treewidget, QStringList(QString(course->name())));
 		m_teacher_treewidget->setColumnCount(3);
 		m_teacher_treewidget->setWindowIcon(iconFriend);
@@ -236,14 +233,14 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 		{
 //			m_teacher_treewidget->setCurrentIndex(nNum);
 		}
-		//end
+		
 		delete course;
 		nNum++;		
 	}
 	ui.teacher_verticalLayout->addWidget(m_teacher_treewidget);
 }
 
-//TODO zp 添加树信息
+//TODO  添加树信息
 
 void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QString tableName, QTreeWidgetItem* pTableWidget, bool &bExpand,int num)
 {
@@ -282,6 +279,7 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 			imageItem1->setToolTip(0,pLesson->name());
 		}
 		imageItem1->setText(1, pLesson->LessonTime());
+//		imageItem1->setText(1, pLesson->name());
 		imageItem1->setText(2, pLesson->ChinaLessonStatus());	
 		imageItem1->setSizeHint(0, QSize(20, 20));
 		imageItem1->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
@@ -300,27 +298,27 @@ void UIAuxiliaryPanel::GetItemColor(QString strStatus, QBrush& brush, QIcon& qIc
 {
 	if (strStatus == "init")
 	{
-		brush = QColor::fromRgb(255, 255, 255);
+		brush = QColor::fromRgb(255, 243, 231);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "ready")
 	{
-		brush = QColor::fromRgb(255, 243, 200);
+		brush = QColor::fromRgb(255, 243, 231);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "teaching")
 	{
-		brush = QColor::fromRgb(255, 243, 200);
+		brush = QColor::fromRgb(255, 243, 231);
 		qIcon = QIcon("./images/teaching.png");
 	}
 	else if (strStatus == "paused")
 	{
-		brush = QColor::fromRgb(255, 243, 200);
+		brush = QColor::fromRgb(255, 243, 231);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "closed")
 	{
-		brush = QColor::fromRgb(255, 243, 200);
+		brush = QColor::fromRgb(255, 243, 231);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "finished")
@@ -395,7 +393,6 @@ QString UIAuxiliaryPanel::getLessonName()
 {
 	return m_lessonName;
 }
-//TODO zp
 void UIAuxiliaryPanel::on_treeWidget_clicked(QTreeWidgetItem * item, int column)
 {
 	//TODO 单击触发的函数，暂时屏蔽
@@ -413,7 +410,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 				{
 					for (int j = 0; j <= 3; j++)
 					{
-//						terrWidget->child(i)->setBackgroundColor(j, QColor("#FFFF00"));
+						terrWidget->child(i)->setBackgroundColor(j, QColor("#FFFF00"));
 					}
 				}	
 				m_pCurrenDoubTree = terrWidget;
@@ -429,14 +426,14 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 			{
 				for (int j = 0; j <= 3; j++)
 				{					
-//					m_pCurrenDoubTree->child(i)->setBackgroundColor(j, QColor("#FFFFFF"));
+					m_pCurrenDoubTree->child(i)->setBackgroundColor(j, QColor("#FFFFFF"));
 				}
 			}
 			for (int i = 0; i < terrWidget->childCount(); i++)	//在新的选择框里面添加底图颜色
 			{
 				for (int j = 0; j <= 3; j++)
 				{
-//					terrWidget->child(i)->setBackgroundColor(j, QColor("#FFFF00"));
+					terrWidget->child(i)->setBackgroundColor(j, QColor("#FFFF00"));
 				}
 			}
 
