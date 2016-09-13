@@ -209,15 +209,16 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 
 		//TODO zp begen
 		QTreeWidgetItem *imageItem1 = new QTreeWidgetItem(m_teacher_treewidget, QStringList(QString(course->name())));
-		m_teacher_treewidget->setColumnCount(4);
+		m_teacher_treewidget->setColumnCount(3);
 		m_teacher_treewidget->setWindowIcon(iconFriend);
 		QString str = "课程进度 ";
 		imageItem1->setText(3, str+course->progress());
 		imageItem1->setTextAlignment(3, Qt::AlignRight);
 		imageItem1->setTextAlignment(0, Qt::AlignLeft );
-		m_teacher_treewidget->setColumnWidth(0, 150);
-		m_teacher_treewidget->setColumnWidth(1, 150);
-		imageItem1->setSizeHint(0, QSize(200, 25));		
+		m_teacher_treewidget->setColumnWidth(0, 355);
+		m_teacher_treewidget->setColumnWidth(1, 140);
+		m_teacher_treewidget->setColumnWidth(2, 60);
+		imageItem1->setSizeHint(0, QSize(200, 25));	
 		setCourseInfoToTree(course->JsonLesson(), course->url(), strItemName, imageItem1, bExpand, nNum);
 		//展开直播中的课程
 		if (bExpand)
@@ -257,7 +258,9 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 		pItemIcon->setBackground(brush);		
 
 		// 显示编号
-		QString strNum = QString::number(nNum);		
+		QString strNum = QString::number(nNum);	
+		strNum += "      ";
+		strNum += pLesson->name();
 		QTreeWidgetItem *imageItem1 = new QTreeWidgetItem(pTableWidget, QStringList(strNum));		
 		for (int i = 0; i <= 3; i++)
 		{			
@@ -269,11 +272,9 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 			imageItem1->setBackground(i, brush);
 		}
 		imageItem1->setText(1, pLesson->LessonTime());
-		imageItem1->setText(2, pLesson->name());
-		imageItem1->setText(3, pLesson->ChinaLessonStatus());	
+		imageItem1->setText(2, pLesson->ChinaLessonStatus());	
 		imageItem1->setSizeHint(0, QSize(20, 20));
-		imageItem1->setTextAlignment(3, Qt::AlignRight);
-		imageItem1->setTextAlignment(2, Qt::AlignLeft);
+		imageItem1->setTextAlignment(2, Qt::AlignRight);
 		imageItem1->setTextAlignment(1, Qt::AlignLeft);
 		imageItem1->setTextAlignment(0, Qt::AlignLeft);
 		QIcon qIconOld("./images/empty.png");
@@ -286,27 +287,27 @@ void UIAuxiliaryPanel::GetItemColor(QString strStatus, QBrush& brush, QIcon& qIc
 {
 	if (strStatus == "init")
 	{
-		brush = QColor::fromRgb(255, 243, 231);
+		brush = QColor::fromRgb(255, 255, 255);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "ready")
 	{
-		brush = QColor::fromRgb(255, 243, 231);
+		brush = QColor::fromRgb(255, 243, 200);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "teaching")
 	{
-		brush = QColor::fromRgb(255, 243, 231);
+		brush = QColor::fromRgb(255, 243, 200);
 		qIcon = QIcon("./images/teaching.png");
 	}
 	else if (strStatus == "paused")
 	{
-		brush = QColor::fromRgb(255, 243, 231);
+		brush = QColor::fromRgb(255, 243, 200);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "closed")
 	{
-		brush = QColor::fromRgb(255, 243, 231);
+		brush = QColor::fromRgb(255, 243, 200);
 		qIcon = QIcon("./images/empty.png");
 	}
 	else if (strStatus == "finished")
@@ -363,7 +364,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 				{
 					for (int j = 0; j <= 3; j++)
 					{
-						terrWidget->child(i)->setBackgroundColor(j, QColor("#FFFF00"));
+//						terrWidget->child(i)->setBackgroundColor(j, QColor("#FFFF00"));
 					}
 				}	
 				m_pCurrenDoubTree = terrWidget;
@@ -379,14 +380,14 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 			{
 				for (int j = 0; j <= 3; j++)
 				{					
-					m_pCurrenDoubTree->child(i)->setBackgroundColor(j, QColor("#FFFFFF"));
+//					m_pCurrenDoubTree->child(i)->setBackgroundColor(j, QColor("#FFFFFF"));
 				}
 			}
 			for (int i = 0; i < terrWidget->childCount(); i++)	//在新的选择框里面添加底图颜色
 			{
 				for (int j = 0; j <= 3; j++)
 				{
-					terrWidget->child(i)->setBackgroundColor(j, QColor("#FFFF00"));
+//					terrWidget->child(i)->setBackgroundColor(j, QColor("#FFFF00"));
 				}
 			}
 
