@@ -211,9 +211,8 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 		QTreeWidgetItem *imageItem1 = new QTreeWidgetItem(m_teacher_treewidget, QStringList(QString(course->name())));
 		m_teacher_treewidget->setColumnCount(3);
 		m_teacher_treewidget->setWindowIcon(iconFriend);
-		QString str = "¿Î³Ì½ø¶È ";
-		imageItem1->setText(3, str+course->progress());
-		imageItem1->setTextAlignment(3, Qt::AlignRight);
+		imageItem1->setText(2, course->progress());
+		imageItem1->setTextAlignment(2, Qt::AlignRight);
 		imageItem1->setTextAlignment(0, Qt::AlignLeft );
 		m_teacher_treewidget->setColumnWidth(0, 355);
 		m_teacher_treewidget->setColumnWidth(1, 140);
