@@ -4,5 +4,7 @@ Debug/
 qatime-studio.v12.suo
 qatime-studio.sdf
 qatime-studio/GeneratedFiles/
-qatime-studio/log/
+qatime-studio/log/*.log
 qatime-studio/qatime-studio.vcxproj.user
+*.log
+*.log
