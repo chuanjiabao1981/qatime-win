@@ -386,7 +386,6 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 				}
 			}
 
-
 			m_pCurrenDoubTree = terrWidget;
 		}
 		return;
