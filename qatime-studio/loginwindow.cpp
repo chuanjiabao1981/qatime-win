@@ -32,6 +32,9 @@ LoginWindow::LoginWindow(QWidget *parent)
 
 	ReadSetting();
 	InitUserName();
+
+	setTabOrder(ui.UserName_Edit, ui.UserPass_Edit);
+	setTabOrder(ui.UserPass_Edit, ui.login_pushBtn);
 }
 
 LoginWindow::~LoginWindow()

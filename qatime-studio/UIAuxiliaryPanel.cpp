@@ -415,14 +415,6 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 		}
 		else
 		{			
-			for (int i = 0; i < m_pCurrenDoubTree->childCount(); i++)
-			{
-				for (int j = 0; j <= 3; j++)
-				{					
-					m_pCurrenDoubTree->child(i)->setBackgroundColor(j, QColor("#FFFFFF"));
-				}
-			}
-
 			m_pCurrenDoubTree = terrWidget;
 		}
 		return;
@@ -455,22 +447,22 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 		QString tableName = (QString)terrWidget->data(0,QT_TOOLBOXLITEMNAME).toString();
 		QString tabText = terrWidget->parent()->text(0);
 		
-				// 去掉上一节课的箭头
-				if (m_pTreeCurrentItem)
-				{
-					QIcon qIconOld("./images/empty.png");
-					m_pTreeCurrentItem->setIcon(0,qIconOld);
-					m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#000000"));
-					m_pTreeCurrentItem->parent()->setTextColor(3, QColor("#000000"));
-				}
+		// 去掉上一节课的箭头
+		if (m_pTreeCurrentItem)
+		{
+			QIcon qIconOld("./images/empty.png");
+			m_pTreeCurrentItem->setIcon(0,qIconOld);
+			m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#000000"));
+			m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#000000"));
+		}
 
-				// 添加当前课的箭头
-				QIcon qIcon("./images/teaching.png");
-				terrWidget->setIcon(0, qIcon);	
-				// 设置当前item
-				m_pTreeCurrentItem = terrWidget;	
-				m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#FF0000"));
-				m_pTreeCurrentItem->parent()->setTextColor(3, QColor("#FF0000"));
+		// 添加当前课的箭头
+		QIcon qIcon("./images/teaching.png");
+		terrWidget->setIcon(0, qIcon);	
+		// 设置当前item
+		m_pTreeCurrentItem = terrWidget;	
+		m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#FF0000"));
+		m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#FF0000"));
 
 	}
 	setFocus();
