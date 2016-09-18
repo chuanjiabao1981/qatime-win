@@ -14,7 +14,11 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTreeWidget>
+#include "UIMainwindow.h"
+
 #pragma execution_character_set("utf-8")
+
+class UIMainWindow;
 
 class UIAuxiliaryPanel : public QWidget
 {
@@ -31,6 +35,7 @@ private:
 	QNetworkAccessManager			manager;
 	QNetworkReply*					reply;
 
+	UIMainWindow*					m_Parent;
 	QTreeWidget*					m_teacher_treewidget;	//修改版老师面板
 	QString							m_teacherID;			//老师ID
 	QString							m_teacherName;			//老师名字
@@ -46,10 +51,15 @@ private slots:
 	//TODO zp 
 	void on_treeWidget_clicked(QTreeWidgetItem * item, int column);
 	void on_DoubleClicked(QTreeWidgetItem* terrWidget, int index);
+	void on_itemExpanded(QTreeWidgetItem* terrWidget);
+	void on_itemCollapsed(QTreeWidgetItem* terrWidget);
+	void returnClick();
+
 private:
 	void style(QTableWidget* pTableWidget);													//tableWidget样式
 	void GetItemColor(QString strStatus, QBrush& brush, QIcon& qIcon);						//根据状态绘制课程背景色 和 图标
 	void setCourseInfoToTree(QJsonArray courses, QString url, QString tableName, QTreeWidgetItem* pTableWidget, bool &bExpand,int num);		//设置课程信息TODO
+	void GetItemTextColor(QString strStatus, QColor& qColor);
 public:
 	void init();
 	void setAuxiliaryInfo(QJsonObject &obj);
@@ -61,6 +71,7 @@ public:
 	QString getURL();
 	void setPreview(bool bPreview);
 	QString getLessonName();
+	void setParent(UIMainWindow* parent);
 };
 
 #endif // UIAUXILIARYPANEL_H

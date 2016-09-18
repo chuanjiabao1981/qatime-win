@@ -15,10 +15,17 @@
 #include "UIAudiochange.h"
 #include "UIVideochange.h"
 #include "UIRatio.h"
+
 #include "UIChatRoom.h"
+
+#include "loginwindow.h"
+
+
 #pragma execution_character_set("utf-8")
 #define STARTLS_ASYNC
 
+class LoginWindow;
+class UIAuxiliaryPanel;
 class UIAudioChange;
 class UIVideoChange;
 class UIRatio;
@@ -37,7 +44,11 @@ private:
 	QNetworkAccessManager			manager;
 	QNetworkReply*					reply;
 
+
 	UIChatRoom*						m_charRoom;			//聊天室
+
+
+	LoginWindow*					m_LoginWindow;
 
 	UIAuxiliaryPanel*				m_AuxiliaryPanel;	// 老师课程面板
 	UIOtherApp*					    m_OtherAppInfo;		// 其它应用信息窗口
@@ -91,7 +102,11 @@ public:
 	void setAudioChangeIndex(int index);					//  改变麦克风
 	void setVideoChangeIndex(int index);					//  改变视频头
 	void setRatioChangeIndex(int index);					//  改变分辨率
-	void HideOtherUI( QWidget* self=NULL);					//  隐藏其他界面
+
+
+	void HideOtherUI( QWidget* self=NULL);						//  隐藏其他界面
+	void returnClick();
+	void setLoginWindow(LoginWindow* parent);
 
 };
 

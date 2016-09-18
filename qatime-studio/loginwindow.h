@@ -13,6 +13,8 @@
 
 #pragma execution_character_set("utf-8")
 
+class UIMainWindow;
+
 class LoginWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -52,6 +54,9 @@ private:
 	QNetworkAccessManager manager;
 	QNetworkReply *reply;
 	UIMainWindow* mainWin;
+
+public:
+	void ReturnLogin();			// ÖØÐÂµÇÂ½
 };
 
 #endif // LOGINWINDOW_H

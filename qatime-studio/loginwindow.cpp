@@ -32,8 +32,14 @@ LoginWindow::LoginWindow(QWidget *parent)
 
 	ReadSetting();
 	InitUserName();
+
 	QShortcut *key = new QShortcut(QKeySequence(Qt::Key_Return), this);//创建一个快捷键"Key_Return"键
 	connect(key, SIGNAL(activated()), this, SLOT(OnLogIn()));//连接到指定槽函数
+
+
+	setTabOrder(ui.UserName_Edit, ui.UserPass_Edit);
+	setTabOrder(ui.UserPass_Edit, ui.login_pushBtn);
+
 }
 
 LoginWindow::~LoginWindow()
@@ -103,6 +109,7 @@ void LoginWindow::OnLogIn()
 	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
 
 	RemeberPassword();
+	ui.UserPass_Edit->setText(QString(""));
 }
 
 // 返回登陆结果
@@ -120,6 +127,7 @@ void LoginWindow::loginFinished()
 		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->setRemeberToken(data["remember_token"].toString());
 		mainWin->ShowAuxiliary();
+		mainWin->setLoginWindow(this);
 		mainWin->show();
 		this->hide();
 	}
@@ -205,4 +213,14 @@ void LoginWindow::InitUserName()
 		ui.UserName_Edit->setText(QString::fromStdWString(m_pathUserName));
 		ui.remember_checkBox->setCheckState(Qt::Checked);
 	}
+}
+
+void LoginWindow::ReturnLogin()
+{
+	if (mainWin)
+	{
+		delete mainWin;
+		mainWin = NULL;
+	}
+	this->show();
 }
