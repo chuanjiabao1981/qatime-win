@@ -7,3 +7,7 @@ qatime-studio/GeneratedFiles/
 qatime-studio/log/*.log
 qatime-studio/qatime-studio.vcxproj.user
 *.log
+qatime-studio/cat.gif
+qatime-studio/config.ini
+qatime-studio/config.ini
+qatime-studio/qgifd.dll

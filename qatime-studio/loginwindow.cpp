@@ -7,7 +7,7 @@
 #include "windows.h"
 #include "ShellApi.h"
 #include <QHBoxLayout>
-
+#include <QShortcut>
 //#define _DEBUG
 TCHAR m_pathHomePage[MAX_PATH] = {0};
 TCHAR m_pathUserName[MAX_PATH] = { 0 };
@@ -32,6 +32,8 @@ LoginWindow::LoginWindow(QWidget *parent)
 
 	ReadSetting();
 	InitUserName();
+	QShortcut *key = new QShortcut(QKeySequence(Qt::Key_Return), this);//创建一个快捷键"Key_Return"键
+	connect(key, SIGNAL(activated()), this, SLOT(OnLogIn()));//连接到指定槽函数
 }
 
 LoginWindow::~LoginWindow()
@@ -95,6 +97,7 @@ void LoginWindow::OnLogIn()
 	append.append("&password=");
 	qInfo(append);
 	append += ui.UserPass_Edit->text();
+	append.append("&client_cate=teacher_live");
 	QNetworkRequest request(url);
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);

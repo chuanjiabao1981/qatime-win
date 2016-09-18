@@ -11,7 +11,9 @@
 #include <math.h>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QDir>
 #include "UIMessageBox.h"
+#include <QMovie>
 
 //#define _DEBUG
 #define MAINWINDOW_X_MARGIN 6
@@ -26,9 +28,10 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, m_iTimerCount(0)
 	, m_bOtherApp(false)
 	, m_AudioChangeInfo(NULL)
-	, m_AuxiliaryPanel(NULL)
+	, m_AuxiliaryPanel(NULL)	
 	, m_VideoChangeInfo(NULL)
 	, m_RatioChangeInfo(NULL)
+	, m_charRoom(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
@@ -48,7 +51,14 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(ui.AudioCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeAudio(int)));
 	connect(ui.videoCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeVideo(int)));
 	connect(ui.ratio_pushBtn, SIGNAL(clicked()), this, SLOT(clickChangeRatio()));
-
+	connect(ui.button_talk, SIGNAL(clicked()), this, SLOT(clickTalk()));
+	connect(ui.button_proclamation, SIGNAL(clicked()), this, SLOT(clickProclamation()));
+	connect(ui.button_studentList, SIGNAL(clicked()), this, SLOT(clickStudentList()));
+	connect(ui.button_cleanText, SIGNAL(clicked()), this, SLOT(clickCleanText()));
+	connect(ui.button_brow, SIGNAL(clicked()), this, SLOT(clickBrow()));
+	connect(ui.button_notes, SIGNAL(clicked()), this, SLOT(clickNotes()));
+	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMseeage()));
+	
 	m_VideoInfo = new UIVideo(this);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
 	m_VideoInfo->move(30, 60);
@@ -136,6 +146,10 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	InitAudioList();
 	InitVideoList();
+
+	m_charRoom = new UIChatRoom(this);
+	m_charRoom->move(725+215, 0);
+	m_charRoom->show();
 }
 
 UIMainWindow::~UIMainWindow()
@@ -346,7 +360,8 @@ void UIMainWindow::slot_startOrStopLiveStream()
 // #ifdef _DEBUG
 // 			url = "rtmp://pa0a19f55.live.126.net/live/ae753e52ec6741fbb94ed4c0aea672c6?wsSecret=cacb5b393123f706e6f7b6e6a8291259&wsTime=1472695026";
 // #else
-			url = m_AuxiliaryPanel->getURL();
+			url = "rtmp://192.168.142.128:1935/live1/111";
+//			url = m_AuxiliaryPanel->getURL();
 //#endif
 			
 			m_VideoInfo->setPlugFlowUrl(url);
@@ -740,7 +755,7 @@ void UIMainWindow::HideOtherUI(QWidget* self)
 			m_RatioChangeInfo->hide();
 			m_AudioChangeInfo->hide();
 			m_VideoChangeInfo->hide();
-			m_AuxiliaryPanel->hide();
+			m_AuxiliaryPanel->hide();			
 		}
 	}
 }
