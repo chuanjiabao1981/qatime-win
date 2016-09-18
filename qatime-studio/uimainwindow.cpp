@@ -11,7 +11,9 @@
 #include <math.h>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QDir>
 #include "UIMessageBox.h"
+#include <QMovie>
 
 //#define _DEBUG
 #define MAINWINDOW_X_MARGIN 6
@@ -26,9 +28,10 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, m_iTimerCount(0)
 	, m_bOtherApp(false)
 	, m_AudioChangeInfo(NULL)
-	, m_AuxiliaryPanel(NULL)
+	, m_AuxiliaryPanel(NULL)	
 	, m_VideoChangeInfo(NULL)
 	, m_RatioChangeInfo(NULL)
+	, m_charRoom(NULL)
 	, m_LoginWindow(NULL)
 {
 	ui.setupUi(this);
@@ -50,6 +53,14 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(ui.videoCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeVideo(int)));
 	connect(ui.ratio_pushBtn, SIGNAL(clicked()), this, SLOT(clickChangeRatio()));
 
+	connect(ui.button_talk, SIGNAL(clicked()), this, SLOT(clickTalk()));
+	connect(ui.button_proclamation, SIGNAL(clicked()), this, SLOT(clickProclamation()));
+	connect(ui.button_studentList, SIGNAL(clicked()), this, SLOT(clickStudentList()));
+	connect(ui.button_cleanText, SIGNAL(clicked()), this, SLOT(clickCleanText()));
+	connect(ui.button_brow, SIGNAL(clicked()), this, SLOT(clickBrow()));
+	connect(ui.button_notes, SIGNAL(clicked()), this, SLOT(clickNotes()));
+	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMseeage()));
+	
 	m_VideoInfo = new UIVideo(this);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
 	m_VideoInfo->move(30, 60);
@@ -138,6 +149,10 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	InitAudioList();
 	InitVideoList();
+
+	m_charRoom = new UIChatRoom(this);
+	m_charRoom->move(725+215, 0);
+	m_charRoom->show();
 }
 
 UIMainWindow::~UIMainWindow()
