@@ -93,11 +93,12 @@ void LoginWindow::OnLogIn()
 #endif
 	
 	QByteArray append("client_type=pc");
-	append.append("&email=");
+	append.append("&login_account=");
 	append += ui.UserName_Edit->text();
 	append.append("&password=");
 	qInfo(append);
 	append += ui.UserPass_Edit->text();
+	append.append("&client_cate=teacher_live");
 	QNetworkRequest request(url);
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
@@ -109,10 +110,12 @@ void LoginWindow::OnLogIn()
 // 返回登陆结果
 void LoginWindow::loginFinished()
 {
+	QString strError;
 	QByteArray result = reply->readAll();
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1 && data.contains("remember_token"))
 	{
 		mainWin = new UIMainWindow();
@@ -125,13 +128,32 @@ void LoginWindow::loginFinished()
 		mainWin->show();
 		this->hide();
 	}
+	else if (error["code"].toInt() == 1001)
+		strError = QString("用户未登录");
+	else if (error["code"].toInt() == 1002)
+		strError = QString("授权过期");
+	else if (error["code"].toInt() == 1003)
+		strError = QString("没有权限访问");
+	else if (error["code"].toInt() == 1004)
+		strError = QString("授权失败");
+	else if (error["code"].toInt() == 2001)
+		strError = QString("客户端版本过低");
+	else if (error["code"].toInt() == 2002)
+		strError = QString("不支持的客户端");
+	else if (error["code"].toInt() == 3001)
+		strError = QString("参数错误");
+	else if (error["code"].toInt() == 3002)
+		strError = QString("数据不合法");
+	else if (error["code"].toInt() == 4001)
+		strError = QString("找不到资源");
+	else if (error["code"].toInt() == 9999)
+		strError = QString("服务器错误");
 	else
-	{
-		QString str = QString("用户名或密码不正确");
-		ui.ErrorTip_Label->setText(str);
-		ui.UserName_Edit->setText(QString(""));
-		ui.UserPass_Edit->setText(QString(""));
-	}
+		strError = QString("用户名或密码不正确");
+
+	ui.ErrorTip_Label->setText(strError);
+	ui.UserName_Edit->setText(QString(""));
+	ui.UserPass_Edit->setText(QString(""));
 }
 
 void LoginWindow::BrowseHomePage()
