@@ -144,7 +144,8 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	InitVideoList();
 
 	m_charRoom = new UIChatRoom(this);
-	m_charRoom->move(725+215, 0);
+	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
+	m_charRoom->move(725+215, 50);
 	m_charRoom->show();
 }
 
