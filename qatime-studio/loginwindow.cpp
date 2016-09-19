@@ -7,7 +7,7 @@
 #include "windows.h"
 #include "ShellApi.h"
 #include <QHBoxLayout>
-
+#include "QShortcut"
 //#define _DEBUG
 TCHAR m_pathHomePage[MAX_PATH] = {0};
 TCHAR m_pathUserName[MAX_PATH] = { 0 };
