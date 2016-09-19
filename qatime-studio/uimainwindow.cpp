@@ -53,13 +53,6 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(ui.videoCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeVideo(int)));
 	connect(ui.ratio_pushBtn, SIGNAL(clicked()), this, SLOT(clickChangeRatio()));
 
-	connect(ui.button_talk, SIGNAL(clicked()), this, SLOT(clickTalk()));
-	connect(ui.button_proclamation, SIGNAL(clicked()), this, SLOT(clickProclamation()));
-	connect(ui.button_studentList, SIGNAL(clicked()), this, SLOT(clickStudentList()));
-	connect(ui.button_cleanText, SIGNAL(clicked()), this, SLOT(clickCleanText()));
-	connect(ui.button_brow, SIGNAL(clicked()), this, SLOT(clickBrow()));
-	connect(ui.button_notes, SIGNAL(clicked()), this, SLOT(clickNotes()));
-	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMseeage()));
 	
 	m_VideoInfo = new UIVideo(this);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
