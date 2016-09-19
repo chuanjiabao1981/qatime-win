@@ -110,6 +110,7 @@ void LoginWindow::OnLogIn()
 
 	RemeberPassword();
 	ui.UserPass_Edit->setText(QString(""));
+
 }
 
 // ·µ»ØµÇÂ½½á¹û
