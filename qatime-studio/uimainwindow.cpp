@@ -829,10 +829,6 @@ void UIMainWindow::setCurChatRoom(QString chatID)
 {
 	if (m_charRoom)
 	{
-		// 没登录，则请求key并登录
-		if (!m_charRoom->IsLogin())
-			RequestKey();
-
 		// 如果是当前会话窗口，则不需要再次请求群成员
 		if (!m_charRoom->IsCurChatRoom(m_AuxiliaryPanel->getChatID()))
 			RequestMember();
@@ -924,4 +920,8 @@ void UIMainWindow::returnMember()
 			delete announcements;
 		}
 	}
+
+	// 没登录，则请求key并登录
+	if (!m_charRoom->IsLogin())
+		RequestKey();
 }
