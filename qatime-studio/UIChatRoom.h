@@ -37,7 +37,7 @@ private:
 	MyEmotionWidget*				m_smallEmotionWidget;
 	MyEmotionWidget*				m_normalEmotionWidget;
 	QLabel*						    m_lableTitle;
-	QString							m_borw;//当前选中的表情
+	QStringList						m_borw;//当前选中的表情
 	bool							m_isBorw;//是否有表情
 	std::string						m_CurChatID;		// 当前会话窗口ID 
 	QString							m_accid;			// 云信用户ID

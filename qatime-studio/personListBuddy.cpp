@@ -9,6 +9,10 @@ personListBuddy::personListBuddy(QWidget *parent) :
 	this->setFixedSize(QSize(300, 30));
 }
 
+personListBuddy::~personListBuddy()
+{
+}
+
 void personListBuddy::initFirst()
 {
 	peopleNum = new QLabel(this);

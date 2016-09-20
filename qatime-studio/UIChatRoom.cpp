@@ -1,4 +1,4 @@
-#include "UIChatRoom.h"
+ï»¿#include "UIChatRoom.h"
 #include <QDir>
 #include <QTime>
 #include <QMovie>
@@ -40,8 +40,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMseeage()));
 	connect(ui.student_list, SIGNAL(signalChickChage(bool, QString, QString)), this, SLOT(chickChage(bool, QString,QString)));
 	initEmotion();
-	this->clickTalk();
-	m_borw = "";
+	this->clickTalk();	
 	m_isBorw = false;
 	
 	initSDK();
@@ -79,6 +78,7 @@ void UIChatRoom::clickProclamation()
 void UIChatRoom::clickCleanText()
 {
 	ui.text_talk->clear();
+	ui.student_list->cleanStudents();
 }
 // ±íÇé°´Å¥
 void UIChatRoom::clickBrow()
@@ -172,7 +172,7 @@ void UIChatRoom::imgPathToHtml(QString &path)
 void UIChatRoom::setBrow(QString path)
 {
 	m_smallEmotionWidget->hide();
-	m_borw = path;
+	m_borw.append(path);
 	ui.textEdit->insertHtml("<img src='" + path + "'/>");  //   ´Ë´¦µÄtest ¼´ url
 	ui.textEdit->addAnimation(QUrl(path), path);  //Ìí¼ÓÒ»¸ö¶¯»­.
 	m_isBorw = true;
@@ -180,8 +180,22 @@ void UIChatRoom::setBrow(QString path)
 
 void UIChatRoom::clickSendMseeage()
 {
-	QString sendText = ui.textEdit->toPlainText();
-	if (!sendText.isEmpty())
+	QString tempText = ui.textEdit->toPlainText();
+	QStringList textList = tempText.split("?");
+	QString sendText,sendMsg;
+	for (int i = 0; i < textList.size(); i++)
+	{
+		if (i == textList.size() - 1)
+		{
+			sendText.append(textList.at(i));
+			sendMsg.append(textList.at(i));
+			break;
+		}
+		sendText.append(textList.at(i));
+		sendMsg.append(textList.at(i));
+		sendMsg.append("[" + m_borw.at(i).split("/").at(2).split(".").at(0) + "]");
+	}
+	if (textList.size() >= 2 || !sendText.isEmpty())
 	{
 		QDateTime time = QDateTime::currentDateTime();//»ñÈ¡ÏµÍ³ÏÖÔÚµÄÊ±¼ä
 		QString timeStr = time.toString("MM-dd hh:mm:ss");
@@ -192,9 +206,12 @@ void UIChatRoom::clickSendMseeage()
 		{
 			ui.text_talk->append("(×Ô¼º) " + timeStr);
 			ui.text_talk->append("");
-			ui.text_talk->insertHtml("<img src='" + m_borw + "'/>");  //   ´Ë´¦µÄtest ¼´ url
-			ui.text_talk->addAnimation(QUrl(m_borw), m_borw);  //Ìí¼ÓÒ»¸ö¶¯»­.
-			ui.text_talk->insertHtml(sendText);
+			for (int i = 0; i < m_borw.count(); i++)
+			{
+				ui.text_talk->insertHtml("<img src='" + m_borw.at(i) + "'/>");  //   ´Ë´¦µÄtest ¼´ url
+				ui.text_talk->addAnimation(QUrl(m_borw.at(i)), m_borw.at(i));  //Ìí¼ÓÒ»¸ö¶¯»­.				
+			}
+			ui.text_talk->insertHtml(sendText);			
 			m_isBorw = false;
 		}
 		else
@@ -223,11 +240,12 @@ void UIChatRoom::clickSendMseeage()
 	nim::IMMessage msg;
 	PackageMsg(msg);
 	msg.type_ = nim::kNIMMessageTypeText;
-	msg.content_ = sendText.toStdString();
-
+	msg.content_ = sendMsg.toStdString();
+	
 	nim::MessageSetting setting;
 	std::string json_msg = nim::Talk::CreateTextMessage(msg.receiver_accid_, msg.session_type_, msg.client_msg_id_, msg.content_, setting, msg.timetag_);
 	nim::Talk::SendMsg(json_msg);
+	m_borw.clear();
 }
 
 void UIChatRoom::PackageMsg(nim::IMMessage &msg)
@@ -365,18 +383,18 @@ void UIChatRoom::OnTeamEventCallback(const nim::TeamEvent& result)
 {
 }
 
-//½ûÑÔ°´Å¥ÊÂ¼þ
+//?????????
 void UIChatRoom::chickChage(bool b, QString qAccid, QString name)
 {
 	std::string accid = qAccid.toStdString();
 	auto cb = std::bind(OnTeamEventCallback, std::placeholders::_1);
 	nim::Team::MuteMemberAsync(m_CurChatID, accid, b, cb);
 
-	// »á»°´°¿ÚÏÔÊ¾
+	// ?????????
 	if (b)
-		ui.text_talk->append(name + "  ±»½ûÑÔ");
+		ui.text_talk->append(name + "  ??????");
 	else
-		ui.text_talk->append(name + "  ±»½â³ý½ûÑÔ");
+		ui.text_talk->append(name + "  ?????????");
 
 	ui.text_talk->append("");
 }

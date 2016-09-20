@@ -22,10 +22,10 @@ void personList::initMenu()
     groupMenu = new QMenu();
     personMenu = new QMenu();
     groupNameEdit=new QLineEdit();
+	QAction *rename = new QAction("重命名", this);
+	QAction *addBuddy = new QAction("添加好友", this);
 //    QAction *addGroup = new QAction("添加分组", this);
-//    QAction *delGroup = new QAction("删除该组", this);
-    QAction *rename = new QAction("重命名", this);
-    QAction *addBuddy = new QAction("添加好友",this);
+//    QAction *delGroup = new QAction("删除该组", this);    
 //    QAction *delBuddy = new QAction("删除好友", this);
     //设置：
     groupNameEdit->setParent(this);  //设置父类
@@ -33,16 +33,16 @@ void personList::initMenu()
     groupNameEdit->setPlaceholderText("未命名");//设置初始时的内容
     //布局：
 	blankMenu->addAction(addBuddy);
- //   groupMenu->addAction(delGroup);
     groupMenu->addAction(rename);
     groupMenu->addAction(addBuddy);
  //   personMenu->addAction(delBuddy);
+//   groupMenu->addAction(delGroup);
     //信息槽：
     connect(groupNameEdit,SIGNAL(editingFinished()),this,SLOT(slotRenameEditFshed()));
+	connect(rename, SIGNAL(triggered()), this, SLOT(slotRename()));
+	connect(addBuddy, SIGNAL(triggered()), this, SLOT(slotAddBuddy()));
 //    connect(addGroup,SIGNAL(triggered()),this,SLOT(slotAddGroup()));
-//    connect(delGroup,SIGNAL(triggered()),this,SLOT(slotDelGroup()));
-    connect(rename,SIGNAL(triggered()),this,SLOT(slotRename()));
-    connect(addBuddy,SIGNAL(triggered()),this,SLOT(slotAddBuddy()));
+//    connect(delGroup,SIGNAL(triggered()),this,SLOT(slotDelGroup()));  
 //    connect(delBuddy,SIGNAL(triggered()),this,SLOT(slotDelBuddy()));
 
 }
@@ -139,26 +139,24 @@ void personList::initFronUi()
 	buddyFirst = new personListBuddy();
 	connect(buddyFirst, SIGNAL(signalStopAllTalk(bool, QString)), this, SLOT(stopAllTalk(bool, QString)));
 	buddyFirst->initFirst();
-	QList<QListWidgetItem*> tem = groupMap.keys(currentItem);
 	QListWidgetItem *newItem = new QListWidgetItem();
 	newItem->setSizeHint(QSize(300, 30));
-	this->insertItem(0 + tem.count(), newItem);
+	this->insertItem(0, newItem);
 	this->setItemWidget(newItem, buddyFirst);
-	groupMap.insert(newItem, currentItem);
 	newItem->setHidden(false);
+	groupMap.insert(newItem, currentItem);
 }
 void personList::initSecUi()
 {
 	buddySec = new personListBuddy();	
 	buddySec->initFindPeople();
-	connect(buddySec, SIGNAL(signalFindName(QString)), this, SLOT(findName(QString)));
-	QList<QListWidgetItem*> tem = groupMap.keys(currentItem);
+	connect(buddySec, SIGNAL(signalFindName(QString)), this, SLOT(findName(QString)));	
 	QListWidgetItem *newItem = new QListWidgetItem();
 	newItem->setSizeHint(QSize(30, 30));
-	this->insertItem(0 + tem.count()+2, newItem);
-	this->setItemWidget(newItem, buddySec);
-	groupMap.insert(newItem, currentItem);
+	this->insertItem(1 , newItem);
+	this->setItemWidget(newItem, buddySec);	
 	newItem->setHidden(false);
+	groupMap.insert(newItem, currentItem);
 }
 void personList::addStrdent(QString imagesUrl,QString stuName,QString ID)
 {
@@ -268,4 +266,20 @@ void personList::stopAllTalk(bool b, QString ID)
 void personList::setOlineNum(int olineNum, int allNum)
 {
 	buddyFirst->setOlineNum(olineNum, allNum);
+}
+
+void personList::cleanStudents()
+{
+	for (int i = 0; i < groupMap.size(); i++)
+	{
+		if (groupMap.keys().at(i))
+		{
+			delete (groupMap.keys().at(i));
+		}		
+	}	
+	groupMap.clear();
+	allStudents.clear();
+	this->clear();
+	initFronUi();
+	initSecUi();
 }

@@ -11,13 +11,13 @@
 #include <QNetworkReply>
 #include "personlistbuddy.h"
 //自定义QListWidget
-class personList : public QListWidget //继承QListWidget，可以使用它本身自带的函数，更方便
+class personList : public QListWidget 
 {
     Q_OBJECT
 public:
     explicit personList(QWidget *parent = 0);
-    void mousePressEvent(QMouseEvent *event);//鼠标点击事件
-    void contextMenuEvent(QContextMenuEvent*);//菜单事件，为了显示菜单
+    void mousePressEvent(QMouseEvent *event);		//鼠标点击事件
+    void contextMenuEvent(QContextMenuEvent*);		//菜单事件，为了显示菜单
     void initMenu();//初始化菜单
     QMenu *blankMenu;//点击空白上的菜单
     QMenu *groupMenu;//点击组上的菜单
@@ -31,6 +31,7 @@ public:
 	void initFronUi();
 	void initSecUi();
 	void setOlineNum(int olineNum, int allNum);//设置在线人数的接口
+	void cleanStudents();		//清空列表中的数据
 signals:
 	void signalChickChage(bool,QString, QString);
 	void signalAllTalk(bool, QString);		//全部禁言时候 ID为“0”

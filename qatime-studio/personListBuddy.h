@@ -17,14 +17,14 @@ class personListBuddy : public QWidget
     Q_OBJECT  
 public:  
     explicit personListBuddy(QWidget *parent = 0);  
-	void initFirst();//初始化第一行 
-	void initFindPeople();//初始化第二行
-	QLabel *peopleNum;		//第一行的label
-	QCheckBox* firstButton; //第一行的按钮
+	~personListBuddy();
+	void initFirst();			//初始化第一行 
+	void initFindPeople();		//初始化第二行
+	QLabel *peopleNum;			//第一行的label
+	QCheckBox* firstButton;		//第一行的按钮
 	QLineEdit* secLinEdit;		//第二行的输入框
 	QPushButton* secFindButton;	//第二行的查找按钮
-	void initUi(const QString &szUrl,QString strName,QString ID);//初始化Ui  
-//    QWidget *head;  //头像  
+	void initUi(const QString &szUrl,QString strName,QString ID);//初始化Ui
 	QLabel *head;  //头像label  
     QLabel *name;  //用户名  
 	bool isOline;	//是否在线
@@ -43,7 +43,7 @@ public slots :
 	void radioChange(bool b);			//禁止某个学生的言论	
 	void stopAllTalk(bool b);			//禁止所有学生的言论
 	void onlyOnline(bool b);			//只显示在线人员
-	void findName();		//查找学生名字
+	void findName();					//查找学生名字
 private:
 	void setNetworkPic(const QString &szUrl);
 	bool eventFilter(QObject *obj, QEvent *event);//事件过滤器 
