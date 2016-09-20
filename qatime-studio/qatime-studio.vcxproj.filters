@@ -237,7 +237,7 @@
     </ClCompile>
     <ClCompile Include="member.cpp">
       <Filter>Source Files</Filter>
-
+	</ClCompile>
     <ClCompile Include="MToolButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
