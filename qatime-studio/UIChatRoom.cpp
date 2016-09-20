@@ -3,10 +3,34 @@
 #include <QTime>
 #include <QMovie>
 #include "UIMessageBox.h"
+
+#include "YxChat/nim_sdk_helper.h"
+#include "YxChat/session_callback.h"
+#include "YxChat/nim_cpp_client.h"
+#include "define.h"
+
+typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
+typedef void(*nim_client_cleanup)(const char *json_extension);
+typedef void(*nim_client_login)(const char *app_token, const char *account, const char *password, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
+typedef void(*nim_client_relogin)(const char *json_extension);
+typedef void(*nim_client_logout)(NIMLogoutType logout_type, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
+typedef void(*nim_client_kick_other_client)(const char *json_extension);
+typedef void(*nim_client_reg_auto_relogin_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
+typedef void(*nim_client_reg_kickout_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
+typedef void(*nim_client_reg_disconnect_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
+typedef void(*nim_client_reg_multispot_login_notify_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void *user_data);
+typedef void(*nim_client_reg_kickout_other_client_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void *user_data);
+typedef void(*nim_client_reg_sync_multiport_push_config_cb)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
+typedef void(*nim_client_set_multiport_push_config)(const char *switch_content, const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
+typedef void(*nim_client_get_multiport_push_config)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
+
 UIChatRoom::UIChatRoom(QWidget *parent)
 	: QWidget(parent)
+	, m_CurChatID("")
+	, m_bLogin(false)
 {
 	ui.setupUi(this);
+	setWindowTitle("QATIME");
 	connect(ui.button_talk, SIGNAL(clicked()), this, SLOT(clickTalk()));
 	connect(ui.button_proclamation, SIGNAL(clicked()), this, SLOT(clickProclamation()));
 	connect(ui.button_studentList, SIGNAL(clicked()), this, SLOT(clickStudentList()));
@@ -20,6 +44,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	m_borw = "";
 	m_isBorw = false;
 	
+	initSDK();
 }
 
 UIChatRoom::~UIChatRoom()
@@ -163,8 +188,8 @@ void UIChatRoom::clickSendMseeage()
 		stringToHtmlFilter(sendText);
 		if (m_isBorw != false)
 		{
-//			imgPathToHtml(m_borw);
-			ui.text_talk->append(imgPath + "范德彪：" );
+			ui.text_talk->append("(自己) " + timeStr);
+			ui.text_talk->append("");
 			ui.text_talk->insertHtml("<img src='" + m_borw + "'/>");  //   此处的test 即 url
 			ui.text_talk->addAnimation(QUrl(m_borw), m_borw);  //添加一个动画.
 			ui.text_talk->insertHtml(sendText);
@@ -172,12 +197,12 @@ void UIChatRoom::clickSendMseeage()
 		}
 		else
 		{
-			ui.text_talk->append(imgPath + "范德彪：" + sendText);
+			QString qName = "(自己)";
+			ui.text_talk->append(qName + " " + timeStr);
+			ui.text_talk->append(sendText);
 		}
 
-		//		stringToHtml(sendText, QColor(255,0,0));
-
-		ui.text_talk->append(timeStr);
+		ui.text_talk->append("");
 		ui.text_talk->acceptRichText();
 		ui.text_talk->moveCursor(QTextCursor::End);
 		ui.textEdit->clear();
@@ -189,5 +214,151 @@ void UIChatRoom::clickSendMseeage()
 			QString("不能发送空数据！"),
 			QString("确定"),
 			QString());
+		return;
 	}
+
+	// 发往服务器
+	nim::IMMessage msg;
+	PackageMsg(msg);
+	msg.type_ = nim::kNIMMessageTypeText;
+	msg.content_ = sendText.toStdString();
+
+	nim::MessageSetting setting;
+	std::string json_msg = nim::Talk::CreateTextMessage(msg.receiver_accid_, msg.session_type_, msg.client_msg_id_, msg.content_, setting, msg.timetag_);
+	nim::Talk::SendMsg(json_msg);
+}
+
+void UIChatRoom::PackageMsg(nim::IMMessage &msg)
+{
+	msg.session_type_ = nim::kNIMSessionTypeTeam;
+	msg.receiver_accid_ = m_CurChatID;//会话ID
+	msg.sender_accid_ = m_accid.toStdString();//用户名
+	msg.client_msg_id_ = nim::Client::GetUuid();
+	msg.msg_setting_.resend_flag_ = nim::BS_FALSE;
+
+	//base获取的时间单位是s，服务器的时间单位是ms
+	msg.timetag_ = QDateTime::currentMSecsSinceEpoch();
+
+	msg.status_ = nim::kNIMMsgLogStatusSending;
+}
+
+void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
+{
+	// 判断当前过来的消息，是不是此会话窗口
+	if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0)
+	{
+		std::string strName = pMsg->readonly_sender_nickname_;
+		std::string strContent = pMsg->content_;
+
+		__int64 time = pMsg->timetag_;
+		QString qTime = QDateTime::fromMSecsSinceEpoch(time).toString("MM-dd hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+		QString qName = QString::fromStdString(strName);
+		QString qContent = QString::fromStdString(strContent);
+
+		ui.text_talk->append(qName + " " + qTime);
+		ui.text_talk->append(qContent);
+		ui.text_talk->append("");
+	}
+}
+
+//////////////////////////////添加云信功能////////////////////////////////
+void UIChatRoom::initSDK()
+{
+	nim::SDKConfig config;
+
+	//sdk能力参数（必填）
+	config.database_encrypt_key_ = "Netease"; //string（db key必填，目前只支持最多32个字符的加密密钥！建议使用32个字符）
+	bool ret = false;
+	ret = nim::SDKFunction::LoadSdkDll();
+	ret = LoadConfig("Netease", "", config);
+
+	if (!ret)
+		assert(0);// 初始化失败
+
+	nim_http::Init(); // 初始化云信http
+
+	// 接受消息回调
+	nim::Talk::RegReceiveCb(&nim_comp::TalkCallback::OnReceiveMsgCallback);
+}
+
+void UIChatRoom::OnLoginCallback(const nim::LoginRes& login_res, const void* user_data)
+{
+	bool bsuc = true;
+
+	if (login_res.res_code_ == nim::kNIMResSuccess)
+	{
+		bsuc = true;
+	}
+	else
+	{
+		bsuc = false;
+	}
+}
+
+bool UIChatRoom::LoadConfig(const std::string& app_data_dir, const std::string& app_install_dir, nim::SDKConfig &config)
+{
+	QJsonObject config_root;
+	QJsonObject config_values;
+	config_values[kNIMDataBaseEncryptKey] = config.database_encrypt_key_.c_str();//string（db key必填，目前只支持最多32个字符的加密密钥！建议使用32个字符）
+	config_values[kNIMPreloadAttach] = config.preload_attach_;        //bool （选填，是否需要预下载附件缩略图， sdk默认预下载）
+	config_values[kNIMSDKLogLevel] = config.sdk_log_level_;
+	config_root[kNIMGlobalConfig] = config_values;
+
+	return NIM_SDK_GET_FUNC(nim_client_init)(app_data_dir.c_str(), app_install_dir.c_str(), GetJsonStringWithNoStyled(config_root).c_str());
+}
+
+std::string UIChatRoom::GetJsonStringWithNoStyled(const QJsonObject& values)
+{
+	QJsonDocument document;
+	document.setObject(values);
+
+	QByteArray byte_array = document.toJson(QJsonDocument::Compact);
+	QString json_str(byte_array);
+	return json_str.toStdString();
+}
+
+void UIChatRoom::setCurChatID(QString chatID)
+{
+	m_CurChatID = chatID.toStdString();
+}
+
+void UIChatRoom::setChatInfo(QJsonObject &chatInfo)
+{
+	m_accid = chatInfo["accid"].toString();
+	m_token = chatInfo["token"].toString();
+}
+
+void UIChatRoom::setKeyAndLogin(QString key)
+{
+	m_appKey = key;
+
+	// 登陆
+	auto cb = std::bind(OnLoginCallback, std::placeholders::_1, nullptr);
+	bool bFail = nim::Client::Login(m_appKey.toStdString(), m_accid.toStdString(), m_token.toStdString(), cb);
+	if (!bFail)
+	{
+		CMessageBox::showMessage(QString("答疑时间"),QString("失败！"),QString("确定"),QString("取消"));
+		return;
+	}
+
+	m_bLogin = true;
+}
+
+bool UIChatRoom::IsLogin()
+{
+	return m_bLogin;
+}
+
+bool UIChatRoom::IsCurChatRoom(QString chatID)
+{
+	bool bChatRoom = false;
+	std::string strChatID = chatID.toStdString();
+
+	// 判断当前过来的消息，是不是此会话窗口
+	if (strcmp(strChatID.c_str(), m_CurChatID.c_str()) == 0)
+	{
+		bChatRoom = true;
+	}
+
+	return bChatRoom;
 }

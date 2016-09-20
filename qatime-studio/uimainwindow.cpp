@@ -14,12 +14,11 @@
 #include <QDir>
 #include "UIMessageBox.h"
 #include <QMovie>
-
-//#define _DEBUG
+#include "define.h"
+#include "member.h"
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6
 #define MAINWINDOW_TITLE_HEIGHT 49
-
 
 UIMainWindow::UIMainWindow(QWidget *parent)
 	: QWidget(parent)
@@ -249,6 +248,9 @@ void UIMainWindow::setTeacherInfo(QJsonObject &data)
 	// 设置老师头像
 	QString teacherPhoto_url = data["avatar_url"].toString();
 	m_AuxiliaryPanel->setNetworkPic(teacherPhoto_url);
+
+	// 老师云信信息
+	m_charRoom->setChatInfo(data["chat_account"].toObject());
 }
 
 void UIMainWindow::setRemeberToken(const QString &token)
@@ -357,11 +359,7 @@ void UIMainWindow::slot_startOrStopLiveStream()
 			}
 			
 			QString url;
-// #ifdef _DEBUG
-// 			url = "rtmp://pa0a19f55.live.126.net/live/ae753e52ec6741fbb94ed4c0aea672c6?wsSecret=cacb5b393123f706e6f7b6e6a8291259&wsTime=1472695026";
-// #else
 			url = m_AuxiliaryPanel->getURL();
-//#endif
 			
 			m_VideoInfo->setPlugFlowUrl(url);
 			m_VideoInfo->StartLiveVideo();
@@ -561,6 +559,17 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 		PMSG pMsg = static_cast<PMSG>(message);
 		switch (pMsg->message)
 		{
+		case MSG_CLIENT_RECEIVE:
+		{
+			MSG* Msg = pMsg;
+			nim::IMMessage* pIMsg = (nim::IMMessage*)Msg->wParam;
+			
+			if (m_charRoom)
+				m_charRoom->ReceiverMsg(pIMsg);
+
+			delete pIMsg;
+		}
+		break;
 		case WM_NCLBUTTONDBLCLK:
 		{
 			int y = GET_Y_LPARAM(pMsg->lParam) - this->frameGeometry().y();
@@ -619,14 +628,12 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 			{
 				if (ui.mainclose_pushBtn && ui.mainmin_pushBtn)
 				{
-					QPoint pt = ui.mainclose_pushBtn->mapFromGlobal(QPoint(GET_X_LPARAM(pMsg->lParam), GET_Y_LPARAM(pMsg->lParam)));
 					QRect Rect = ui.mainclose_pushBtn->geometry();
 					if (x > Rect.left() && x < Rect.right() && y > Rect.top() && y < Rect.bottom())
 					{
 						return false;
 					}
 
-					pt = ui.mainmin_pushBtn->mapFromGlobal(QPoint(GET_X_LPARAM(pMsg->lParam), GET_Y_LPARAM(pMsg->lParam)));
 					Rect = ui.mainmin_pushBtn->geometry();
 					if (x > Rect.left() && x < Rect.right() && y > Rect.top() && y < Rect.bottom())
 					{
@@ -815,5 +822,106 @@ void UIMainWindow::returnClick()
 	{
 		if (m_LoginWindow)
 			m_LoginWindow->ReturnLogin();
+	}
+}
+
+void UIMainWindow::setCurChatRoom(QString chatID)
+{
+	if (m_charRoom)
+	{
+		// 没登录，则请求key并登录
+		if (!m_charRoom->IsLogin())
+			RequestKey();
+
+		// 如果是当前会话窗口，则不需要再次请求群成员
+		if (!m_charRoom->IsCurChatRoom(m_AuxiliaryPanel->getChatID()))
+			RequestMember();
+
+		m_charRoom->setCurChatID(chatID);
+	}
+}
+
+void UIMainWindow::RequestKey()
+{
+	QString strUrl;
+#ifdef _DEBUG
+	strUrl = "http://testing.qatime.cn/api/v1/app_constant/im_app_key";
+#else
+	strUrl = "http://qatime.cn/api/v1/app_constant/im_app_key";
+#endif
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+	QString str = this->mRemeberToken;
+
+	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIMainWindow::returnKey);
+}
+
+void UIMainWindow::returnKey()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	if (obj["status"].toInt() == 1 && data.contains("im_app_key"))
+	{
+		QString key = data["im_app_key"].toString();
+		m_charRoom->setKeyAndLogin(key);
+	}
+}
+
+void UIMainWindow::RequestMember()
+{
+	QString strUrl;
+#ifdef _DEBUG
+	strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+	strUrl.replace("{id}", m_AuxiliaryPanel->getCouresID());
+#else
+	strUrl = "http://qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+	strUrl.replace("{id}", m_AuxiliaryPanel->getCouresID());
+#endif
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+	QString str = this->mRemeberToken;
+
+	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIMainWindow::returnMember);
+}
+
+void UIMainWindow::returnMember()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	if (obj["status"].toInt() == 1 && data.contains("members"))
+	{
+		// 群成员信息
+		QJsonArray members = data["members"].toArray();
+		foreach(const QJsonValue & value, members)
+		{
+			QJsonObject obj = value.toObject();
+			YXMember *pMember = new YXMember();
+			pMember->readJsonToMember(value.toObject());
+
+			//用完之后删除
+			delete pMember;
+		}
+		
+		// 群公告信息
+		QJsonArray announcements = data["announcements"].toArray();
+		foreach(const QJsonValue & value, announcements)
+		{
+			QJsonObject obj = value.toObject();
+			YXMember *announcements = new YXMember();
+			announcements->readJsonToMember(value.toObject());
+
+			//用完之后删除
+			delete announcements;
+		}
 	}
 }

@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
 	LoginWindow w;
 	w.setWindowFlags(Qt::FramelessWindowHint);
-
+	
 	w.setAutoFillBackground(true);
 	QPalette palette;
 	QPixmap pixmap("./images/bk.png");

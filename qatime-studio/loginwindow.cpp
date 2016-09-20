@@ -127,8 +127,8 @@ void LoginWindow::loginFinished()
 		mainWin = new UIMainWindow();
 		mainWin->setWindowFlags(Qt::FramelessWindowHint);
 		mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
-		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->setRemeberToken(data["remember_token"].toString());
+		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->ShowAuxiliary();
 		mainWin->setLoginWindow(this);
 		mainWin->show();

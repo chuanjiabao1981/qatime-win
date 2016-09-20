@@ -15,6 +15,7 @@
 #define QT_TOOLBOXLITEMNAME		104				//QTableWidgetItem 对应的objectname
 #define QT_TOOLBOXLITEMSTATUS	105				//课程状态	
 #define QT_TOOLBOXLESSONNAME	106				//课程名字
+#define QT_TOOLBOXCHATID		107				//云信会话ID（一个辅导班对应一个ID）
 
 UIAuxiliaryPanel::UIAuxiliaryPanel(QWidget *parent)
 	: QWidget(parent)	
@@ -227,12 +228,7 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 		m_teacher_treewidget->setColumnWidth(1, 140);
 		m_teacher_treewidget->setColumnWidth(2, 40);
 		imageItem1->setSizeHint(0, QSize(200, 25));	
-		setCourseInfoToTree(course->JsonLesson(), course->url(), strItemName, imageItem1, bExpand, nNum);
-		//展开直播中的课程
-		if (bExpand)
-		{
-//			m_teacher_treewidget->setCurrentIndex(nNum);
-		}
+		setCourseInfoToTree(course->JsonLesson(), course->url(), strItemName, imageItem1,course->ChatId(),course->id());
 		
 		delete course;
 		nNum++;		
@@ -240,12 +236,9 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 	ui.teacher_verticalLayout->addWidget(m_teacher_treewidget);
 }
 
-//TODO  添加树信息
-
-void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QString tableName, QTreeWidgetItem* pTableWidget, bool &bExpand,int num)
+void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QString tableName, QTreeWidgetItem* pTableWidget, QString chatID, QString courseID)
 {
 	int nNum = 0;	// 编号
-//	pTableWidget->setSizeHint(0, QSize(50, 40));
 	foreach(const QJsonValue & value, courses)
 	{
 		QJsonObject obj = value.toObject();
@@ -274,12 +267,13 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 			imageItem1->setData(0,QT_TOOLBOXLESSONURL, url);
 			imageItem1->setData(0,QT_TOOLBOXLITEMNAME, tableName);
 			imageItem1->setData(0,QT_TOOLBOXLITEMSTATUS, pLesson->LessonStatus());
+			imageItem1->setData(0, QT_TOOLBOXCHATID, chatID);
+			imageItem1->setData(0, QT_TOOLBOXCOURSEID, courseID);
 			imageItem1->setTextAlignment(i, Qt::AlignHCenter | Qt::AlignVCenter);
 			imageItem1->setBackground(i, brush);
 			imageItem1->setToolTip(0,pLesson->name());
 		}
 		imageItem1->setText(1, pLesson->LessonTime());
-//		imageItem1->setText(1, pLesson->name());
 		imageItem1->setText(2, pLesson->ChinaLessonStatus());	
 		imageItem1->setSizeHint(0, QSize(20, 20));
 		imageItem1->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
@@ -384,6 +378,16 @@ QString UIAuxiliaryPanel::getURL()
 	return m_url;
 }
 
+QString UIAuxiliaryPanel::getCouresID()
+{
+	return m_auxiliaryID;
+}
+
+QString UIAuxiliaryPanel::getChatID()
+{
+	return m_chatID;
+}
+
 void UIAuxiliaryPanel::setPreview(bool bPreview)
 {
 	m_bPreview = bPreview;
@@ -442,7 +446,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	{
 		m_lessonID = (QString)terrWidget->data(0,QT_TOOLBOXLESSONID).toString();
 		m_url = (QString)terrWidget->data(0, QT_TOOLBOXLESSONURL).toString();
-
+		m_auxiliaryID = (QString)terrWidget->data(0, QT_TOOLBOXCOURSEID).toString();
 
 		QString tableName = (QString)terrWidget->data(0,QT_TOOLBOXLITEMNAME).toString();
 		QString tabText = terrWidget->parent()->text(0);
@@ -463,6 +467,10 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 		m_pTreeCurrentItem = terrWidget;	
 		m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#FF0000"));
 		m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#FF0000"));
+
+		//进入聊天室
+		m_chatID = (QString)terrWidget->data(0, QT_TOOLBOXCHATID).toString();
+		m_Parent->setCurChatRoom(m_chatID);
 
 	}
 	setFocus();

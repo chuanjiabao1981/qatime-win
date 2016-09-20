@@ -38,6 +38,9 @@
       <Extensions>ts</Extensions>
       <ParseFiles>false</ParseFiles>
     </Filter>
+    <Filter Include="YxChat">
+      <UniqueIdentifier>{623320f6-5445-4cb7-b218-ded375d9fc7d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -169,9 +172,6 @@
     <ClCompile Include="UIChatRoom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UIChatRoom.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_animatedtextbrowser.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -196,8 +196,47 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_myemotionwidget.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIChatRoom.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_UIChatRoom.cpp">
       <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_client_helper.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_common_helper.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_cpp_client.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_cpp_talk.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_msg_helper.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_msglog_helper.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_sdk_helper.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_session_helper.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_talk_helper.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_tools_http_cpp_wrapper.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\session_callback.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="member.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -316,6 +355,45 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIChatRoom.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\net_export.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_client_helper.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_common_helper.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_cpp_client.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_cpp_talk.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_msg_helper.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_msglog_helper.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_sdk_helper.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_session_helper.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_talk_helper.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_tools_http_cpp_wrapper.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\session_callback.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="member.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

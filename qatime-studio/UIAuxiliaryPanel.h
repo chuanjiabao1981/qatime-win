@@ -46,6 +46,7 @@ private:
 	bool							m_bPreview;				//当前是否是直播状态(决定当前课程的切换)
 	QString							m_lessonName;			//课程名字
 	QTreeWidgetItem*				m_pCurrenDoubTree;		//目前双击的列表
+	QString							m_chatID;				//当前会话窗口ID
 private slots:
 	void DrawBack();
 	//TODO zp 
@@ -58,7 +59,18 @@ private slots:
 private:
 	void style(QTableWidget* pTableWidget);													//tableWidget样式
 	void GetItemColor(QString strStatus, QBrush& brush, QIcon& qIcon);						//根据状态绘制课程背景色 和 图标
-	void setCourseInfoToTree(QJsonArray courses, QString url, QString tableName, QTreeWidgetItem* pTableWidget, bool &bExpand,int num);		//设置课程信息TODO
+
+	/** @fn setCourseInfoToTree
+	* 添加树信息
+	* @param[QJsonArray]	  辅导班下的所有课程信息
+	* @param[QString]		  推流地址
+	* @param[QString]		  对应的树名称
+	* @param[QTreeWidgetItem] 加载课程的控件
+	* @param[QString]		  会话窗口ID
+	* @param[QString]	      辅导班ID
+	*/
+	void setCourseInfoToTree(QJsonArray courses, QString url, QString tableName, QTreeWidgetItem* pTableWidget,
+							 QString chatID, QString courseID);		
 	void GetItemTextColor(QString strStatus, QColor& qColor);
 public:
 	void init();
@@ -66,9 +78,11 @@ public:
 	void setRemeberToken(const QString &token);
 	void setTeacherID(const QString &teacherID);
 	void setTeacherName(const QString &teacherName);
-	void setNetworkPic(const QString &szUrl);												// 显示网络图片
-	QString getLessonID();
-	QString getURL();
+	void setNetworkPic(const QString &szUrl);								// 显示网络图片
+	QString getLessonID();													// 获取课程ID
+	QString getURL();														// 获取推流url
+	QString getCouresID();													// 获取辅导班ID
+	QString getChatID();													// 获取当前会话ID
 	void setPreview(bool bPreview);
 	QString getLessonName();
 	void setParent(UIMainWindow* parent);

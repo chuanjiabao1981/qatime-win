@@ -11,6 +11,7 @@ void Course::readJson(const QJsonObject &json)
     mId = json["id"].toInt();
     mName = json["name"].toString();
     mStatus = json["status"].toInt();
+	mChatId = json["chat_team_id"].toString();
 
 	// ½ø¶È
 	int preset_lesson = json["preset_lesson_count"].toInt();
@@ -54,4 +55,9 @@ int Course::status()
 QJsonArray Course::JsonLesson()
 {
 	return mJsonArray;
+}
+
+QString Course::ChatId()
+{
+	return mChatId;
 }
