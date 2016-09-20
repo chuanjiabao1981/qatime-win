@@ -32,7 +32,7 @@ public:
 	void initSecUi();
 	void setOlineNum(int olineNum, int allNum);//设置在线人数的接口
 signals:
-	void signalChickChage(bool,QString);
+	void signalChickChage(bool,QString, QString);
 	void signalAllTalk(bool, QString);		//全部禁言时候 ID为“0”
 public slots:
     void slotAddGroup();   //添加组
@@ -43,7 +43,7 @@ public slots:
 	void findName(QString name);//查找好友
     void slotRenameEditFshed();//命名完成
 
-	void chickChage(bool b,QString ID);	//禁言的状态发生改变
+	void chickChage(bool b,QString ID, QString name);	//禁言的状态发生改变
 	void stopAllTalk(bool, QString ID); //禁言所有的学生
 private:
 	personListBuddy *buddyFirst;

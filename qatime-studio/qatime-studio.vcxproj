@@ -231,13 +231,17 @@
     <ClCompile Include="YxChat\nim_client_helper.cpp" />
     <ClCompile Include="YxChat\nim_common_helper.cpp" />
     <ClCompile Include="YxChat\nim_cpp_client.cpp" />
+    <ClCompile Include="YxChat\nim_cpp_global.cpp" />
     <ClCompile Include="YxChat\nim_cpp_talk.cpp" />
+    <ClCompile Include="YxChat\nim_cpp_team.cpp" />
     <ClCompile Include="YxChat\nim_msglog_helper.cpp" />
     <ClCompile Include="YxChat\nim_msg_helper.cpp" />
     <ClCompile Include="YxChat\nim_sdk_helper.cpp" />
     <ClCompile Include="YxChat\nim_session_helper.cpp" />
     <ClCompile Include="YxChat\nim_talk_helper.cpp" />
+    <ClCompile Include="YxChat\nim_team_helper.cpp" />
     <ClCompile Include="YxChat\nim_tools_http_cpp_wrapper.cpp" />
+    <ClCompile Include="YxChat\nim_user_helper.cpp" />
     <ClCompile Include="YxChat\session_callback.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -270,13 +274,17 @@
     <ClInclude Include="YxChat\nim_client_helper.h" />
     <ClInclude Include="YxChat\nim_common_helper.h" />
     <ClInclude Include="YxChat\nim_cpp_client.h" />
+    <ClInclude Include="YxChat\nim_cpp_global.h" />
     <ClInclude Include="YxChat\nim_cpp_talk.h" />
+    <ClInclude Include="YxChat\nim_cpp_team.h" />
     <ClInclude Include="YxChat\nim_msglog_helper.h" />
     <ClInclude Include="YxChat\nim_msg_helper.h" />
     <ClInclude Include="YxChat\nim_sdk_helper.h" />
     <ClInclude Include="YxChat\nim_session_helper.h" />
     <ClInclude Include="YxChat\nim_talk_helper.h" />
+    <ClInclude Include="YxChat\nim_team_helper.h" />
     <ClInclude Include="YxChat\nim_tools_http_cpp_wrapper.h" />
+    <ClInclude Include="YxChat\nim_user_helper.h" />
     <ClInclude Include="YxChat\session_callback.h" />
     <CustomBuild Include="animatedtextedit.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

@@ -15,6 +15,7 @@
 #include "YxChat/nim_tools_http_cpp_wrapper.h"
 #include "YxChat/nim_client_helper.h"
 #include "YxChat/nim_cpp_talk.h"
+#include "YxChat/nim_cpp_team.h"
 
 class UIChatRoom : public QWidget
 {
@@ -69,6 +70,16 @@ private:
 	*/
 	static void OnLoginCallback(const nim::LoginRes& login_res, const void* user_data);
 
+	/**
+	* 群事件回调
+	* @param[in] rescode 返回码
+	* @param[in] notification_id 群事件类型
+	* @param[in] tid 群id
+	* @param[in] result 事件信息内容， Json数据转化成的字符串
+	* @return void	无返回值
+	*/
+	static void OnTeamEventCallback(const nim::TeamEvent& result);
+
 public:
 	void setChatInfo(QJsonObject &chatInfo);				// 设置云信账户信息
 	void ReceiverMsg(nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
@@ -77,7 +88,8 @@ public:
 	bool IsLogin();											// 是否登录
 	bool IsCurChatRoom(QString chatID);						// 是否是当前会话ID
 public slots:
-	void chickChage(bool);
+	void chickChage(bool, QString, QString);
+	void AddStudent(QString iconUrl, QString name, QString accid);
 };
 
 #endif // UICHATROOM_H

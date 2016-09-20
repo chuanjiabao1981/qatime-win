@@ -34,7 +34,7 @@ public:
 //  QLabel *sign;  //个性签名  
 	void setOlineNum(int olineNum, int allNum);			
 signals:  
-	void emitRadioChange(bool,QString);
+	void emitRadioChange(bool,QString,QString);
 	void signalRadioChange(bool);
 	void signalStopAllTalk(bool,QString);	//禁言所有学生信号
  	void signalFindName(QString name);		//查找学生名字信号

@@ -83,7 +83,7 @@ bool personListBuddy::eventFilter(QObject *obj, QEvent *event)
 
 void personListBuddy::radioChange(bool b)
 {
-	emit emitRadioChange(b,m_ID);
+	emit emitRadioChange(b, m_ID, name->text());
 }
 
 void personListBuddy::stopAllTalk(bool b)

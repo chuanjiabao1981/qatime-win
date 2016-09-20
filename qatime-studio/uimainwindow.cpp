@@ -908,6 +908,9 @@ void UIMainWindow::returnMember()
 			YXMember *pMember = new YXMember();
 			pMember->readJsonToMember(value.toObject());
 
+			if (m_charRoom)
+				m_charRoom->AddStudent(pMember->url(), pMember->name(), pMember->accid());
+
 			//用完之后删除
 			delete pMember;
 		}

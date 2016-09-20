@@ -38,7 +38,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.button_brow, SIGNAL(clicked()), this, SLOT(clickBrow()));
 	connect(ui.button_notes, SIGNAL(clicked()), this, SLOT(clickNotes()));
 	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMseeage()));
-	connect(ui.student_list, SIGNAL(signalChickChage(bool)), this, SLOT(chickChage(bool)));
+	connect(ui.student_list, SIGNAL(signalChickChage(bool, QString, QString)), this, SLOT(chickChage(bool, QString,QString)));
 	initEmotion();
 	this->clickTalk();
 	m_borw = "";
@@ -288,13 +288,9 @@ void UIChatRoom::OnLoginCallback(const nim::LoginRes& login_res, const void* use
 	bool bsuc = true;
 
 	if (login_res.res_code_ == nim::kNIMResSuccess)
-	{
 		bsuc = true;
-	}
 	else
-	{
 		bsuc = false;
-	}
 }
 
 bool UIChatRoom::LoadConfig(const std::string& app_data_dir, const std::string& app_install_dir, nim::SDKConfig &config)
@@ -364,8 +360,28 @@ bool UIChatRoom::IsCurChatRoom(QString chatID)
 
 	return bChatRoom;
 }
-//禁言按钮事件
-void UIChatRoom::chickChage(bool b)
-{
 
+void UIChatRoom::OnTeamEventCallback(const nim::TeamEvent& result)
+{
+}
+
+//禁言按钮事件
+void UIChatRoom::chickChage(bool b, QString qAccid, QString name)
+{
+	std::string accid = qAccid.toStdString();
+	auto cb = std::bind(OnTeamEventCallback, std::placeholders::_1);
+	nim::Team::MuteMemberAsync(m_CurChatID, accid, b, cb);
+
+	// 会话窗口显示
+	if (b)
+		ui.text_talk->append(name + "  被禁言");
+	else
+		ui.text_talk->append(name + "  被解除禁言");
+
+	ui.text_talk->append("");
+}
+
+void UIChatRoom::AddStudent(QString iconUrl, QString name, QString accid)
+{
+	ui.student_list->addStrdent(iconUrl, name, accid);
 }

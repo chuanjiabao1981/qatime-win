@@ -6,6 +6,7 @@
 #pragma execution_character_set("utf-8")
 personList::personList(QWidget *parent) :
     QListWidget(parent)
+	, currentItem(NULL)
 {
     setFocusPolicy(Qt::NoFocus);       // 去除item选中时的虚线边框
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);//水平滚动条关闭
@@ -163,7 +164,7 @@ void personList::addStrdent(QString imagesUrl,QString stuName,QString ID)
 {
 	personListBuddy *buddy = new personListBuddy();
 	buddy->initUi("http://img4.duitang.com/uploads/item/201303/08/20130308111421_3msAX.png", stuName,ID);
-	connect(buddy, SIGNAL(emitRadioChange(bool,QString)), this, SLOT(chickChage(bool,QString)));	
+	connect(buddy, SIGNAL(emitRadioChange(bool, QString, QString)), this, SLOT(chickChage(bool, QString, QString)));
 	QList<QListWidgetItem*> tem = groupMap.keys(currentItem);	
 	QListWidgetItem *newItem = new QListWidgetItem();       
 	newItem->setSizeHint(QSize(30, 30));
@@ -255,9 +256,9 @@ void personList::slotRenameEditFshed()
     groupNameEdit->hide();  //隐藏重命名编辑框
 }
 //禁言学生
-void personList::chickChage(bool b,QString ID)
+void personList::chickChage(bool b, QString ID, QString name)
 {
-	emit signalChickChage(b,ID);
+	emit signalChickChage(b, ID, name);
 }
 //禁言所有的学生
 void personList::stopAllTalk(bool b, QString ID)
