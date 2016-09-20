@@ -38,7 +38,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.button_brow, SIGNAL(clicked()), this, SLOT(clickBrow()));
 	connect(ui.button_notes, SIGNAL(clicked()), this, SLOT(clickNotes()));
 	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMseeage()));
-
+	connect(ui.student_list, SIGNAL(signalChickChage(bool)), this, SLOT(chickChage(bool)));
 	initEmotion();
 	this->clickTalk();
 	m_borw = "";
@@ -62,9 +62,11 @@ void UIChatRoom::clickTalk()
 // 弹出学生列表
 void UIChatRoom::clickStudentList()
 {
+	//ui.student_list->
 	ui.text_proclamation->setHidden(true);
 	ui.text_talk->setHidden(true);
 	ui.student_list->setHidden(false);
+	ui.student_list->initMenu();
 }
 // 弹出讨论框
 void UIChatRoom::clickProclamation()
@@ -90,7 +92,7 @@ void UIChatRoom::clickBrow()
 		m_smallEmotionWidget->setHidden(true);
 	}
 	
-	m_smallEmotionWidget->move(60, 490);
+	m_smallEmotionWidget->move(60, 440);
 }
 // 消息记录
 void UIChatRoom::clickNotes()
@@ -115,19 +117,19 @@ void UIChatRoom::initEmotion()
 		m_smallEmotionWidget->addEmotionItem(path + QString::number(i) + path1, "");
 		//		m_smallEmotionWidget->addEmotionItem(dir.currentPath()+"./images/em_1.gif", "");
 	}
-	// 初始化正常表情框;
-	m_normalEmotionWidget = new MyEmotionWidget;
-	m_normalEmotionWidget->setRowAndColumn(10, 14);
-	m_normalEmotionWidget->setEmotionSize(QSize(32, 32));
-	m_normalEmotionWidget->setEmotionMovieSize(QSize(24, 24));
-	m_normalEmotionWidget->setMaxRow(6);
-	m_normalEmotionWidget->initTableWidget();
-	m_normalEmotionWidget->setVisible(false);
-	for (int i = 1; i <= 75; i++)
-	{
-		//		m_normalEmotionWidget->addEmotionItem(path.arg(i + 1), "");
-	}
 	m_smallEmotionWidget->setVisible(false);
+	// 初始化正常表情框;
+// 	m_normalEmotionWidget = new MyEmotionWidget;
+// 	m_normalEmotionWidget->setRowAndColumn(10, 14);
+// 	m_normalEmotionWidget->setEmotionSize(QSize(32, 32));
+// 	m_normalEmotionWidget->setEmotionMovieSize(QSize(24, 24));
+// 	m_normalEmotionWidget->setMaxRow(6);
+// 	m_normalEmotionWidget->initTableWidget();
+// 	m_normalEmotionWidget->setVisible(false);
+// 	for (int i = 1; i <= 75; i++)
+// 	{
+// 		//		m_normalEmotionWidget->addEmotionItem(path.arg(i + 1), "");
+// 	}	
 
 	// 	m_lableTitle = new QLabel;
 	// 	QVBoxLayout* vLayout = new QVBoxLayout;
@@ -361,4 +363,9 @@ bool UIChatRoom::IsCurChatRoom(QString chatID)
 	}
 
 	return bChatRoom;
+}
+//禁言按钮事件
+void UIChatRoom::chickChage(bool b)
+{
+
 }

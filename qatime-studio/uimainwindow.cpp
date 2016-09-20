@@ -142,6 +142,10 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	InitAudioList();
 	InitVideoList();
 
+	QPixmap pixmap(QCoreApplication::applicationDirPath() + "/images/btn_07.png");
+	QPixmap pixmap1(QCoreApplication::applicationDirPath() + "/images/btn_off.png");
+	ui.mainmin_pushBtn->setPixmap(pixmap,4);
+	ui.mainclose_pushBtn->setPixmap(pixmap1, 4);
 	m_charRoom = new UIChatRoom(this);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
 	m_charRoom->move(725+215, 50);

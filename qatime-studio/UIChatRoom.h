@@ -76,6 +76,8 @@ public:
 	void setKeyAndLogin(QString key);						// 设置appkey并登录（获取完Key之后，就可以直接登录）
 	bool IsLogin();											// 是否登录
 	bool IsCurChatRoom(QString chatID);						// 是否是当前会话ID
+public slots:
+	void chickChage(bool);
 };
 
 #endif // UICHATROOM_H

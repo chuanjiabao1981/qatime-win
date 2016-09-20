@@ -35,10 +35,13 @@ LoginWindow::LoginWindow(QWidget *parent)
 
 	QShortcut *key = new QShortcut(QKeySequence(Qt::Key_Return), this);//创建一个快捷键"Key_Return"键
 	connect(key, SIGNAL(activated()), this, SLOT(OnLogIn()));//连接到指定槽函数
-
-
 	setTabOrder(ui.UserName_Edit, ui.UserPass_Edit);
 	setTabOrder(ui.UserPass_Edit, ui.login_pushBtn);
+
+	QPixmap pixmap(QCoreApplication::applicationDirPath() + "/images/btn_07.png");
+	QPixmap pixmap1(QCoreApplication::applicationDirPath() + "/images/btn_off.png");
+	ui.min_pushBtn->setPixmap(pixmap, 4);
+	ui.close_pushBtn->setPixmap(pixmap1, 4);
 
 }
 

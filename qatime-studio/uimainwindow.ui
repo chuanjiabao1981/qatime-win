@@ -48,39 +48,33 @@
     <string>答疑时间  专用直播器V0.1</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="mainclose_pushBtn">
+  <widget class="MToolButton" name="mainclose_pushBtn">
    <property name="geometry">
     <rect>
      <x>1270</x>
-     <y>15</y>
+     <y>12</y>
      <width>25</width>
      <height>25</height>
     </rect>
    </property>
    <property name="cursor">
     <cursorShape>PointingHandCursor</cursorShape>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border-image: url(:/LoginWindow/images/close.png);</string>
    </property>
    <property name="text">
     <string/>
    </property>
   </widget>
-  <widget class="QPushButton" name="mainmin_pushBtn">
+  <widget class="MToolButton" name="mainmin_pushBtn">
    <property name="geometry">
     <rect>
      <x>1240</x>
-     <y>15</y>
+     <y>12</y>
      <width>25</width>
      <height>25</height>
     </rect>
    </property>
    <property name="cursor">
     <cursorShape>PointingHandCursor</cursorShape>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border-image: url(:/LoginWindow/images/minsize.png);</string>
    </property>
    <property name="text">
     <string/>
@@ -414,6 +408,13 @@
   <zorder>line_2</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>MToolButton</class>
+   <extends>QToolButton</extends>
+   <header>mtoolbutton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="loginwindow.qrc"/>
  </resources>
