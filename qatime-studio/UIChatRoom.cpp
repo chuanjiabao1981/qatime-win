@@ -38,11 +38,11 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.button_brow, SIGNAL(clicked()), this, SLOT(clickBrow()));
 	connect(ui.button_notes, SIGNAL(clicked()), this, SLOT(clickNotes()));
 	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMseeage()));
-	connect(ui.student_list, SIGNAL(signalChickChage(bool, QString, QString)), this, SLOT(chickChage(bool, QString,QString)));
+	connect(ui.student_list, SIGNAL(signalChickChage(bool, QString, QString)), this, SLOT(chickChage(bool, QString, QString)));
 	initEmotion();
-	this->clickTalk();	
+	this->clickTalk();
 	m_isBorw = false;
-	
+
 	initSDK();
 }
 
@@ -50,7 +50,7 @@ UIChatRoom::~UIChatRoom()
 {
 
 }
-// µ¯³öÁÄÌì¿ò
+// å¼¹å‡ºèŠå¤©æ¡†
 void UIChatRoom::clickTalk()
 {
 	ui.text_proclamation->setHidden(true);
@@ -58,7 +58,7 @@ void UIChatRoom::clickTalk()
 	ui.student_list->setHidden(true);
 	ui.text_talk->moveCursor(QTextCursor::End);
 }
-// µ¯³öÑ§ÉúÁĞ±í
+// å¼¹å‡ºå­¦ç”Ÿåˆ—è¡¨
 void UIChatRoom::clickStudentList()
 {
 	//ui.student_list->
@@ -67,20 +67,20 @@ void UIChatRoom::clickStudentList()
 	ui.student_list->setHidden(false);
 	ui.student_list->initMenu();
 }
-// µ¯³öÌÖÂÛ¿ò
+// å¼¹å‡ºè®¨è®ºæ¡†
 void UIChatRoom::clickProclamation()
 {
 	ui.text_proclamation->setHidden(false);
 	ui.text_talk->setHidden(true);
 	ui.student_list->setHidden(true);
 }
-// ÇåÆÁ
+// æ¸…å±
 void UIChatRoom::clickCleanText()
 {
 	ui.text_talk->clear();
 	ui.student_list->cleanStudents();
 }
-// ±íÇé°´Å¥
+// è¡¨æƒ…æŒ‰é’®
 void UIChatRoom::clickBrow()
 {
 	if (m_smallEmotionWidget->isHidden())
@@ -91,18 +91,18 @@ void UIChatRoom::clickBrow()
 	{
 		m_smallEmotionWidget->setHidden(true);
 	}
-	
+
 	m_smallEmotionWidget->move(60, 440);
 }
-// ÏûÏ¢¼ÇÂ¼
+// æ¶ˆæ¯è®°å½•
 void UIChatRoom::clickNotes()
 {
 
 }
-//¼ÓÔØËùÓĞ±íÇé
+//åŠ è½½æ‰€æœ‰è¡¨æƒ…
 void UIChatRoom::initEmotion()
 {
-	// ³õÊ¼»¯Ğ¡±íÇé¿ò;
+	// åˆå§‹åŒ–å°è¡¨æƒ…æ¡†;
 	m_smallEmotionWidget = new MyEmotionWidget(this);
 	connect(m_smallEmotionWidget, SIGNAL(emitFileName(QString)), this, SLOT(setBrow(QString)));
 	m_smallEmotionWidget->setRowAndColumn(10, 8);
@@ -118,18 +118,18 @@ void UIChatRoom::initEmotion()
 		//		m_smallEmotionWidget->addEmotionItem(dir.currentPath()+"./images/em_1.gif", "");
 	}
 	m_smallEmotionWidget->setVisible(false);
-	// ³õÊ¼»¯Õı³£±íÇé¿ò;
-// 	m_normalEmotionWidget = new MyEmotionWidget;
-// 	m_normalEmotionWidget->setRowAndColumn(10, 14);
-// 	m_normalEmotionWidget->setEmotionSize(QSize(32, 32));
-// 	m_normalEmotionWidget->setEmotionMovieSize(QSize(24, 24));
-// 	m_normalEmotionWidget->setMaxRow(6);
-// 	m_normalEmotionWidget->initTableWidget();
-// 	m_normalEmotionWidget->setVisible(false);
-// 	for (int i = 1; i <= 75; i++)
-// 	{
-// 		//		m_normalEmotionWidget->addEmotionItem(path.arg(i + 1), "");
-// 	}	
+	// åˆå§‹åŒ–æ­£å¸¸è¡¨æƒ…æ¡†;
+	// 	m_normalEmotionWidget = new MyEmotionWidget;
+	// 	m_normalEmotionWidget->setRowAndColumn(10, 14);
+	// 	m_normalEmotionWidget->setEmotionSize(QSize(32, 32));
+	// 	m_normalEmotionWidget->setEmotionMovieSize(QSize(24, 24));
+	// 	m_normalEmotionWidget->setMaxRow(6);
+	// 	m_normalEmotionWidget->initTableWidget();
+	// 	m_normalEmotionWidget->setVisible(false);
+	// 	for (int i = 1; i <= 75; i++)
+	// 	{
+	// 		//		m_normalEmotionWidget->addEmotionItem(path.arg(i + 1), "");
+	// 	}	
 
 	// 	m_lableTitle = new QLabel;
 	// 	QVBoxLayout* vLayout = new QVBoxLayout;
@@ -143,7 +143,7 @@ void UIChatRoom::initEmotion()
 
 void UIChatRoom::stringToHtmlFilter(QString &str)
 {
-	//×¢ÒâÕâ¼¸ĞĞ´úÂëµÄË³Ğò²»ÄÜÂÒ£¬·ñÔò»áÔì³É¶à´ÎÌæ»»
+	//æ³¨æ„è¿™å‡ è¡Œä»£ç çš„é¡ºåºä¸èƒ½ä¹±ï¼Œå¦åˆ™ä¼šé€ æˆå¤šæ¬¡æ›¿æ¢
 	str.replace("&", "&amp;");
 	str.replace(">", "&gt;");
 	str.replace("<", "&lt;");
@@ -173,16 +173,16 @@ void UIChatRoom::setBrow(QString path)
 {
 	m_smallEmotionWidget->hide();
 	m_borw.append(path);
-	ui.textEdit->insertHtml("<img src='" + path + "'/>");  //   ´Ë´¦µÄtest ¼´ url
-	ui.textEdit->addAnimation(QUrl(path), path);  //Ìí¼ÓÒ»¸ö¶¯»­.
+	ui.textEdit->insertHtml("<img src='" + path + "'/>");  //   æ­¤å¤„çš„test å³ url
+	ui.textEdit->addAnimation(QUrl(path), path);  //æ·»åŠ ä¸€ä¸ªåŠ¨ç”».
 	m_isBorw = true;
 }
 
 void UIChatRoom::clickSendMseeage()
 {
 	QString tempText = ui.textEdit->toPlainText();
-	QStringList textList = tempText.split("?");
-	QString sendText,sendMsg;
+	QStringList textList = tempText.split("ï¿¼");
+	QString sendText, sendMsg;
 	for (int i = 0; i < textList.size(); i++)
 	{
 		if (i == textList.size() - 1)
@@ -197,26 +197,26 @@ void UIChatRoom::clickSendMseeage()
 	}
 	if (textList.size() >= 2 || !sendText.isEmpty())
 	{
-		QDateTime time = QDateTime::currentDateTime();//»ñÈ¡ÏµÍ³ÏÖÔÚµÄÊ±¼ä
+		QDateTime time = QDateTime::currentDateTime();//è·å–ç³»ç»Ÿç°åœ¨çš„æ—¶é—´
 		QString timeStr = time.toString("MM-dd hh:mm:ss");
 		QString imgPath = "./images/username.png";
 		imgPathToHtml(imgPath);
 		stringToHtmlFilter(sendText);
 		if (m_isBorw != false)
 		{
-			ui.text_talk->append("(×Ô¼º) " + timeStr);
+			ui.text_talk->append("(è‡ªå·±) " + timeStr);
 			ui.text_talk->append("");
 			for (int i = 0; i < m_borw.count(); i++)
 			{
-				ui.text_talk->insertHtml("<img src='" + m_borw.at(i) + "'/>");  //   ´Ë´¦µÄtest ¼´ url
-				ui.text_talk->addAnimation(QUrl(m_borw.at(i)), m_borw.at(i));  //Ìí¼ÓÒ»¸ö¶¯»­.				
+				ui.text_talk->insertHtml("<img src='" + m_borw.at(i) + "'/>");  //   æ­¤å¤„çš„test å³ url
+				ui.text_talk->addAnimation(QUrl(m_borw.at(i)), m_borw.at(i));  //æ·»åŠ ä¸€ä¸ªåŠ¨ç”».				
 			}
-			ui.text_talk->insertHtml(sendText);			
+			ui.text_talk->insertHtml(sendText);
 			m_isBorw = false;
 		}
 		else
 		{
-			QString qName = "(×Ô¼º)";
+			QString qName = "(è‡ªå·±)";
 			ui.text_talk->append(qName + " " + timeStr);
 			ui.text_talk->append(sendText);
 		}
@@ -229,19 +229,19 @@ void UIChatRoom::clickSendMseeage()
 	else
 	{
 		CMessageBox::showMessage(
-			QString("´ğÒÉÊ±¼ä"),
-			QString("²»ÄÜ·¢ËÍ¿ÕÊı¾İ£¡"),
-			QString("È·¶¨"),
+			QString("ç­”ç–‘æ—¶é—´"),
+			QString("ä¸èƒ½å‘é€ç©ºæ•°æ®ï¼"),
+			QString("ç¡®å®š"),
 			QString());
 		return;
 	}
 
-	// ·¢Íù·şÎñÆ÷
+	// å‘å¾€æœåŠ¡å™¨
 	nim::IMMessage msg;
 	PackageMsg(msg);
 	msg.type_ = nim::kNIMMessageTypeText;
 	msg.content_ = sendMsg.toStdString();
-	
+
 	nim::MessageSetting setting;
 	std::string json_msg = nim::Talk::CreateTextMessage(msg.receiver_accid_, msg.session_type_, msg.client_msg_id_, msg.content_, setting, msg.timetag_);
 	nim::Talk::SendMsg(json_msg);
@@ -251,12 +251,12 @@ void UIChatRoom::clickSendMseeage()
 void UIChatRoom::PackageMsg(nim::IMMessage &msg)
 {
 	msg.session_type_ = nim::kNIMSessionTypeTeam;
-	msg.receiver_accid_ = m_CurChatID;//»á»°ID
-	msg.sender_accid_ = m_accid.toStdString();//ÓÃ»§Ãû
+	msg.receiver_accid_ = m_CurChatID;//ä¼šè¯ID
+	msg.sender_accid_ = m_accid.toStdString();//ç”¨æˆ·å
 	msg.client_msg_id_ = nim::Client::GetUuid();
 	msg.msg_setting_.resend_flag_ = nim::BS_FALSE;
 
-	//base»ñÈ¡µÄÊ±¼äµ¥Î»ÊÇs£¬·şÎñÆ÷µÄÊ±¼äµ¥Î»ÊÇms
+	//baseè·å–çš„æ—¶é—´å•ä½æ˜¯sï¼ŒæœåŠ¡å™¨çš„æ—¶é—´å•ä½æ˜¯ms
 	msg.timetag_ = QDateTime::currentMSecsSinceEpoch();
 
 	msg.status_ = nim::kNIMMsgLogStatusSending;
@@ -264,14 +264,14 @@ void UIChatRoom::PackageMsg(nim::IMMessage &msg)
 
 void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 {
-	// ÅĞ¶Ïµ±Ç°¹ıÀ´µÄÏûÏ¢£¬ÊÇ²»ÊÇ´Ë»á»°´°¿Ú
+	// åˆ¤æ–­å½“å‰è¿‡æ¥çš„æ¶ˆæ¯ï¼Œæ˜¯ä¸æ˜¯æ­¤ä¼šè¯çª—å£
 	if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0)
 	{
 		std::string strName = pMsg->readonly_sender_nickname_;
 		std::string strContent = pMsg->content_;
 
 		__int64 time = pMsg->timetag_;
-		QString qTime = QDateTime::fromMSecsSinceEpoch(time).toString("MM-dd hh:mm:ss");// Ô­ĞÍyyyy-MM-dd hh:mm:ss
+		QString qTime = QDateTime::fromMSecsSinceEpoch(time).toString("MM-dd hh:mm:ss");// åŸå‹yyyy-MM-dd hh:mm:ss
 		QString qName = QString::fromStdString(strName);
 		QString qContent = QString::fromStdString(strContent);
 
@@ -281,23 +281,23 @@ void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 	}
 }
 
-//////////////////////////////Ìí¼ÓÔÆĞÅ¹¦ÄÜ////////////////////////////////
+//////////////////////////////æ·»åŠ äº‘ä¿¡åŠŸèƒ½////////////////////////////////
 void UIChatRoom::initSDK()
 {
 	nim::SDKConfig config;
 
-	//sdkÄÜÁ¦²ÎÊı£¨±ØÌî£©
-	config.database_encrypt_key_ = "Netease"; //string£¨db key±ØÌî£¬Ä¿Ç°Ö»Ö§³Ö×î¶à32¸ö×Ö·ûµÄ¼ÓÃÜÃÜÔ¿£¡½¨ÒéÊ¹ÓÃ32¸ö×Ö·û£©
+	//sdkèƒ½åŠ›å‚æ•°ï¼ˆå¿…å¡«ï¼‰
+	config.database_encrypt_key_ = "Netease"; //stringï¼ˆdb keyå¿…å¡«ï¼Œç›®å‰åªæ”¯æŒæœ€å¤š32ä¸ªå­—ç¬¦çš„åŠ å¯†å¯†é’¥ï¼å»ºè®®ä½¿ç”¨32ä¸ªå­—ç¬¦ï¼‰
 	bool ret = false;
 	ret = nim::SDKFunction::LoadSdkDll();
 	ret = LoadConfig("Netease", "", config);
 
 	if (!ret)
-		assert(0);// ³õÊ¼»¯Ê§°Ü
+		assert(0);// åˆå§‹åŒ–å¤±è´¥
 
-	nim_http::Init(); // ³õÊ¼»¯ÔÆĞÅhttp
+	nim_http::Init(); // åˆå§‹åŒ–äº‘ä¿¡http
 
-	// ½ÓÊÜÏûÏ¢»Øµ÷
+	// æ¥å—æ¶ˆæ¯å›è°ƒ
 	nim::Talk::RegReceiveCb(&nim_comp::TalkCallback::OnReceiveMsgCallback);
 }
 
@@ -315,8 +315,8 @@ bool UIChatRoom::LoadConfig(const std::string& app_data_dir, const std::string& 
 {
 	QJsonObject config_root;
 	QJsonObject config_values;
-	config_values[kNIMDataBaseEncryptKey] = config.database_encrypt_key_.c_str();//string£¨db key±ØÌî£¬Ä¿Ç°Ö»Ö§³Ö×î¶à32¸ö×Ö·ûµÄ¼ÓÃÜÃÜÔ¿£¡½¨ÒéÊ¹ÓÃ32¸ö×Ö·û£©
-	config_values[kNIMPreloadAttach] = config.preload_attach_;        //bool £¨Ñ¡Ìî£¬ÊÇ·ñĞèÒªÔ¤ÏÂÔØ¸½¼şËõÂÔÍ¼£¬ sdkÄ¬ÈÏÔ¤ÏÂÔØ£©
+	config_values[kNIMDataBaseEncryptKey] = config.database_encrypt_key_.c_str();//stringï¼ˆdb keyå¿…å¡«ï¼Œç›®å‰åªæ”¯æŒæœ€å¤š32ä¸ªå­—ç¬¦çš„åŠ å¯†å¯†é’¥ï¼å»ºè®®ä½¿ç”¨32ä¸ªå­—ç¬¦ï¼‰
+	config_values[kNIMPreloadAttach] = config.preload_attach_;        //bool ï¼ˆé€‰å¡«ï¼Œæ˜¯å¦éœ€è¦é¢„ä¸‹è½½é™„ä»¶ç¼©ç•¥å›¾ï¼Œ sdké»˜è®¤é¢„ä¸‹è½½ï¼‰
 	config_values[kNIMSDKLogLevel] = config.sdk_log_level_;
 	config_root[kNIMGlobalConfig] = config_values;
 
@@ -348,12 +348,12 @@ void UIChatRoom::setKeyAndLogin(QString key)
 {
 	m_appKey = key;
 
-	// µÇÂ½
+	// ç™»é™†
 	auto cb = std::bind(OnLoginCallback, std::placeholders::_1, nullptr);
 	bool bFail = nim::Client::Login(m_appKey.toStdString(), m_accid.toStdString(), m_token.toStdString(), cb);
 	if (!bFail)
 	{
-		CMessageBox::showMessage(QString("´ğÒÉÊ±¼ä"),QString("Ê§°Ü£¡"),QString("È·¶¨"),QString("È¡Ïû"));
+		CMessageBox::showMessage(QString("ç­”ç–‘æ—¶é—´"), QString("å¤±è´¥ï¼"), QString("ç¡®å®š"), QString("å–æ¶ˆ"));
 		return;
 	}
 
@@ -370,7 +370,7 @@ bool UIChatRoom::IsCurChatRoom(QString chatID)
 	bool bChatRoom = false;
 	std::string strChatID = chatID.toStdString();
 
-	// ÅĞ¶Ïµ±Ç°¹ıÀ´µÄÏûÏ¢£¬ÊÇ²»ÊÇ´Ë»á»°´°¿Ú
+	// åˆ¤æ–­å½“å‰è¿‡æ¥çš„æ¶ˆæ¯ï¼Œæ˜¯ä¸æ˜¯æ­¤ä¼šè¯çª—å£
 	if (strcmp(strChatID.c_str(), m_CurChatID.c_str()) == 0)
 	{
 		bChatRoom = true;
