@@ -277,6 +277,15 @@
     <ClCompile Include="YxChat\nim_user_helper.cpp">
       <Filter>YxChat</Filter>
     </ClCompile>
+    <ClCompile Include="myLabel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_myLabel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_myLabel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="loginwindow.h">
@@ -364,6 +373,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="personListBuddy.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="myLabel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

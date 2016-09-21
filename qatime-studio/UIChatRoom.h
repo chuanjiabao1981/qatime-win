@@ -53,8 +53,10 @@ private slots:
 	void clickCleanText();								// 清屏
 	void clickBrow();									// 表情按钮
 	void clickNotes();									// 消息记录
+	void closeNotes();									// 关闭消息记录
 	void clickSendMseeage();							// 发送消息
-
+	void chickChoseTime();								// 选择时间观看消息记录
+	void choseTime(QDate);								// 点击某一时间的槽函数
 private:
 private:
 	void		initSDK();									// 初始化云信SDK

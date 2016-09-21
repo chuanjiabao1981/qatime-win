@@ -36,8 +36,11 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.button_studentList, SIGNAL(clicked()), this, SLOT(clickStudentList()));
 	connect(ui.button_cleanText, SIGNAL(clicked()), this, SLOT(clickCleanText()));
 	connect(ui.button_brow, SIGNAL(clicked()), this, SLOT(clickBrow()));
-	connect(ui.button_notes, SIGNAL(clicked()), this, SLOT(clickNotes()));
+	connect(ui.button_notes, SIGNAL(clicked()), this, SLOT(clickNotes()));	
+	connect(ui.toolButton_3, SIGNAL(clicked()), this, SLOT(closeNotes()));
+	connect(ui.timeShow, SIGNAL(Clicked()), this, SLOT(chickChoseTime()));
 	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMseeage()));
+	connect(ui.timeWidget, SIGNAL(clicked(QDate)), this, SLOT(choseTime(QDate)));
 	connect(ui.student_list, SIGNAL(signalChickChage(bool, QString, QString)), this, SLOT(chickChage(bool, QString, QString)));
 	initEmotion();
 	this->clickTalk();
@@ -56,6 +59,7 @@ void UIChatRoom::clickTalk()
 	ui.text_proclamation->setHidden(true);
 	ui.text_talk->setHidden(false);
 	ui.student_list->setHidden(true);
+	ui.msgRecord->setHidden(true);
 	ui.text_talk->moveCursor(QTextCursor::End);
 }
 // 弹出学生列表
@@ -65,6 +69,7 @@ void UIChatRoom::clickStudentList()
 	ui.text_proclamation->setHidden(true);
 	ui.text_talk->setHidden(true);
 	ui.student_list->setHidden(false);
+	ui.msgRecord->setHidden(true);
 	ui.student_list->initMenu();
 }
 // 弹出讨论框
@@ -73,6 +78,7 @@ void UIChatRoom::clickProclamation()
 	ui.text_proclamation->setHidden(false);
 	ui.text_talk->setHidden(true);
 	ui.student_list->setHidden(true);
+	ui.msgRecord->setHidden(true);
 }
 // 清屏
 void UIChatRoom::clickCleanText()
@@ -97,8 +103,29 @@ void UIChatRoom::clickBrow()
 // 消息记录
 void UIChatRoom::clickNotes()
 {
-
+	ui.text_proclamation->setHidden(true);
+	ui.text_talk->setHidden(true);
+	ui.student_list->setHidden(true);
+	ui.button_brow->setHidden(true);
+	ui.button_cleanText->setHidden(true);
+	ui.button_notes->setHidden(true);
+	ui.button_sendMseeage->setHidden(true);
+	ui.textEdit->setHidden(true);
+	ui.msgRecord->setHidden(false);
+	ui.timeWidget->hide();
 }
+
+void UIChatRoom::closeNotes()
+{
+	clickTalk();	
+	ui.button_brow->setHidden(false);
+	ui.button_cleanText->setHidden(false);
+	ui.button_notes->setHidden(false);
+	ui.button_sendMseeage->setHidden(false);
+	ui.textEdit->setHidden(false);
+	ui.msgRecord->setHidden(true);
+}
+
 //加载所有表情
 void UIChatRoom::initEmotion()
 {
@@ -248,6 +275,26 @@ void UIChatRoom::clickSendMseeage()
 	m_borw.clear();
 }
 
+void UIChatRoom::chickChoseTime()
+{
+	if (ui.timeWidget->isHidden())
+	{
+		ui.timeWidget->setHidden(false);
+	}
+	else
+	{
+		ui.timeWidget->setHidden(true);
+	}
+	
+}
+
+void UIChatRoom::choseTime(QDate date)
+{		
+	QString dtstr = date.toString("yyyy-MM-dd");
+	ui.timeShow->setText(dtstr);
+	ui.timeWidget->hide();
+}
+
 void UIChatRoom::PackageMsg(nim::IMMessage &msg)
 {
 	msg.session_type_ = nim::kNIMSessionTypeTeam;
@@ -383,18 +430,16 @@ void UIChatRoom::OnTeamEventCallback(const nim::TeamEvent& result)
 {
 }
 
-//?????????
+//禁言
 void UIChatRoom::chickChage(bool b, QString qAccid, QString name)
 {
 	std::string accid = qAccid.toStdString();
 	auto cb = std::bind(OnTeamEventCallback, std::placeholders::_1);
-	nim::Team::MuteMemberAsync(m_CurChatID, accid, b, cb);
-
-	// ?????????
+	nim::Team::MuteMemberAsync(m_CurChatID, accid, b, cb);	
 	if (b)
-		ui.text_talk->append(name + "  ??????");
+		ui.text_talk->append(name + "  被禁言");
 	else
-		ui.text_talk->append(name + "  ?????????");
+		ui.text_talk->append(name + "  被解除禁言");
 
 	ui.text_talk->append("");
 }
