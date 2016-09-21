@@ -41,6 +41,8 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.timeShow, SIGNAL(Clicked()), this, SLOT(chickChoseTime()));
 	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMseeage()));
 	connect(ui.timeWidget, SIGNAL(clicked(QDate)), this, SLOT(choseTime(QDate)));
+	connect(ui.toolButton_2, SIGNAL(clicked()), this, SLOT(forwardTime()));
+	connect(ui.toolButton_1, SIGNAL(clicked()), this, SLOT(afterTime()));
 	connect(ui.student_list, SIGNAL(signalChickChage(bool, QString, QString)), this, SLOT(chickChage(bool, QString, QString)));
 	initEmotion();
 	this->clickTalk();
@@ -293,6 +295,22 @@ void UIChatRoom::choseTime(QDate date)
 	QString dtstr = date.toString("yyyy-MM-dd");
 	ui.timeShow->setText(dtstr);
 	ui.timeWidget->hide();
+}
+
+void UIChatRoom::forwardTime()
+{
+	QDate date = ui.timeWidget->selectedDate().addDays(1);	
+	ui.timeWidget->setSelectedDate(date);
+	QString dtstr = date.toString("yyyy-MM-dd");
+	ui.timeShow->setText(dtstr);
+}
+
+void UIChatRoom::afterTime()
+{
+	QDate date = ui.timeWidget->selectedDate().addDays(-1);
+	ui.timeWidget->setSelectedDate(date);
+	QString dtstr = date.toString("yyyy-MM-dd");
+	ui.timeShow->setText(dtstr);
 }
 
 void UIChatRoom::PackageMsg(nim::IMMessage &msg)

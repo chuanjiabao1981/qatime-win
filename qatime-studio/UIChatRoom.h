@@ -57,6 +57,8 @@ private slots:
 	void clickSendMseeage();							// 发送消息
 	void chickChoseTime();								// 选择时间观看消息记录
 	void choseTime(QDate);								// 点击某一时间的槽函数
+	void forwardTime();									// 点击往前一天的槽函数
+	void afterTime();									// 点击往后一天的槽函数
 private:
 private:
 	void		initSDK();									// 初始化云信SDK
