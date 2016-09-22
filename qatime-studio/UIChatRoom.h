@@ -70,6 +70,8 @@ private slots:
 	void forwardTime();									// 点击往前一天的槽函数
 	void afterTime();									// 点击往后一天的槽函数
 	void RecordMoved(int iPos);							// 消息记录滚动条
+	void announce();									// 点击【发布公告】按钮
+	void putTalk();										// 点击【发布】按钮
 private:
 private:
 	void		initSDK();									// 初始化云信SDK

@@ -9,7 +9,7 @@
 #include "YxChat/session_callback.h"
 #include "YxChat/nim_cpp_client.h"
 #include "define.h"
-
+#include <QMouseEvent>
 typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
 typedef void(*nim_client_cleanup)(const char *json_extension);
 typedef void(*nim_client_login)(const char *app_token, const char *account, const char *password, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
@@ -47,6 +47,9 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.timeWidget, SIGNAL(clicked(QDate)), this, SLOT(choseTime(QDate)));
 	connect(ui.toolButton_2, SIGNAL(clicked()), this, SLOT(forwardTime()));
 	connect(ui.toolButton_1, SIGNAL(clicked()), this, SLOT(afterTime()));
+	connect(ui.button_sendMseeage_2, SIGNAL(clicked()), this, SLOT(announce()));
+	connect(ui.button_sendMseeage_3, SIGNAL(clicked()), this, SLOT(putTalk()));
+	
 	connect(ui.student_list, SIGNAL(signalChickChage(bool, QString, QString)), this, SLOT(chickChage(bool, QString, QString)));
 	
 	QScrollBar* TalkRecordScrollBar;
@@ -73,29 +76,48 @@ UIChatRoom::~UIChatRoom()
 // 弹出聊天框
 void UIChatRoom::clickTalk()
 {
-	ui.text_proclamation->setHidden(true);
+	ui.button_brow->setHidden(false);
+	ui.button_cleanText->setHidden(false);
+	ui.button_notes->setHidden(false);
+	ui.button_sendMseeage->setHidden(false);
+	ui.textEdit->setHidden(false);
+	ui.proclamationWidget->setHidden(true);
 	ui.text_talk->setHidden(false);
 	ui.student_list->setHidden(true);
-	ui.msgRecord->setHidden(true);
+	ui.msgRecord->setHidden(true);	
 	ui.text_talk->moveCursor(QTextCursor::End);
 }
 // 弹出学生列表
 void UIChatRoom::clickStudentList()
 {
-	//ui.student_list->
-	ui.text_proclamation->setHidden(true);
+	ui.button_brow->setHidden(true);
+	ui.button_cleanText->setHidden(true);
+	ui.button_notes->setHidden(true);
+	ui.button_sendMseeage->setHidden(true);
+	ui.textEdit->setHidden(true);
+	ui.proclamationWidget->setHidden(true);
 	ui.text_talk->setHidden(true);
 	ui.student_list->setHidden(false);
 	ui.msgRecord->setHidden(true);
 	ui.student_list->initMenu();
 }
-// 弹出讨论框
+// 弹出公告框
 void UIChatRoom::clickProclamation()
 {
-	ui.text_proclamation->setHidden(false);
+	ui.proclamationWidget->setHidden(false);
+	ui.button_sendMseeage_3->hide();
+	ui.textEdit_2->hide();
+	ui.button_sendMseeage_2->show();
+	ui.text_proclamation->show();
 	ui.text_talk->setHidden(true);
 	ui.student_list->setHidden(true);
-	ui.msgRecord->setHidden(true);
+	ui.msgRecord->setHidden(true);	
+	ui.button_brow->setHidden(true);
+	ui.button_cleanText->setHidden(true);
+	ui.button_notes->setHidden(true);
+	ui.button_sendMseeage->setHidden(true);
+	ui.textEdit->setHidden(true);
+	
 }
 // 清屏
 void UIChatRoom::clickCleanText()
@@ -120,15 +142,15 @@ void UIChatRoom::clickBrow()
 // 消息记录
 void UIChatRoom::clickNotes()
 {
-	ui.text_proclamation->setHidden(true);
-	ui.text_talk->setHidden(true);
+	ui.proclamationWidget->setHidden(true);
+	ui.text_talk->setHidden(true);	
 	ui.student_list->setHidden(true);
 	ui.button_brow->setHidden(true);
 	ui.button_cleanText->setHidden(true);
 	ui.button_notes->setHidden(true);
 	ui.button_sendMseeage->setHidden(true);
 	ui.textEdit->setHidden(true);
-	ui.msgRecord->setHidden(false);
+	ui.msgRecord->setHidden(false);	
 	ui.timeWidget->hide();
 	ui.talkRecord->clear();		// 清除消息记录
 
@@ -241,6 +263,7 @@ void UIChatRoom::clickSendMseeage()
 		stringToHtmlFilter(sendText);
 		if (m_isBorw != false)
 		{
+			stringToHtml(timeStr, QColor(205, 205, 205));
 			ui.text_talk->append("(自己) " + timeStr);
 			ui.text_talk->append("");
 			for (int i = 0; i < m_borw.count(); i++)
@@ -248,12 +271,13 @@ void UIChatRoom::clickSendMseeage()
 				ui.text_talk->insertHtml("<img src='" + m_borw.at(i) + "'/>");  //   此处的test 即 url
 				ui.text_talk->addAnimation(QUrl(m_borw.at(i)), m_borw.at(i));  //添加一个动画.				
 			}
-			ui.text_talk->insertHtml(sendText);
+			ui.text_talk->insertHtml(sendText);			
 			m_isBorw = false;
 		}
 		else
 		{
 			QString qName = "(自己)";
+			stringToHtml(timeStr, QColor(205, 205, 205));
 			ui.text_talk->append(qName + " " + timeStr);
 			ui.text_talk->append(sendText);
 		}
@@ -289,7 +313,8 @@ void UIChatRoom::chickChoseTime()
 {
 	if (ui.timeWidget->isHidden())
 	{
-		ui.timeWidget->setHidden(false);
+		ui.timeWidget->raise();
+		ui.timeWidget->show();
 	}
 	else
 	{
@@ -346,6 +371,7 @@ void UIChatRoom::forwardTime()
 	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
 	m_farst_msg_time = time.toMSecsSinceEpoch();
 	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
+
 }
 
 void UIChatRoom::afterTime()
@@ -371,6 +397,31 @@ void UIChatRoom::afterTime()
 	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
 	m_farst_msg_time = time.toMSecsSinceEpoch();
 	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
+}
+// 点击【发布公告】按钮
+void UIChatRoom::announce()
+{
+	ui.button_sendMseeage_3->show();	
+	ui.textEdit_2->show();
+	ui.button_sendMseeage_2->hide();
+	ui.text_proclamation->hide();
+}
+// 点击【发布】按钮
+void UIChatRoom::putTalk()
+{
+	ui.button_sendMseeage_3->hide();
+	ui.textEdit_2->hide();
+	ui.button_sendMseeage_2->show();
+	ui.text_proclamation->show();
+
+	QDateTime current_date_time = QDateTime::currentDateTime();
+	QString current_date = current_date_time.toString("yyyy-MM-dd hh:mm:ss");
+	stringToHtml(current_date,QColor(133,133,133));
+	ui.text_proclamation->append(current_date);	
+	ui.text_proclamation->append(ui.textEdit_2->toPlainText());//增加新公告
+	ui.text_proclamation->append("");
+	ui.textEdit_2->clear();
+		
 }
 
 void UIChatRoom::PackageMsg(nim::IMMessage &msg)
@@ -398,8 +449,7 @@ void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		__int64 time = pMsg->timetag_;
 		QString qTime = QDateTime::fromMSecsSinceEpoch(time).toString("MM-dd hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
 		QString qName = QString::fromStdString(strName);
-		QString qContent = QString::fromStdString(strContent);
-
+		QString qContent = QString::fromStdString(strContent);		
 		ui.text_talk->append(qName + " " + qTime);
 		ui.text_talk->append(qContent);
 		ui.text_talk->append("");
