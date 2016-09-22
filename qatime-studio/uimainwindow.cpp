@@ -148,7 +148,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	ui.mainclose_pushBtn->setPixmap(pixmap1, 4);
 	m_charRoom = new UIChatRoom(this);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
-	m_charRoom->move(725+215, 50);
+	m_charRoom->move(725+215, 50-2);
 	m_charRoom->show();
 }
 

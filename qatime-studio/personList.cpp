@@ -13,6 +13,8 @@ personList::personList(QWidget *parent) :
     initMenu();	
 	initFronUi();
 	initSecUi();
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(timeOutSet()));
 }
 //初始化菜单
 void personList::initMenu()
@@ -51,77 +53,77 @@ void personList::mousePressEvent(QMouseEvent *event)
 {
     QListWidget::mousePressEvent(event); // 如果不调用基类mousePressEvent，item被select会半天不响应,调用父类，让QSS起效，因为QSS基于父类QListWidget，子类就是子窗口，就是最上层窗口，是覆盖在父窗口上的，所以先于父窗口捕获消息
     //防止一种特殊情况：给新item命名、点击其他item或空白处时，指向新item的currentItem被赋予其他item
-    if(groupNameEdit->isVisible() && !(groupNameEdit->rect().contains(event->pos())))
-    {
-        if(groupNameEdit->text()!=NULL)
-            currentItem->setText(groupNameEdit->text());
-        groupNameEdit->setText("");
-        groupNameEdit->hide();
-    }
-    currentItem = this->itemAt(mapFromGlobal(QCursor::pos()));//鼠标位置的Item，不管右键左键都获取
-    if(event->button()==Qt::LeftButton && currentItem!=NULL && currentItem==groupMap.value(currentItem))//如果点击的左键并且是点击的是组
-    {
-        if(isHideMap.value(currentItem))                                  //如果先前是隐藏，则显示
-        {
-            foreach(QListWidgetItem* subItem, groupMap.keys(currentItem))//遍历组的对应的项（包括自身和好友）
-                if(subItem!=currentItem)                                 //如果是组的话不进行处理
-                {
-                    subItem->setHidden(false);                            //好友全部显示
-                }
-            isHideMap.insert(currentItem,false);                          //设置该组为显示状态
-            currentItem->setIcon(QIcon(":/arrowDown"));
-        }
-        else                                                             //否则，先前是显示，则隐藏
-        {
-            foreach(QListWidgetItem* subItem, groupMap.keys(currentItem))//遍历组的对应的项（包括自身和好友）
-                if(subItem!=currentItem)                                 //如果是组的话不进行处理
-                {
-                    subItem->setHidden(true);                            //好友全部隐藏
-                }
-             isHideMap.insert(currentItem,true);                          //设置该组为隐藏状态
-             currentItem->setIcon(QIcon(":/arrowRight"));
-        }
-    }
+//     if(groupNameEdit->isVisible() && !(groupNameEdit->rect().contains(event->pos())))
+//     {
+//         if(groupNameEdit->text()!=NULL)
+//             currentItem->setText(groupNameEdit->text());
+//         groupNameEdit->setText("");
+//         groupNameEdit->hide();
+//     }
+//     currentItem = this->itemAt(mapFromGlobal(QCursor::pos()));//鼠标位置的Item，不管右键左键都获取
+//     if(event->button()==Qt::LeftButton && currentItem!=NULL && currentItem==groupMap.value(currentItem))//如果点击的左键并且是点击的是组
+//     {
+//         if(isHideMap.value(currentItem))                                  //如果先前是隐藏，则显示
+//         {
+//             foreach(QListWidgetItem* subItem, groupMap.keys(currentItem))//遍历组的对应的项（包括自身和好友）
+//                 if(subItem!=currentItem)                                 //如果是组的话不进行处理
+//                 {
+//                     subItem->setHidden(false);                            //好友全部显示
+//                 }
+//             isHideMap.insert(currentItem,false);                          //设置该组为显示状态
+//             currentItem->setIcon(QIcon(":/arrowDown"));
+//         }
+//         else                                                             //否则，先前是显示，则隐藏
+//         {
+//             foreach(QListWidgetItem* subItem, groupMap.keys(currentItem))//遍历组的对应的项（包括自身和好友）
+//                 if(subItem!=currentItem)                                 //如果是组的话不进行处理
+//                 {
+//                     subItem->setHidden(true);                            //好友全部隐藏
+//                 }
+//              isHideMap.insert(currentItem,true);                          //设置该组为隐藏状态
+//              currentItem->setIcon(QIcon(":/arrowRight"));
+//         }
+//     }
 }
 //菜单事件，为了显示菜单，点击鼠标右键响应，鼠标点击事件mousePressEvent优先于contextMenuEvent
 void personList::contextMenuEvent(QContextMenuEvent *event)
 {
     QListWidget::contextMenuEvent(event);           //调用基类事件
-    if(currentItem==NULL)                           //如果点击到的是空白处
-    {
-        blankMenu->exec(QCursor::pos());
-        return;
-    }
-    if(currentItem==groupMap.value(currentItem))    // 如果点击到的是组
-        groupMenu->exec(QCursor::pos());
-    else                                            //否则点击到的是好友
-        personMenu->exec(QCursor::pos());
+//     if(currentItem==NULL)                           //如果点击到的是空白处
+//     {
+//         blankMenu->exec(QCursor::pos());
+//         return;
+//     }
+//     if(currentItem==groupMap.value(currentItem))    // 如果点击到的是组
+//         groupMenu->exec(QCursor::pos());
+//     else                                            //否则点击到的是好友
+//         personMenu->exec(QCursor::pos());
 }
 //添加组
 void personList::slotAddGroup()
 {
-    QListWidgetItem *newItem=new QListWidgetItem(QIcon(":/arrowRight"),QString("未命名"));    //创建一个Item
-    newItem->setSizeHint(QSize(this->width(),25));//设置宽度、高度
-    this->addItem(newItem);         //加到QListWidget中
-    groupMap.insert(newItem,newItem);//加到容器groupMap里，key和value都为组
-    isHideMap.insert(newItem,true);  //设置该组隐藏状态
-    groupNameEdit->raise();
-    groupNameEdit->setText(QString("未命名")); //设置默认内容
-    groupNameEdit->selectAll();        //设置全选
-    groupNameEdit->setGeometry(this->visualItemRect(newItem).left()+15,this->visualItemRect(newItem).top()+1,this->visualItemRect(newItem).width(),this->visualItemRect(newItem).height()-2);//出现的位置
-    groupNameEdit->show();              //显示
-    groupNameEdit->setFocus();          //获取焦点
-    currentItem = newItem;	   // 因为要给group命名，所以当前的currentItem设为该group
+//     QListWidgetItem *newItem=new QListWidgetItem(QIcon(":/arrowRight"),QString("未命名"));    //创建一个Item
+//     newItem->setSizeHint(QSize(this->width(),25));//设置宽度、高度
+//     this->addItem(newItem);         //加到QListWidget中
+//     groupMap.insert(newItem,newItem);//加到容器groupMap里，key和value都为组
+//     isHideMap.insert(newItem,true);  //设置该组隐藏状态
+//     groupNameEdit->raise();
+//     groupNameEdit->setText(QString("未命名")); //设置默认内容
+//     groupNameEdit->selectAll();        //设置全选
+//     groupNameEdit->setGeometry(this->visualItemRect(newItem).left()+15,this->visualItemRect(newItem).top()+1,this->visualItemRect(newItem).width(),this->visualItemRect(newItem).height()-2);//出现的位置
+//     groupNameEdit->show();              //显示
+//     groupNameEdit->setFocus();          //获取焦点
+//     currentItem = newItem;	   // 因为要给group命名，所以当前的currentItem设为该group
 }
 //删除组
 void personList::slotDelGroup()
 {
-    foreach(QListWidgetItem* item, groupMap.keys(currentItem))  //遍历该组的所有好友和自身的组
-    {
-        groupMap.remove(item);   //移除
-        delete item;   //删除
-    }
-    isHideMap.remove(currentItem); //移除
+//     foreach(QListWidgetItem* item, groupMap.keys(currentItem))  //遍历该组的所有好友和自身的组
+//     {
+//         groupMap.remove(item);   //移除
+//         delete item;   //删除
+//     }
+//     isHideMap.remove(currentItem); //移除
 }
 //重命名
 void personList::slotRename()
@@ -136,54 +138,52 @@ void personList::slotRename()
 
 void personList::initFronUi()
 {
-	buddyFirst = new personListBuddy();
-	connect(buddyFirst, SIGNAL(signalStopAllTalk(bool, QString)), this, SLOT(stopAllTalk(bool, QString)));
+	buddyFirst = new personListBuddy();	
 	buddyFirst->initFirst();
 	QListWidgetItem *newItem = new QListWidgetItem();
 	newItem->setSizeHint(QSize(300, 30));
 	this->insertItem(0, newItem);
 	this->setItemWidget(newItem, buddyFirst);
-	newItem->setHidden(false);
-	groupMap.insert(newItem, currentItem);
+	newItem->setHidden(false);	
 }
 void personList::initSecUi()
 {
 	buddySec = new personListBuddy();	
 	buddySec->initFindPeople();
-	connect(buddySec, SIGNAL(signalFindName(QString)), this, SLOT(findName(QString)));	
+	connect(buddySec, SIGNAL(signalFindName(const QString)), this, SLOT(findName(const QString)));
+	connect(buddySec, SIGNAL(signalFindNameNULL(const QString)), this, SLOT(findName(const QString)));	
 	QListWidgetItem *newItem = new QListWidgetItem();
 	newItem->setSizeHint(QSize(30, 30));
 	this->insertItem(1 , newItem);
 	this->setItemWidget(newItem, buddySec);	
-	newItem->setHidden(false);
-	groupMap.insert(newItem, currentItem);
+	newItem->setHidden(false);	
+
+	buddyLast = new personListBuddy();
+	buddyLast->initNotFind();	
+	connect(buddyLast, SIGNAL(signalStopAllTalk(bool, QString)), this, SLOT(stopAllTalk(bool, QString)));
+	QListWidgetItem *newItemLast = new QListWidgetItem();
+	newItemLast->setSizeHint(QSize(30, 30));
+	this->insertItem(2, newItemLast);
+	this->setItemWidget(newItemLast, buddyLast);
+	newItemLast->setHidden(false);
 }
 void personList::addStrdent(QString imagesUrl,QString stuName,QString ID)
 {
 	personListBuddy *buddy = new personListBuddy();
 	buddy->initUi("http://img4.duitang.com/uploads/item/201303/08/20130308111421_3msAX.png", stuName,ID);
-	connect(buddy, SIGNAL(emitRadioChange(bool, QString, QString)), this, SLOT(chickChage(bool, QString, QString)));
-	QList<QListWidgetItem*> tem = groupMap.keys(currentItem);	
+	connect(buddy, SIGNAL(emitRadioChange(int, QString, QString)), this, SLOT(chickChage(int, QString, QString)));
+	QList<QListWidgetItem*> tem = groupMap.keys(buddy);
 	QListWidgetItem *newItem = new QListWidgetItem();       
 	newItem->setSizeHint(QSize(30, 30));
 	int num = row(currentItem) + tem.count();
-	this->insertItem(num + 3, newItem);
+	this->insertItem(num + 4, newItem);
 	this->setItemWidget(newItem, buddy);
-	groupMap.insert(newItem, currentItem);  
+	groupMap.insert(newItem, buddy);
 	allStudents.insert(stuName, newItem);
 	newItem->setHidden(false);
 }
 void personList::slotAddBuddy()
-{    
-	addStrdent("", "111111","1");
-	addStrdent("", "我去","2");
-	addStrdent("", "范德奎","2");
-	addStrdent("", "呵呵哒","4"); 
-	addStrdent("", "么么哒","5");
-	addStrdent("", "你妹的","6");
-	addStrdent("", "赵日天","7");
-	addStrdent("", "叶良辰","8");
-	return;
+{  
 //    buddy->sign->setText("用通俗的语言，讲深刻的技术。");   //设置个性签名
 //     QList<QListWidgetItem*> tem = groupMap.keys(currentItem);//当前组对应的项（包括组本身和好友）复制给tem
 //     //关键代码
@@ -204,7 +204,7 @@ void personList::slotDelBuddy()
     delete currentItem;            //删除
 }
 //查找好友
-void personList::findName(QString name)
+void personList::findName(const QString name)
 {
 	if (name.isEmpty())
 	{
@@ -212,11 +212,10 @@ void personList::findName(QString name)
 		{			
 			allStudents.values().at(i)->setHidden(false);			
 		}
-		CMessageBox::showMessage(
-			QString("答疑时间"),
-			QString("输入想要查找的名字"),
-			QString("确定"),
-			QString());
+		buddyLast->notFind->setText("输入姓名，查找！");
+		buddyLast->notFind->show();
+		timer->start(3000);
+		
 	}
 	else
 	{
@@ -228,19 +227,20 @@ void personList::findName(QString name)
 				allStudents.values().at(i)->setHidden(true);
 				num++;
 			}
-
 		}
 		if (num == allStudents.size())
 		{
 			for (int i = 0; i < allStudents.size(); i++)
 			{
-				allStudents.values().at(i)->setHidden(false);
+				allStudents.values().at(i)->setHidden(true);
 			}
-			CMessageBox::showMessage(
-				QString("答疑时间"),
-				QString("没有这个名字"),
-				QString("确定"),
-				QString());
+			buddyLast->notFind->setText("没有找到该学生！");
+			buddyLast->notFind->show();
+			timer->start(3000);
+		}
+		else
+		{
+			buddyLast->notFind->hide();
 		}
 	}
 	
@@ -254,15 +254,25 @@ void personList::slotRenameEditFshed()
     groupNameEdit->hide();  //隐藏重命名编辑框
 }
 //禁言学生
-void personList::chickChage(bool b, QString ID, QString name)
+void personList::chickChage(int b, QString ID, QString name)
 {
 	emit signalChickChage(b, ID, name);
 }
 //禁言所有的学生
 void personList::stopAllTalk(bool b, QString ID)
 {
-	emit signalAllTalk(b, ID);
+	for (int i = 0; i < groupMap.size();i++)
+	{
+		groupMap.values().at(i)->button->setChecked(b);
+	}
 }
+
+void personList::timeOutSet()
+{
+	buddyLast->notFind->setText(" ");
+	timer->stop();
+}
+
 void personList::setOlineNum(int olineNum, int allNum)
 {
 	buddyFirst->setOlineNum(olineNum, allNum);

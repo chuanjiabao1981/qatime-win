@@ -55,10 +55,8 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.toolButton_2, SIGNAL(clicked()), this, SLOT(forwardTime()));
 	connect(ui.toolButton_1, SIGNAL(clicked()), this, SLOT(afterTime()));
 	connect(ui.button_sendMseeage_2, SIGNAL(clicked()), this, SLOT(announce()));
-	connect(ui.button_sendMseeage_3, SIGNAL(clicked()), this, SLOT(putTalk()));
-	
-	connect(ui.student_list, SIGNAL(signalChickChage(bool, QString, QString)), this, SLOT(chickChage(bool, QString, QString)));
-	
+	connect(ui.button_sendMseeage_3, SIGNAL(clicked()), this, SLOT(putTalk()));	
+	connect(ui.student_list, SIGNAL(signalChickChage(int, QString, QString)), this, SLOT(chickChage(int, QString, QString)));	
 	QScrollBar* TalkRecordScrollBar;
 	TalkRecordScrollBar = (QScrollBar*)ui.talkRecord->verticalScrollBar();
 	if (TalkRecordScrollBar)
@@ -69,6 +67,12 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	m_isBorw = false;
 
 	initSDK();
+	
+	QDate cdate = QDate::currentDate();   //获取今天的日期
+	QTextCharFormat format;
+	format.setBackground(Qt::green);  //设置格式，颜色自选
+	ui.timeWidget->setDateTextFormat(cdate, format);//设置当前日期始终高亮！
+	ui.timeWidget->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
 }
 
 UIChatRoom::~UIChatRoom()
@@ -77,7 +81,23 @@ UIChatRoom::~UIChatRoom()
 }
 // 弹出聊天框
 void UIChatRoom::clickTalk()
-{
+{	
+	QPalette   pal,pal_1,pal_2;
+	pal.setColor(QPalette::ButtonText, Qt::blue);
+	pal_1.setColor(QPalette::ButtonText, Qt::black);	
+	ui.button_talk->setPalette(pal);
+	ui.button_studentList->setPalette(pal_1);
+	ui.button_proclamation->setPalette(pal_1);
+	ui.button_talk->setIcon(QIcon("./images/button_talk1.png"));
+	ui.button_talk->setIconSize(QSize(22, 22));
+	ui.button_studentList->setIcon(QIcon("./images/button_studentList.png"));
+	ui.button_studentList->setIconSize(QSize(22, 22));
+	ui.button_proclamation->setIcon(QIcon("./images/button_proclamation.png"));
+	ui.button_proclamation->setIconSize(QSize(22, 22));
+// 	ui.button_talk->setStyleSheet("background-color: rgb(229,241,251);");
+// 	ui.button_studentList->setStyleSheet("background-color: rgb(225,225,225);");
+// 	ui.button_proclamation->setStyleSheet("background-color: rgb(225,225,225);");
+
 	ui.button_brow->setHidden(false);
 	ui.button_cleanText->setHidden(false);
 	ui.button_notes->setHidden(false);
@@ -92,6 +112,22 @@ void UIChatRoom::clickTalk()
 // 弹出学生列表
 void UIChatRoom::clickStudentList()
 {
+	QPalette   pal, pal_1, pal_2;
+	pal.setColor(QPalette::ButtonText, Qt::blue);
+	pal_1.setColor(QPalette::ButtonText, Qt::black);
+	ui.button_talk->setPalette(pal_1);
+	ui.button_studentList->setPalette(pal);
+	ui.button_proclamation->setPalette(pal_1);
+	ui.button_talk->setIcon(QIcon("./images/button_talk.png"));
+	ui.button_talk->setIconSize(QSize(22, 22));
+	ui.button_studentList->setIcon(QIcon("./images/button_studentList1.png"));
+	ui.button_studentList->setIconSize(QSize(22, 22));
+	ui.button_proclamation->setIcon(QIcon("./images/button_proclamation.png"));
+	ui.button_proclamation->setIconSize(QSize(22, 22));
+// 	ui.button_talk->setStyleSheet("background-color: rgb(225,225,225);");
+// 	ui.button_studentList->setStyleSheet("background-color: rgb(229,241,251);");
+// 	ui.button_proclamation->setStyleSheet("background-color: rgb(225,225,225);");
+
 	ui.button_brow->setHidden(true);
 	ui.button_cleanText->setHidden(true);
 	ui.button_notes->setHidden(true);
@@ -106,6 +142,23 @@ void UIChatRoom::clickStudentList()
 // 弹出公告框
 void UIChatRoom::clickProclamation()
 {
+	QPalette   pal, pal_1, pal_2;
+	pal.setColor(QPalette::ButtonText, Qt::blue);
+	pal_1.setColor(QPalette::ButtonText, Qt::black);
+	ui.button_talk->setPalette(pal_1);
+	ui.button_studentList->setPalette(pal_1);
+	ui.button_proclamation->setPalette(pal);
+	ui.button_talk->setIcon(QIcon("./images/button_talk.png"));
+	ui.button_talk->setIconSize(QSize(22,22));
+	ui.button_studentList->setIcon(QIcon("./images/button_studentList.png"));
+	ui.button_studentList->setIconSize(QSize(22, 22));
+	ui.button_proclamation->setIcon(QIcon("./images/button_proclamation1.png"));
+	ui.button_proclamation->setIconSize(QSize(22, 22));
+// 	ui.button_talk->setStyleSheet("background-color: rgb(225,225,225);\font-color:black;");
+// 	ui.button_talk->setStyleSheet("font-color: rgb(0,0,0);");
+// 	ui.button_studentList->setStyleSheet("background-color: rgb(225,225,225);");
+// 	ui.button_proclamation->setStyleSheet("background-color: rgb(229,241,251);");
+
 	ui.proclamationWidget->setHidden(false);
 	ui.button_sendMseeage_3->hide();
 	ui.textEdit_2->hide();
@@ -125,7 +178,6 @@ void UIChatRoom::clickProclamation()
 void UIChatRoom::clickCleanText()
 {
 	ui.text_talk->clear();
-	ui.student_list->cleanStudents();
 }
 // 表情按钮
 void UIChatRoom::clickBrow()
@@ -635,7 +687,7 @@ void UIChatRoom::OnTeamEventCallback(const nim::TeamEvent& result)
 }
 
 //禁言
-void UIChatRoom::chickChage(bool b, QString qAccid, QString name)
+void UIChatRoom::chickChage(int b, QString qAccid, QString name)
 {
 	std::string accid = qAccid.toStdString();
 	auto cb = std::bind(OnTeamEventCallback, std::placeholders::_1);

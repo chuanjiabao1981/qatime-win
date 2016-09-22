@@ -15,17 +15,14 @@ personListBuddy::~personListBuddy()
 
 void personListBuddy::initFirst()
 {
-	peopleNum = new QLabel(this);
-	firstButton = new QCheckBox(this);	
-	connect(firstButton, SIGNAL(clicked(bool)), this, SLOT(stopAllTalk(bool)));
-	peopleNum->move(5, 5);
-	peopleNum->setText("观看人数 0/0");
-	firstButton->move(225, 5);
-	firstButton->setText("全部禁言");	
+	peopleNum = new QLabel(this);	
+	peopleNum->move(95, 5);
+	peopleNum->setText("当前观看人数 30");
 }
 void personListBuddy::initFindPeople()
 {
 	secLinEdit = new QLineEdit(this);
+	connect(secLinEdit, SIGNAL(textChanged(const QString)), this, SLOT(findName(const QString)));
 	secFindButton = new QPushButton(this);
 	connect(secFindButton, SIGNAL(clicked()), this, SLOT(findName()));	
 	secLinEdit->move(5, 5);
@@ -34,6 +31,20 @@ void personListBuddy::initFindPeople()
 	secLinEdit->setAlignment(Qt::AlignCenter);//居中对齐
 	secFindButton->move(225, 4);
 	secFindButton->setText("查找");
+}
+void personListBuddy::initNotFind()
+{
+	notFind = new QLabel(this);
+	notFind->setBaseSize(QSize(200, 25));
+	notFind->move(95, 5);
+	notFind->setText("没有找到该好友");
+	notFind->setAlignment(Qt::AlignCenter);//居中对齐;//居中对齐	
+	notFind->setStyleSheet("color:red;");
+	notFind->hide();
+	firstButton = new QCheckBox(this);
+	connect(firstButton, SIGNAL(clicked(bool)), this, SLOT(stopAllTalk(bool)));
+	firstButton->move(250, 5);
+	firstButton->setText("全禁");
 }
 
 //初始化Ui
@@ -45,7 +56,7 @@ void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID)
     name=new QLabel(this);
 	m_ID = ID;
 	button = new QCheckBox(this);
-	connect(button, SIGNAL(clicked(bool)), this, SLOT(radioChange(bool)));
+	connect(button, SIGNAL(stateChanged(int)), this, SLOT(radioChange(int)));
 //    sign=new QLabel(this);
     //设置头像大小
     head->setFixedSize(32,32);
@@ -85,7 +96,7 @@ bool personListBuddy::eventFilter(QObject *obj, QEvent *event)
     return QWidget::eventFilter(obj, event);
 }
 
-void personListBuddy::radioChange(bool b)
+void personListBuddy::radioChange(int b)
 {
 	emit emitRadioChange(b, m_ID, name->text());
 }
@@ -104,6 +115,14 @@ void personListBuddy::findName()
 {
 	QString name = secLinEdit->text();
 	emit signalFindName(name);
+}
+//当查找学生编辑框为NULL时候，显示所有学生名字
+void personListBuddy::findName(const QString name)
+{
+	if (name.isEmpty())
+	{
+		emit signalFindNameNULL(name);
+	}	
 }
 
 void personListBuddy::setNetworkPic(const QString &szUrl)

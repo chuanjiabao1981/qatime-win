@@ -122,7 +122,7 @@ public:
 	void ShowMsgs(const std::vector<nim::IMMessage> &msg);
 	void ShowMsg(nim::IMMessage pMsg);
 public slots:
-	void chickChage(bool, QString, QString);
+	void chickChage(int, QString, QString);
 	void AddStudent(QString iconUrl, QString name, QString accid);		//添加成员
 	void AddAnnouncement(QString announcement, QString time);			//添加公告
 	void QueryGroup();
