@@ -46,6 +46,8 @@ private:
 	QString							m_appKey;			// 云信key
 	bool							m_bLogin;			// 是否登录
 	bool                            m_switchTime;		// 切换时间
+	QDateTime						m_RecordTime;		// 消息记录时间（和历史记录时间做对比，用来显示跨天）
+	QDateTime						m_ReceiveTime;		// 聊天记录时间（和之前记录做对比，用来显示跨天）
 	/************************************************************************/
 	/*								聊天记录参数							*/
 	long long						m_farst_msg_time;	// 最远得消息时间
@@ -75,8 +77,7 @@ private slots:
 private:
 private:
 	void		initSDK();									// 初始化云信SDK
-	bool		LoadConfig(const std::string& app_data_dir,
-		const std::string& app_install_dir, nim::SDKConfig &config); //加载配置
+	bool		LoadConfig(const std::string& app_data_dir,const std::string& app_install_dir, nim::SDKConfig &config); //加载配置
 	std::string GetJsonStringWithNoStyled(const QJsonObject& values);				   //json类型转换
 	void		PackageMsg(nim::IMMessage &msg);
 	/**
@@ -125,6 +126,9 @@ public slots:
 	void AddStudent(QString iconUrl, QString name, QString accid);		//添加成员
 	void AddAnnouncement(QString announcement, QString time);			//添加公告
 	void QueryGroup();
+	void QueryRecord(QString dtstr);
+	void stepDays(QDateTime date);										//历史记录跨天
+	void stepMsgDays(QDateTime dateTime);								//聊天记录跨天
 };
 
 #endif // UICHATROOM_H

@@ -10,6 +10,7 @@
 #include "YxChat/nim_cpp_client.h"
 #include "define.h"
 #include <QMouseEvent>
+
 typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
 typedef void(*nim_client_cleanup)(const char *json_extension);
 typedef void(*nim_client_login)(const char *app_token, const char *account, const char *password, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
@@ -25,6 +26,11 @@ typedef void(*nim_client_reg_sync_multiport_push_config_cb)(const char *json_ext
 typedef void(*nim_client_set_multiport_push_config)(const char *switch_content, const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
 typedef void(*nim_client_get_multiport_push_config)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
 
+
+QColor timeColor(100, 100, 100);
+QColor contentColor(0, 0, 0);
+QColor nameColor(85, 170, 255);
+
 UIChatRoom::UIChatRoom(QWidget *parent)
 	: QWidget(parent)
 	, m_CurChatID("")
@@ -32,6 +38,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	, m_farst_msg_time(0)
 	, kMsgLogNumberShow(20)
 	, m_switchTime(false)
+	, m_RecordTime(QDateTime::currentDateTime())
 {
 	ui.setupUi(this);
 	setWindowTitle("QATIME");
@@ -62,11 +69,6 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	m_isBorw = false;
 
 	initSDK();
-
-	// 消息记录日期
-	QDate date = ui.timeWidget->selectedDate();
-	QString dtstr = date.toString("yyyy-MM-dd");
-	ui.timeShow->setText(dtstr);
 }
 
 UIChatRoom::~UIChatRoom()
@@ -142,6 +144,11 @@ void UIChatRoom::clickBrow()
 // 消息记录
 void UIChatRoom::clickNotes()
 {
+	// 消息记录日期
+	QDateTime date = QDateTime::currentDateTime();
+	QString dtstr = date.toString("yyyy-MM-dd");
+	ui.timeShow->setText(dtstr);
+
 	ui.proclamationWidget->setHidden(true);
 	ui.text_talk->setHidden(true);	
 	ui.student_list->setHidden(true);
@@ -231,6 +238,7 @@ void UIChatRoom::setBrow(QString path)
 	m_isBorw = true;
 }
 
+// 发送消息按钮
 void UIChatRoom::clickSendMseeage()
 {
 	if (m_CurChatID.c_str() == "")
@@ -257,14 +265,20 @@ void UIChatRoom::clickSendMseeage()
 	if (textList.size() >= 2 || !sendText.isEmpty())
 	{
 		QDateTime time = QDateTime::currentDateTime();//获取系统现在的时间
-		QString timeStr = time.toString("MM-dd hh:mm:ss");
+
+		// 跨天处理
+		stepMsgDays(time);
+
+		QString timeStr = time.toString("hh:mm:ss");
 		QString imgPath = "./images/username.png";
 		imgPathToHtml(imgPath);
 		stringToHtmlFilter(sendText);
 		if (m_isBorw != false)
 		{
-			stringToHtml(timeStr, QColor(205, 205, 205));
-			ui.text_talk->append("(自己) " + timeStr);
+			QString name = "(自己) ";
+			stringToHtml(name, nameColor);
+			stringToHtml(timeStr, timeColor);
+			ui.text_talk->append(name + timeStr);
 			ui.text_talk->append("");
 			for (int i = 0; i < m_borw.count(); i++)
 			{
@@ -276,9 +290,10 @@ void UIChatRoom::clickSendMseeage()
 		}
 		else
 		{
-			QString qName = "(自己)";
-			stringToHtml(timeStr, QColor(205, 205, 205));
-			ui.text_talk->append(qName + " " + timeStr);
+			QString qName = "(自己) ";
+			stringToHtml(timeStr, timeColor);
+			stringToHtml(qName, nameColor);
+			ui.text_talk->append(qName + timeStr);
 			ui.text_talk->append(sendText);
 		}
 
@@ -330,22 +345,7 @@ void UIChatRoom::choseTime(QDate date)
 	ui.timeShow->setText(dtstr);
 	ui.timeWidget->hide();
 
-	// 获取时间
-	m_switchTime = true;
-	ui.talkRecord->clear();
-	QDateTime time;
-	dtstr += " 00:00:01";
-	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
-
-	// 和当前时间做比较,如选择的时间比当前时间晚，则直接返回
-	QDateTime curTime = QDateTime::currentDateTime();
-	if (curTime < time)
-		return;
-
-	dtstr.replace("00:00:01", "23:59:59");
-	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
-	m_farst_msg_time = time.toMSecsSinceEpoch();
-	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
+	QueryRecord(dtstr);
 }
 
 void UIChatRoom::forwardTime()
@@ -355,23 +355,7 @@ void UIChatRoom::forwardTime()
 	QString dtstr = date.toString("yyyy-MM-dd");
 	ui.timeShow->setText(dtstr);
 
-	// 获取时间
-	m_switchTime = true;
-	ui.talkRecord->clear();
-	QDateTime time;
-	dtstr += " 00:00:01";
-	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
-
-	// 和当前时间做比较,如选择的时间比当前时间晚，则直接返回
-	QDateTime curTime = QDateTime::currentDateTime();
-	if (curTime < time)
-		return;
-
-	dtstr.replace("00:00:01", "23:59:59");
-	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
-	m_farst_msg_time = time.toMSecsSinceEpoch();
-	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
-
+	QueryRecord(dtstr);
 }
 
 void UIChatRoom::afterTime()
@@ -381,6 +365,11 @@ void UIChatRoom::afterTime()
 	QString dtstr = date.toString("yyyy-MM-dd");
 	ui.timeShow->setText(dtstr);
 
+	QueryRecord(dtstr);
+}
+
+void UIChatRoom::QueryRecord(QString dtstr)
+{
 	// 获取时间
 	m_switchTime = true;
 	ui.talkRecord->clear();
@@ -398,6 +387,7 @@ void UIChatRoom::afterTime()
 	m_farst_msg_time = time.toMSecsSinceEpoch();
 	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
 }
+
 // 点击【发布公告】按钮
 void UIChatRoom::announce()
 {
@@ -415,11 +405,21 @@ void UIChatRoom::putTalk()
 	ui.text_proclamation->show();
 
 	QDateTime current_date_time = QDateTime::currentDateTime();
-	QString current_date = current_date_time.toString("yyyy-MM-dd hh:mm:ss");
-	stringToHtml(current_date,QColor(133,133,133));
-	ui.text_proclamation->append(current_date);	
-	ui.text_proclamation->append(ui.textEdit_2->toPlainText());//增加新公告
-	ui.text_proclamation->append("");
+	QString current_date = current_date_time.toString("hh:mm:ss");
+	stringToHtml(current_date, timeColor);
+
+	QString announcement = ui.textEdit_2->toPlainText();//增加新公告
+	stringToHtml(announcement, contentColor);
+
+	QTextCursor textCursor = ui.text_proclamation->textCursor();
+	textCursor.movePosition(QTextCursor::Start);
+	textCursor.insertImage("./images/announcement.png");
+	textCursor.insertText("  ");
+	textCursor.insertHtml(current_date);
+	textCursor.insertText("\n");
+	textCursor.insertHtml(announcement);
+	textCursor.insertText("\n\r");
+
 	ui.textEdit_2->clear();
 		
 }
@@ -438,17 +438,24 @@ void UIChatRoom::PackageMsg(nim::IMMessage &msg)
 	msg.status_ = nim::kNIMMsgLogStatusSending;
 }
 
+
+// 接收消息
 void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 {
 	// 判断当前过来的消息，是不是此会话窗口
 	if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0)
 	{
+		stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_));
+
 		std::string strName = pMsg->readonly_sender_nickname_;
 		std::string strContent = pMsg->content_;
 
-		__int64 time = pMsg->timetag_;
-		QString qTime = QDateTime::fromMSecsSinceEpoch(time).toString("MM-dd hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+		QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg->timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+		stringToHtml(qTime, timeColor);
+
 		QString qName = QString::fromStdString(strName);
+		stringToHtml(qName, nameColor);
+
 		QString qContent = QString::fromStdString(strContent);		
 		ui.text_talk->append(qName + " " + qTime);
 		ui.text_talk->append(qContent);
@@ -480,6 +487,12 @@ void UIChatRoom::ShowMsgs(const std::vector<nim::IMMessage> &msg)
 	{
 		m_farst_msg_time = msg[len - 1].timetag_;
 	}
+	else
+		return;
+
+	//如果请求的20条消息填补不了窗口，则再次请求
+	if (!ui.talkRecord->verticalScrollBar()->isVisible())
+		nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
 }
 
 void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
@@ -487,22 +500,29 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 	if (pMsg.type_ == nim::kNIMMessageTypeNotification) // 过滤系统消息
 		return;
 	
+	// 跨天处理
+	stepDays(QDateTime::fromMSecsSinceEpoch(pMsg.timetag_));
+
 	std::string strName = pMsg.readonly_sender_nickname_;
 	std::string strContent = pMsg.content_;
-
-	__int64 time = pMsg.timetag_;
-	QString qTime = QDateTime::fromMSecsSinceEpoch(time).toString("MM-dd hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+	QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg.timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
 	QString qContent = QString::fromStdString(strContent);
 	QString qName;
 	if (pMsg.sender_accid_ == m_accid.toStdString())
 		strName = "(自己)";
 	
+	// 格式化消息
 	qName = QString::fromStdString(strName);
+	stringToHtml(qName, nameColor);
+	stringToHtml(qTime, timeColor);
+	stringToHtml(qContent, contentColor);
+
+	// 显示消息
 	QTextCursor textCursor = ui.talkRecord->textCursor();
 	textCursor.movePosition(QTextCursor::Start);
-	textCursor.insertText(qName + " " + qTime);
+	textCursor.insertHtml(qName + " " + qTime);
 	textCursor.insertText("\n");
-	textCursor.insertText(qContent);
+	textCursor.insertHtml(qContent);
 	textCursor.insertText("\n\r");
 
 	m_switchTime = false;
@@ -620,25 +640,38 @@ void UIChatRoom::chickChage(bool b, QString qAccid, QString name)
 	std::string accid = qAccid.toStdString();
 	auto cb = std::bind(OnTeamEventCallback, std::placeholders::_1);
 	nim::Team::MuteMemberAsync(m_CurChatID, accid, b, cb);	
-	if (b)
-		ui.text_talk->append(name + "  被禁言");
-	else
-		ui.text_talk->append(name + "  被解除禁言");
+
+// 暂时不显示禁言通知
+// 	if (b)
+// 		ui.text_talk->append(name + "  被禁言");
+// 	else
+// 		ui.text_talk->append(name + "  被解除禁言");
 
 	ui.text_talk->append("");
 }
 
+// 添加成员
 void UIChatRoom::AddStudent(QString iconUrl, QString name, QString accid)
 {
 	ui.student_list->addStrdent(iconUrl, name, accid);
 }
 
+// 添加公告
 void UIChatRoom::AddAnnouncement(QString announcement, QString time)
 {
-	ui.text_proclamation->append(announcement);
-	ui.text_proclamation->append("");
+	stringToHtml(time, timeColor);
+	stringToHtml(announcement, contentColor);
+	QTextCursor textCursor = ui.text_proclamation->textCursor();
+	textCursor.insertImage("./images/announcement.png");
+	textCursor.insertText(" ");
+	textCursor.insertHtml(time);
+	textCursor.insertText("\n");
+	textCursor.insertHtml(announcement);
+	textCursor.insertText("\n\r");
+	ui.text_proclamation->setTextCursor(textCursor);
 }
 
+// 滚动条事件
 void UIChatRoom::RecordMoved(int iPos)
 {
 	if (iPos == 0 && !m_switchTime)
@@ -647,7 +680,56 @@ void UIChatRoom::RecordMoved(int iPos)
 	}
 }
 
+// 查询群成员信息
 void UIChatRoom::QueryGroup()
 {
 	nim::Team::QueryTeamInfoOnlineAsync(m_CurChatID);
+}
+
+// 历史消息记录跨天处理
+void UIChatRoom::stepDays(QDateTime dateTime)
+{
+	QString newDay = dateTime.toString("MM-dd");
+	QString oldDay = m_RecordTime.toString("MM-dd");
+	if (newDay != oldDay && !ui.talkRecord->toPlainText().isEmpty())
+	{
+		QTextCursor textCursor = ui.talkRecord->textCursor();
+		textCursor.movePosition(QTextCursor::Start);
+
+		QTextFrameFormat frameFormat2;
+		frameFormat2.setLeftMargin(110);	//设置左边距
+		frameFormat2.setRightMargin(110);	//设置右边距
+		frameFormat2.setBottomMargin(20);	//设置右边距
+		textCursor.insertFrame(frameFormat2);		//在光标处插入框架
+
+		textCursor.insertText(oldDay);
+	}
+
+	m_RecordTime = dateTime;
+}
+
+void UIChatRoom::stepMsgDays(QDateTime dateTime)
+{
+	if (m_ReceiveTime.isNull())
+	{
+		m_ReceiveTime = dateTime;
+		return;
+	}
+
+	QString newDay = dateTime.toString("MM-dd");
+	QString oldDay = m_ReceiveTime.toString("MM-dd");
+	if (newDay != oldDay && !ui.text_talk->toPlainText().isEmpty())
+	{
+		QTextCursor textCursor = ui.text_talk->textCursor();
+
+		QTextFrameFormat frameFormat2;
+		frameFormat2.setLeftMargin(110);	//设置左边距
+		frameFormat2.setRightMargin(110);	//设置右边距
+		frameFormat2.setBottomMargin(10);	//设置右边距
+		textCursor.insertFrame(frameFormat2);		//在光标处插入框架
+
+		textCursor.insertText(newDay);
+	}
+
+	m_ReceiveTime = dateTime;
 }
