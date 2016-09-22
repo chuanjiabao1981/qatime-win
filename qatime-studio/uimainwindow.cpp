@@ -563,13 +563,24 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 		PMSG pMsg = static_cast<PMSG>(message);
 		switch (pMsg->message)
 		{
-		case MSG_CLIENT_RECEIVE:
+		case MSG_CLIENT_RECEIVE:  // 接收聊天消息
 		{
 			MSG* Msg = pMsg;
 			nim::IMMessage* pIMsg = (nim::IMMessage*)Msg->wParam;
 			
 			if (m_charRoom)
 				m_charRoom->ReceiverMsg(pIMsg);
+
+			delete pIMsg;
+		}
+		break;
+		case MSG_CLIENT_RECORD:  // 接收历史消息
+		{
+			MSG* Msg = pMsg;
+			nim::QueryMsglogResult* pIMsg = (nim::QueryMsglogResult*)Msg->wParam;
+
+			if (m_charRoom)
+				m_charRoom->ReceiverRecordMsg(pIMsg);
 
 			delete pIMsg;
 		}
@@ -915,13 +926,20 @@ void UIMainWindow::returnMember()
 			delete pMember;
 		}
 		
+		// 从云信再次获取群成员信息
+		if (m_charRoom)
+			m_charRoom->QueryGroup();
+
 		// 群公告信息
 		QJsonArray announcements = data["announcements"].toArray();
 		foreach(const QJsonValue & value, announcements)
 		{
 			QJsonObject obj = value.toObject();
 			YXMember *announcements = new YXMember();
-			announcements->readJsonToMember(value.toObject());
+			announcements->readJsonToAnnouncement(value.toObject());
+
+			if (m_charRoom)
+				m_charRoom->AddAnnouncement(announcements->announcement(), announcements->announcementTime());
 
 			//用完之后删除
 			delete announcements;

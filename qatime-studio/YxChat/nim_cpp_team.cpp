@@ -614,16 +614,16 @@ TeamInfo Team::QueryTeamInfoBlock(const std::string& tid)
 	return tinfo;
 }
 
-bool Team::QueryTeamInfoOnlineAsync(const std::string& tid, const TeamEventCallback& cb, const std::string& json_extension/* = ""*/)
+bool Team::QueryTeamInfoOnlineAsync(const std::string& tid, /*const TeamEventCallback& cb,*/ const std::string& json_extension/* = ""*/)
 {
 	if (tid.empty())
 		return false;
 
 	TeamEventCallback* cb_pointer = nullptr;
-	if (cb)
-	{
-		cb_pointer = new TeamEventCallback(cb);
-	}
+// 	if (cb)
+// 	{
+		cb_pointer = new TeamEventCallback();
+/*	}*/
 	NIM_SDK_GET_FUNC(nim_team_query_team_info_online_async)(tid.c_str()
 		, json_extension.c_str()
 		, &CallbackTeamChange

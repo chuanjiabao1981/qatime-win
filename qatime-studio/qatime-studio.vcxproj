@@ -77,7 +77,8 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;.\depend\lib\win32;depend\libs\YX;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Network.lib;Qt5Widgets.lib;LSMediaCapture.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Network.lib;Qt5Widgets.lib;LSMediaCapture.lib;jsoncpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcpmt.lib;</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
       <Command>copy.bat $(OutDir) $(ProjectName) $(Configuration) $(Platform)</Command>
@@ -239,6 +240,7 @@
     <ClCompile Include="YxChat\nim_common_helper.cpp" />
     <ClCompile Include="YxChat\nim_cpp_client.cpp" />
     <ClCompile Include="YxChat\nim_cpp_global.cpp" />
+    <ClCompile Include="YxChat\nim_cpp_msglog.cpp" />
     <ClCompile Include="YxChat\nim_cpp_talk.cpp" />
     <ClCompile Include="YxChat\nim_cpp_team.cpp" />
     <ClCompile Include="YxChat\nim_msglog_helper.cpp" />
@@ -292,6 +294,7 @@
     <ClInclude Include="YxChat\nim_common_helper.h" />
     <ClInclude Include="YxChat\nim_cpp_client.h" />
     <ClInclude Include="YxChat\nim_cpp_global.h" />
+    <ClInclude Include="YxChat\nim_cpp_msglog.h" />
     <ClInclude Include="YxChat\nim_cpp_talk.h" />
     <ClInclude Include="YxChat\nim_cpp_team.h" />
     <ClInclude Include="YxChat\nim_msglog_helper.h" />

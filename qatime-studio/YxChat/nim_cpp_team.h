@@ -383,7 +383,7 @@ public:
 	* @param[in] cb		获取群信息的回调函数
 	* @return bool 检查参数如果不符合要求则返回失败
 	*/
-	static bool QueryTeamInfoOnlineAsync(const std::string& tid, const TeamEventCallback& cb, const std::string& json_extension = "");
+	static bool QueryTeamInfoOnlineAsync(const std::string& tid, /*const TeamEventCallback& cb,*/ const std::string& json_extension = "");
 
 	/** @fn static bool ParseTeamInfo(const std::string& json_team_info, TeamInfo& team_info)
 	* 解析群组信息

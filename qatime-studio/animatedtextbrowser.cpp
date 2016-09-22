@@ -3,6 +3,7 @@
 #include <QMovie>
 
 AnimatedTextBrowser::AnimatedTextBrowser(QWidget *parent)
+	:QTextBrowser(parent)
 {
 
 }

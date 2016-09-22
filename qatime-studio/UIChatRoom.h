@@ -16,6 +16,7 @@
 #include "YxChat/nim_client_helper.h"
 #include "YxChat/nim_cpp_talk.h"
 #include "YxChat/nim_cpp_team.h"
+#include "YxChat/nim_cpp_msglog.h"
 
 class UIChatRoom : public QWidget
 {
@@ -44,6 +45,15 @@ private:
 	QString							m_token;			// 云信用户密码
 	QString							m_appKey;			// 云信key
 	bool							m_bLogin;			// 是否登录
+	bool                            m_switchTime;		// 切换时间
+	/************************************************************************/
+	/*								聊天记录参数							*/
+	long long						m_farst_msg_time;	// 最远得消息时间
+	int								kMsgLogNumberShow;	// 一次获取的条数
+	/************************************************************************/
+	QTextCursor*					m_TextCursor;
+
+
 	void initEmotion();
 	
 private slots:
@@ -59,6 +69,7 @@ private slots:
 	void choseTime(QDate);								// 点击某一时间的槽函数
 	void forwardTime();									// 点击往前一天的槽函数
 	void afterTime();									// 点击往后一天的槽函数
+	void RecordMoved(int iPos);							// 消息记录滚动条
 private:
 private:
 	void		initSDK();									// 初始化云信SDK
@@ -84,16 +95,34 @@ private:
 	*/
 	static void OnTeamEventCallback(const nim::TeamEvent& result);
 
+	/**
+	* 获取会话记录的回调函数
+	* @param[in] code	错误码(200代表无错误)
+	* @param[in] id		获取的会话记录所属的会话id
+	* @param[in] type	获取的会话记录所属的会话类型
+	* @param[in] result 消息体Json string,包含了获取的会话记录的信息
+	* @return void 无返回值
+	*/
+	static void QueryMsgOnlineCb(nim::NIMResCode code, const std::string& id, nim::NIMSessionType type, const nim::QueryMsglogResult& result);
+
+	static void OnGetTeamInfoCb(const nim::TeamEvent& team_event);
+
 public:
 	void setChatInfo(QJsonObject &chatInfo);				// 设置云信账户信息
 	void ReceiverMsg(nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
+	void ReceiverRecordMsg(nim::QueryMsglogResult* pMsg);	// 接收历史消息记录
 	void setCurChatID(QString chatID);						// 设置当前窗口会话ID,用于接收消息时比较
 	void setKeyAndLogin(QString key);						// 设置appkey并登录（获取完Key之后，就可以直接登录）
 	bool IsLogin();											// 是否登录
 	bool IsCurChatRoom(QString chatID);						// 是否是当前会话ID
+
+	void ShowMsgs(const std::vector<nim::IMMessage> &msg);
+	void ShowMsg(nim::IMMessage pMsg);
 public slots:
 	void chickChage(bool, QString, QString);
-	void AddStudent(QString iconUrl, QString name, QString accid);
+	void AddStudent(QString iconUrl, QString name, QString accid);		//添加成员
+	void AddAnnouncement(QString announcement, QString time);			//添加公告
+	void QueryGroup();
 };
 
 #endif // UICHATROOM_H

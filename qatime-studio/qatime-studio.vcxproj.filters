@@ -286,6 +286,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_myLabel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="YxChat\nim_cpp_msglog.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="loginwindow.h">
@@ -465,6 +468,9 @@
       <Filter>YxChat</Filter>
     </ClInclude>
     <ClInclude Include="YxChat\nim_user_helper.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_cpp_msglog.h">
       <Filter>YxChat</Filter>
     </ClInclude>
   </ItemGroup>

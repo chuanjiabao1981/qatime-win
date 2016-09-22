@@ -3,6 +3,7 @@
 #include <QTime>
 #include <QMovie>
 #include "UIMessageBox.h"
+#include <QScrollBar>
 
 #include "YxChat/nim_sdk_helper.h"
 #include "YxChat/session_callback.h"
@@ -28,6 +29,9 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	: QWidget(parent)
 	, m_CurChatID("")
 	, m_bLogin(false)
+	, m_farst_msg_time(0)
+	, kMsgLogNumberShow(20)
+	, m_switchTime(false)
 {
 	ui.setupUi(this);
 	setWindowTitle("QATIME");
@@ -44,11 +48,22 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.toolButton_2, SIGNAL(clicked()), this, SLOT(forwardTime()));
 	connect(ui.toolButton_1, SIGNAL(clicked()), this, SLOT(afterTime()));
 	connect(ui.student_list, SIGNAL(signalChickChage(bool, QString, QString)), this, SLOT(chickChage(bool, QString, QString)));
+	
+	QScrollBar* TalkRecordScrollBar;
+	TalkRecordScrollBar = (QScrollBar*)ui.talkRecord->verticalScrollBar();
+	if (TalkRecordScrollBar)
+		connect((QObject*)TalkRecordScrollBar, SIGNAL(valueChanged(int)), this, SLOT(RecordMoved(int)));
+
 	initEmotion();
 	this->clickTalk();
 	m_isBorw = false;
 
 	initSDK();
+
+	// 消息记录日期
+	QDate date = ui.timeWidget->selectedDate();
+	QString dtstr = date.toString("yyyy-MM-dd");
+	ui.timeShow->setText(dtstr);
 }
 
 UIChatRoom::~UIChatRoom()
@@ -115,6 +130,10 @@ void UIChatRoom::clickNotes()
 	ui.textEdit->setHidden(true);
 	ui.msgRecord->setHidden(false);
 	ui.timeWidget->hide();
+	ui.talkRecord->clear();		// 清除消息记录
+
+	m_farst_msg_time = 0;
+	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
 }
 
 void UIChatRoom::closeNotes()
@@ -126,6 +145,10 @@ void UIChatRoom::closeNotes()
 	ui.button_sendMseeage->setHidden(false);
 	ui.textEdit->setHidden(false);
 	ui.msgRecord->setHidden(true);
+}
+
+void UIChatRoom::QueryMsgOnlineCb(nim::NIMResCode code, const std::string& id, nim::NIMSessionType type, const nim::QueryMsglogResult& result)
+{
 }
 
 //加载所有表情
@@ -144,29 +167,8 @@ void UIChatRoom::initEmotion()
 	for (int i = 1; i <= 75; i++)
 	{
 		m_smallEmotionWidget->addEmotionItem(path + QString::number(i) + path1, "");
-		//		m_smallEmotionWidget->addEmotionItem(dir.currentPath()+"./images/em_1.gif", "");
 	}
 	m_smallEmotionWidget->setVisible(false);
-	// 初始化正常表情框;
-	// 	m_normalEmotionWidget = new MyEmotionWidget;
-	// 	m_normalEmotionWidget->setRowAndColumn(10, 14);
-	// 	m_normalEmotionWidget->setEmotionSize(QSize(32, 32));
-	// 	m_normalEmotionWidget->setEmotionMovieSize(QSize(24, 24));
-	// 	m_normalEmotionWidget->setMaxRow(6);
-	// 	m_normalEmotionWidget->initTableWidget();
-	// 	m_normalEmotionWidget->setVisible(false);
-	// 	for (int i = 1; i <= 75; i++)
-	// 	{
-	// 		//		m_normalEmotionWidget->addEmotionItem(path.arg(i + 1), "");
-	// 	}	
-
-	// 	m_lableTitle = new QLabel;
-	// 	QVBoxLayout* vLayout = new QVBoxLayout;
-	// 	vLayout->addWidget(m_lableTitle);
-	// 	vLayout->addWidget(m_smallEmotionWidget);
-	// 	vLayout->addWidget(m_normalEmotionWidget);
-	// 	this->setLayout(vLayout);
-
 }
 
 
@@ -209,6 +211,12 @@ void UIChatRoom::setBrow(QString path)
 
 void UIChatRoom::clickSendMseeage()
 {
+	if (m_CurChatID.c_str() == "")
+	{
+		CMessageBox::showMessage(QString("答疑时间"),QString("请选择直播间！"),QString("确定"),QString());
+		return;
+	}
+
 	QString tempText = ui.textEdit->toPlainText();
 	QStringList textList = tempText.split("￼");
 	QString sendText, sendMsg;
@@ -290,11 +298,29 @@ void UIChatRoom::chickChoseTime()
 	
 }
 
+// 选择时间
 void UIChatRoom::choseTime(QDate date)
 {		
 	QString dtstr = date.toString("yyyy-MM-dd");
 	ui.timeShow->setText(dtstr);
 	ui.timeWidget->hide();
+
+	// 获取时间
+	m_switchTime = true;
+	ui.talkRecord->clear();
+	QDateTime time;
+	dtstr += " 00:00:01";
+	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
+
+	// 和当前时间做比较,如选择的时间比当前时间晚，则直接返回
+	QDateTime curTime = QDateTime::currentDateTime();
+	if (curTime < time)
+		return;
+
+	dtstr.replace("00:00:01", "23:59:59");
+	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
+	m_farst_msg_time = time.toMSecsSinceEpoch();
+	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
 }
 
 void UIChatRoom::forwardTime()
@@ -303,6 +329,23 @@ void UIChatRoom::forwardTime()
 	ui.timeWidget->setSelectedDate(date);
 	QString dtstr = date.toString("yyyy-MM-dd");
 	ui.timeShow->setText(dtstr);
+
+	// 获取时间
+	m_switchTime = true;
+	ui.talkRecord->clear();
+	QDateTime time;
+	dtstr += " 00:00:01";
+	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
+
+	// 和当前时间做比较,如选择的时间比当前时间晚，则直接返回
+	QDateTime curTime = QDateTime::currentDateTime();
+	if (curTime < time)
+		return;
+
+	dtstr.replace("00:00:01", "23:59:59");
+	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
+	m_farst_msg_time = time.toMSecsSinceEpoch();
+	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
 }
 
 void UIChatRoom::afterTime()
@@ -311,6 +354,23 @@ void UIChatRoom::afterTime()
 	ui.timeWidget->setSelectedDate(date);
 	QString dtstr = date.toString("yyyy-MM-dd");
 	ui.timeShow->setText(dtstr);
+
+	// 获取时间
+	m_switchTime = true;
+	ui.talkRecord->clear();
+	QDateTime time;
+	dtstr += " 00:00:01";
+	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
+
+	// 和当前时间做比较,如选择的时间比当前时间晚，则直接返回
+	QDateTime curTime = QDateTime::currentDateTime();
+	if (curTime < time)
+		return;
+
+	dtstr.replace("00:00:01", "23:59:59");
+	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
+	m_farst_msg_time = time.toMSecsSinceEpoch();
+	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
 }
 
 void UIChatRoom::PackageMsg(nim::IMMessage &msg)
@@ -344,6 +404,62 @@ void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		ui.text_talk->append(qContent);
 		ui.text_talk->append("");
 	}
+}
+
+void UIChatRoom::ReceiverRecordMsg(nim::QueryMsglogResult* pMsg)
+{
+	std::vector<nim::IMMessage> vec;
+	for (auto& msg : pMsg->msglogs_)
+	{
+		vec.push_back(msg);
+	}
+	ShowMsgs(vec);
+}
+
+void UIChatRoom::ShowMsgs(const std::vector<nim::IMMessage> &msg)
+{
+	//msg倒序排列
+	size_t len = msg.size();
+	for (size_t i = 0; i < len; i++)
+	{
+		ShowMsg(msg[i]);
+	}
+	
+	//修正最远时间
+	if (len > 0)
+	{
+		m_farst_msg_time = msg[len - 1].timetag_;
+	}
+}
+
+void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
+{
+	if (pMsg.type_ == nim::kNIMMessageTypeNotification) // 过滤系统消息
+		return;
+	
+	std::string strName = pMsg.readonly_sender_nickname_;
+	std::string strContent = pMsg.content_;
+
+	__int64 time = pMsg.timetag_;
+	QString qTime = QDateTime::fromMSecsSinceEpoch(time).toString("MM-dd hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+	QString qContent = QString::fromStdString(strContent);
+	QString qName;
+	if (pMsg.sender_accid_ == m_accid.toStdString())
+		strName = "(自己)";
+	
+	qName = QString::fromStdString(strName);
+	QTextCursor textCursor = ui.talkRecord->textCursor();
+	textCursor.movePosition(QTextCursor::Start);
+	textCursor.insertText(qName + " " + qTime);
+	textCursor.insertText("\n");
+	textCursor.insertText(qContent);
+	textCursor.insertText("\n\r");
+
+	m_switchTime = false;
+
+	QScrollBar* pScrollBar = ui.talkRecord->verticalScrollBar();
+	if (pScrollBar)
+		pScrollBar->setSliderPosition(2);
 }
 
 //////////////////////////////添加云信功能////////////////////////////////
@@ -465,4 +581,23 @@ void UIChatRoom::chickChage(bool b, QString qAccid, QString name)
 void UIChatRoom::AddStudent(QString iconUrl, QString name, QString accid)
 {
 	ui.student_list->addStrdent(iconUrl, name, accid);
+}
+
+void UIChatRoom::AddAnnouncement(QString announcement, QString time)
+{
+	ui.text_proclamation->append(announcement);
+	ui.text_proclamation->append("");
+}
+
+void UIChatRoom::RecordMoved(int iPos)
+{
+	if (iPos == 0 && !m_switchTime)
+	{
+		nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
+	}
+}
+
+void UIChatRoom::QueryGroup()
+{
+	nim::Team::QueryTeamInfoOnlineAsync(m_CurChatID);
 }

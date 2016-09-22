@@ -28,3 +28,19 @@ QString YXMember::name()
 {
     return mName;
 }
+
+void YXMember::readJsonToAnnouncement(const QJsonObject &json)
+{
+	mAnnouncement = json["announcement"].toString();
+	mTime = json["edit_at"].toString();
+}
+
+QString YXMember::announcement()
+{
+	return mAnnouncement;
+}
+
+QString YXMember::announcementTime()
+{
+	return mTime;
+}
