@@ -199,6 +199,8 @@ void UIChatRoom::clickNotes()
 	// 消息记录日期
 	QDateTime date = QDateTime::currentDateTime();
 	QString dtstr = date.toString("yyyy-MM-dd");
+	QDate cdate = QDate::currentDate();
+	ui.timeWidget->setSelectedDate(cdate);
 	ui.timeShow->setText(dtstr);
 
 	ui.proclamationWidget->setHidden(true);
