@@ -197,6 +197,7 @@ void UIChatRoom::clickBrow()
 void UIChatRoom::clickNotes()
 {
 	// 消息记录日期
+	
 	QDateTime date = QDateTime::currentDateTime();
 	QString dtstr = date.toString("yyyy-MM-dd");
 	QDate cdate = QDate::currentDate();
@@ -786,4 +787,11 @@ void UIChatRoom::stepMsgDays(QDateTime dateTime)
 	}
 
 	m_ReceiveTime = dateTime;
+}
+
+void UIChatRoom::clearAll()
+{
+	ui.text_talk->clear();
+	ui.text_proclamation->clear();
+	ui.student_list->cleanStudents();
 }

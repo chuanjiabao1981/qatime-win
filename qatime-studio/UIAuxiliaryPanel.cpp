@@ -48,7 +48,11 @@ void UIAuxiliaryPanel::init()
 	m_teacher_treewidget->setHeaderHidden(true);
 
 	connect(ui.return_pushButton, SIGNAL(clicked()), this, SLOT(returnClick()));
-	ui.return_pushButton->setToolTip(tr("ÕÀ≥ˆµΩµ«¬Ω¥∞ø⁄"));
+//	ui.return_pushButton->setToolTip(tr("ÕÀ≥ˆµΩµ«¬Ω¥∞ø⁄"));
+
+	ui.return_pushButton->setIcon(QIcon("./images/quit.png"));
+	ui.return_pushButton->setIconSize(QSize(16, 16));
+	ui.return_pushButton->setText("«–ªª’À∫≈");
 }
 
 void UIAuxiliaryPanel::setParent(UIMainWindow* parent)

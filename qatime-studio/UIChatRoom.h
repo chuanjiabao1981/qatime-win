@@ -129,6 +129,7 @@ public slots:
 	void QueryRecord(QString dtstr);
 	void stepDays(QDateTime date);										//历史记录跨天
 	void stepMsgDays(QDateTime dateTime);								//聊天记录跨天
+	void clearAll();													//情况聊天记录、公告、群成员
 };
 
 #endif // UICHATROOM_H
