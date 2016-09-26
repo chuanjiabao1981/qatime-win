@@ -10,6 +10,7 @@
 #include "YxChat/nim_cpp_client.h"
 #include "define.h"
 #include <QMouseEvent>
+#include <QToolTip>
 
 typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
 typedef void(*nim_client_cleanup)(const char *json_extension);
@@ -301,9 +302,10 @@ void UIChatRoom::setBrow(QString path)
 // 发送消息按钮
 void UIChatRoom::clickSendMseeage()
 {
-	if (m_CurChatID.c_str() == "")
+	if (strcmp(m_CurChatID.c_str(),"") == 0)
 	{
-		CMessageBox::showMessage(QString("答疑时间"),QString("请选择直播间！"),QString("确定"),QString());
+		QToolTip::showText(QCursor::pos(), "请选择直播间！");
+		//CMessageBox::showMessage(QString("答疑时间"),QString("请选择直播间！"),QString("确定"),QString());
 		return;
 	}
 
@@ -382,6 +384,9 @@ void UIChatRoom::clickSendMseeage()
 	std::string json_msg = nim::Talk::CreateTextMessage(msg.receiver_accid_, msg.session_type_, msg.client_msg_id_, msg.content_, setting, msg.timetag_);
 	nim::Talk::SendMsg(json_msg);
 	m_borw.clear();
+
+	
+	ui.textEdit->setFocus();
 }
 
 void UIChatRoom::chickChoseTime()
@@ -588,6 +593,27 @@ void UIChatRoom::ShowMsgs(const std::vector<nim::IMMessage> &msg)
 	else
 		return;
 
+	// 滚动条跳转到新加载消息的位置(用时间做标识)
+	for (size_t i = 0; i < len; i++)
+	{
+		if (msg[i].type_ != nim::kNIMMessageTypeNotification)
+		{
+			QString time = QDateTime::fromMSecsSinceEpoch(msg[i].timetag_).toString("hh:mm:ss");
+			QTextCursor tc = ui.talkRecord->textCursor();
+			int position = ui.talkRecord->document()->find(time).position();
+			tc.setPosition(position, QTextCursor::MoveAnchor);
+			ui.talkRecord->setTextCursor(tc);
+
+			QScrollBar* pScrollBar = ui.talkRecord->verticalScrollBar();
+			if (pScrollBar)
+			{
+				int Pos = pScrollBar->sliderPosition();
+				pScrollBar->setSliderPosition(Pos + 20);
+			}
+			break;
+		}
+	}
+
 	//如果请求的20条消息填补不了窗口，则再次请求
 	if (!ui.talkRecord->verticalScrollBar()->isVisible())
 		nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
@@ -623,11 +649,7 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 	textCursor.insertHtml(qContent);
 	textCursor.insertText("\n\r");
 
-	m_switchTime = false;
-
-	QScrollBar* pScrollBar = ui.talkRecord->verticalScrollBar();
-	if (pScrollBar)
-		pScrollBar->setSliderPosition(2);
+	m_switchTime = false;	
 }
 
 //////////////////////////////添加云信功能////////////////////////////////
@@ -706,7 +728,36 @@ void UIChatRoom::setKeyAndLogin(QString key)
 		return;
 	}
 
+	
+
 	m_bLogin = true;
+}
+
+void UIChatRoom::ReceiverLoginMsg(nim::LoginRes* pRes)
+{
+	if (pRes->res_code_ == nim::kNIMResSuccess && pRes->login_step_ == kNIMLoginStepLogin) // 登录成功
+	{
+		// 从云信再次获取群成员信息
+		QueryGroup();
+	}
+}
+
+// 初始化获取群成员的禁言状态
+void UIChatRoom::ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg)
+{
+	for (auto it : *pMemberMsg)
+	{
+		if (it.IsMute())
+		{
+			QString accid = QString::fromStdString(it.GetAccountID());
+			personListBuddy* pBuddy = NULL;
+			pBuddy = ui.student_list->findID(accid);
+			if (pBuddy)
+			{
+				pBuddy->setCheckBox(true);
+			}
+		}
+	}
 }
 
 bool UIChatRoom::IsLogin()
@@ -781,7 +832,7 @@ void UIChatRoom::RecordMoved(int iPos)
 // 查询群成员信息
 void UIChatRoom::QueryGroup()
 {
-	nim::Team::QueryTeamInfoOnlineAsync(m_CurChatID);
+	nim::Team::QueryTeamMembersAsync(m_CurChatID);
 }
 
 // 历史消息记录跨天处理

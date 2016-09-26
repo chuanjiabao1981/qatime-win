@@ -82,6 +82,14 @@ void personListBuddy::setOlineNum(int olineNum,int allNum)
 	peopleNum->setText("观看人数 " + QString::number(olineNum) + "/" + QString::number(allNum));
 }
 
+void personListBuddy::setCheckBox(bool bCheck)
+{
+	if (bCheck)
+		button->setCheckState(Qt::CheckState::Checked);
+	else
+		button->setCheckState(Qt::CheckState::Unchecked);
+}
+
 //事件过滤器，主要是为了让图片能够全部填充在head里面
 bool personListBuddy::eventFilter(QObject *obj, QEvent *event)
 {

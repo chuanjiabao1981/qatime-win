@@ -180,6 +180,7 @@ void personList::addStrdent(QString imagesUrl,QString stuName,QString ID)
 	this->setItemWidget(newItem, buddy);
 	groupMap.insert(newItem, buddy);
 	allStudents.insert(stuName, newItem);
+	IdStudents.insert(ID, newItem);
 	newItem->setHidden(false);
 }
 void personList::slotAddBuddy()
@@ -290,7 +291,19 @@ void personList::cleanStudents()
 	}	
 	groupMap.clear();
 	allStudents.clear();
+	IdStudents.clear();
 	this->clear();
 	initFronUi();
 	initSecUi();
 }
+
+personListBuddy* personList::findID(const QString id)
+{
+	personListBuddy* Buddy = NULL;
+
+	if (!id.isEmpty())
+		Buddy = *groupMap.find(*IdStudents.find(id));
+	
+	return Buddy;
+}
+
