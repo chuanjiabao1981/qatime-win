@@ -7,6 +7,9 @@
 personList::personList(QWidget *parent) :
     QListWidget(parent)
 	, currentItem(NULL)
+	, buddyFirst(NULL)
+	, buddySec(NULL)
+	, buddyLast(NULL)
 {
     setFocusPolicy(Qt::NoFocus);       // 去除item选中时的虚线边框
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);//水平滚动条关闭
@@ -138,8 +141,8 @@ void personList::slotRename()
 
 void personList::initFronUi()
 {
-	buddyFirst = new personListBuddy();	
-	buddyFirst->initFirst();
+	buddyFirst = new personListBuddy();
+	buddyFirst->initFirst();		
 	QListWidgetItem *newItem = new QListWidgetItem();
 	newItem->setSizeHint(QSize(300, 30));
 	this->insertItem(0, newItem);
@@ -166,6 +169,10 @@ void personList::initSecUi()
 	this->insertItem(2, newItemLast);
 	this->setItemWidget(newItemLast, buddyLast);
 	newItemLast->setHidden(false);
+}
+void personList::setStrdentNumbers(int num)
+{
+	buddyFirst->setOlineNum(num, 0);
 }
 void personList::addStrdent(QString imagesUrl,QString stuName,QString ID)
 {
@@ -287,6 +294,7 @@ void personList::cleanStudents()
 		if (groupMap.keys().at(i))
 		{
 			delete (groupMap.keys().at(i));
+			delete (groupMap.values().at(i));
 		}		
 	}	
 	groupMap.clear();

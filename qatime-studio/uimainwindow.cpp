@@ -939,6 +939,7 @@ void UIMainWindow::returnMember()
 	{
 		// 群成员信息
 		QJsonArray members = data["members"].toArray();
+		int i = 0;
 		foreach(const QJsonValue & value, members)
 		{
 			QJsonObject obj = value.toObject();
@@ -947,11 +948,11 @@ void UIMainWindow::returnMember()
 
 			if (m_charRoom)
 				m_charRoom->AddStudent(pMember->url(), pMember->name(), pMember->accid());
-
+			i++;
 			//用完之后删除
 			delete pMember;
 		}
-
+		m_charRoom->AddStudentNumbers(i);
 		// 群公告信息
 		QJsonArray announcements = data["announcements"].toArray();
 		foreach(const QJsonValue & value, announcements)

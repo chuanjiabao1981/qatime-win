@@ -118,62 +118,6 @@
      <widget class="personList" name="student_list"/>
     </item>
     <item>
-     <widget class="QWidget" name="proclamationWidget" native="true">
-      <widget class="QTextBrowser" name="text_proclamation">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>100</y>
-         <width>299</width>
-         <height>431</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QTextEdit" name="textEdit_2">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>10</y>
-         <width>299</width>
-         <height>91</height>
-        </rect>
-       </property>
-       <property name="placeholderText">
-        <string>请在此输入新公布内容（最多支持一百字）</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="button_sendMseeage_2">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>10</y>
-         <width>71</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>+发布公告</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="button_sendMseeage_3">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>238</x>
-         <y>100</y>
-         <width>61</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>发布</string>
-       </property>
-      </widget>
-     </widget>
-    </item>
-    <item>
      <widget class="QWidget" name="msgRecord" native="true">
       <widget class="myLabel" name="timeShow">
        <property name="geometry">
@@ -291,6 +235,62 @@ selection-background-color: rgb(0, 220, 161);</string>
        </property>
        <property name="verticalHeaderFormat">
         <enum>QCalendarWidget::NoVerticalHeader</enum>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="proclamationWidget" native="true">
+      <widget class="QTextBrowser" name="text_proclamation">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>100</y>
+         <width>299</width>
+         <height>452</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="textEdit_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>10</y>
+         <width>299</width>
+         <height>91</height>
+        </rect>
+       </property>
+       <property name="placeholderText">
+        <string>请在此输入新公布内容（最多支持一百字）</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="button_sendMseeage_2">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>10</y>
+         <width>71</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>+发布公告</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="button_sendMseeage_3">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>238</x>
+         <y>100</y>
+         <width>61</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>发布</string>
        </property>
       </widget>
      </widget>

@@ -128,6 +128,7 @@ public:
 public slots:
 	void chickChage(int, QString, QString);
 	void AddStudent(QString iconUrl, QString name, QString accid);		//添加成员
+	void AddStudentNumbers(int num);									//添加成员数量
 	void AddAnnouncement(QString announcement, QString time);			//添加公告
 	void QueryGroup();
 	void QueryRecord(QString dtstr);

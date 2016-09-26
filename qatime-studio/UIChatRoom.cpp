@@ -414,6 +414,7 @@ void UIChatRoom::choseTime(QDate date)
 	if (dateNow<date)
 	{
 		//TODO提示，消息记录只能查看之前的消息
+		QToolTip::showText(QCursor::pos(),"没有今天之后的消息记录！");
 	}
 	else
 	{
@@ -483,7 +484,7 @@ void UIChatRoom::putTalk()
 	ui.text_proclamation->show();
 
 	QDateTime current_date_time = QDateTime::currentDateTime();
-	QString current_date = current_date_time.toString("hh:mm:ss");
+	QString current_date = current_date_time.toString("yyyy-MM-dd hh:mm:ss");
 	stringToHtml(current_date, timeColor);
 
 	QString announcement = ui.textEdit_2->toPlainText();//增加新公告
@@ -803,6 +804,10 @@ void UIChatRoom::chickChage(int b, QString qAccid, QString name)
 void UIChatRoom::AddStudent(QString iconUrl, QString name, QString accid)
 {
 	ui.student_list->addStrdent(iconUrl, name, accid);
+}
+void UIChatRoom::AddStudentNumbers(int num)
+{
+	ui.student_list->setStrdentNumbers(num);
 }
 
 // 添加公告

@@ -17,7 +17,7 @@ void personListBuddy::initFirst()
 {
 	peopleNum = new QLabel(this);	
 	peopleNum->move(95, 5);
-	peopleNum->setText("当前观看人数 30");
+	peopleNum->setText("当前观看人数 0");
 }
 void personListBuddy::initFindPeople()
 {
@@ -79,7 +79,8 @@ void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID)
 
 void personListBuddy::setOlineNum(int olineNum,int allNum)
 {
-	peopleNum->setText("观看人数 " + QString::number(olineNum) + "/" + QString::number(allNum));
+//	peopleNum->setText("观看人数 " + QString::number(olineNum) + "/" + QString::number(allNum));
+	peopleNum->setText("当前观看人数 "+QString::number(olineNum));
 }
 
 void personListBuddy::setCheckBox(bool bCheck)

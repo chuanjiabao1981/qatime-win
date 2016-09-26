@@ -30,6 +30,7 @@ public:
     QLineEdit *groupNameEdit;//组的名字，重命名的时候需要用到
     QListWidgetItem *currentItem;//当前的项
 	void addStrdent(QString imagePath, QString stuName, QString ID);
+	void setStrdentNumbers(int num);
 	void initFronUi();
 	void initSecUi();
 	void setOlineNum(int olineNum, int allNum);//设置在线人数的接口
