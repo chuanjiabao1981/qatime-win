@@ -305,7 +305,6 @@ void UIChatRoom::clickSendMseeage()
 	if (strcmp(m_CurChatID.c_str(),"") == 0)
 	{
 		QToolTip::showText(QCursor::pos(), "请选择直播间！");
-		//CMessageBox::showMessage(QString("答疑时间"),QString("请选择直播间！"),QString("确定"),QString());
 		return;
 	}
 
@@ -562,9 +561,80 @@ void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 
 		QString qContent = QString::fromStdString(strContent);		
 		ui.text_talk->append(qName + " " + qTime);
-		ui.text_talk->append(qContent);
+		if (IsHasFace(qContent)) // 有表情则解析，没有表情直接输出
+			ParseFace(qContent);
+		else
+			ui.text_talk->append(qContent);
 		ui.text_talk->append("");
 	}
+}
+
+bool UIChatRoom::IsHasFace(QString qContect)
+{
+	int iStartPos = qContect.indexOf("[");
+	int iEndPos = qContect.indexOf("]");
+	if (iStartPos != -1 && iEndPos != -1) // 找到[]
+	{
+		QString qFace = "[em_number]";
+		for (int iCount = 1; iCount < 76; iCount++)		//详细对比
+		{
+			qFace = qFace.replace("number", QString::number(iCount));
+			if (qContect.indexOf(qFace) != -1)
+				return true;
+			else
+				qFace = "[em_number]";
+		}
+	}
+
+	return false;
+}
+
+void UIChatRoom::ParseFace(QString qContect)
+{
+	ui.text_talk->append("");
+	QString qFace="";			// 表情
+	bool    bHas = false;		// 判断当前是否有表情
+	int iCount =qContect.size();
+	for (int i = 0; i < iCount;i++)
+	{
+		QString str = qContect.at(i);
+		if (str == "[")
+		{
+			QString sBlock = qContect.mid(i, 4);
+			// 谨慎处理，完全比对
+			if (sBlock == "[em_")
+				bHas = true;
+		}	
+
+		if (bHas)
+			qFace += str;
+
+		if (str == "]" && bHas)
+		{
+			QString strFace = BuildFaceToUrl(qFace);
+			ui.text_talk->insertHtml("<img src='" + strFace + "'/>");  //   此处的test 即 url
+			ui.text_talk->addAnimation(QUrl(strFace), strFace);  //添加一个动画.	
+
+			qFace = "";
+			bHas = false;
+			continue;
+		}
+
+		if (!bHas)
+		{
+			ui.text_talk->insertHtml(str);
+		}
+	}
+}
+
+QString UIChatRoom::BuildFaceToUrl(QString qFace)
+{
+	qFace.replace("[", "");
+	qFace.replace("]", "");
+	
+	QString qFacePath = "./images/em.gif";
+	qFacePath.replace("em",qFace);
+	return qFacePath;
 }
 
 void UIChatRoom::ReceiverRecordMsg(nim::QueryMsglogResult* pMsg)
@@ -741,6 +811,8 @@ void UIChatRoom::ReceiverLoginMsg(nim::LoginRes* pRes)
 		// 从云信再次获取群成员信息
 		QueryGroup();
 	}
+
+	QToolTip::showText(QCursor::pos(), "您已成功进入直播教室！");
 }
 
 // 初始化获取群成员的禁言状态

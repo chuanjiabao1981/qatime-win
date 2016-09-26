@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QScrollBar>
 #include "UIMessageBox.h"
+#include <QToolTip>
 
 #define QT_TOOLBOXINDEX			100				//QTableWidgetItem索引
 #define QT_TOOLBOXCOURSEID		101				//Toolbox对应的辅导班ID
@@ -48,11 +49,11 @@ void UIAuxiliaryPanel::init()
 	m_teacher_treewidget->setHeaderHidden(true);
 
 	connect(ui.return_pushButton, SIGNAL(clicked()), this, SLOT(returnClick()));
-//	ui.return_pushButton->setToolTip(tr("退出到登陆窗口"));
-
 	ui.return_pushButton->setIcon(QIcon("./images/quit.png"));
 	ui.return_pushButton->setIconSize(QSize(16, 16));
 	ui.return_pushButton->setText("切换账号");
+
+	connect(this, SIGNAL(emitShowTip()), this, SLOT(ShowTip()));
 }
 
 void UIAuxiliaryPanel::setParent(UIMainWindow* parent)
@@ -477,7 +478,8 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 		m_Parent->setCurChatRoom(m_chatID);
 
 	}
-	setFocus();
+	emit emitShowTip();
+//	setFocus();
 }
 
 void UIAuxiliaryPanel::on_itemExpanded(QTreeWidgetItem* terrWidget)
@@ -495,4 +497,10 @@ void UIAuxiliaryPanel::on_itemCollapsed(QTreeWidgetItem* terrWidget)
 void UIAuxiliaryPanel::returnClick()
 {
 	m_Parent->returnClick();
+}
+
+void UIAuxiliaryPanel::ShowTip()
+{
+	setFocus();
+	QToolTip::showText(QCursor::pos(), "您已成功进入直播教室！");
 }

@@ -47,6 +47,10 @@ private:
 	QString							m_lessonName;			//课程名字
 	QTreeWidgetItem*				m_pCurrenDoubTree;		//目前双击的列表
 	QString							m_chatID;				//当前会话窗口ID
+
+signals:
+	void emitShowTip();
+
 private slots:
 	void DrawBack();
 	//TODO zp 
@@ -55,6 +59,7 @@ private slots:
 	void on_itemExpanded(QTreeWidgetItem* terrWidget);
 	void on_itemCollapsed(QTreeWidgetItem* terrWidget);
 	void returnClick();
+	void ShowTip();
 
 private:
 	void style(QTableWidget* pTableWidget);													//tableWidget样式

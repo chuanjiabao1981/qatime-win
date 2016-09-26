@@ -113,18 +113,21 @@ private:
 	static void OnGetTeamInfoCb(const nim::TeamEvent& team_event);
 
 public:
-	void setChatInfo(QJsonObject &chatInfo);				// 设置云信账户信息
-	void ReceiverMsg(nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
-	void ReceiverRecordMsg(nim::QueryMsglogResult* pMsg);	// 接收历史消息记录
-	void ReceiverLoginMsg(nim::LoginRes* pRes);				// 接收登录结果
-	void ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg); //接收群成员信息
-	void setCurChatID(QString chatID);						// 设置当前窗口会话ID,用于接收消息时比较
-	void setKeyAndLogin(QString key);						// 设置appkey并登录（获取完Key之后，就可以直接登录）
-	bool IsLogin();											// 是否登录
-	bool IsCurChatRoom(QString chatID);						// 是否是当前会话ID
+	void	setChatInfo(QJsonObject &chatInfo);				// 设置云信账户信息
+	void	ReceiverMsg(nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
+	void	ReceiverRecordMsg(nim::QueryMsglogResult* pMsg);	// 接收历史消息记录
+	void	ReceiverLoginMsg(nim::LoginRes* pRes);				// 接收登录结果
+	void	ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg); //接收群成员信息
+	void	setCurChatID(QString chatID);						// 设置当前窗口会话ID,用于接收消息时比较
+	void	setKeyAndLogin(QString key);						// 设置appkey并登录（获取完Key之后，就可以直接登录）
+	bool	IsLogin();											// 是否登录
+	bool	IsCurChatRoom(QString chatID);						// 是否是当前会话ID
 
-	void ShowMsgs(const std::vector<nim::IMMessage> &msg);
-	void ShowMsg(nim::IMMessage pMsg);
+	void	ShowMsgs(const std::vector<nim::IMMessage> &msg);
+	void	ShowMsg(nim::IMMessage pMsg);
+	void	ParseFace(QString qContect);						// 解析接收到的消息
+	bool	IsHasFace(QString qContect);						// 判断是否有表情
+	QString BuildFaceToUrl(QString qFace);						// 通过表情返回url路径（例如：传入[em_1]返回./images/em_1.gif）
 public slots:
 	void chickChage(int, QString, QString);
 	void AddStudent(QString iconUrl, QString name, QString accid);		//添加成员

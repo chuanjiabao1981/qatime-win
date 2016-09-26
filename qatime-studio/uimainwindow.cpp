@@ -12,6 +12,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDir>
+#include <QToolTip>
 #include "UIMessageBox.h"
 #include <QMovie>
 #include "define.h"

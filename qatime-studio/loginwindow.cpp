@@ -161,7 +161,6 @@ void LoginWindow::loginFinished()
 		strError = QString("用户名或密码不正确");
 
 	ui.ErrorTip_Label->setText(strError);
-	ui.UserName_Edit->setText(QString(""));
 	ui.UserPass_Edit->setText(QString(""));
 }
 
