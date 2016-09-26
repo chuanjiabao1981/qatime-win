@@ -202,6 +202,12 @@ void UIChatRoom::clickBrow()
 // 消息记录
 void UIChatRoom::clickNotes()
 {
+	if (strcmp(m_CurChatID.c_str(), "") == 0)
+	{
+		QToolTip::showText(QCursor::pos(), "请选择直播间！");
+		//CMessageBox::showMessage(QString("答疑时间"),QString("请选择直播间！"),QString("确定"),QString());
+		return;
+	}
 	// 消息记录日期
 	
 	QDateTime date = QDateTime::currentDateTime();
@@ -341,12 +347,16 @@ void UIChatRoom::clickSendMseeage()
 			stringToHtml(timeStr, timeColor);
 			ui.text_talk->append(name + timeStr);
 			ui.text_talk->append("");
-			for (int i = 0; i < m_borw.count(); i++)
+			for (int i = 0; i < textList.size(); i++)
 			{
-				ui.text_talk->insertHtml("<img src='" + m_borw.at(i) + "'/>");  //   此处的test 即 url
-				ui.text_talk->addAnimation(QUrl(m_borw.at(i)), m_borw.at(i));  //添加一个动画.				
+				ui.text_talk->insertHtml(textList.at(i));
+				if (i <= textList.size() - 2)
+				{
+					ui.text_talk->insertHtml("<img src='" + m_borw.at(i) + "'/>");  //   此处的test 即 url
+					ui.text_talk->addAnimation(QUrl(m_borw.at(i)), m_borw.at(i));  //添加一个动画
+				}						
+				
 			}
-			ui.text_talk->insertHtml(sendText);			
 			m_isBorw = false;
 		}
 		else
