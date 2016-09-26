@@ -703,7 +703,55 @@ void UIChatRoom::ShowMsgs(const std::vector<nim::IMMessage> &msg)
 void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 {
 	if (pMsg.type_ == nim::kNIMMessageTypeNotification) // 过滤系统消息
+	{
+		Json::Value json;
+		Json::Reader reader;
+		if (reader.parse(pMsg.attach_, json))
+		{
+			nim::NIMNotificationId id = (nim::NIMNotificationId)json[nim::kNIMNotificationKeyId].asInt();
+
+			// 加入消息
+			if (id == nim::kNIMNotificationIdTeamInvite)
+			{
+				QString strName;
+				Json::Value array = json[nim::kNIMNotificationKeyData][nim::kNIMNotificationKeyDataIds];
+				if (!array.empty() && array.isArray())
+				{
+					int len = array.size();
+					std::vector<std::string> ids;
+					for (int i = 0; i < len; i++)
+					{
+						ids.push_back(array[i].asString());
+					}
+					if (!ids.empty())
+					{
+						int n = ids.size();
+						int i = 0;
+						for (; i < n && i < 3; i++)
+						{
+							if (!strName.isEmpty())
+								strName += "，";
+
+							strName += *m_StudentInfo.find(QString::fromStdString(ids[i]));
+						}
+					}
+
+					strName += " 加入了群聊";
+					QTextCursor textCursor = ui.talkRecord->textCursor();
+					textCursor.movePosition(QTextCursor::Start);
+
+					QTextFrameFormat frameFormat2;
+					frameFormat2.setLeftMargin(80);		//设置左边距
+					frameFormat2.setRightMargin(80);	//设置右边距
+					frameFormat2.setBottomMargin(20);	//设置下边距
+					textCursor.insertFrame(frameFormat2);		//在光标处插入框架
+
+					textCursor.insertText(strName);
+				}
+			}
+		}
 		return;
+	}
 	
 	// 跨天处理
 	stepDays(QDateTime::fromMSecsSinceEpoch(pMsg.timetag_));
@@ -886,6 +934,7 @@ void UIChatRoom::chickChage(int b, QString qAccid, QString name)
 void UIChatRoom::AddStudent(QString iconUrl, QString name, QString accid)
 {
 	ui.student_list->addStrdent(iconUrl, name, accid);
+	m_StudentInfo.insert(accid, name);
 }
 void UIChatRoom::AddStudentNumbers(int num)
 {
@@ -975,4 +1024,5 @@ void UIChatRoom::clearAll()
 	ui.text_talk->clear();
 	ui.text_proclamation->clear();
 	ui.student_list->cleanStudents();
+	m_StudentInfo.clear();
 }

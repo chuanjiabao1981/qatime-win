@@ -54,7 +54,7 @@ private:
 	int								kMsgLogNumberShow;	// 一次获取的条数
 	/************************************************************************/
 	QTextCursor*					m_TextCursor;
-
+	QMap<QString, QString>			m_StudentInfo;		// key ：accid 
 
 	void initEmotion();
 	
