@@ -74,7 +74,9 @@ private slots:
 	void RecordMoved(int iPos);							// 消息记录滚动条
 	void announce();									// 点击【发布公告】按钮
 	void putTalk();										// 点击【发布】按钮
-private:
+	void proclamationTextChage();						// 发布编辑框输入文字设置发布按钮是否可以被点击。
+	void colseCalendar();								// 关闭日历槽函数
+	void calendaCurrentPageChanged(int year, int month);// 日历当前页面被改变
 private:
 	void		initSDK();									// 初始化云信SDK
 	bool		LoadConfig(const std::string& app_data_dir,const std::string& app_install_dir, nim::SDKConfig &config); //加载配置
@@ -130,6 +132,10 @@ public slots:
 	void stepDays(QDateTime date);										//历史记录跨天
 	void stepMsgDays(QDateTime dateTime);								//聊天记录跨天
 	void clearAll();													//情况聊天记录、公告、群成员
+
+private:
+	QToolButton* pPreMonthButton1;
+	QToolButton* pPreMonthButton;
 };
 
 #endif // UICHATROOM_H

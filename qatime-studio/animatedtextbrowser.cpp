@@ -52,3 +52,11 @@ void AnimatedTextBrowser::animate(int)
 	}
 
 }
+
+void AnimatedTextBrowser::mousePressEvent(QMouseEvent *e)
+{
+	if (Qt::LeftButton == e->button())
+	{
+		emit colseCalendar();
+	}
+}

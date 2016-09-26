@@ -212,10 +212,10 @@ void personList::findName(const QString name)
 		{			
 			allStudents.values().at(i)->setHidden(false);			
 		}
-		buddyLast->notFind->setText("输入姓名，查找！");
-		buddyLast->notFind->show();
-		timer->start(3000);
-		
+// 		buddyLast->notFind->setText("输入姓名，查找！");
+// 		buddyLast->notFind->show();
+// 		timer->start(3000);
+		buddyLast->firstButton->show();
 	}
 	else
 	{
@@ -236,6 +236,7 @@ void personList::findName(const QString name)
 			}
 			buddyLast->notFind->setText("没有找到该学生！");
 			buddyLast->notFind->show();
+			buddyLast->firstButton->hide();
 			timer->start(3000);
 		}
 		else

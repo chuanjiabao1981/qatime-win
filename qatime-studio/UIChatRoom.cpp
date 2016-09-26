@@ -55,8 +55,12 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.toolButton_2, SIGNAL(clicked()), this, SLOT(forwardTime()));
 	connect(ui.toolButton_1, SIGNAL(clicked()), this, SLOT(afterTime()));
 	connect(ui.button_sendMseeage_2, SIGNAL(clicked()), this, SLOT(announce()));
-	connect(ui.button_sendMseeage_3, SIGNAL(clicked()), this, SLOT(putTalk()));	
+	connect(ui.button_sendMseeage_3, SIGNAL(clicked()), this, SLOT(putTalk()));			
 	connect(ui.student_list, SIGNAL(signalChickChage(int, QString, QString)), this, SLOT(chickChage(int, QString, QString)));	
+	connect(ui.textEdit_2, SIGNAL(textChanged()), this, SLOT(proclamationTextChage()));
+	connect(ui.talkRecord, SIGNAL(colseCalendar()), this, SLOT(colseCalendar()));
+	connect(ui.timeWidget, SIGNAL(currentPageChanged(int, int)), this, SLOT(calendaCurrentPageChanged(int, int)));
+
 	QScrollBar* TalkRecordScrollBar;
 	TalkRecordScrollBar = (QScrollBar*)ui.talkRecord->verticalScrollBar();
 	if (TalkRecordScrollBar)
@@ -73,6 +77,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	format.setBackground(Qt::green);  //设置格式，颜色自选
 	ui.timeWidget->setDateTextFormat(cdate, format);//设置当前日期始终高亮！
 	ui.timeWidget->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
+	ui.timeWidget->setGridVisible(true);	
 }
 
 UIChatRoom::~UIChatRoom()
@@ -83,7 +88,7 @@ UIChatRoom::~UIChatRoom()
 void UIChatRoom::clickTalk()
 {	
 	QPalette   pal,pal_1,pal_2;
-	pal.setColor(QPalette::ButtonText, Qt::blue);
+	pal.setColor(QPalette::ButtonText, QColor(86,171,228));
 	pal_1.setColor(QPalette::ButtonText, Qt::black);	
 	ui.button_talk->setPalette(pal);
 	ui.button_studentList->setPalette(pal_1);
@@ -94,9 +99,9 @@ void UIChatRoom::clickTalk()
 	ui.button_studentList->setIconSize(QSize(22, 22));
 	ui.button_proclamation->setIcon(QIcon("./images/button_proclamation.png"));
 	ui.button_proclamation->setIconSize(QSize(22, 22));
-// 	ui.button_talk->setStyleSheet("background-color: rgb(229,241,251);");
-// 	ui.button_studentList->setStyleSheet("background-color: rgb(225,225,225);");
-// 	ui.button_proclamation->setStyleSheet("background-color: rgb(225,225,225);");
+ 	ui.button_talk->setStyleSheet("background-color: rgb(255,255,255);");
+ 	ui.button_studentList->setStyleSheet("background-color: rgb(255,255,255);");
+ 	ui.button_proclamation->setStyleSheet("background-color: rgb(255,255,255);");
 
 	ui.button_brow->setHidden(false);
 	ui.button_cleanText->setHidden(false);
@@ -113,7 +118,7 @@ void UIChatRoom::clickTalk()
 void UIChatRoom::clickStudentList()
 {
 	QPalette   pal, pal_1, pal_2;
-	pal.setColor(QPalette::ButtonText, Qt::blue);
+	pal.setColor(QPalette::ButtonText, QColor(86, 171, 228));
 	pal_1.setColor(QPalette::ButtonText, Qt::black);
 	ui.button_talk->setPalette(pal_1);
 	ui.button_studentList->setPalette(pal);
@@ -143,7 +148,7 @@ void UIChatRoom::clickStudentList()
 void UIChatRoom::clickProclamation()
 {
 	QPalette   pal, pal_1, pal_2;
-	pal.setColor(QPalette::ButtonText, Qt::blue);
+	pal.setColor(QPalette::ButtonText, QColor(86, 171, 228));
 	pal_1.setColor(QPalette::ButtonText, Qt::black);
 	ui.button_talk->setPalette(pal_1);
 	ui.button_studentList->setPalette(pal_1);
@@ -384,7 +389,11 @@ void UIChatRoom::chickChoseTime()
 	if (ui.timeWidget->isHidden())
 	{
 		ui.timeWidget->raise();
-		ui.timeWidget->show();
+		ui.timeWidget->show();	
+		pPreMonthButton1 = ui.timeWidget->findChild<QToolButton*>(QLatin1String("qt_calendar_yearbutton"));
+		pPreMonthButton1->move(100, 0);
+		pPreMonthButton = ui.timeWidget->findChild<QToolButton*>(QLatin1String("qt_calendar_monthbutton"));
+		pPreMonthButton->move(150, 0);
 	}
 	else
 	{
@@ -395,12 +404,21 @@ void UIChatRoom::chickChoseTime()
 
 // 选择时间
 void UIChatRoom::choseTime(QDate date)
-{		
-	QString dtstr = date.toString("yyyy-MM-dd");
-	ui.timeShow->setText(dtstr);
-	ui.timeWidget->hide();
+{	
+	QDate dateNow= QDate::currentDate();
+	if (dateNow<date)
+	{
+		//TODO提示，消息记录只能查看之前的消息
+	}
+	else
+	{
+		QString dtstr = date.toString("yyyy-MM-dd");
+		ui.timeShow->setText(dtstr);
+		ui.timeWidget->hide();
 
-	QueryRecord(dtstr);
+		QueryRecord(dtstr);
+	}
+	
 }
 
 void UIChatRoom::forwardTime()
@@ -449,7 +467,7 @@ void UIChatRoom::announce()
 	ui.button_sendMseeage_3->show();	
 	ui.textEdit_2->show();
 	ui.button_sendMseeage_2->hide();
-	ui.text_proclamation->hide();
+	ui.text_proclamation->show();
 }
 // 点击【发布】按钮
 void UIChatRoom::putTalk()
@@ -477,6 +495,31 @@ void UIChatRoom::putTalk()
 
 	ui.textEdit_2->clear();
 		
+}
+// 发布编辑框输入文字设置发布按钮是否可以被点击。
+void UIChatRoom::proclamationTextChage()
+{
+	if (ui.textEdit_2->toPlainText().isEmpty())
+	{
+		ui.button_sendMseeage_3->setEnabled(false);
+	}
+	else{
+		ui.button_sendMseeage_3->setEnabled(true);
+	}
+}
+// 关闭日历槽函数
+void UIChatRoom::colseCalendar()
+{
+	ui.timeWidget->hide();
+}
+// 日历当前页面被改变设置年月的顺序
+void UIChatRoom::calendaCurrentPageChanged(int year, int month)
+{
+	pPreMonthButton1 = ui.timeWidget->findChild<QToolButton*>(QLatin1String("qt_calendar_yearbutton"));	
+	pPreMonthButton1->move(50, 0);
+	pPreMonthButton = ui.timeWidget->findChild<QToolButton*>(QLatin1String("qt_calendar_monthbutton"));
+	pPreMonthButton->move(150, 0);
+
 }
 
 void UIChatRoom::PackageMsg(nim::IMMessage &msg)
