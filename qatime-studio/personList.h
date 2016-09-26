@@ -25,6 +25,7 @@ public:
     QMenu *personMenu;//点击人上的菜单
 	QMap<QListWidgetItem*, personListBuddy*> groupMap;   // 组容器 - key:项 value:组
 	QMap<QString, QListWidgetItem*> allStudents;
+	QMap<QString, QListWidgetItem*> IdStudents;
     QMap<QListWidgetItem*,bool> isHideMap;//用来判断该组是否隐藏了
     QLineEdit *groupNameEdit;//组的名字，重命名的时候需要用到
     QListWidgetItem *currentItem;//当前的项
@@ -42,6 +43,7 @@ public slots:
     void slotDelBuddy();   //删除好友
     void slotRename();     //重命名组
 	void findName(const QString name);//查找好友
+	personListBuddy* findID(const QString id);	  //查找ID
     void slotRenameEditFshed();//命名完成
 
 	void chickChage(int b,QString ID, QString name);	//禁言的状态发生改变

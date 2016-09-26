@@ -34,7 +34,8 @@ public:
 	QPixmap headPath;//需要加载的头像
 	QCheckBox* button; //按钮  
 //  QLabel *sign;  //个性签名  
-	void setOlineNum(int olineNum, int allNum);			
+	void setOlineNum(int olineNum, int allNum);	
+	void setCheckBox(bool bCheck);
 signals:  
 	void emitRadioChange(int,QString,QString);
 	void signalRadioChange(bool);

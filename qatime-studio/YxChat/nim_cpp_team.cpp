@@ -9,6 +9,7 @@
 #include "nim_sdk_helper.h"
 #include "nim_common_helper.h"
 #include "nim_cpp_global.h"
+#include "define.h"
 
 namespace nim
 {
@@ -61,15 +62,10 @@ static void CallbackTeamChange(int res_code, int notification_id, const char *ti
 {
 	if (user_data)
 	{
-		Team::TeamEventCallback* cb_pointer = (Team::TeamEventCallback*)user_data;
-		if (*cb_pointer)
-		{
-			TeamEvent team_event;
-			ParseTeamEvent(res_code, PCharToString(tid), (nim::NIMNotificationId)notification_id, PCharToString(result), team_event);
-			//PostTaskToUIThread(std::bind((*cb_pointer), team_event));
-			//(*cb_pointer)(team_event);
-		}
-		delete cb_pointer;
+		TeamEvent team_event;
+		ParseTeamEvent(res_code, PCharToString(tid), (nim::NIMNotificationId)notification_id, PCharToString(result), team_event);
+			
+		delete user_data;
 	}
 }
 
@@ -93,15 +89,20 @@ static void CallbackQueryTeamMembers(const char *tid, int member_count, bool inc
 {
 	if (user_data)
 	{
-		Team::QueryTeamMembersCallback* cb_pointer = (Team::QueryTeamMembersCallback*)user_data;
-		if (*cb_pointer)
+		std::list<nim::TeamMemberProperty> team_member_info_list;
+		ParseTeamMemberPropertysJson(PCharToString(result), team_member_info_list);
+		
+		std::list<nim::TeamMemberProperty> *pTeamList = new std::list<nim::TeamMemberProperty>;
+
+		for (const auto& member : team_member_info_list)
 		{
-			std::list<nim::TeamMemberProperty> team_member_info_list;
-			ParseTeamMemberPropertysJson(PCharToString(result), team_member_info_list);
-			//PostTaskToUIThread(std::bind((*cb_pointer), PCharToString(tid), member_count, team_member_info_list));
-			//(*cb_pointer)(PCharToString(tid), member_count, team_member_info_list);
+			pTeamList->push_back(member);
 		}
-		delete cb_pointer;
+
+		HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+		PostMessage(hWnd, MSG_MEMBERS_INFO, (WPARAM)pTeamList, 0);
+		
+		delete user_data;
 	}
 }
 
@@ -541,16 +542,14 @@ void Team::QueryAllMyTeamsInfoAsync(const QueryAllMyTeamsInfoCallback& cb, const
 	return NIM_SDK_GET_FUNC(nim_team_query_all_my_teams_info_async)(json_extension.c_str(), &CallbackQueryAllMyTeamsInfo, cb_pointer);
 }
 
-bool Team::QueryTeamMembersAsync(const std::string& tid, const QueryTeamMembersCallback& cb, const std::string& json_extension/* = ""*/)
+bool Team::QueryTeamMembersAsync(const std::string& tid, /*const QueryTeamMembersCallback& cb,*/ const std::string& json_extension/* = ""*/)
 {
 	if (tid.empty())
 		return false;
 
 	QueryTeamMembersCallback* cb_pointer = nullptr;
-	if (cb)
-	{
-		cb_pointer = new QueryTeamMembersCallback(cb);
-	}
+	cb_pointer = new QueryTeamMembersCallback();
+
 	NIM_SDK_GET_FUNC(nim_team_query_team_members_async)(tid.c_str(), true, json_extension.c_str(), &CallbackQueryTeamMembers, cb_pointer);
 
 	return true;

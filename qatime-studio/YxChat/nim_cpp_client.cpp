@@ -8,6 +8,7 @@
 #include "nim_cpp_client.h"
 #include "nim_sdk_helper.h"
 #include "nim_common_helper.h"
+#include "define.h"
 
 namespace nim
 {
@@ -44,7 +45,15 @@ static void CallbackLogin(const char* json_res, const void *callback)
 			res.relogin_ = values[kNIMRelogin].asBool();
 			ParseOtherClientsPres(values[kNIMOtherClientsPres], res.other_clients_);
 		}
-		Client::LoginCallback *cb = (Client::LoginCallback *)callback;
+
+		LoginRes* pRes = new LoginRes;
+		pRes->res_code_ = res.res_code_;
+		pRes->login_step_ = res.login_step_;
+		pRes->relogin_ = res.relogin_;
+
+		HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+		PostMessage(hWnd, MSG_LOGIN, (WPARAM)pRes, 0);
+		
 		//PostTaskToUIThread(std::bind((*cb), res));
 		//(*cb)(res);
 	}

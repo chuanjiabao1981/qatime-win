@@ -56,7 +56,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_VideoInfo = new UIVideo(this);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
 	m_VideoInfo->move(30, 60);
-	m_VideoInfo->resize(970, 560);
+	m_VideoInfo->resize(960, 560);
 	m_VideoInfo->hide();
 
 	m_OtherAppInfo = new UIOtherApp(this);
@@ -150,6 +150,8 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
 	m_charRoom->move(725+215, 50-2);
 	m_charRoom->show();
+
+	ui.video_checkBox->setCheckState(Qt::CheckState::Checked);
 }
 
 UIMainWindow::~UIMainWindow()
@@ -585,6 +587,28 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 			delete pIMsg;
 		}
 		break;
+		case MSG_LOGIN:  // 接收登录返回结果
+		{
+			MSG* Msg = pMsg;
+			nim::LoginRes* pLogMsg = (nim::LoginRes*)Msg->wParam;
+
+			if (m_charRoom)
+				m_charRoom->ReceiverLoginMsg(pLogMsg);
+
+			delete pLogMsg;
+		}
+		break; 
+		case MSG_MEMBERS_INFO:  // 接收群成员信息
+		{
+			MSG* Msg = pMsg;
+			std::list<nim::TeamMemberProperty>* pMemberMsg = (std::list<nim::TeamMemberProperty>*)Msg->wParam;
+
+			if (m_charRoom)
+				m_charRoom->ReceiverMemberMsg(pMemberMsg);
+
+			delete pMemberMsg;
+		}
+		break;
 		case WM_NCLBUTTONDBLCLK:
 		{
 			int y = GET_Y_LPARAM(pMsg->lParam) - this->frameGeometry().y();
@@ -927,10 +951,6 @@ void UIMainWindow::returnMember()
 			//用完之后删除
 			delete pMember;
 		}
-		
-		// 从云信再次获取群成员信息
-		if (m_charRoom)
-			m_charRoom->QueryGroup();
 
 		// 群公告信息
 		QJsonArray announcements = data["announcements"].toArray();
@@ -950,5 +970,7 @@ void UIMainWindow::returnMember()
 
 	// 没登录，则请求key并登录
 	if (!m_charRoom->IsLogin())
+	{
 		RequestKey();
+	}
 }

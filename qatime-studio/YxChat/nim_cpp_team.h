@@ -337,7 +337,7 @@ public:
 	* @param[in] cb		查询群成员的回调函数
 	* @return bool 检查参数如果不符合要求则返回失败
 	*/
-	static bool QueryTeamMembersAsync(const std::string& tid, const QueryTeamMembersCallback& cb, const std::string& json_extension = "");
+	static bool QueryTeamMembersAsync(const std::string& tid, /*const QueryTeamMembersCallback& cb,*/ const std::string& json_extension = "");
 
 	/** @fn static bool QueryTeamMemberAsync(const std::string& tid, const std::string& id, const QueryTeamMemberCallback& cb, const std::string& json_extension = "")
 	* 查询(单个)群成员信息
