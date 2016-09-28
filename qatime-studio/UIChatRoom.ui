@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>290</x>
-     <y>620</y>
+     <y>666</y>
      <width>61</width>
      <height>41</height>
     </rect>
@@ -30,7 +30,7 @@
    <property name="geometry">
     <rect>
      <x>100</x>
-     <y>590</y>
+     <y>636</y>
      <width>23</width>
      <height>23</height>
     </rect>
@@ -71,7 +71,7 @@
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>590</y>
+     <y>636</y>
      <width>23</width>
      <height>23</height>
     </rect>
@@ -112,7 +112,7 @@
    <property name="geometry">
     <rect>
      <x>330</x>
-     <y>590</y>
+     <y>636</y>
      <width>23</width>
      <height>23</height>
     </rect>
@@ -290,9 +290,9 @@ selection-background-color: rgb(0, 220, 161);</string>
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>100</y>
+         <y>40</y>
          <width>299</width>
-         <height>452</height>
+         <height>650</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -347,6 +347,22 @@ selection-background-color: rgb(0, 220, 161);</string>
         <string>发布</string>
        </property>
       </widget>
+      <widget class="QPushButton" name="button_sendMseeage_cancel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>100</y>
+         <width>61</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>取消</string>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -355,7 +371,7 @@ selection-background-color: rgb(0, 220, 161);</string>
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>620</y>
+     <y>666</y>
      <width>211</width>
      <height>41</height>
     </rect>
@@ -375,9 +391,9 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>60</x>
-     <y>29</y>
-     <width>299</width>
-     <height>556</height>
+     <y>30</y>
+     <width>301</width>
+     <height>600</height>
     </rect>
    </property>
    <property name="styleSheet">

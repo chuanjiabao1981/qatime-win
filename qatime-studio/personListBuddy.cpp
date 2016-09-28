@@ -147,8 +147,17 @@ void personListBuddy::setNetworkPic(const QString &szUrl)
 	loop.exec();
 	QByteArray jpegData = reply->readAll();
 	QPixmap pixmap;
-	QSize pixSize(32,32);
-	bool b = pixmap.loadFromData(jpegData);
-	QPixmap scaledPixmap = pixmap.scaled(pixSize, Qt::KeepAspectRatio);	
-	head->setPixmap(scaledPixmap);
+	QSize pixSize(24,24);
+	// 加载成功则显示
+	if (pixmap.loadFromData(jpegData))
+	{
+		QPixmap scaledPixmap = pixmap.scaled(pixSize, Qt::KeepAspectRatio);
+		head->setPixmap(scaledPixmap);
+	}
+	else // 否则显示备用图片
+	{
+		pixmap = QPixmap("./images/teacherPhoto.png");
+		QPixmap scaledPixmap = pixmap.scaled(QSize(24, 24), Qt::KeepAspectRatio);
+		head->setPixmap(scaledPixmap);
+	}
 }

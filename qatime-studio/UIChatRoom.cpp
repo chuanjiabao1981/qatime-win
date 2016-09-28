@@ -57,6 +57,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.toolButton_1, SIGNAL(clicked()), this, SLOT(afterTime()));
 	connect(ui.button_sendMseeage_2, SIGNAL(clicked()), this, SLOT(announce()));
 	connect(ui.button_sendMseeage_3, SIGNAL(clicked()), this, SLOT(putTalk()));			
+	connect(ui.button_sendMseeage_cancel, SIGNAL(clicked()), this, SLOT(putTalkCancel()));
 	connect(ui.student_list, SIGNAL(signalChickChage(int, QString, QString)), this, SLOT(chickChage(int, QString, QString)));	
 	connect(ui.textEdit_2, SIGNAL(textChanged()), this, SLOT(proclamationTextChage()));
 	connect(ui.talkRecord, SIGNAL(colseCalendar()), this, SLOT(colseCalendar()));
@@ -168,6 +169,7 @@ void UIChatRoom::clickProclamation()
 // 	ui.button_studentList->setStyleSheet("background-color: rgb(225,225,225);");
 // 	ui.button_proclamation->setStyleSheet("background-color: rgb(229,241,251);");
 
+	ui.button_sendMseeage_cancel->hide();
 	ui.proclamationWidget->setHidden(false);
 	ui.button_sendMseeage_3->hide();
 	ui.textEdit_2->hide();
@@ -182,6 +184,7 @@ void UIChatRoom::clickProclamation()
 	ui.button_sendMseeage->setHidden(true);
 	ui.textEdit->setHidden(true);
 	
+	ui.text_proclamation->setGeometry(QRect(0,40,299,650));
 }
 // 清屏
 void UIChatRoom::clickCleanText()
@@ -478,6 +481,8 @@ void UIChatRoom::QueryRecord(QString dtstr)
 // 点击【发布公告】按钮
 void UIChatRoom::announce()
 {
+	ui.text_proclamation->setGeometry(QRect(0, 40+80, 299, 650-80));
+	ui.button_sendMseeage_cancel->show();
 	ui.button_sendMseeage_3->show();	
 	ui.textEdit_2->show();
 	ui.button_sendMseeage_2->hide();
@@ -486,6 +491,8 @@ void UIChatRoom::announce()
 // 点击【发布】按钮
 void UIChatRoom::putTalk()
 {
+	ui.text_proclamation->setGeometry(QRect(0, 40, 299, 650));
+	ui.button_sendMseeage_cancel->hide();
 	ui.button_sendMseeage_3->hide();
 	ui.textEdit_2->hide();
 	ui.button_sendMseeage_2->show();
@@ -509,6 +516,19 @@ void UIChatRoom::putTalk()
 
 	ui.textEdit_2->clear();
 		
+}
+
+// 点击【取消】按钮
+void UIChatRoom::putTalkCancel()
+{
+	ui.text_proclamation->setGeometry(QRect(0, 40, 299, 650));
+	ui.button_sendMseeage_cancel->hide();
+	ui.button_sendMseeage_3->hide();
+	ui.textEdit_2->hide();
+	ui.button_sendMseeage_2->show();
+	ui.text_proclamation->show();
+
+	ui.textEdit_2->clear();
 }
 // 发布编辑框输入文字设置发布按钮是否可以被点击。
 void UIChatRoom::proclamationTextChage()
@@ -973,10 +993,17 @@ void UIChatRoom::chickChage(int b, QString qAccid, QString name)
 }
 
 // 添加成员
-void UIChatRoom::AddStudent(QString iconUrl, QString name, QString accid)
+bool UIChatRoom::AddStudent(QString iconUrl, QString name, QString accid)
 {
-	ui.student_list->addStrdent(iconUrl, name, accid);
-	m_StudentInfo.insert(accid, name);
+	// 老师本人不添加进群成员
+	if (accid != m_accid)
+	{
+		ui.student_list->addStrdent(iconUrl, name, accid);
+		m_StudentInfo.insert(accid, name);
+		return true;
+	}
+	else
+		return false;
 }
 void UIChatRoom::AddStudentNumbers(int num)
 {

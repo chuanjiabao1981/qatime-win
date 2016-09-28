@@ -74,6 +74,7 @@ private slots:
 	void RecordMoved(int iPos);							// 消息记录滚动条
 	void announce();									// 点击【发布公告】按钮
 	void putTalk();										// 点击【发布】按钮
+	void putTalkCancel();								// 点击【取消发布】按钮
 	void proclamationTextChage();						// 发布编辑框输入文字设置发布按钮是否可以被点击。
 	void colseCalendar();								// 关闭日历槽函数
 	void calendaCurrentPageChanged(int year, int month);// 日历当前页面被改变
@@ -130,7 +131,7 @@ public:
 	QString BuildFaceToUrl(QString qFace);						// 通过表情返回url路径（例如：传入[em_1]返回./images/em_1.gif）
 public slots:
 	void chickChage(int, QString, QString);
-	void AddStudent(QString iconUrl, QString name, QString accid);		//添加成员
+	bool AddStudent(QString iconUrl, QString name, QString accid);		//添加成员
 	void AddStudentNumbers(int num);									//添加成员数量
 	void AddAnnouncement(QString announcement, QString time);			//添加公告
 	void QueryGroup();													//查询群成员信息

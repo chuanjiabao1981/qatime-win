@@ -73,7 +73,7 @@ private slots :
 	void clickChangeAudio(int);
 	void clickChangeVideo(int);							// 弹出摄像头选择框
 	void clickChangeRatio();							// 弹出分辨率框
-
+	void clickLessonList();								// 弹出课程表
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result); // 添加caption
 	virtual void resizeEvent(QResizeEvent *);			// 设置窗口圆角

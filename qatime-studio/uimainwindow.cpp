@@ -36,6 +36,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
+	setFixedSize(QSize(850, 770));
 
 	connect(ui.mainmin_pushBtn, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.mainclose_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
@@ -48,12 +49,12 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(ui.AudioCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeAudio(int)));
 	connect(ui.videoCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeVideo(int)));
 	connect(ui.ratio_pushBtn, SIGNAL(clicked()), this, SLOT(clickChangeRatio()));
-
+	connect(ui.lesson_pushButton, SIGNAL(clicked()), this, SLOT(clickLessonList()));
 	
 	m_VideoInfo = new UIVideo(this);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
-	m_VideoInfo->move(30, 60);
-	m_VideoInfo->resize(960, 560);
+	m_VideoInfo->move(30, 80);
+	m_VideoInfo->resize(800, 600);
 	m_VideoInfo->hide();
 
 	m_OtherAppInfo = new UIOtherApp(this);
@@ -145,7 +146,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	ui.mainclose_pushBtn->setPixmap(pixmap1, 4);
 	m_charRoom = new UIChatRoom(this);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
-	m_charRoom->move(725+215, 50-2);
+	m_charRoom->move(780, 50-2);
 	m_charRoom->hide();
 
 	ui.video_checkBox->setCheckState(Qt::CheckState::Checked);
@@ -221,7 +222,7 @@ void UIMainWindow::CloseDialog()
 {
 	int iStatus = CMessageBox::showMessage(
 		QString("答疑时间"),
-		QString("是否关闭当前直播！"),
+		QString("是否关闭当前应用程序！"),
 		QString("确定"),
 		QString("取消"));
 	if (iStatus == 1)
@@ -340,22 +341,32 @@ void UIMainWindow::slot_startOrStopLiveStream()
 		bool bLiving = m_VideoInfo->IsCurrentLiving();
 		if (bLiving)
 		{
-			ui.Live_pushBtn->setText("开始直播");
-			m_VideoInfo->StopLiveVideo();
-			m_VideoInfo->setLessonName("");
-			SendStopLiveHttpMsg();
-
-			if (m_CountTimer->isActive())
+			int iStatus = CMessageBox::showMessage(
+				QString("答疑时间"),
+				QString("是否关闭当前直播！"),
+				QString("确定"),
+				QString("取消"));
+			if (iStatus == 1)
 			{
-				m_CountTimer->stop();					// 停止计时
-				m_iTimerCount = 0;						// 重置秒数
-				ui.time_label->setText("00:00:00");		// 重置时间
-			}
+				ui.Live_pushBtn->setText("开始直播");
+				m_VideoInfo->StopLiveVideo();
+				m_VideoInfo->setLessonName("");
+				SendStopLiveHttpMsg();
 
-			if (m_HeartTimer->isActive())
-			{
-				m_HeartTimer->stop();					// 停止发送心跳
+				if (m_CountTimer->isActive())
+				{
+					m_CountTimer->stop();					// 停止计时
+					m_iTimerCount = 0;						// 重置秒数
+					ui.time_label->setText("00:00:00");		// 重置时间
+				}
+
+				if (m_HeartTimer->isActive())
+				{
+					m_HeartTimer->stop();					// 停止发送心跳
+				}
 			}
+			else
+				return;
 		}
 		else
 		{
@@ -486,7 +497,7 @@ void UIMainWindow::clickChangeAudio(int)
 		}
 		int x = ui.Audio_checkBox->geometry().x();
 		int y = ui.Audio_checkBox->geometry().y();
-		m_AudioChangeInfo->move(QPoint(x - 15, y - 28 - m_VideoInfo->m_iAudioDeviceNum * 30));
+		m_AudioChangeInfo->move(QPoint(x - 10, y - 24 - m_VideoInfo->m_iAudioDeviceNum * 30));
 		m_AudioChangeInfo->resize(m_AudioChangeInfo->geometry().width(), m_VideoInfo->m_iAudioDeviceNum * 30);
 		m_AudioChangeInfo->show();
 	}
@@ -504,7 +515,7 @@ void UIMainWindow::clickChangeVideo(int)
 		}
 		int x = ui.video_checkBox->geometry().x();
 		int y = ui.video_checkBox->geometry().y();
-		m_VideoChangeInfo->move(QPoint(x - 15, y - 28 - m_VideoInfo->m_iVideoDeviceNum * 30));
+		m_VideoChangeInfo->move(QPoint(x - 10, y - 24 - m_VideoInfo->m_iVideoDeviceNum * 30));
 		m_VideoChangeInfo->resize(m_VideoChangeInfo->geometry().width(), m_VideoInfo->m_iVideoDeviceNum * 30);
 		m_VideoChangeInfo->show();
 	}
@@ -523,7 +534,7 @@ void UIMainWindow::clickChangeRatio()
 
 		int x = ui.ratio_pushBtn->geometry().x();
 		int y = ui.ratio_pushBtn->geometry().y();
-		m_RatioChangeInfo->move(QPoint(x - 15, y - 28 - 60));
+		m_RatioChangeInfo->move(QPoint(x - 10, y - 24 - 60));
 		m_RatioChangeInfo->show();
 	}
 }
@@ -544,6 +555,12 @@ void UIMainWindow::AudioStatus(int iStatus)
 void UIMainWindow::OtherApp(int i)
 {
 	HideOtherUI();
+	if (m_OtherAppInfo->isVisible())
+	{
+		m_OtherAppInfo->hide();
+		return;
+	}
+	
 	if (m_OtherAppInfo && m_VideoInfo)
 	{
 		QRect MainRect = this->geometry();
@@ -777,17 +794,17 @@ void UIMainWindow::paintEvent(QPaintEvent *event)
 {
 	QPainterPath path;
 	path.setFillRule(Qt::WindingFill);
-	path.addRect(5, 5, this->width() - 10, this->height() - 10);
+	path.addRect(2, 2, this->width()-4, this->height()-4);
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing, true);
 	painter.fillPath(path, QBrush(Qt::white));
 
 	QColor color(0, 0, 0, 50);
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		QPainterPath path;
 		path.setFillRule(Qt::WindingFill);
-		path.addRect(10 - i, 10 - i, this->width() - (10 - i) * 2, this->height() - (10 - i) * 2);
+		path.addRect(4 - i, 4 - i, this->width() - (4 - i) * 2, this->height() - (4 - i) * 2);
 		color.setAlpha(150 - sqrt(i) * 50);
 		painter.setPen(color);
 		painter.drawPath(path);
@@ -969,14 +986,24 @@ void UIMainWindow::returnMember()
 			pMember->readJsonToMember(value.toObject());
 
 			if (m_charRoom)
-				m_charRoom->AddStudent(pMember->url(), pMember->name(), pMember->accid());
-			i++;
+			{
+				// 添加成员成功，才算显示人数
+				bool bSuc = m_charRoom->AddStudent(pMember->url(), pMember->name(), pMember->accid());
+				if (bSuc)
+					i++;
+			}
+			
 			//用完之后删除
 			delete pMember;
 		}
 		m_charRoom->AddStudentNumbers(i);
 		m_charRoom->QueryGroup();
-		m_VideoInfo->setPersonNum(i);
+
+		// 设置观看人数
+		ui.person_pushButton->setIcon(QIcon("./images/eyes.png"));
+		ui.person_pushButton->setIconSize(QSize(16, 16));
+		ui.person_pushButton->setText(QString::number(i));
+
 		// 群公告信息
 		QJsonArray announcements = data["announcements"].toArray();
 		foreach(const QJsonValue & value, announcements)
@@ -1002,8 +1029,7 @@ void UIMainWindow::returnMember()
 
 void UIMainWindow::setVideoLesson(QString strLessonName)
 {
-	if (m_VideoInfo)
-		m_VideoInfo->setLessonName(strLessonName);
+	ui.lesson_label->setText(strLessonName);
 }
 
 // 显示聊天窗口
@@ -1022,6 +1048,25 @@ void UIMainWindow::showChatRoomWnd()
 		QPoint minQt = ui.mainmin_pushBtn->pos();
 		ui.mainmin_pushBtn->move(QPoint(minQt.x() + 300, minQt.y()));
 
-		this->resize(1315, 727);
+		resize(1150, 770);
+		setFixedSize(QSize(1150, 770));
+	}
+}
+
+void UIMainWindow::clickLessonList()
+{
+	HideOtherUI(m_RatioChangeInfo);
+	if (m_RatioChangeInfo)
+	{
+		if (m_RatioChangeInfo->isVisible())
+		{
+			m_RatioChangeInfo->hide();
+			return;
+		}
+
+		int x = ui.ratio_pushBtn->geometry().x();
+		int y = ui.ratio_pushBtn->geometry().y();
+		m_RatioChangeInfo->move(QPoint(x - 15, y - 28 - 60));
+		m_RatioChangeInfo->show();
 	}
 }

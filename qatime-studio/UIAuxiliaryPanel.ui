@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>610</width>
-    <height>585</height>
+    <height>638</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -67,7 +67,7 @@
      <x>0</x>
      <y>0</y>
      <width>580</width>
-     <height>584</height>
+     <height>633</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -84,7 +84,7 @@ border-right-color: rgb(0, 0, 0);</string>
      <x>10</x>
      <y>130</y>
      <width>561</width>
-     <height>441</height>
+     <height>501</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="teacher_verticalLayout"/>

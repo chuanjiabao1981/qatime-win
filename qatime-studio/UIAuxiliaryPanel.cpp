@@ -93,7 +93,8 @@ void UIAuxiliaryPanel::setNetworkPic(const QString &szUrl)
 	QByteArray jpegData = reply->readAll();
 	QPixmap pixmap;
 	pixmap.loadFromData(jpegData);
-	ui.teacherPhoto_Label->setPixmap(pixmap);
+	QPixmap scaledPixmap = pixmap.scaled(QSize(64,64), Qt::KeepAspectRatio);
+	ui.teacherPhoto_Label->setPixmap(scaledPixmap);
 }
 
 void UIAuxiliaryPanel::style(QTableWidget* pTableWidget)

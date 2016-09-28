@@ -177,7 +177,7 @@ void personList::setStrdentNumbers(int num)
 void personList::addStrdent(QString imagesUrl,QString stuName,QString ID)
 {
 	personListBuddy *buddy = new personListBuddy();
-	buddy->initUi("http://img4.duitang.com/uploads/item/201303/08/20130308111421_3msAX.png", stuName,ID);
+	buddy->initUi(imagesUrl, stuName, ID);
 	connect(buddy, SIGNAL(emitRadioChange(int, QString, QString)), this, SLOT(chickChage(int, QString, QString)));
 	QList<QListWidgetItem*> tem = groupMap.keys(buddy);
 	QListWidgetItem *newItem = new QListWidgetItem();       
