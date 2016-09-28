@@ -43,15 +43,15 @@ UIVideo::UIVideo(QWidget *parent)
 	connect(m_pWorker, SIGNAL(sig_StopResult(int)), this, SLOT(slot_FinishStopLiveStream(int)));
 #endif
 
-	//默认采集音视频的麦克风以及摄像头设备，所以，先初始化ui控件时，将 音视频设备通通找出来
-	//初始化音视频控件，利用到底层库
-	EnumAvailableMediaDevices();
-
 	//创建mediacapture类，失败抛出错	
 	if (NLSS_OK != Nlss_Create(NULL, &m_hNlssService))
 	{
 		MessageBox(NULL, L"创建直播失败，请关闭程序重新启动", L"", MB_OK);
 	}
+
+	//默认采集音视频的麦克风以及摄像头设备，所以，先初始化ui控件时，将 音视频设备通通找出来
+	//初始化音视频控件，利用到底层库
+	EnumAvailableMediaDevices();
 
 	SetMediaCapture(m_hNlssService);
 }
@@ -541,4 +541,11 @@ void UIVideo::setLessonName(QString strLessonName)
 {
 	//[当前直播课程]
 	ui.lessonName_label->setText(strLessonName);
+}
+
+void UIVideo::setPersonNum(int num)
+{
+	ui.person_label->setIcon(QIcon("./images/eyes.png"));
+	ui.person_label->setIconSize(QSize(16, 16));
+	ui.person_label->setText(QString::number(num));
 }

@@ -8,9 +8,16 @@
 #include "ShellApi.h"
 #include <QHBoxLayout>
 #include "QShortcut"
+
 //#define _DEBUG
 TCHAR m_pathHomePage[MAX_PATH] = {0};
 TCHAR m_pathUserName[MAX_PATH] = { 0 };
+TCHAR m_pathTeacherName[MAX_PATH] = { 0 };
+TCHAR m_pathTeacherID[MAX_PATH] = { 0 };
+TCHAR m_pathTeacherToken[MAX_PATH] = { 0 };
+TCHAR m_pathTeacherUrl[MAX_PATH] = { 0 };
+TCHAR m_pathAccid[MAX_PATH] = { 0 };
+TCHAR m_pathAccidToken[MAX_PATH] = { 0 };
 int	  m_iRemeber = 0;
 
 LoginWindow::LoginWindow(QWidget *parent)
@@ -110,10 +117,6 @@ void LoginWindow::OnLogIn()
 	QNetworkRequest request(url);
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
-
-	RemeberPassword();
-	ui.UserPass_Edit->setText(QString(""));
-
 }
 
 // 返回登陆结果
@@ -127,10 +130,19 @@ void LoginWindow::loginFinished()
 	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1 && data.contains("remember_token"))
 	{
+		// 记住老师信息，用于自动登录
+		m_teacherToken = data["remember_token"].toString();
+		QJsonObject objInfo = data["user"].toObject();
+		m_teacherID = QString::number(objInfo["id"].toInt());
+		m_teacherName = objInfo["name"].toString();
+		m_teacherUrl = objInfo["avatar_url"].toString();
+		m_accid = objInfo["chat_account"].toObject()["accid"].toString();
+		m_accidToken = objInfo["chat_account"].toObject()["token"].toString();
+
 		mainWin = new UIMainWindow();
 		mainWin->setWindowFlags(Qt::FramelessWindowHint);
 		mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
-		mainWin->setRemeberToken(data["remember_token"].toString());
+		mainWin->setRemeberToken(m_teacherToken);
 		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->ShowAuxiliary();
 		mainWin->setLoginWindow(this);
@@ -162,6 +174,8 @@ void LoginWindow::loginFinished()
 
 	ui.ErrorTip_Label->setText(strError);
 	ui.UserPass_Edit->setText(QString(""));
+
+	RemeberPassword();
 }
 
 void LoginWindow::BrowseHomePage()
@@ -199,8 +213,21 @@ void LoginWindow::ReadSetting()
 	lstrcat(szTempPath, L"\\config.ini");
 
 	GetPrivateProfileString(L"CONFIG_PATH", L"HOMEPAGE", L"", m_pathHomePage, MAX_PATH, szTempPath);				//访问主页路径
-	GetPrivateProfileString(L"CONFIG_PATH", L"USERNAME", L"", m_pathUserName, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"USERNAME", L"",    m_pathUserName, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"TEACHERNAME", L"", m_pathTeacherName, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"TEACHERID", L"", m_pathTeacherID, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"TOKEN", L"", m_pathTeacherToken, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"TEACHERURL", L"", m_pathTeacherUrl, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"ACCID", L"", m_pathAccid, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"ACCIDTOKEN", L"", m_pathAccidToken, MAX_PATH, szTempPath);
 	m_iRemeber = GetPrivateProfileInt(L"CONFIG_PATH", L"REMEBER", 0, szTempPath);
+
+	m_teacherName = QString::fromStdWString(m_pathTeacherName);
+	m_teacherID = QString::fromStdWString(m_pathTeacherID);
+	m_teacherToken = QString::fromStdWString(m_pathTeacherToken);
+	m_teacherUrl = QString::fromStdWString(m_pathTeacherUrl);
+	m_accid = QString::fromStdWString(m_pathAccid);
+	m_accidToken = QString::fromStdWString(m_pathAccidToken);
 }
 
 void LoginWindow::changedRemeber(int i)
@@ -223,10 +250,23 @@ void LoginWindow::RemeberPassword()
 	GetCurrentDirectory(MAX_PATH, szTempPath);
 	lstrcat(szTempPath, L"\\config.ini");
 
+	QString strName = ui.UserName_Edit->text();
+	WritePrivateProfileString(L"CONFIG_PATH", L"USERNAME", (LPCTSTR)strName.utf16(), szTempPath);
+
 	if (ui.remember_checkBox->isChecked())
 	{
-		QString strName = ui.UserName_Edit->text();
-		WritePrivateProfileString(L"CONFIG_PATH", L"USERNAME", (LPCTSTR)strName.utf16(), szTempPath);
+		// TOKEN
+		WritePrivateProfileString(L"CONFIG_PATH", L"TOKEN", (LPCTSTR)m_teacherToken.utf16(), szTempPath);
+		// 老师ID
+		WritePrivateProfileString(L"CONFIG_PATH", L"TEACHERID", (LPCTSTR)m_teacherID.utf16(), szTempPath);
+		// 老师名字
+		WritePrivateProfileString(L"CONFIG_PATH", L"TEACHERNAME", (LPCTSTR)m_teacherName.utf16(), szTempPath);
+		// 老师头像URL
+		WritePrivateProfileString(L"CONFIG_PATH", L"TEACHERURL", (LPCTSTR)m_teacherUrl.utf16(), szTempPath);
+		// 老师accid
+		WritePrivateProfileString(L"CONFIG_PATH", L"ACCID", (LPCTSTR)m_accid.utf16(), szTempPath);
+		// 老师accidToken
+		WritePrivateProfileString(L"CONFIG_PATH", L"ACCIDTOKEN", (LPCTSTR)m_accidToken.utf16(), szTempPath);
 	}
 }
 
@@ -236,7 +276,11 @@ void LoginWindow::InitUserName()
 	{
 		ui.UserName_Edit->setText(QString::fromStdWString(m_pathUserName));
 		ui.remember_checkBox->setCheckState(Qt::Checked);
+
+		Checking();
 	}
+	else
+		this->show();
 }
 
 void LoginWindow::ReturnLogin()
@@ -247,4 +291,62 @@ void LoginWindow::ReturnLogin()
 		mainWin = NULL;
 	}
 	this->show();
+}
+
+void LoginWindow::AutoLogin()
+{
+	mainWin = new UIMainWindow();
+	mainWin->setWindowFlags(Qt::FramelessWindowHint);
+	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
+	mainWin->setRemeberToken(m_teacherToken);
+	mainWin->setAutoTeacherInfo(m_teacherID, m_teacherName,m_teacherUrl,m_accid,m_accidToken);
+	mainWin->ShowAuxiliary();
+	mainWin->setLoginWindow(this);
+	mainWin->show();
+}
+
+bool LoginWindow::IsAutoLogin()
+{
+	return (bool)m_iRemeber;
+}
+
+void LoginWindow::Checking()
+{
+	QString strUrl;
+#ifdef _DEBUG
+	strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses";
+	strUrl.replace("{teacher_id}", m_teacherID);
+#else
+	strUrl = "http://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses";
+	strUrl.replace("{teacher_id}", m_teacherID);
+#endif
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+	QString str = m_teacherToken;
+
+	request.setRawHeader("Remember-Token", m_teacherToken.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &LoginWindow::CheckingFinished);
+}
+
+void LoginWindow::CheckingFinished()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	if (obj["status"].toInt() == 0)
+	{
+		QString sError;
+		QJsonObject error = obj["error"].toObject();
+		if (error["code"].toInt() == 1002)
+			sError = QString("授权已过期，请重新输入密码");
+
+		ui.ErrorTip_Label->setText(sError);
+		this->show();
+	}
+	else
+	{
+		AutoLogin();
+	}
 }

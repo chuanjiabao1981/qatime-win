@@ -69,9 +69,6 @@ static void CallbackReceiveMsg(const char *content, const char *json_extension, 
 			pMsg->status_ = msg.status_;
 			pMsg->sub_status_ = msg.sub_status_;
 			
-			if (pMsg->type_ == kNIMMessageTypeNotification) // 过滤系统消息
-				return;
-			
 			HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
 			PostMessage(hWnd, MSG_CLIENT_RECEIVE, (WPARAM)pMsg, 0);
 		}

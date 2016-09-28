@@ -91,6 +91,7 @@ public:
 	void setPlugFlowUrl(QString url);					// 设置推流url
 	void setLessonName(QString strLessonName);
 	void EnumAvailableMediaDevices();					// 枚举设备
+	void setPersonNum(int num);
 };
 
 #endif // UIVideo_H

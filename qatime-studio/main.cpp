@@ -15,6 +15,11 @@ int main(int argc, char *argv[])
 	QPixmap pixmap("./images/bk.png");
 	palette.setBrush(QPalette::Window, QBrush(pixmap));
 	w.setPalette(palette);
-	w.show();
+	w.ReadSetting();
+
+	if (w.IsAutoLogin())
+		w.hide();
+	else
+		w.show();
 	return a.exec();
 }

@@ -133,11 +133,11 @@ public slots:
 	void AddStudent(QString iconUrl, QString name, QString accid);		//添加成员
 	void AddStudentNumbers(int num);									//添加成员数量
 	void AddAnnouncement(QString announcement, QString time);			//添加公告
-	void QueryGroup();
+	void QueryGroup();													//查询群成员信息
 	void QueryRecord(QString dtstr);
 	void stepDays(QDateTime date);										//历史记录跨天
 	void stepMsgDays(QDateTime dateTime);								//聊天记录跨天
-	void clearAll();													//情况聊天记录、公告、群成员
+	void clearAll();													//清除聊天记录、公告、群成员
 
 private:
 	QToolButton* pPreMonthButton1;

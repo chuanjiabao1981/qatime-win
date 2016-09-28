@@ -29,13 +29,13 @@ void UIRatio::SetRatioInfo()
 	m_pGroup = new QButtonGroup;
 
 	QRadioButton* radio = new QRadioButton();
-	radio->setText("标清  画面流畅，适合网络一般的用户使用");
+	radio->setText("标清  适合网络一般的用户使用");
 	m_pVBox->addWidget(radio);
 	m_pGroup->addButton(radio, 0);
 	radio->setChecked(true);
 		
 	QRadioButton* radio1 = new QRadioButton();
-	radio1->setText("高清  网络不好时容易卡屏，适合宽带较高的用户使用");
+	radio1->setText("高清  适合宽带较高的用户使用");
 	m_pVBox->addWidget(radio1);
 	m_pGroup->addButton(radio1, 1);
 	

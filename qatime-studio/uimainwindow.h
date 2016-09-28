@@ -83,6 +83,8 @@ protected:
 
 public:
 	void setTeacherInfo(QJsonObject& data);					// 设置老师信息
+	void setAutoTeacherInfo(QString teacherID, QString teacherName, 
+		 QString teacherUrl, QString accid, QString token); // 记住密码时使用的方法
 	void setRemeberToken(const QString &name);				// 设置Token
 	void AuxiliaryRequestFinished();						// 辅导班http请求
 	void LessonRequestFinished();							// 课程http请求
@@ -106,6 +108,8 @@ public:
 	void returnKey();										// 返回key
 	void RequestMember();									// 请求群成员
 	void returnMember();									// 返回群成员
+	void setVideoLesson(QString lessonName);				// 设置视频上显示的课程
+	void showChatRoomWnd();									// 显示聊天会话
 };
 
 #endif // UIMAINWINDOW_H

@@ -40,9 +40,10 @@ private:
 	void loginFinished();		// 登陆完成的返回事件
 
 protected:
-	void ReadSetting();			// 读取配置文件路径信息
 	void RemeberPassword();
 	void InitUserName();
+	void AutoLogin();			// 自动登录（记住密码功能）
+
 private:
 	CButton* m_MinBtn;
 	CButton* m_CloseBtn;
@@ -55,8 +56,20 @@ private:
 	QNetworkReply *reply;
 	UIMainWindow* mainWin;
 
+	// 自动登录时需要
+	QString m_teacherID;
+	QString m_teacherName;
+	QString m_teacherToken;
+	QString m_teacherUrl;
+	QString m_accid;
+	QString m_accidToken;
+
 public:
 	void ReturnLogin();			// 重新登陆
+	void ReadSetting();			// 读取配置文件路径信息
+	bool IsAutoLogin();			// 是否自动登录
+	void Checking();			// 验证当前token是否可用
+	void CheckingFinished();
 };
 
 #endif // LOGINWINDOW_H

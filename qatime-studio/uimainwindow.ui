@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1314</width>
+    <width>1012</width>
     <height>727</height>
    </rect>
   </property>
@@ -51,7 +51,7 @@
   <widget class="MToolButton" name="mainclose_pushBtn">
    <property name="geometry">
     <rect>
-     <x>1270</x>
+     <x>965</x>
      <y>12</y>
      <width>25</width>
      <height>25</height>
@@ -67,7 +67,7 @@
   <widget class="MToolButton" name="mainmin_pushBtn">
    <property name="geometry">
     <rect>
-     <x>1240</x>
+     <x>935</x>
      <y>12</y>
      <width>25</width>
      <height>25</height>
@@ -85,7 +85,7 @@
     <rect>
      <x>10</x>
      <y>40</y>
-     <width>1291</width>
+     <width>990</width>
      <height>16</height>
     </rect>
    </property>

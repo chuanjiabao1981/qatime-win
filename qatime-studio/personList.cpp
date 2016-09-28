@@ -309,7 +309,7 @@ personListBuddy* personList::findID(const QString id)
 {
 	personListBuddy* Buddy = NULL;
 
-	if (!id.isEmpty())
+	if (!id.isEmpty() && !IdStudents.isEmpty() && !groupMap.isEmpty())
 		Buddy = *groupMap.find(*IdStudents.find(id));
 	
 	return Buddy;

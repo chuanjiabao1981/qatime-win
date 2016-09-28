@@ -79,18 +79,21 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	ui.timeWidget->setDateTextFormat(cdate, format);//设置当前日期始终高亮！
 	ui.timeWidget->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
 	ui.timeWidget->setGridVisible(true);	
+
+//	ui.text_proclamation->setStyleSheet();
+//	ui.button_brow->setStyleSheet("QToolTip{backgroud： white}");
 }
 
 UIChatRoom::~UIChatRoom()
 {
-
+	m_StudentInfo.clear();
 }
 // 弹出聊天框
 void UIChatRoom::clickTalk()
 {	
 	QPalette   pal,pal_1,pal_2;
 	pal.setColor(QPalette::ButtonText, QColor(86,171,228));
-	pal_1.setColor(QPalette::ButtonText, Qt::black);	
+	pal_1.setColor(QPalette::ButtonText, QColor(100, 100, 100));
 	ui.button_talk->setPalette(pal);
 	ui.button_studentList->setPalette(pal_1);
 	ui.button_proclamation->setPalette(pal_1);
@@ -120,7 +123,7 @@ void UIChatRoom::clickStudentList()
 {
 	QPalette   pal, pal_1, pal_2;
 	pal.setColor(QPalette::ButtonText, QColor(86, 171, 228));
-	pal_1.setColor(QPalette::ButtonText, Qt::black);
+	pal_1.setColor(QPalette::ButtonText, QColor(100, 100, 100));
 	ui.button_talk->setPalette(pal_1);
 	ui.button_studentList->setPalette(pal);
 	ui.button_proclamation->setPalette(pal_1);
@@ -150,7 +153,7 @@ void UIChatRoom::clickProclamation()
 {
 	QPalette   pal, pal_1, pal_2;
 	pal.setColor(QPalette::ButtonText, QColor(86, 171, 228));
-	pal_1.setColor(QPalette::ButtonText, Qt::black);
+	pal_1.setColor(QPalette::ButtonText, QColor(100, 100, 100));
 	ui.button_talk->setPalette(pal_1);
 	ui.button_studentList->setPalette(pal_1);
 	ui.button_proclamation->setPalette(pal);
@@ -375,11 +378,7 @@ void UIChatRoom::clickSendMseeage()
 	}
 	else
 	{
-		CMessageBox::showMessage(
-			QString("答疑时间"),
-			QString("不能发送空数据！"),
-			QString("确定"),
-			QString());
+		QToolTip::showText(QCursor::pos(), "不能发送空数据！");
 		return;
 	}
 
@@ -555,6 +554,55 @@ void UIChatRoom::PackageMsg(nim::IMMessage &msg)
 // 接收消息
 void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 {
+	if (pMsg->type_ == nim::kNIMMessageTypeNotification) // 过滤系统消息
+	{
+		Json::Value json;
+		Json::Reader reader;
+		if (reader.parse(pMsg->attach_, json))
+		{
+			nim::NIMNotificationId id = (nim::NIMNotificationId)json[nim::kNIMNotificationKeyId].asInt();
+
+			// 加入消息
+			if (id == nim::kNIMNotificationIdTeamInvite)
+			{
+				QString strName;
+				Json::Value array = json[nim::kNIMNotificationKeyData][nim::kNIMNotificationKeyDataIds];
+				if (!array.empty() && array.isArray())
+				{
+					int len = array.size();
+					std::vector<std::string> ids;
+					for (int i = 0; i < len; i++)
+					{
+						ids.push_back(array[i].asString());
+					}
+					if (!ids.empty())
+					{
+						int n = ids.size();
+						int i = 0;
+						for (; i < n && i < 3; i++)
+						{
+							if (!strName.isEmpty())
+								strName += "，";
+
+							strName += *m_StudentInfo.find(QString::fromStdString(ids[i]));
+						}
+					}
+
+					strName += " 加入了群聊";
+					QTextCursor textCursor = ui.text_talk->textCursor();
+					QTextFrameFormat frameFormat2;
+					frameFormat2.setLeftMargin(80);		//设置左边距
+					frameFormat2.setRightMargin(80);	//设置右边距
+					frameFormat2.setBottomMargin(20);	//设置下边距
+					textCursor.insertFrame(frameFormat2);		//在光标处插入框架
+
+					textCursor.insertText(strName);
+				}
+			}
+		}
+		return;
+	}
+
 	// 判断当前过来的消息，是不是此会话窗口
 	if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0)
 	{
@@ -920,12 +968,6 @@ void UIChatRoom::chickChage(int b, QString qAccid, QString name)
 	std::string accid = qAccid.toStdString();
 	auto cb = std::bind(OnTeamEventCallback, std::placeholders::_1);
 	nim::Team::MuteMemberAsync(m_CurChatID, accid, b, cb);	
-
-// 暂时不显示禁言通知
-// 	if (b)
-// 		ui.text_talk->append(name + "  被禁言");
-// 	else
-// 		ui.text_talk->append(name + "  被解除禁言");
 
 	ui.text_talk->append("");
 }

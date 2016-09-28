@@ -36,10 +36,6 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
-	QPalette palette;
-	palette.setColor(QPalette::Background, QColor(255, 255, 255));
-	//palette.setBrush(QPalette::Background, QBrush(QPixmap(":/background.png")));
-	setPalette(palette);
 
 	connect(ui.mainmin_pushBtn, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.mainclose_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
@@ -150,9 +146,11 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_charRoom = new UIChatRoom(this);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
 	m_charRoom->move(725+215, 50-2);
-	m_charRoom->show();
+	m_charRoom->hide();
 
 	ui.video_checkBox->setCheckState(Qt::CheckState::Checked);
+
+	ui.line_2->setVisible(false);
 }
 
 UIMainWindow::~UIMainWindow()
@@ -260,6 +258,29 @@ void UIMainWindow::setTeacherInfo(QJsonObject &data)
 	m_charRoom->setChatInfo(data["chat_account"].toObject());
 }
 
+void UIMainWindow::setAutoTeacherInfo(QString teacherID, QString teacherName, QString teacherUrl, QString accid, QString token)
+{
+	m_teacherID = teacherID;
+	m_AuxiliaryPanel->setTeacherID(m_teacherID);
+
+	// 设置老师名字
+	m_AuxiliaryPanel->setTeacherName(teacherName);
+
+	QString strWelcome = "欢迎 ";
+	strWelcome += teacherName;
+	strWelcome += " 老师登录答疑时间，祝您直播愉快！";
+	ui.welcome_label->setText(strWelcome);
+
+	// 设置老师头像
+	m_AuxiliaryPanel->setNetworkPic(teacherUrl);
+
+	// 老师云信信息
+	QJsonObject data;
+	data["accid"] = accid;
+	data["token"] = token;
+	m_charRoom->setChatInfo(data);
+}
+
 void UIMainWindow::setRemeberToken(const QString &token)
 {
 	mRemeberToken = token;
@@ -301,14 +322,14 @@ void UIMainWindow::Expansion()
 
 void UIMainWindow::resizeEvent(QResizeEvent *e)
 {
-	QBitmap bmp(this->size());
-	bmp.fill();
-	QPainter p(&bmp);
-	p.setPen(Qt::NoPen);
-	p.setBrush(Qt::black);
-	p.drawRoundedRect(bmp.rect(), 10, 10);
-	setMask(bmp);
-	bmp.clear();
+// 	QBitmap bmp(this->size());
+// 	bmp.fill();
+// 	QPainter p(&bmp);
+// 	p.setPen(Qt::NoPen);
+// 	p.setBrush(Qt::black);
+// 	p.drawRoundedRect(bmp.rect(), 10, 10);
+// 	setMask(bmp);
+// 	bmp.clear();
 }
 
 void UIMainWindow::slot_startOrStopLiveStream()
@@ -954,6 +975,8 @@ void UIMainWindow::returnMember()
 			delete pMember;
 		}
 		m_charRoom->AddStudentNumbers(i);
+		m_charRoom->QueryGroup();
+		m_VideoInfo->setPersonNum(i);
 		// 群公告信息
 		QJsonArray announcements = data["announcements"].toArray();
 		foreach(const QJsonValue & value, announcements)
@@ -974,5 +997,31 @@ void UIMainWindow::returnMember()
 	if (!m_charRoom->IsLogin())
 	{
 		RequestKey();
+	}
+}
+
+void UIMainWindow::setVideoLesson(QString strLessonName)
+{
+	if (m_VideoInfo)
+		m_VideoInfo->setLessonName(strLessonName);
+}
+
+// 显示聊天窗口
+void UIMainWindow::showChatRoomWnd()
+{
+	if (m_charRoom && !m_charRoom->isVisible())
+	{
+		QRect lineRect = ui.line->geometry();
+		ui.line->setGeometry(QRect(lineRect.left(), lineRect.top(), lineRect.width()+300, lineRect.height()));
+		ui.line_2->setVisible(true);
+		m_charRoom->show();
+
+		QPoint closeQt = ui.mainclose_pushBtn->pos();
+		ui.mainclose_pushBtn->move(QPoint(closeQt.x() + 300, closeQt.y()));
+
+		QPoint minQt = ui.mainmin_pushBtn->pos();
+		ui.mainmin_pushBtn->move(QPoint(minQt.x() + 300, minQt.y()));
+
+		this->resize(1315, 727);
 	}
 }

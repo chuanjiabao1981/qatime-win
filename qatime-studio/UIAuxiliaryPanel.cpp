@@ -274,6 +274,7 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 			imageItem1->setData(0,QT_TOOLBOXLITEMSTATUS, pLesson->LessonStatus());
 			imageItem1->setData(0, QT_TOOLBOXCHATID, chatID);
 			imageItem1->setData(0, QT_TOOLBOXCOURSEID, courseID);
+			imageItem1->setData(0, QT_TOOLBOXLESSONNAME, pLesson->name());
 			imageItem1->setTextAlignment(i, Qt::AlignHCenter | Qt::AlignVCenter);
 			imageItem1->setBackground(i, brush);
 			imageItem1->setToolTip(0,pLesson->name());
@@ -452,6 +453,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 		m_lessonID = (QString)terrWidget->data(0,QT_TOOLBOXLESSONID).toString();
 		m_url = (QString)terrWidget->data(0, QT_TOOLBOXLESSONURL).toString();
 		m_auxiliaryID = (QString)terrWidget->data(0, QT_TOOLBOXCOURSEID).toString();
+		m_lessonName = (QString)terrWidget->data(0, QT_TOOLBOXLESSONNAME).toString();
 
 		QString tableName = (QString)terrWidget->data(0,QT_TOOLBOXLITEMNAME).toString();
 		QString tabText = terrWidget->parent()->text(0);
@@ -476,7 +478,8 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 		//½øÈëÁÄÌìÊÒ
 		m_chatID = (QString)terrWidget->data(0, QT_TOOLBOXCHATID).toString();
 		m_Parent->setCurChatRoom(m_chatID);
-
+		m_Parent->setVideoLesson(m_lessonName);
+		m_Parent->showChatRoomWnd();
 	}
 	emit emitShowTip();
 //	setFocus();
