@@ -2,8 +2,112 @@
 #include <QScrollBar>
 #include <QBitmap>
 #include <QPainter>
+#include <shlobj.h> // SHGetFolderPathW
+#include <shlwapi.h>
+#pragma comment(lib,"Version.lib")
+#pragma comment(lib,"Shlwapi.lib")
 
 #define QT_USERDATA			100
+
+//±éÀúwindows´°¿Ú
+bool GetFileVersion(const wchar_t *file_path, WORD *major_version, WORD *minor_version, WORD *build_number, WORD *revision_number)
+{
+	DWORD handle, len;
+	UINT buf_len;
+	LPTSTR buf_data;
+	VS_FIXEDFILEINFO *file_info;
+	len = GetFileVersionInfoSize(file_path, &handle);
+	if (0 == len)
+		return false;
+
+	buf_data = (LPTSTR)malloc(len);
+	if (!buf_data)
+		return false;
+
+	if (!GetFileVersionInfo(file_path, handle, len, buf_data))
+	{
+		free(buf_data);
+		return false;
+	}
+	if (VerQueryValue(buf_data, L"\\", (LPVOID *)&file_info, (PUINT)&buf_len))
+	{
+		*major_version = HIWORD(file_info->dwFileVersionMS);
+		*minor_version = LOWORD(file_info->dwFileVersionMS);
+		*build_number = HIWORD(file_info->dwFileVersionLS);
+		*revision_number = LOWORD(file_info->dwFileVersionLS);
+		free(buf_data);
+		return true;
+	}
+	free(buf_data);
+	return false;
+}
+int GetNTDLLVersion()
+{
+	static int ret = 0;
+	if (ret == 0)
+	{
+		wchar_t buf_dll_name[MAX_PATH] = { 0 };
+		HRESULT hr = ::SHGetFolderPathW(NULL, CSIDL_SYSTEM, NULL, SHGFP_TYPE_CURRENT, buf_dll_name);
+		if (SUCCEEDED(hr) && ::PathAppendW(buf_dll_name, L"ntdll.dll"))
+		{
+			WORD major_version, minor_version, build_number, revision_number;
+			GetFileVersion(buf_dll_name, &major_version, &minor_version, &build_number, &revision_number);
+			ret = major_version * 100 + minor_version;
+		}
+	}
+	return ret;
+}
+
+BOOL CALLBACK WindowsEnumerationHandler(HWND hwnd, LPARAM param)
+{
+	CaptureWindowInfoList* list =
+		reinterpret_cast<CaptureWindowInfoList*>(param);
+
+	// Skip windows that are invisible, minimized, have no title, or are owned,
+	// unless they have the app window style set.
+	int len = GetWindowTextLength(hwnd);
+	HWND owner = GetWindow(hwnd, GW_OWNER);
+	LONG exstyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+	if (len == 0 || IsIconic(hwnd) || !IsWindowVisible(hwnd) ||
+		(owner && !(exstyle & WS_EX_APPWINDOW))
+		|| (exstyle & WS_EX_LAYERED)) {
+		return TRUE;
+	}
+
+	// Skip the Program Manager window and the Start button.
+	const size_t kClassLength = 256;
+	WCHAR class_name[kClassLength];
+	int class_name_length = GetClassName(hwnd, class_name, kClassLength);
+
+	// Skip Program Manager window and the Start button. This is the same logic
+	// that's used in Win32WindowPicker in libjingle. Consider filtering other
+	// windows as well (e.g. toolbars).
+	if (wcscmp(class_name, L"Progman") == 0 || wcscmp(class_name, L"Button") == 0)
+		return TRUE;
+
+	if (GetNTDLLVersion() >= 602 &&
+		(wcscmp(class_name, L"ApplicationFrameWindow") == 0 ||
+		wcscmp(class_name, L"Windows.UI.Core.CoreWindow") == 0)) {
+		return TRUE;
+	}
+
+	CaptureWindowInfo window;
+	window.id = hwnd;
+
+	const size_t kTitleLength = 500;
+	WCHAR window_title[kTitleLength];
+	// Truncate the title if it's longer than kTitleLength.
+	GetWindowText(hwnd, window_title, kTitleLength);
+	window.title = window_title;
+
+	// Skip windows when we failed to convert the title or it is empty.
+	if (window.title.empty())
+		return TRUE;
+
+	list->push_back(window);
+
+	return TRUE;
+}
 
 UIOtherApp::UIOtherApp(QWidget *parent)
 	: QDialog(parent)
@@ -151,4 +255,14 @@ void UIOtherApp::resizeEvent(QResizeEvent *e)
 void UIOtherApp::closeEvent(QCloseEvent *)
 {
 	reject();
+}
+
+bool UIOtherApp::GetCaptureWindowList(CaptureWindowInfoList* windows)
+{
+	CaptureWindowInfoList result;
+	LPARAM param = reinterpret_cast<LPARAM>(&result);
+	if (!EnumWindows(&WindowsEnumerationHandler, param))
+		return false;
+	windows->swap(result);
+	return true;
 }

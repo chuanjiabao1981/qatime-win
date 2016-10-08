@@ -478,7 +478,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 
 		//进入聊天室
 		m_chatID = (QString)terrWidget->data(0, QT_TOOLBOXCHATID).toString();
-		m_Parent->setCurChatRoom(m_chatID);
+		m_Parent->setCurChatRoom(m_chatID, m_auxiliaryID);
 		m_Parent->setVideoLesson(m_lessonName);
 		m_Parent->showChatRoomWnd();
 	}
@@ -507,4 +507,30 @@ void UIAuxiliaryPanel::ShowTip()
 {
 	setFocus();
 	QToolTip::showText(QCursor::pos(), "您已成功进入直播教室！");
+}
+
+// 遍历节点
+void UIAuxiliaryPanel::ergodicItem(QString sLessonID, QString sCourseid)
+{
+	QTreeWidgetItemIterator it(m_teacher_treewidget);
+	while (*it)
+	{
+		QTreeWidgetItem* terrWidget = *it;
+		QString lessonID = (QString)terrWidget->data(0, QT_TOOLBOXLESSONID).toString();
+		QString CourseID = (QString)terrWidget->data(0, QT_TOOLBOXCOURSEID).toString();
+		if (sLessonID == lessonID && sCourseid == CourseID)
+		{
+			QString status = (QString)terrWidget->data(0, QT_TOOLBOXLITEMSTATUS).toString();
+			if (status.isNull() || status == "finish")
+				return;
+			
+			if (sLessonID == m_lessonID)
+				return;
+			
+			emit m_teacher_treewidget->itemDoubleClicked(terrWidget, 0);
+			return;
+		}
+
+		++it;
+	}
 }

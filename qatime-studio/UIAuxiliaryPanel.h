@@ -91,6 +91,8 @@ public:
 	void setPreview(bool bPreview);
 	QString getLessonName();
 	void setParent(UIMainWindow* parent);
+
+	void ergodicItem(QString lessonID,QString courseid);					// ±éÀú½Úµã
 };
 
 #endif // UIAUXILIARYPANEL_H

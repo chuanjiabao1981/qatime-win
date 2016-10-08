@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>564</width>
+    <width>309</width>
     <height>777</height>
    </rect>
   </property>
@@ -16,7 +16,7 @@
   <widget class="QPushButton" name="button_sendMseeage">
    <property name="geometry">
     <rect>
-     <x>290</x>
+     <x>230</x>
      <y>666</y>
      <width>61</width>
      <height>41</height>
@@ -29,7 +29,7 @@
   <widget class="QPushButton" name="button_cleanText">
    <property name="geometry">
     <rect>
-     <x>100</x>
+     <x>40</x>
      <y>636</y>
      <width>23</width>
      <height>23</height>
@@ -51,7 +51,7 @@
   <widget class="QPushButton" name="button_talk">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>0</x>
      <y>0</y>
      <width>100</width>
      <height>31</height>
@@ -70,7 +70,7 @@
   <widget class="QPushButton" name="button_brow">
    <property name="geometry">
     <rect>
-     <x>70</x>
+     <x>10</x>
      <y>636</y>
      <width>23</width>
      <height>23</height>
@@ -92,7 +92,7 @@
   <widget class="QPushButton" name="button_studentList">
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>200</x>
      <y>0</y>
      <width>102</width>
      <height>31</height>
@@ -111,7 +111,7 @@
   <widget class="QPushButton" name="button_notes">
    <property name="geometry">
     <rect>
-     <x>330</x>
+     <x>270</x>
      <y>636</y>
      <width>23</width>
      <height>23</height>
@@ -133,7 +133,7 @@
   <widget class="QPushButton" name="button_proclamation">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>100</x>
      <y>0</y>
      <width>101</width>
      <height>31</height>
@@ -152,7 +152,7 @@
   <widget class="QWidget" name="verticalLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>0</x>
      <y>30</y>
      <width>301</width>
      <height>541</height>
@@ -370,7 +370,7 @@ selection-background-color: rgb(0, 220, 161);</string>
   <widget class="AnimatedTextEdit" name="textEdit">
    <property name="geometry">
     <rect>
-     <x>70</x>
+     <x>10</x>
      <y>666</y>
      <width>211</width>
      <height>41</height>
@@ -390,7 +390,7 @@ p, li { white-space: pre-wrap; }
   <widget class="AnimatedTextBrowser" name="text_talk">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>0</x>
      <y>30</y>
      <width>301</width>
      <height>600</height>

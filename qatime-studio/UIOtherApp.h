@@ -8,6 +8,12 @@
 
 #pragma execution_character_set("utf-8")
 
+struct CaptureWindowInfo {
+	HWND id;
+	std::wstring title;
+};
+typedef std::vector<CaptureWindowInfo> CaptureWindowInfoList;
+
 class UIOtherApp : public QDialog
 {
 	Q_OBJECT
@@ -33,6 +39,7 @@ public:
 	void setAppInfo(ST_NLSS_INDEVICE_INF* m_pAppWinds, int iAppCount);
 	void initAppPath();
 	int  getCurrentIndex();
+	bool GetCaptureWindowList(CaptureWindowInfoList* windows);
 };
 
 #endif // UIOtherApp_H

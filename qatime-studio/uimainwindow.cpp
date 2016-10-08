@@ -17,6 +17,8 @@
 #include <QMovie>
 #include "define.h"
 #include "member.h"
+#include <QHBoxLayout>
+
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6
 #define MAINWINDOW_TITLE_HEIGHT 49
@@ -33,10 +35,11 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, m_RatioChangeInfo(NULL)
 	, m_charRoom(NULL)
 	, m_LoginWindow(NULL)
+	, m_LessonTable(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
-	setFixedSize(QSize(850, 770));
+	setFixedSize(QSize(985, 770));
 
 	connect(ui.mainmin_pushBtn, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.mainclose_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
@@ -53,8 +56,9 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	
 	m_VideoInfo = new UIVideo(this);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
-	m_VideoInfo->move(30, 80);
-	m_VideoInfo->resize(800, 600);
+	m_VideoInfo->SetMainWnd(this);
+	m_VideoInfo->move(15, 80);
+	m_VideoInfo->resize(960, 600);
 	m_VideoInfo->hide();
 
 	m_OtherAppInfo = new UIOtherApp(this);
@@ -64,7 +68,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_AuxiliaryPanel = new UIAuxiliaryPanel(this);
 	m_AuxiliaryPanel->setWindowFlags(Qt::FramelessWindowHint);
 	m_AuxiliaryPanel->setParent(this);
-	m_AuxiliaryPanel->move(11, 48);
+	m_AuxiliaryPanel->move(5, 40);
 	m_AuxiliaryPanel->hide();
 
 	m_AudioChangeInfo = new UIAudioChange(this);
@@ -82,6 +86,11 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_RatioChangeInfo->setVideoChange(this);
 	m_RatioChangeInfo->hide();
 
+	m_LessonTable = new UILessonTable(this);
+	m_LessonTable->setWindowFlags(Qt::FramelessWindowHint);
+	m_LessonTable->SetMainWindow(this);
+	m_LessonTable->hide();
+
 	// 直播按钮
 	ui.Live_pushBtn->setText("开始直播");
 	ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: red;border-radius: 10px; }"
@@ -97,7 +106,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(m_HeartTimer, SIGNAL(timeout()), this, SLOT(slot_onHeartTimeout()));
 
 	// 面板展开按钮初始位置
-	ui.expansion_pushBtn->move(QPoint(15, 290));
+	ui.expansion_pushBtn->move(QPoint(5, 290));
 
 	// 设置摄像头视频源样式
 	ui.video_checkBox->setStyleSheet("QCheckBox{spacing: 2px;color: white;}"
@@ -146,12 +155,13 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	ui.mainclose_pushBtn->setPixmap(pixmap1, 4);
 	m_charRoom = new UIChatRoom(this);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
-	m_charRoom->move(780, 50-2);
+	m_charRoom->move(985, 50);
 	m_charRoom->hide();
 
 	ui.video_checkBox->setCheckState(Qt::CheckState::Checked);
 
 	ui.line_2->setVisible(false);
+	ui.time_label->setVisible(false);
 }
 
 UIMainWindow::~UIMainWindow()
@@ -206,6 +216,12 @@ UIMainWindow::~UIMainWindow()
 
 	if (m_LoginWindow)
 		m_LoginWindow = NULL;
+
+	if (m_LessonTable)
+	{
+		delete m_LessonTable;
+		m_LessonTable = NULL;
+	}
 }
 
 void UIMainWindow::MinDialog()
@@ -250,13 +266,16 @@ void UIMainWindow::setTeacherInfo(QJsonObject &data)
 	strWelcome += teacherName;
 	strWelcome += " 老师登录答疑时间，祝您直播愉快！";
 	ui.welcome_label->setText(strWelcome);
+	ui.welcome_label_2->setText(strWelcome);
 
 	// 设置老师头像
 	QString teacherPhoto_url = data["avatar_url"].toString();
 	m_AuxiliaryPanel->setNetworkPic(teacherPhoto_url);
 
 	// 老师云信信息
-	m_charRoom->setChatInfo(data["chat_account"].toObject());
+	m_charRoom->setChatInfo(data["chat_account"].toObject(), mRemeberToken);
+
+	m_LessonTable->InitToken(mRemeberToken, m_teacherID);
 }
 
 void UIMainWindow::setAutoTeacherInfo(QString teacherID, QString teacherName, QString teacherUrl, QString accid, QString token)
@@ -271,6 +290,7 @@ void UIMainWindow::setAutoTeacherInfo(QString teacherID, QString teacherName, QS
 	strWelcome += teacherName;
 	strWelcome += " 老师登录答疑时间，祝您直播愉快！";
 	ui.welcome_label->setText(strWelcome);
+	ui.welcome_label_2->setText(strWelcome);
 
 	// 设置老师头像
 	m_AuxiliaryPanel->setNetworkPic(teacherUrl);
@@ -279,7 +299,9 @@ void UIMainWindow::setAutoTeacherInfo(QString teacherID, QString teacherName, QS
 	QJsonObject data;
 	data["accid"] = accid;
 	data["token"] = token;
-	m_charRoom->setChatInfo(data);
+	m_charRoom->setChatInfo(data, mRemeberToken);
+
+	m_LessonTable->InitToken(mRemeberToken, m_teacherID);
 }
 
 void UIMainWindow::setRemeberToken(const QString &token)
@@ -350,7 +372,6 @@ void UIMainWindow::slot_startOrStopLiveStream()
 			{
 				ui.Live_pushBtn->setText("开始直播");
 				m_VideoInfo->StopLiveVideo();
-				m_VideoInfo->setLessonName("");
 				SendStopLiveHttpMsg();
 
 				if (m_CountTimer->isActive())
@@ -358,6 +379,7 @@ void UIMainWindow::slot_startOrStopLiveStream()
 					m_CountTimer->stop();					// 停止计时
 					m_iTimerCount = 0;						// 重置秒数
 					ui.time_label->setText("00:00:00");		// 重置时间
+					ui.time_label->setVisible(false);		// 隐藏
 				}
 
 				if (m_HeartTimer->isActive())
@@ -402,7 +424,6 @@ void UIMainWindow::slot_startOrStopLiveStream()
 			
 			m_VideoInfo->setPlugFlowUrl(url);
 			m_VideoInfo->StartLiveVideo();
-			m_VideoInfo->setLessonName(m_AuxiliaryPanel->getLessonName());
 			ui.Live_pushBtn->setText("结束直播");
 			SendStartLiveHttpMsg();
 
@@ -590,6 +611,7 @@ void UIMainWindow::slot_onCountTimeout()
 	m_iTimerCount++;
 	QString str = QString().sprintf("%02lld:%02lld:%02lld", m_iTimerCount / 3600, m_iTimerCount % 3600 / 60, m_iTimerCount % 60);
 	ui.time_label->setText(str);
+	ui.time_label->show();
 }
 
 void UIMainWindow::slot_onHeartTimeout()
@@ -799,13 +821,17 @@ void UIMainWindow::paintEvent(QPaintEvent *event)
 	painter.setRenderHint(QPainter::Antialiasing, true);
 	painter.fillPath(path, QBrush(Qt::white));
 
-	QColor color(0, 0, 0, 50);
+	QColor color(102, 204, 204);
 	for (int i = 0; i < 4; i++)
 	{
 		QPainterPath path;
 		path.setFillRule(Qt::WindingFill);
-		path.addRect(4 - i, 4 - i, this->width() - (4 - i) * 2, this->height() - (4 - i) * 2);
-		color.setAlpha(150 - sqrt(i) * 50);
+
+		for(int j = 0; j < 40;j++)
+		{
+			path.addRect(4 - i, j - i, this->width() - (4 - i) * 2, this->height() - (2 - i) * 2);
+		}
+		
 		painter.setPen(color);
 		painter.drawPath(path);
 	}
@@ -821,7 +847,8 @@ void UIMainWindow::HideOtherUI(QWidget* self)
 	if (m_AuxiliaryPanel &&
 		m_RatioChangeInfo &&
 		m_AudioChangeInfo &&
-		m_VideoChangeInfo)
+		m_VideoChangeInfo &&
+		m_LessonTable)
 	{
 		if (self != NULL)
 		{
@@ -831,6 +858,8 @@ void UIMainWindow::HideOtherUI(QWidget* self)
 				m_AudioChangeInfo->hide();
 			if ( m_VideoChangeInfo != self)
 				m_VideoChangeInfo->hide();
+			if (m_LessonTable != self)
+				m_LessonTable->hide();
 
 			m_AuxiliaryPanel->hide();
 		}
@@ -840,6 +869,7 @@ void UIMainWindow::HideOtherUI(QWidget* self)
 			m_AudioChangeInfo->hide();
 			m_VideoChangeInfo->hide();
 			m_AuxiliaryPanel->hide();
+			m_LessonTable->hide();
 		}
 	}
 }
@@ -903,14 +933,15 @@ void UIMainWindow::returnClick()
 	}
 }
 
-void UIMainWindow::setCurChatRoom(QString chatID)
+void UIMainWindow::setCurChatRoom(QString chatID, QString courseid)
 {
 	if (m_charRoom)
 	{
+		ui.welcome_label_2->setVisible(false);
 		// 如果是当前会话窗口，则不需要再次请求群成员
 		if (!m_charRoom->IsCurChatRoom(m_AuxiliaryPanel->getChatID()))
 		{
-			m_charRoom->setCurChatID(chatID);
+			m_charRoom->setCurChatID(chatID, courseid);
 			m_charRoom->clearAll();
 			RequestMember();
 		}
@@ -1037,36 +1068,48 @@ void UIMainWindow::showChatRoomWnd()
 {
 	if (m_charRoom && !m_charRoom->isVisible())
 	{
-		QRect lineRect = ui.line->geometry();
-		ui.line->setGeometry(QRect(lineRect.left(), lineRect.top(), lineRect.width()+300, lineRect.height()));
 		ui.line_2->setVisible(true);
 		m_charRoom->show();
 
 		QPoint closeQt = ui.mainclose_pushBtn->pos();
-		ui.mainclose_pushBtn->move(QPoint(closeQt.x() + 300, closeQt.y()));
+		ui.mainclose_pushBtn->move(QPoint(closeQt.x() + 295, closeQt.y()));
 
 		QPoint minQt = ui.mainmin_pushBtn->pos();
-		ui.mainmin_pushBtn->move(QPoint(minQt.x() + 300, minQt.y()));
+		ui.mainmin_pushBtn->move(QPoint(minQt.x() + 295, minQt.y()));
 
-		resize(1150, 770);
-		setFixedSize(QSize(1150, 770));
+		resize(1150+135+15, 770);
+		setFixedSize(QSize(1150+135+15, 770));
 	}
 }
 
 void UIMainWindow::clickLessonList()
 {
-	HideOtherUI(m_RatioChangeInfo);
-	if (m_RatioChangeInfo)
+	HideOtherUI(m_LessonTable);
+	if (m_LessonTable)
 	{
-		if (m_RatioChangeInfo->isVisible())
+		if (m_LessonTable->isVisible())
 		{
-			m_RatioChangeInfo->hide();
+			m_LessonTable->hide();
 			return;
 		}
 
-		int x = ui.ratio_pushBtn->geometry().x();
-		int y = ui.ratio_pushBtn->geometry().y();
-		m_RatioChangeInfo->move(QPoint(x - 15, y - 28 - 60));
-		m_RatioChangeInfo->show();
+		int x = ui.lesson_pushButton->geometry().x();
+		int y = ui.lesson_pushButton->geometry().y();
+		m_LessonTable->move(QPoint(x - 200, y - 294));
+		m_LessonTable->RequestLesson();
+		m_LessonTable->show();
 	}
+}
+
+// 课程表中选择课程——关联到辅导班
+void UIMainWindow::LessonTable_Auxiliary(QString sLessonID, QString sCourseID)
+{
+	m_AuxiliaryPanel->ergodicItem(sLessonID, sCourseID);
+}
+
+void UIMainWindow::setLiveBtnEnable(bool bEnable)
+{
+	ui.video_checkBox->setEnabled(bEnable);
+	ui.fullscreen_checkBox->setEnabled(bEnable);
+	ui.app_pushBtn->setEnabled(bEnable);
 }

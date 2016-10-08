@@ -8,9 +8,12 @@
 #include <QTimer>
 #include <QMutex>
 #include "UIWorkThread.h"
+#include "UIMainwindow.h"
 
 #define STARTLS_ASYNC
 #pragma execution_character_set("utf-8")
+
+class UIMainWindow;
 
 class UIVideo : public QWidget
 {
@@ -47,8 +50,10 @@ public:
 	ST_NLSS_INDEVICE_INF*			m_pAppWinds;		// 其他应用
 	EN_NLSS_VIDEOQUALITY_LVL		m_videoQ;			// 画面清晰度
 	int								m_CurrentMicIndex;	// 当前麦克风索引
-	int								m_CurrentVideoIndex;		// 当前摄像头索引
+	int								m_CurrentVideoIndex;// 当前摄像头索引
+	bool							m_bStopLiveFinish;	// 停止直播流
 
+	UIMainWindow*					m_Parent;			// 主窗口
 #ifdef STARTLS_ASYNC
 	Worker* m_pWorker;
 #endif
@@ -92,6 +97,8 @@ public:
 	void setLessonName(QString strLessonName);
 	void EnumAvailableMediaDevices();					// 枚举设备
 	void setPersonNum(int num);
+	void sendCoutom(ST_NLSS_VIDEO_SAMPLER	m_SvideoSampler);
+	void SetMainWnd(UIMainWindow* wnd);
 };
 
 #endif // UIVideo_H

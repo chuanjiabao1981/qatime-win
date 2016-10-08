@@ -289,6 +289,15 @@
     <ClCompile Include="YxChat\nim_cpp_msglog.cpp">
       <Filter>YxChat</Filter>
     </ClCompile>
+    <ClCompile Include="UILessontable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UILessontable.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UILessontable.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="loginwindow.h">
@@ -381,6 +390,12 @@
     <CustomBuild Include="myLabel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="UILessontable.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UILessontable.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_loginwindow.h">
@@ -472,6 +487,9 @@
     </ClInclude>
     <ClInclude Include="YxChat\nim_cpp_msglog.h">
       <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UILessontable.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

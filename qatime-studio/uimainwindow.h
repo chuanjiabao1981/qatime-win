@@ -17,6 +17,7 @@
 #include "UIRatio.h"
 #include "UIChatRoom.h"
 #include "loginwindow.h"
+#include "UILessontable.h"
 
 #pragma execution_character_set("utf-8")
 #define STARTLS_ASYNC
@@ -26,6 +27,8 @@ class UIAuxiliaryPanel;
 class UIAudioChange;
 class UIVideoChange;
 class UIRatio;
+class UILessonTable;
+class UIVideo;
 
 class UIMainWindow : public QWidget
 {
@@ -47,6 +50,7 @@ private:
 
 	UIAuxiliaryPanel*				m_AuxiliaryPanel;	// 老师课程面板
 	UIOtherApp*					    m_OtherAppInfo;		// 其它应用信息窗口
+	UILessonTable*					m_LessonTable;		// 课程表窗口
 	UIVideo*						m_VideoInfo;		// 直播窗口
 	QString							m_teacherID;		// 老师ID
 	QTimer*							m_CountTimer;		// 计时器
@@ -103,13 +107,15 @@ public:
 	void HideOtherUI( QWidget* self=NULL);					//  隐藏其他界面
 	void returnClick();
 	void setLoginWindow(LoginWindow* parent);
-	void setCurChatRoom(QString chatID);					// 进入聊天室
+	void setCurChatRoom(QString chatID, QString courseid);	// 进入聊天室
 	void RequestKey();										// 申请云信key
 	void returnKey();										// 返回key
 	void RequestMember();									// 请求群成员
 	void returnMember();									// 返回群成员
 	void setVideoLesson(QString lessonName);				// 设置视频上显示的课程
 	void showChatRoomWnd();									// 显示聊天会话
+	void LessonTable_Auxiliary(QString sLessonID, QString sCourseID); //程表中选择课程——关联到辅导班
+	void setLiveBtnEnable(bool bEnable);
 };
 
 #endif // UIMAINWINDOW_H

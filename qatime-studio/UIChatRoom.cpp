@@ -11,6 +11,7 @@
 #include "define.h"
 #include <QMouseEvent>
 #include <QToolTip>
+#include <QNetworkRequest>
 
 typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
 typedef void(*nim_client_cleanup)(const char *json_extension);
@@ -203,7 +204,7 @@ void UIChatRoom::clickBrow()
 		m_smallEmotionWidget->setHidden(true);
 	}
 
-	m_smallEmotionWidget->move(60, 440);
+	m_smallEmotionWidget->move(0, 500);
 }
 // 消息记录
 void UIChatRoom::clickNotes()
@@ -503,6 +504,8 @@ void UIChatRoom::putTalk()
 	stringToHtml(current_date, timeColor);
 
 	QString announcement = ui.textEdit_2->toPlainText();//增加新公告
+	OnSendAnnouncements(announcement);
+
 	stringToHtml(announcement, contentColor);
 
 	QTextCursor textCursor = ui.text_proclamation->textCursor();
@@ -901,15 +904,18 @@ std::string UIChatRoom::GetJsonStringWithNoStyled(const QJsonObject& values)
 	return json_str.toStdString();
 }
 
-void UIChatRoom::setCurChatID(QString chatID)
+void UIChatRoom::setCurChatID(QString chatID, QString courseid)
 {
 	m_CurChatID = chatID.toStdString();
+	m_CurCourseID = courseid;
 }
 
-void UIChatRoom::setChatInfo(QJsonObject &chatInfo)
+void UIChatRoom::setChatInfo(QJsonObject &chatInfo, QString token)
 {
 	m_accid = chatInfo["accid"].toString();
 	m_token = chatInfo["token"].toString();
+
+	mRemeberToken = token;
 }
 
 void UIChatRoom::setKeyAndLogin(QString key)
@@ -1094,4 +1100,28 @@ void UIChatRoom::clearAll()
 	ui.text_proclamation->clear();
 	ui.student_list->cleanStudents();
 	m_StudentInfo.clear();
+}
+
+// 发送群公告
+void UIChatRoom::OnSendAnnouncements(QString Announcements)
+{
+	if (m_CurCourseID.isEmpty())
+		return;
+	
+	QString strUrl;
+#ifdef _DEBUG
+	strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/announcements";
+	strUrl.replace("{id}", m_CurCourseID);
+#else
+	strUrl = "http://qatime.cn/api/v1/live_studio/courses/{id}/announcements";
+	strUrl.replace("{id}", m_CurCourseID);
+#endif
+
+	QUrl url = QUrl(strUrl);
+	QByteArray append("content=");
+	append += Announcements;
+	QNetworkRequest request(url);
+	request.setRawHeader("Remember-Token", mRemeberToken.toUtf8());	
+	reply = manager.post(request, append);
+//	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
 }

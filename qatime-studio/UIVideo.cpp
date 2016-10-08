@@ -22,6 +22,8 @@ UIVideo::UIVideo(QWidget *parent)
 	, m_bLiving(false)
 	, m_CurrentMicIndex(0)
 	, m_CurrentVideoIndex(0)
+	, m_bStopLiveFinish(true)
+	, m_Parent(NULL)
 {
 	ui.setupUi(this);
 
@@ -34,6 +36,8 @@ UIVideo::UIVideo(QWidget *parent)
 	m_refreshTimer = new QTimer(this);
 	m_refreshTimer->start(1000 / 12);
 	connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(slot_onRefreshTimeout()));
+
+
 
 #ifdef STARTLS_ASYNC
 	m_pWorker = new Worker();
@@ -84,6 +88,9 @@ UIVideo::~UIVideo()
 		delete m_refreshTimer;
 		m_refreshTimer = NULL;
 	}
+
+	if (m_Parent)
+		m_Parent = NULL;
 }
 
 void UIVideo::setPlugFlowUrl(QString url)
@@ -105,8 +112,8 @@ void UIVideo::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
 	if (pSampler != NULL)
 	{
 		m_mutex.lock();
-		if (pSampler->iWidth * pSampler->iHeight > m_SvideoSampler.iWidth * m_SvideoSampler.iHeight)
-		{
+// 		if (pSampler->iWidth * pSampler->iHeight > m_SvideoSampler.iWidth * m_SvideoSampler.iHeight)
+// 		{
 			if (m_SvideoSampler.puaData)
 			{
 				delete[]m_SvideoSampler.puaData;
@@ -114,7 +121,7 @@ void UIVideo::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
 			}
 				
 			m_SvideoSampler.puaData = new unsigned char[pSampler->iWidth * pSampler->iHeight * 4];
-		}
+//		}
 
 		m_SvideoSampler.iWidth = pSampler->iWidth;
 		m_SvideoSampler.iHeight = pSampler->iHeight;
@@ -151,7 +158,8 @@ void UIVideo::paintEvent(QPaintEvent *)
 	{
 		QImage qimage;
 		m_mutex.lock();
-		qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_ARGB32);
+//		qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_ARGB32);
+		qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_RGB32);
 		p.drawImage(rect(), qimage);
 		m_mutex.unlock();
 	}
@@ -243,6 +251,7 @@ bool UIVideo::InitMediaCapture()
 	}
 
 	std::string strUrl = m_strUrl.toStdString();
+//	std::string strUrl = "rtmp://pa0a19f55.live.126.net/live/2794c854398f4d05934157e05e2fe419?wsSecret=cc547b3b2fe49e6b5da6e2aed293c7da&wsTime=1475212427";
 	stParam.paOutUrl = new char[1024];
 	memset(stParam.paOutUrl, 0, 1024);
 	strcpy(stParam.paOutUrl, strUrl.c_str());
@@ -373,8 +382,6 @@ void UIVideo::StartLiveVideo()
 		return;
 	}
 
-// 		m_StartLiveTimer->start(1000);
-// 		connect(m_StartLiveTimer, SIGNAL(timeout()), this, SLOT(slot_onStartLiveTimeout()));
  	m_pWorker->SetMediaCapture(m_hNlssService);
  	emit sig_StartLiveStream();
 	m_bPreviewing = true;
@@ -397,23 +404,28 @@ void UIVideo::slot_onRefreshTimeout()
 
 void UIVideo::slot_onStartLiveTimeout()
 {
-	m_StartLiveTimer->stop();
-	m_pWorker->SetMediaCapture(m_hNlssService);
-	emit sig_StartLiveStream();
+	if (m_bStopLiveFinish)
+	{
+		m_StartLiveTimer->stop();
+		m_pWorker->SetMediaCapture(m_hNlssService);
+		emit sig_StartLiveStream();
+	}
 }
 
 #ifdef STARTLS_ASYNC
 
 void UIVideo::slot_FinishStartLiveStream(int iRet)
 {
-	if ((NLSS_RET)iRet != NLSS_OK)
-	{
-		MessageBox(NULL, L"打开直播出错，具体错误信息请看返回值", L"答疑时间", MB_OK);
-	}
+// 	if ((NLSS_RET)iRet != NLSS_OK)
+// 	{
+// 		MessageBox(NULL, L"打开直播出错，具体错误信息请看返回值", L"答疑时间", MB_OK);
+// 	}
 }
 
 void UIVideo::slot_FinishStopLiveStream(int iRet)
 {
+	m_Parent->setLiveBtnEnable(true);
+	m_bStopLiveFinish = true;
 	emit sig_changeLiveStatus(false);
 	return;
 }
@@ -464,6 +476,8 @@ void UIVideo::ChangeLiveVideo()
 
 	if (m_bLiving)
 	{
+		m_Parent->setLiveBtnEnable(false);
+		m_bStopLiveFinish = false;
 		emit sig_StopLiveStream();
 
 		Nlss_UninitParam(m_hNlssService);
@@ -493,8 +507,17 @@ void UIVideo::ChangeLiveVideo()
 			return;
 		}
 
- 		m_pWorker->SetMediaCapture(m_hNlssService);
- 		emit sig_StartLiveStream();
+		if (m_bStopLiveFinish)// 彻底结束直播流,才可进行直播
+		{
+			m_pWorker->SetMediaCapture(m_hNlssService);
+			emit sig_StartLiveStream();
+		}
+		else
+		{
+			m_StartLiveTimer->start(1000);
+			connect(m_StartLiveTimer, SIGNAL(timeout()), this, SLOT(slot_onStartLiveTimeout()));
+		}
+ 		
 	}
 	else
 	{
@@ -548,4 +571,9 @@ void UIVideo::setPersonNum(int num)
 	ui.person_label->setIcon(QIcon("./images/eyes.png"));
 	ui.person_label->setIconSize(QSize(16, 16));
 	ui.person_label->setText(QString::number(num));
+}
+
+void UIVideo::SetMainWnd(UIMainWindow* wnd)
+{
+	m_Parent = wnd;
 }
