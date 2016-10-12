@@ -29,7 +29,7 @@ void Worker::slot_StartLiveStream()
 	NLSS_RET iRet = 0;
     if (m_hNlssService != NULL)
 	{
-        iRet = Nlss_StartLiveStream(m_hNlssService);
+ //       iRet = Nlss_StartLiveStream(m_hNlssService);
 	}
 	else
 		iRet = NLSS_ERR;
@@ -41,7 +41,7 @@ void Worker::slot_StopLiveStream()
     NLSS_RET iRet = NLSS_OK;
     if (m_hNlssService != NULL)
     {
-        Nlss_StopLiveStream(m_hNlssService);
+ //       Nlss_StopLiveStream(m_hNlssService);
     }
     else
         iRet = NLSS_OK;

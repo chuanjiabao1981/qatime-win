@@ -205,7 +205,7 @@
     <string>抓取全屏</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="app_pushBtn">
+  <widget class="QPushButton" name="app_pushBtn">
    <property name="geometry">
     <rect>
      <x>660</x>
@@ -218,13 +218,16 @@
     <cursorShape>PointingHandCursor</cursorShape>
    </property>
    <property name="toolTip">
-    <string>全屏采集开关</string>
+    <string>其他应用</string>
    </property>
    <property name="toolTipDuration">
     <number>-1</number>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{border-image: url(:/LoginWindow/images/app.png)};</string>
+   </property>
    <property name="text">
-    <string>显示其它应用</string>
+    <string/>
    </property>
   </widget>
   <widget class="QPushButton" name="ratio_pushBtn">

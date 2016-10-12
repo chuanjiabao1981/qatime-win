@@ -18,6 +18,8 @@
 #include "define.h"
 #include "member.h"
 #include <QHBoxLayout>
+#include <iosfwd>
+#include <sstream>
 
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6
@@ -36,6 +38,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, m_charRoom(NULL)
 	, m_LoginWindow(NULL)
 	, m_LessonTable(NULL)
+	, m_VideoWnd(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
@@ -48,7 +51,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(ui.Audio_checkBox, SIGNAL(stateChanged(int)), this, SLOT(AudioStatus(int)));
 	connect(ui.video_checkBox, SIGNAL(stateChanged(int)), this, SLOT(VideoStatus(int)));
 	connect(ui.fullscreen_checkBox, SIGNAL(stateChanged(int)), this, SLOT(FullScreenStatus(int)));
-	connect(ui.app_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(OtherApp(int)));
+	connect(ui.app_pushBtn, SIGNAL(clicked()), this, SLOT(OtherApp()));
 	connect(ui.AudioCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeAudio(int)));
 	connect(ui.videoCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeVideo(int)));
 	connect(ui.ratio_pushBtn, SIGNAL(clicked()), this, SLOT(clickChangeRatio()));
@@ -57,9 +60,9 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_VideoInfo = new UIVideo(this);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
 	m_VideoInfo->SetMainWnd(this);
-	m_VideoInfo->move(15, 80);
-	m_VideoInfo->resize(960, 600);
-	m_VideoInfo->hide();
+	m_VideoInfo->move(15, 75);
+	m_VideoInfo->resize(960, 605);
+	m_VideoInfo->show();
 
 	m_OtherAppInfo = new UIOtherApp(this);
 	m_OtherAppInfo->setWindowFlags(Qt::FramelessWindowHint);
@@ -105,6 +108,9 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_HeartTimer = new QTimer(this);
 	connect(m_HeartTimer, SIGNAL(timeout()), this, SLOT(slot_onHeartTimeout()));
 
+	m_ShowVideoTimer = new QTimer(this);
+	connect(m_ShowVideoTimer, SIGNAL(timeout()), this, SLOT(setVideoPos()));
+
 	// 面板展开按钮初始位置
 	ui.expansion_pushBtn->move(QPoint(5, 290));
 
@@ -125,12 +131,6 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 		"QCheckBox::indicator{width: 32px;height: 32px;}"
 		"QCheckBox::indicator:unchecked{image: url(./images/screen_close.png);}"
 		"QCheckBox::indicator:checked{image: url(./images/screen_open.png);}");
-
-	// 设置抓取其他应用样式
-	ui.app_pushBtn->setStyleSheet("QCheckBox{spacing: 2px;color: white;}"
-		"QCheckBox::indicator{width: 32px;height: 32px;}"
-		"QCheckBox::indicator:unchecked{image: url(./images/app.png);}"
-		"QCheckBox::indicator:checked{image: url(./images/app.png);}");
 
 	ui.AudioCorner_pushBtn->setStyleSheet("QCheckBox{spacing: 2px;color: white;}"
 		"QCheckBox::indicator{width: 16px;height: 32px;}"
@@ -243,6 +243,8 @@ void UIMainWindow::CloseDialog()
 		QString("取消"));
 	if (iStatus == 1)
 	{
+		// 发送结束直播消息再关闭
+		SendStopLiveHttpMsg();
 		close();
 	}
 }
@@ -410,20 +412,21 @@ void UIMainWindow::slot_startOrStopLiveStream()
 				return;
 			}
 
-			if (m_VideoInfo->m_videoSourceType == EN_NLSS_VIDEOIN_NONE)
-			{
-				CMessageBox::showMessage(
-					QString("答疑时间"),
-					QString("请选择要播放的视频源！"),
-					QString("确定"));
-				return;
-			}
+// 			if (m_VideoInfo->m_videoSourceType == EN_NLSS_VIDEOIN_NONE)
+// 			{
+// 				CMessageBox::showMessage(
+// 					QString("答疑时间"),
+// 					QString("请选择要播放的视频源！"),
+// 					QString("确定"));
+// 				return;
+// 			}
 			
-			QString url;
-			url = m_AuxiliaryPanel->getURL();
+// 			QString url;
+// 			url = m_AuxiliaryPanel->getURL();
 			
-			m_VideoInfo->setPlugFlowUrl(url);
-			m_VideoInfo->StartLiveVideo();
+// 			m_VideoInfo->setPlugFlowUrl(url);
+ 			m_VideoInfo->StartLiveVideo();
+			SendVideoMsg((UINT)MSG_VIDEO_START_LIVE);
 			ui.Live_pushBtn->setText("结束直播");
 			SendStartLiveHttpMsg();
 
@@ -442,12 +445,13 @@ void UIMainWindow::VideoStatus(int iStatus)
 	HideOtherUI();
 	if (iStatus)
 	{
-		m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_CAMERA;
-		m_VideoInfo->ChangeLiveVideo();
+//		m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_CAMERA;
+//		m_VideoInfo->ChangeLiveVideo();
 		m_VideoInfo->show();
 
 		ui.fullscreen_checkBox->setCheckState(Qt::CheckState::Unchecked);
 		m_bOtherApp = false;
+		SendVideoMsg((UINT)MSG_VIDEO_CAMERA);
 	}
 	else
 	{
@@ -468,12 +472,11 @@ void UIMainWindow::FullScreenStatus(int iStatus)
 	HideOtherUI();
 	if (iStatus)
 	{
-		m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_FULLSCREEN;
-		m_VideoInfo->ChangeLiveVideo();
+//		m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_FULLSCREEN;
 		m_VideoInfo->show();
-
 		ui.video_checkBox->setCheckState(Qt::CheckState::Unchecked);
 		m_bOtherApp = false;
+		SendVideoMsg((UINT)MSG_VIDEO_FULLSCREEN);
 	}
 	else
 	{
@@ -573,7 +576,7 @@ void UIMainWindow::AudioStatus(int iStatus)
 	}
 }
 
-void UIMainWindow::OtherApp(int i)
+void UIMainWindow::OtherApp()
 {
 	HideOtherUI();
 	if (m_OtherAppInfo->isVisible())
@@ -584,25 +587,26 @@ void UIMainWindow::OtherApp(int i)
 	
 	if (m_OtherAppInfo && m_VideoInfo)
 	{
-		QRect MainRect = this->geometry();
-		QRect InfoRect = m_OtherAppInfo->geometry();
-		m_VideoInfo->EnumAvailableMediaDevices();
-		m_OtherAppInfo->setAppInfo(m_VideoInfo->m_pAppWinds, m_VideoInfo->m_iAppWindNum);
-		m_OtherAppInfo->move((MainRect.width() - InfoRect.width()) / 2, (MainRect.height() - InfoRect.height()) / 2);
-		if (m_OtherAppInfo->exec() != 0)
-		{
-			m_bOtherApp = true;
-			m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_APP;
-
-			int index = m_OtherAppInfo->getCurrentIndex();
-			m_VideoInfo->ChangeAppPath(index+1);
-			m_VideoInfo->ChangeLiveVideo();
-			m_VideoInfo->show();
-
-			// 当选中其他应用时，摄像头和全屏都不可用
-			ui.video_checkBox->setCheckState(Qt::CheckState::Unchecked);
-			ui.fullscreen_checkBox->setCheckState(Qt::CheckState::Unchecked);
-		}
+//		QRect MainRect = this->geometry();
+//		QRect InfoRect = m_OtherAppInfo->geometry();
+//		m_VideoInfo->EnumAvailableMediaDevices();
+//		m_OtherAppInfo->setAppInfo(m_VideoInfo->m_pAppWinds, m_VideoInfo->m_iAppWindNum);
+// 		m_OtherAppInfo->move((MainRect.width() - InfoRect.width()) / 2, (MainRect.height() - InfoRect.height()) / 2);
+// 		if (m_OtherAppInfo->exec() != 0)
+// 		{
+// 			m_bOtherApp = true;
+// 			m_VideoInfo->m_videoSourceType = EN_NLSS_VIDEOIN_APP;
+// 
+// 			int index = m_OtherAppInfo->getCurrentIndex();
+// 			m_VideoInfo->ChangeAppPath(index+1);
+// 			m_VideoInfo->ChangeLiveVideo();
+// 			m_VideoInfo->show();
+// 
+// 			// 当选中其他应用时，摄像头和全屏都不可用
+// 			ui.video_checkBox->setCheckState(Qt::CheckState::Unchecked);
+// 			ui.fullscreen_checkBox->setCheckState(Qt::CheckState::Unchecked);
+// 		}
+		SendVideoMsg(MSG_VIDEO_OTHREAPP);
 	}
 }
 
@@ -680,6 +684,13 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 			}
 		}
 		break;
+		case MSG_VIDEO_HWND:
+		{
+			HWND hwnd = (HWND)pMsg->wParam;
+			m_VideoWnd = hwnd;
+			m_VideoInfo->SetVideoWnd(hwnd);
+			m_ShowVideoTimer->start(50);
+		}
 		case WM_NCHITTEST:
 		{
 			int x = GET_X_LPARAM(pMsg->lParam) - this->frameGeometry().x();
@@ -1112,4 +1123,31 @@ void UIMainWindow::setLiveBtnEnable(bool bEnable)
 	ui.video_checkBox->setEnabled(bEnable);
 	ui.fullscreen_checkBox->setEnabled(bEnable);
 	ui.app_pushBtn->setEnabled(bEnable);
+}
+
+void UIMainWindow::setVideoPos()
+{
+	if (m_VideoWnd)
+	{
+		if (m_ShowVideoTimer->isActive())
+			m_ShowVideoTimer->stop();
+		MoveWindow(m_VideoWnd, 0, 0, 960, 605, true);
+	}
+}
+
+void UIMainWindow::SendVideoMsg(UINT iMsg)
+{
+	if (m_VideoWnd)
+	{
+		if (iMsg == MSG_VIDEO_START_LIVE)
+		{
+ 			TCHAR szTempPath[MAX_PATH] = { 0 };
+ 			GetCurrentDirectory(MAX_PATH, szTempPath);
+ 			lstrcat(szTempPath, L"\\config.ini");
+ 			QString url = m_AuxiliaryPanel->getURL();
+ 			WritePrivateProfileString(L"CONFIG_PATH", L"LIVEURL", (LPCTSTR)url.utf16(), szTempPath);
+		}
+		
+		PostMessage(m_VideoWnd, iMsg,0,0);
+	}
 }

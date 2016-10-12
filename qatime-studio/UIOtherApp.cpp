@@ -142,8 +142,10 @@ void UIOtherApp::setAppInfo(ST_NLSS_INDEVICE_INF* m_pAppWinds, int iAppCount)
 		QTableWidgetItem *pItemNum = new QTableWidgetItem(strAppName);
 		ui.Auxiliary_tableWidget->setItem(i - 1, 0, pItemNum);
 	}
-
-	ui.Auxiliary_tableWidget->removeRow(iAppCount);
+	if (iAppCount != 0)
+	{
+		ui.Auxiliary_tableWidget->removeRow(iAppCount);
+	}
 }
 
 void UIOtherApp::initAppPath()
