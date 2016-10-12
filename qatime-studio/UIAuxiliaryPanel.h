@@ -93,6 +93,7 @@ public:
 	void setParent(UIMainWindow* parent);
 
 	void ergodicItem(QString lessonID,QString courseid);					// 遍历节点
+	void ChangeLessonStatus(QString Status);								// 改变当前课程状态
 };
 
 #endif // UIAUXILIARYPANEL_H

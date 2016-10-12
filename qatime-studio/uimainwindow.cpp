@@ -838,7 +838,15 @@ void UIMainWindow::SendStopLiveHttpMsg()
 
 void UIMainWindow::FinishStopLive()
 {
-
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	if (obj["status"].toInt() == 1 && data.contains("status"))
+	{
+		QString status = data["status"].toString();
+		m_AuxiliaryPanel->ChangeLessonStatus(status);
+	}
 }
 
 // Ôö¼ÓÒõÓ°

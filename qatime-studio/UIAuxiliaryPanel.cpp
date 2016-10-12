@@ -534,3 +534,26 @@ void UIAuxiliaryPanel::ergodicItem(QString sLessonID, QString sCourseid)
 		++it;
 	}
 }
+
+void UIAuxiliaryPanel::ChangeLessonStatus(QString Status)
+{
+	QString strChinaStatus;
+	if (Status == "init")
+		strChinaStatus = "未开始";
+	else if (Status == "ready")
+		strChinaStatus = "待上课";
+	else if (Status == "teaching")
+		strChinaStatus = "进行中";
+	else if (Status == "paused")
+		strChinaStatus = "暂停中";
+	else if (Status == "closed")
+		strChinaStatus = "进行中";
+	else if (Status == "finished")
+		strChinaStatus = "已结束";
+	else if (Status == "billing")
+		strChinaStatus = "已结束";
+	else if (Status == "completed")
+		strChinaStatus = "已结束";
+
+	m_pTreeCurrentItem->setText(2, strChinaStatus);
+}
