@@ -83,8 +83,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	ui.timeWidget->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
 	ui.timeWidget->setGridVisible(true);	
 
-//	ui.text_proclamation->setStyleSheet();
-//	ui.button_brow->setStyleSheet("QToolTip{backgroud： white}");
+	// 消息编辑框粘贴过滤代码
 	ui.textEdit->setContextMenuPolicy(Qt::NoContextMenu);
 	ui.textEdit->installEventFilter(this);
 }
@@ -93,6 +92,38 @@ UIChatRoom::~UIChatRoom()
 {
 	m_StudentInfo.clear();
 }
+
+// 消息编辑框粘贴过滤代码
+bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
+{
+	if (target == ui.textEdit) {
+		if (event->type() == QEvent::KeyPress) {
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+			if (keyEvent->matches(QKeySequence::Paste))
+			{
+				qDebug() << "Ctrl + V";
+				QClipboard *board = QApplication::clipboard();
+				QString strClip = board->text();
+				strClip.replace("￼", "");
+				ui.textEdit->insertPlainText(strClip);
+				return true;
+			}
+		}
+		if (event->type() == QEvent::MouseButtonRelease) {
+			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+			if (mouseEvent->button() == Qt::MidButton) {
+				qDebug() << "Mouse MidButton Release";
+				QClipboard *board = QApplication::clipboard();
+				QString strClip = board->text();
+				strClip.replace("￼", "");
+				ui.textEdit->insertPlainText(strClip);
+				return true;
+			}
+		}
+	}
+	return QWidget::eventFilter(target, event);
+}
+
 // 弹出聊天框
 void UIChatRoom::clickTalk()
 {	
@@ -1129,34 +1160,4 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 	request.setRawHeader("Remember-Token", mRemeberToken.toUtf8());	
 	reply = manager.post(request, append);
 //	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
-}
-
-bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
-{
-	if (target == ui.textEdit) {
-		if (event->type() == QEvent::KeyPress) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-			if (keyEvent->matches(QKeySequence::Paste)) 
-			{
-				qDebug() << "Ctrl + V";
-				QClipboard *board = QApplication::clipboard();
-				QString strClip = board->text();
-				strClip.replace("￼", "");
-				ui.textEdit->insertPlainText(strClip);
-				return true;
-			}
-		}
-		if (event->type() == QEvent::MouseButtonRelease) {
-			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-			if (mouseEvent->button() == Qt::MidButton) {
-				qDebug() << "Mouse MidButton Release";
-				QClipboard *board = QApplication::clipboard();
-				QString strClip = board->text();
-				strClip.replace("￼", "");
-				ui.textEdit->insertPlainText(strClip);
-				return true;
-			}
-		}
-	}
-	return QWidget::eventFilter(target, event);
 }
