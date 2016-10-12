@@ -108,6 +108,11 @@ bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
 				ui.textEdit->insertPlainText(strClip);
 				return true;
 			}
+			else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
+			{
+				emit ui.button_sendMseeage->clicked();
+				return true;
+			}
 		}
 		if (event->type() == QEvent::MouseButtonRelease) {
 			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);

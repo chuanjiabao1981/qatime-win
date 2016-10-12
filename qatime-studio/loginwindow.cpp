@@ -40,7 +40,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 	ReadSetting();
 	InitUserName();
 
-	QShortcut *key = new QShortcut(QKeySequence(Qt::Key_Return), this);//创建一个快捷键"Key_Return"键
+	QShortcut *key = new QShortcut(QKeySequence(Qt::Key_Return | Qt::Key_Enter), this);//创建一个快捷键"Key_Return"键
 	connect(key, SIGNAL(activated()), this, SLOT(OnLogIn()));//连接到指定槽函数
 	setTabOrder(ui.UserName_Edit, ui.UserPass_Edit);
 	setTabOrder(ui.UserPass_Edit, ui.login_pushBtn);
