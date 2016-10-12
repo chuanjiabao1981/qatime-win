@@ -6,3 +6,4 @@
 ## Contribute
 
 - Please commit with messages include issue number
+- Every issue must have a branch with issue number as name
