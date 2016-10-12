@@ -1170,5 +1170,4 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 	QNetworkRequest request(url);
 	request.setRawHeader("Remember-Token", mRemeberToken.toUtf8());	
 	reply = manager.post(request, append);
-//	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
 }

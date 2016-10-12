@@ -790,9 +790,14 @@ void UIMainWindow::FinishStartLive()
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1 && data.contains("live_token"))
 	{
 		m_liveToken = data["live_token"].toString();
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
 	}
 }
 
@@ -843,10 +848,15 @@ void UIMainWindow::FinishStopLive()
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1 && data.contains("status"))
 	{
 		QString status = data["status"].toString();
 		m_AuxiliaryPanel->ChangeLessonStatus(status);
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
 	}
 }
 
@@ -1014,10 +1024,15 @@ void UIMainWindow::returnKey()
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1 && data.contains("im_app_key"))
 	{
 		QString key = data["im_app_key"].toString();
 		m_charRoom->setKeyAndLogin(key);
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
 	}
 }
 
@@ -1047,6 +1062,7 @@ void UIMainWindow::returnMember()
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1 && data.contains("members"))
 	{
 		// 群成员信息
@@ -1091,6 +1107,10 @@ void UIMainWindow::returnMember()
 			//用完之后删除
 			delete announcements;
 		}
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
 	}
 
 	// 没登录，则请求key并登录
@@ -1180,5 +1200,37 @@ void UIMainWindow::SendVideoMsg(UINT iMsg)
 		}
 		
 		PostMessage(m_VideoWnd, iMsg,0,0);
+	}
+}
+
+void UIMainWindow::RequestError(QJsonObject& error)
+{
+	QString strError;
+	if (error["code"].toInt() == 1002)
+		strError = QString("授权过期,请重新登录！");
+	else if (error["code"].toInt() == 1003)
+		strError = QString("没有权限访问,请重新登录！");
+	else if (error["code"].toInt() == 1004)
+		strError = QString("授权失败,请重新登录！");
+	else if (error["code"].toInt() == 3001)
+		strError = QString("参数错误,请重新登录！");
+	else if (error["code"].toInt() == 3002)
+		strError = QString("数据不合法,请重新登录！");
+	else if (error["code"].toInt() == 4001)
+		strError = QString("找不到资源,请重新登录！");
+	else if (error["code"].toInt() == 9999)
+		strError = QString("服务器错误,请重新登录！");
+	else
+		return;
+
+	int iStatus = CMessageBox::showMessage(
+		QString("答疑时间"),
+		QString(strError),
+		QString("确定"),
+		QString());
+	if (iStatus == 1)
+	{
+		if (m_LoginWindow)
+			m_LoginWindow->ReturnLogin();
 	}
 }

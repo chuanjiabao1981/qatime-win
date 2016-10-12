@@ -138,6 +138,7 @@ void UILessonTable::returnLesson()
 
 	int jiejf = obj["status"].toInt();
 	QJsonArray data = obj["data"].toArray();
+	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1)
 	{
 		m_bInit = true;
@@ -209,6 +210,10 @@ void UILessonTable::returnLesson()
 				}
 			}
 		}
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		m_MainWindow->RequestError(error);
 	}
 
 	int iCount = ui.lessonTable_tableWidget->rowCount();

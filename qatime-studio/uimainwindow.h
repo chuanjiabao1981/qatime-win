@@ -122,6 +122,7 @@ public:
 	void SendVideoMsg(UINT iMsg);							// 往qatime_video发送消息
 	void FinishStartLive();									// 返回开始直播请求的token
 	void FinishStopLive();									// 返回结束直播请求的状态
+	void RequestError(QJsonObject& error);					// 请求返回错误提示
 };
 
 #endif // UIMAINWINDOW_H
