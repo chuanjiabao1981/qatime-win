@@ -244,7 +244,7 @@ void UIMainWindow::CloseDialog()
 	if (iStatus == 1)
 	{
 		// 发送结束直播消息再关闭
-		SendStopLiveHttpMsg();
+		SendStopLiveHttpMsg(false);
 		close();
 	}
 }
@@ -816,7 +816,7 @@ void UIMainWindow::SendHeartBeatHttpMsg()
 	reply = manager.get(request);
 }
 
-void UIMainWindow::SendStopLiveHttpMsg()
+void UIMainWindow::SendStopLiveHttpMsg(bool bConnect)
 {
 	QString strUrl;
 #ifdef _DEBUG
@@ -833,7 +833,8 @@ void UIMainWindow::SendStopLiveHttpMsg()
 
 	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
 	reply = manager.get(request);
-	connect(reply, &QNetworkReply::finished, this, &UIMainWindow::FinishStopLive);
+	if (bConnect)
+		connect(reply, &QNetworkReply::finished, this, &UIMainWindow::FinishStopLive);
 }
 
 void UIMainWindow::FinishStopLive()
@@ -966,6 +967,9 @@ void UIMainWindow::returnClick()
 		QString("取消"));
 	if (iStatus == 1)
 	{
+		// 发送结束直播消息再关闭
+		SendStopLiveHttpMsg(false);
+
 		if (m_LoginWindow)
 			m_LoginWindow->ReturnLogin();
 	}

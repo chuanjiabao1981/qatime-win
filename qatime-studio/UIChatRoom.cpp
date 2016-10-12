@@ -647,6 +647,9 @@ void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 							if (!strName.isEmpty())
 								strName += "，";
 
+							if (m_StudentInfo.size() == 0)
+								return;
+
 							strName += *m_StudentInfo.find(QString::fromStdString(ids[i]));
 						}
 					}
@@ -843,6 +846,9 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 						{
 							if (!strName.isEmpty())
 								strName += "，";
+
+							if (m_StudentInfo.size() == 0)
+								return;
 
 							strName += *m_StudentInfo.find(QString::fromStdString(ids[i]));
 						}

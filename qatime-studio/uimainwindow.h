@@ -97,7 +97,7 @@ public:
 	void LessonRequestFinished();							// 课程http请求
 	void EnumAvailableMediaDevices();						// 枚举设备
 	void SendStartLiveHttpMsg();							// 往服务器发送直播开始消息
-	void SendStopLiveHttpMsg();								// 往服务器发送直播停止消息
+	void SendStopLiveHttpMsg(bool bConnect=true);			// 往服务器发送直播停止消息
 	void SendHeartBeatHttpMsg();							// 往服务器发送直播心跳消息（5分钟一次）
 	void ShowAuxiliary();									// 显示辅导班
 	void InitAudioList();
