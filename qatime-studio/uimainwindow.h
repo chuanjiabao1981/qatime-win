@@ -63,6 +63,7 @@ private:
 	UIVideoChange*					m_VideoChangeInfo;	// 摄像头选择窗口
 	UIRatio*						m_RatioChangeInfo;	// 分辨率窗口
 	HWND							m_VideoWnd;			// 视频窗口句柄
+	QString							m_liveToken;		// 直播心跳时需要（开始直播时返回token）
 private slots :
 	void MinDialog();									// 最小化对话框
 	void MaxDialog();									// 最大化对话框
@@ -119,6 +120,8 @@ public:
 	void LessonTable_Auxiliary(QString sLessonID, QString sCourseID); //程表中选择课程——关联到辅导班
 	void setLiveBtnEnable(bool bEnable);
 	void SendVideoMsg(UINT iMsg);							// 往qatime_video发送消息
+	void FinishStartLive();									// 返回开始直播请求的token
+	void FinishStopLive();									// 返回结束直播请求的状态
 };
 
 #endif // UIMAINWINDOW_H

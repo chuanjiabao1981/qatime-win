@@ -778,26 +778,39 @@ void UIMainWindow::SendStartLiveHttpMsg()
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
-	QString str = this->mRemeberToken;
 
 	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
 	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIMainWindow::FinishStartLive);
+}
+
+void UIMainWindow::FinishStartLive()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	if (obj["status"].toInt() == 1 && data.contains("live_token"))
+	{
+		m_liveToken = data["live_token"].toString();
+	}
 }
 
 void UIMainWindow::SendHeartBeatHttpMsg()
 {
 	QString strUrl;
 #ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heartbeat";
+	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heartbeat?token={token}";
 	strUrl.replace("{lessons_id}", m_AuxiliaryPanel->getLessonID());
+	strUrl.replace("{token}", m_liveToken);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heartbeat";
+	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heartbeat?token={token}";
 	strUrl.replace("{lessons_id}", m_AuxiliaryPanel->getLessonID());
+	strUrl.replace("{token}", m_liveToken);
 #endif
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
-	QString str = this->mRemeberToken;
 
 	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
 	reply = manager.get(request);
@@ -820,6 +833,12 @@ void UIMainWindow::SendStopLiveHttpMsg()
 
 	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
 	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIMainWindow::FinishStopLive);
+}
+
+void UIMainWindow::FinishStopLive()
+{
+
 }
 
 // ‘ˆº”“ı”∞
