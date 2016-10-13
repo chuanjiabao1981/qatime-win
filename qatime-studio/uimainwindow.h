@@ -18,7 +18,8 @@
 #include "UIChatRoom.h"
 #include "loginwindow.h"
 #include "UILessontable.h"
-
+#include "UIMenuTool.h"
+#include <QMutex>
 #pragma execution_character_set("utf-8")
 #define STARTLS_ASYNC
 
@@ -64,7 +65,19 @@ private:
 	UIRatio*						m_RatioChangeInfo;	// 分辨率窗口
 	HWND							m_VideoWnd;			// 视频窗口句柄
 	QString							m_liveToken;		// 直播心跳时需要（开始直播时返回token）
-private slots :
+
+	UIMenuTool*						m_MenuTool;			//  工具按钮	
+
+	int a;
+	int chat_X;	//聊天位置x
+	int chat_Y; //聊天位置y
+	int video_Width; //播放区大小
+	int video_Heigth;//播放区大小
+	int chat_Width;//聊天区大小宽度
+	int chat_Heigth;//聊天区大小 高度
+	QMutex	m_mutex;
+
+	private slots :
 	void MinDialog();									// 最小化对话框
 	void MaxDialog();									// 最大化对话框
 	void CloseDialog();									// 关闭对话框
