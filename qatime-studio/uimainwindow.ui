@@ -356,7 +356,7 @@
     <rect>
      <x>430</x>
      <y>0</y>
-     <width>181</width>
+     <width>191</width>
      <height>39</height>
     </rect>
    </property>
@@ -376,7 +376,7 @@
     <string notr="true">color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
-    <string>答疑时间  专用直播器V0.1</string>
+    <string>答疑时间  专用直播器V0.2.2</string>
    </property>
   </widget>
   <widget class="MToolButton" name="mainclose_pushBtn">

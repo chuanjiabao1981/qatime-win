@@ -20,6 +20,12 @@
 
 class UIMainWindow;
 
+enum SelLessonStatus {
+	Finished,
+	Closed,
+	Ready,
+	NullStatus
+};
 class UIAuxiliaryPanel : public QWidget
 {
 	Q_OBJECT
@@ -47,6 +53,7 @@ private:
 	QString							m_lessonName;			//课程名字
 	QTreeWidgetItem*				m_pCurrenDoubTree;		//目前双击的列表
 	QString							m_chatID;				//当前会话窗口ID
+	QTreeWidgetItem*				m_FirstLessonItem;		//上一节课程
 
 signals:
 	void emitShowTip();
@@ -93,7 +100,8 @@ public:
 	void setParent(UIMainWindow* parent);
 
 	void ergodicItem(QString lessonID,QString courseid);					// 遍历节点
-	void ChangeLessonStatus(QString Status);								// 改变当前课程状态
+	void ChangeLessonStatus(QString sLessonID, QString Status);				// 改变当前课程状态
+	SelLessonStatus SwitchLesson(QTreeWidgetItem* terrWidget);
 };
 
 #endif // UIAUXILIARYPANEL_H

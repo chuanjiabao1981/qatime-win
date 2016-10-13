@@ -690,7 +690,20 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 			m_VideoWnd = hwnd;
 			m_VideoInfo->SetVideoWnd(hwnd);
 			m_ShowVideoTimer->start(50);
+			return true;
 		}
+		break;
+		case MSG_VIDEO_SELECTAPP:
+		{
+			m_bOtherApp = true;
+			m_VideoInfo->show();
+
+			// 当选中其他应用时，摄像头和全屏都不可用
+			ui.video_checkBox->setCheckState(Qt::CheckState::Unchecked);
+			ui.fullscreen_checkBox->setCheckState(Qt::CheckState::Unchecked);
+			return true;
+		}
+		break;
 		case WM_NCHITTEST:
 		{
 			int x = GET_X_LPARAM(pMsg->lParam) - this->frameGeometry().x();
@@ -794,6 +807,9 @@ void UIMainWindow::FinishStartLive()
 	if (obj["status"].toInt() == 1 && data.contains("live_token"))
 	{
 		m_liveToken = data["live_token"].toString();
+// 		QString status = data["status"].toString();
+// 		m_AuxiliaryPanel->ChangeLessonStatus(status);
+		SendRequestStatus();
 	}
 	else if (obj["status"].toInt() == 0)
 	{
@@ -849,10 +865,57 @@ void UIMainWindow::FinishStopLive()
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
 	QJsonObject error = obj["error"].toObject();
-	if (obj["status"].toInt() == 1 && data.contains("status"))
+	if (obj["status"].toInt() == 1 )
 	{
-		QString status = data["status"].toString();
-		m_AuxiliaryPanel->ChangeLessonStatus(status);
+// 		QString status = data["status"].toString();
+// 		m_AuxiliaryPanel->ChangeLessonStatus(status);
+		SendRequestStatus();
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
+	}
+}
+
+void UIMainWindow::SendRequestStatus()
+{
+	QString strUrl;
+#ifdef _DEBUG
+	strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/{id}";
+	strUrl.replace("{teacher_id}",	m_teacherID);
+	strUrl.replace("{id}", m_AuxiliaryPanel->getCouresID());
+#else
+	strUrl = "http://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/{id}";
+	strUrl.replace("{teacher_id}", m_teacherID);
+	strUrl.replace("{id}", m_AuxiliaryPanel->getCouresID());
+#endif
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+	QString str = this->mRemeberToken;
+
+	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIMainWindow::RequestStatus);
+}
+
+void UIMainWindow::RequestStatus()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	if (obj["status"].toInt() == 1 && data.contains("lessons"))
+	{
+		QJsonArray lessons = data["lessons"].toArray();
+		foreach(const QJsonValue & value, lessons)
+		{
+			QJsonObject objLesson = value.toObject();
+			QString status = objLesson["status"].toString();
+			QString strId = QString::number(objLesson["id"].toInt());
+			m_AuxiliaryPanel->ChangeLessonStatus(strId, status);
+		}
 	}
 	else if (obj["status"].toInt() == 0)
 	{
@@ -1111,6 +1174,7 @@ void UIMainWindow::returnMember()
 	else if (obj["status"].toInt() == 0)
 	{
 		RequestError(error);
+		return;
 	}
 
 	// 没登录，则请求key并登录
@@ -1203,13 +1267,13 @@ void UIMainWindow::SendVideoMsg(UINT iMsg)
 	}
 }
 
-void UIMainWindow::RequestError(QJsonObject& error)
+void UIMainWindow::RequestError(QJsonObject& error, bool bTrue)
 {
 	QString strError;
 	if (error["code"].toInt() == 1002)
 		strError = QString("授权过期,请重新登录！");
 	else if (error["code"].toInt() == 1003)
-		strError = QString("没有权限访问,请重新登录！");
+		strError = QString("没有权限访问！");
 	else if (error["code"].toInt() == 1004)
 		strError = QString("授权失败,请重新登录！");
 	else if (error["code"].toInt() == 3001)
@@ -1230,7 +1294,44 @@ void UIMainWindow::RequestError(QJsonObject& error)
 		QString());
 	if (iStatus == 1)
 	{
-		if (m_LoginWindow)
+		if (m_LoginWindow && bTrue)
 			m_LoginWindow->ReturnLogin();
+	}
+}
+
+void UIMainWindow::SendChangeStatusMsg(QString id)
+{
+	QString strUrl;
+#ifdef _DEBUG
+	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{id}/finish";
+	strUrl.replace("{id}", id);
+#else
+	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{id}/finish";
+	strUrl.replace("{id}", id);
+#endif
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+
+	QByteArray append("");
+	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	reply = manager.put(request, append);
+	connect(reply, &QNetworkReply::finished, this, &UIMainWindow::returnChangeStatus);
+}
+
+void UIMainWindow::returnChangeStatus()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	if (obj["status"].toInt() == 1)
+	{
+		return;
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error, false);
 	}
 }

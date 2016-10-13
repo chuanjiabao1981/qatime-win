@@ -1,4 +1,5 @@
 #include "lesson.h"
+#include "define.h"
 
 Lesson::Lesson()
 {
@@ -57,37 +58,36 @@ QString Lesson::ChinaLessonStatus()
 	QString strChinaStatus;
 	if (mStatus == "init")
 	{
-		strChinaStatus = "未开始";
+		strChinaStatus = MSG_LESSON_STATUS_INIT;
 	}
 	else if (mStatus == "ready")
 	{
-		strChinaStatus = "待上课";
+		strChinaStatus = MSG_LESSON_STATUS_READY;
 	}
 	else if (mStatus == "teaching")
 	{
-		strChinaStatus = "进行中";
+		strChinaStatus = MSG_LESSON_STATUS_THEACHING;
 	}
 	else if (mStatus == "paused")
 	{
-		strChinaStatus = "暂停中";
+		strChinaStatus = MSG_LESSON_STATUS_PAUSED;
 	}
 	else if (mStatus == "closed")
 	{
-		strChinaStatus = "进行中";
+		strChinaStatus = MSG_LESSON_STATUS_CLOSED;
 	}
 	else if (mStatus == "finished")
 	{
-		strChinaStatus = "已结束";
+		strChinaStatus = MSG_LESSON_STATUS_CLOSED;
 	}
 	else if (mStatus == "billing")
 	{
-		strChinaStatus = "已结束";
+		strChinaStatus = MSG_LESSON_STATUS_CLOSED;
 	}
 	else if (mStatus == "completed")
 	{
-		strChinaStatus = "已结束";
+		strChinaStatus = MSG_LESSON_STATUS_CLOSED;
 	}
-
 
 	return strChinaStatus;
 }

@@ -8,6 +8,7 @@
 #include <QScrollBar>
 #include "UIMessageBox.h"
 #include <QToolTip>
+#include "define.h"
 
 #define QT_TOOLBOXINDEX			100				//QTableWidgetItem索引
 #define QT_TOOLBOXCOURSEID		101				//Toolbox对应的辅导班ID
@@ -25,6 +26,7 @@ UIAuxiliaryPanel::UIAuxiliaryPanel(QWidget *parent)
 	, m_pTreeCurrentItem(NULL)
 	, m_bPreview(false)
 	, m_Parent(NULL)
+	, m_FirstLessonItem(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
@@ -449,39 +451,82 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 			QString());
 		return;
 	}
-	else
+
+	SelLessonStatus StatueType = SwitchLesson(terrWidget);
+	if (StatueType == Ready)
 	{
-		m_lessonID = (QString)terrWidget->data(0,QT_TOOLBOXLESSONID).toString();
-		m_url = (QString)terrWidget->data(0, QT_TOOLBOXLESSONURL).toString();
-		m_auxiliaryID = (QString)terrWidget->data(0, QT_TOOLBOXCOURSEID).toString();
-		m_lessonName = (QString)terrWidget->data(0, QT_TOOLBOXLESSONNAME).toString();
-
-		QString tableName = (QString)terrWidget->data(0,QT_TOOLBOXLITEMNAME).toString();
-		QString tabText = terrWidget->parent()->text(0);
-		
-		// 去掉上一节课的箭头
-		if (m_pTreeCurrentItem)
-		{
-			QIcon qIconOld("./images/empty.png");
-			m_pTreeCurrentItem->setIcon(0,qIconOld);
-			m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#000000"));
-			m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#000000"));
-		}
-
-		// 添加当前课的箭头
-		QIcon qIcon("./images/teaching.png");
-		terrWidget->setIcon(0, qIcon);	
-		// 设置当前item
-		m_pTreeCurrentItem = terrWidget;	
-		m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#FF0000"));
-		m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#FF0000"));
-
-		//进入聊天室
-		m_chatID = (QString)terrWidget->data(0, QT_TOOLBOXCHATID).toString();
-		m_Parent->setCurChatRoom(m_chatID, m_auxiliaryID);
-		m_Parent->setVideoLesson(m_lessonName);
-		m_Parent->showChatRoomWnd();
+		CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString("请按顺序直播课程！"),
+			QString("确定"),
+			QString());
+		return;
 	}
+	else if (StatueType == Closed)
+	{
+		int iStatus = CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString("是否结束上一节课，切换到本课程！"),
+			QString("确定"),
+			QString("取消"));
+		if (iStatus == 1)
+		{
+			if (m_FirstLessonItem)
+			{
+				QString status = "finished";
+				QBrush brush;
+				QIcon qIcon;
+				QColor qColor;
+				GetItemColor(status, brush, qIcon);
+				GetItemTextColor(status, qColor);
+
+				QString sID = (QString)m_FirstLessonItem->data(0, QT_TOOLBOXLESSONID).toString();
+				m_FirstLessonItem->setBackground(0,brush);
+				m_FirstLessonItem->setBackground(1, brush);
+				m_FirstLessonItem->setBackground(2, brush);
+				m_FirstLessonItem->setTextColor(0, qColor);
+				m_FirstLessonItem->setTextColor(1, qColor);
+				m_FirstLessonItem->setTextColor(2, qColor);
+
+				m_FirstLessonItem->setData(0, QT_TOOLBOXLITEMSTATUS, status);
+				m_Parent->SendChangeStatusMsg(sID);
+			}
+		}
+		else
+			return;
+	}
+	
+	m_lessonID = (QString)terrWidget->data(0,QT_TOOLBOXLESSONID).toString();
+	m_url = (QString)terrWidget->data(0, QT_TOOLBOXLESSONURL).toString();
+	m_auxiliaryID = (QString)terrWidget->data(0, QT_TOOLBOXCOURSEID).toString();
+	m_lessonName = (QString)terrWidget->data(0, QT_TOOLBOXLESSONNAME).toString();
+
+	QString tableName = (QString)terrWidget->data(0,QT_TOOLBOXLITEMNAME).toString();
+	QString tabText = terrWidget->parent()->text(0);
+		
+	// 去掉上一节课的箭头
+	if (m_pTreeCurrentItem)
+	{
+		QIcon qIconOld("./images/empty.png");
+		m_pTreeCurrentItem->setIcon(0,qIconOld);
+		m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#000000"));
+		m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#000000"));
+	}
+
+	// 添加当前课的箭头
+	QIcon qIcon("./images/teaching.png");
+	terrWidget->setIcon(0, qIcon);	
+	// 设置当前item
+	m_pTreeCurrentItem = terrWidget;	
+	m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#FF0000"));
+	m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#FF0000"));
+
+	//进入聊天室
+	m_chatID = (QString)terrWidget->data(0, QT_TOOLBOXCHATID).toString();
+	m_Parent->setCurChatRoom(m_chatID, m_auxiliaryID);
+	m_Parent->setVideoLesson(m_lessonName);
+	m_Parent->showChatRoomWnd();
+
 	emit emitShowTip();
 //	setFocus();
 }
@@ -535,25 +580,73 @@ void UIAuxiliaryPanel::ergodicItem(QString sLessonID, QString sCourseid)
 	}
 }
 
-void UIAuxiliaryPanel::ChangeLessonStatus(QString Status)
+void UIAuxiliaryPanel::ChangeLessonStatus(QString sLessonID, QString Status)
 {
-	QString strChinaStatus;
-	if (Status == "init")
-		strChinaStatus = "未开始";
-	else if (Status == "ready")
-		strChinaStatus = "待上课";
-	else if (Status == "teaching")
-		strChinaStatus = "进行中";
-	else if (Status == "paused")
-		strChinaStatus = "暂停中";
-	else if (Status == "closed")
-		strChinaStatus = "进行中";
-	else if (Status == "finished")
-		strChinaStatus = "已结束";
-	else if (Status == "billing")
-		strChinaStatus = "已结束";
-	else if (Status == "completed")
-		strChinaStatus = "已结束";
+	QTreeWidgetItem* pItem = m_pTreeCurrentItem->parent();
+	if (pItem)
+	{
+		QTreeWidgetItemIterator it(pItem);
+		while (*it)
+		{
+			QTreeWidgetItem* terrWidget = *it;
+			QString lessonID = (QString)terrWidget->data(0, QT_TOOLBOXLESSONID).toString();
+			if (sLessonID == lessonID)
+			{
+				QString strChinaStatus;
+				if (Status == "init")
+					strChinaStatus = MSG_LESSON_STATUS_INIT;
+				else if (Status == "ready")
+					strChinaStatus = MSG_LESSON_STATUS_READY;
+				else if (Status == "teaching")
+					strChinaStatus = MSG_LESSON_STATUS_THEACHING;
+				else if (Status == "paused")
+					strChinaStatus = MSG_LESSON_STATUS_PAUSED;
+				else if (Status == "closed")
+					strChinaStatus = MSG_LESSON_STATUS_CLOSED;
+				else if (Status == "finished")
+					strChinaStatus = MSG_LESSON_STATUS_CLOSED;
+				else if (Status == "billing")
+					strChinaStatus = MSG_LESSON_STATUS_CLOSED;
+				else if (Status == "completed")
+					strChinaStatus = MSG_LESSON_STATUS_CLOSED;
 
-	m_pTreeCurrentItem->setText(2, strChinaStatus);
+				terrWidget->setText(2, strChinaStatus);
+				return;
+			}
+			++it;
+		}
+	}
+}
+
+SelLessonStatus UIAuxiliaryPanel::SwitchLesson(QTreeWidgetItem* terrWidget)
+{
+	QTreeWidgetItem* pParentItem = terrWidget->parent();
+	QTreeWidgetItemIterator it(pParentItem);
+
+	// 查找当前节点，在父节点中的位置
+	int index = pParentItem->indexOfChild(terrWidget);
+
+	// 查找选择节点的上一个节点
+	QTreeWidgetItem * pFirstItem = pParentItem->child(index - 1);
+	if (pFirstItem == NULL)
+	{
+		return NullStatus;
+	}
+	else
+	{
+		QString status = (QString)pFirstItem->data(0, QT_TOOLBOXLITEMSTATUS).toString();
+		m_FirstLessonItem = pFirstItem;
+		if (status == "finished")
+		{
+			return Finished;
+		}
+		else if ( status == "closed")
+		{
+			return Closed;
+		}
+		else if (status == "ready")
+		{
+			return Ready;
+		}
+	}
 }
