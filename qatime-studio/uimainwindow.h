@@ -31,6 +31,12 @@ class UIRatio;
 class UILessonTable;
 class UIVideo;
 
+struct StructVideo
+{
+	std::string url;
+	HWND hwnd;
+};
+
 class UIMainWindow : public QWidget
 {
 	Q_OBJECT

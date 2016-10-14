@@ -413,6 +413,15 @@ void UIAuxiliaryPanel::on_treeWidget_clicked(QTreeWidgetItem * item, int column)
 }
 void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 {
+// 	HWND hWnd1 = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+// 	StructVideo* p = new StructVideo;
+// 	p->url = "123";
+// 	p->hwnd = hWnd1;
+// 	
+// 	HWND hWnd = FindWindow(L"NLSLiveForm", L"QATIME_HELPER");
+// 	HWND hWnd = FindWindow(L"LoginWinClass", L"exe");
+// 	::SendMessage(hWnd, MSG_VIDEO_START_LIVE, (WPARAM)p, 0);
+// 	return;
 	//TODO 双击触发的函数
 	QString status = (QString)terrWidget->data(0,QT_TOOLBOXLITEMSTATUS).toString();
 	if (status.isNull())
@@ -489,6 +498,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 				m_FirstLessonItem->setTextColor(2, qColor);
 
 				m_FirstLessonItem->setData(0, QT_TOOLBOXLITEMSTATUS, status);
+				m_FirstLessonItem->setText(2, "已结束");
 				m_Parent->SendChangeStatusMsg(sID);
 			}
 		}
@@ -604,13 +614,14 @@ void UIAuxiliaryPanel::ChangeLessonStatus(QString sLessonID, QString Status)
 				else if (Status == "closed")
 					strChinaStatus = MSG_LESSON_STATUS_CLOSED;
 				else if (Status == "finished")
-					strChinaStatus = MSG_LESSON_STATUS_CLOSED;
+					strChinaStatus = MSG_LESSON_STATUS_FINISHED;
 				else if (Status == "billing")
-					strChinaStatus = MSG_LESSON_STATUS_CLOSED;
+					strChinaStatus = MSG_LESSON_STATUS_BILLING;
 				else if (Status == "completed")
-					strChinaStatus = MSG_LESSON_STATUS_CLOSED;
+					strChinaStatus = MSG_LESSON_STATUS_COMPLETED;
 
 				terrWidget->setText(2, strChinaStatus);
+				terrWidget->setData(0, QT_TOOLBOXLITEMSTATUS, Status);
 				return;
 			}
 			++it;

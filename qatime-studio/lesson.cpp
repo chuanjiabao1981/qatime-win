@@ -78,15 +78,15 @@ QString Lesson::ChinaLessonStatus()
 	}
 	else if (mStatus == "finished")
 	{
-		strChinaStatus = MSG_LESSON_STATUS_CLOSED;
+		strChinaStatus = MSG_LESSON_STATUS_FINISHED;
 	}
 	else if (mStatus == "billing")
 	{
-		strChinaStatus = MSG_LESSON_STATUS_CLOSED;
+		strChinaStatus = MSG_LESSON_STATUS_BILLING;
 	}
 	else if (mStatus == "completed")
 	{
-		strChinaStatus = MSG_LESSON_STATUS_CLOSED;
+		strChinaStatus = MSG_LESSON_STATUS_COMPLETED;
 	}
 
 	return strChinaStatus;

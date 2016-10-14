@@ -441,6 +441,7 @@ void UIMainWindow::slot_startOrStopLiveStream()
 //				ui.Live_pushBtn->setText("开始直播");
 				m_MenuTool->setLivePushBtnText("开始直播");
 				m_VideoInfo->StopLiveVideo();
+				SendVideoMsg((UINT)MSG_VIDEO_STOP_LIVE);
 				SendStopLiveHttpMsg();
 
 				if (m_CountTimer->isActive())
