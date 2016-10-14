@@ -223,6 +223,8 @@
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
+       <zorder>welcome_label</zorder>
+       <zorder>expansion_pushBtn</zorder>
       </widget>
      </item>
     </layout>

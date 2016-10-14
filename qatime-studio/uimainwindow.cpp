@@ -201,6 +201,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_MenuTool->setVideoCheckState(Qt::CheckState::Checked);
 //	ui.time_label->setVisible(false);
 	m_MenuTool->setTimeLabelVisible(false);
+	ui.expansion_pushBtn->raise();
 }
 
 UIMainWindow::~UIMainWindow()
@@ -522,7 +523,7 @@ void UIMainWindow::slot_startOrStopLiveStream()
 		}
 
 		m_AuxiliaryPanel->setPreview(!bLiving);
-		ui.video_widget->hide();
+//		ui.video_widget->hide();
 		m_VideoInfo->show();
 	}
 }
@@ -1332,9 +1333,9 @@ void UIMainWindow::showChatRoomWnd()
 		// 		m_charRoom->move(this->size().width() - 305, 50);
 		// 		m_VideoInfo->resize(this->size().width() - 500, this->size().height() - 180);
 
-		m_VideoInfo->resize(video_Width -= 190, video_Heigth);
+		m_VideoInfo->resize(video_Width -= 200, video_Heigth);
 		m_charRoom->resize(chat_Width, chat_Heigth);
-		m_charRoom->move(chat_X -= 205, 50);
+		m_charRoom->move(chat_X -= 215, 50);
 		m_charRoom->show();
 
 		m_MenuTool->resize(video_Width - 50, 50);
