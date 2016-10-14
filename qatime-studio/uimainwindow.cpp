@@ -172,7 +172,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	ui.mainclose_pushBtn->setPixmap(pixmap1, 4);
 	m_charRoom = new UIChatRoom(this);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
-	chat_X = 985;
+	chat_X = this->size().width()-m_charRoom->size().width()-10;
 	chat_Y = 50;
 	chat_Width = m_charRoom->size().width();
 	chat_Heigth = m_charRoom->size().height();
@@ -1333,12 +1333,11 @@ void UIMainWindow::showChatRoomWnd()
 		//  	chat_X = this->size().width() - 255;
 		// 		m_charRoom->move(this->size().width() - 305, 50);
 		// 		m_VideoInfo->resize(this->size().width() - 500, this->size().height() - 180);
-
-		m_VideoInfo->resize(video_Width -= 200, video_Heigth);
-		m_charRoom->resize(chat_Width, chat_Heigth);
-		m_charRoom->move(chat_X -= 215, 50);
+		resize(this->size().width() + chat_Width, this->height());
+		m_VideoInfo->resize(video_Width-=chat_Width, video_Heigth);
+//		m_charRoom->resize(chat_Width, chat_Heigth);
+		m_charRoom->move(chat_X, 50);
 		m_charRoom->show();
-
 		m_MenuTool->resize(video_Width - 50, 50);
 		m_MenuTool->move(50, this->size().height() - 60);
 
@@ -1347,7 +1346,7 @@ void UIMainWindow::showChatRoomWnd()
 
 		QPoint minQt = ui.mainmin_pushBtn->pos();
 		ui.mainmin_pushBtn->move(QPoint(minQt.x() + 295, minQt.y()));
-
+		
 		//		resize( chat_X + 135 + 150, 770);
 		//		resize(1150+135+15, 770);
 		//		setFixedSize(QSize(1150+135+15, 770));
