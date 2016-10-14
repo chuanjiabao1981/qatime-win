@@ -76,7 +76,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	m_VideoInfo->move(15, 80);
 	video_Width = 960;
-	video_Heigth = 640;
+	video_Heigth = 540;
 	m_VideoInfo->resize(video_Width, video_Heigth);
 	m_VideoInfo->hide();
 
@@ -183,8 +183,8 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	m_MenuTool = new UIMenuTool(this);
 	m_MenuTool->setWindowFlags(Qt::FramelessWindowHint);
-	m_MenuTool->resize(video_Width - 50, 50);
-	m_MenuTool->move(50, this->size().height() - 60);
+	m_MenuTool->resize(video_Width - 50, 80);
+	m_MenuTool->move(50, this->size().height() - 100);
 	m_MenuTool->show();
 	connect(m_MenuTool, SIGNAL(emit_startOrStopLiveStream()), this, SLOT(slot_startOrStopLiveStream()));
 	connect(m_MenuTool, SIGNAL(emit_AudioStatus(int)), this, SLOT(AudioStatus(int)));
@@ -406,9 +406,10 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 			m_charRoom->move(chat_X, 50);
 			m_charRoom->resize(chat_Width, this->size().height() - 90 + 30);
 		}
-		m_MenuTool->resize(video_Width-50, 50);
-		m_MenuTool->move(50, this->size().height() - 60);
+		m_MenuTool->resize(video_Width-50, 80);
+		m_MenuTool->move(50, this->size().height() - 100);
 		m_VideoInfo->resize(video_Width, this->size().height() - 180);
+		MoveWindow(m_VideoWnd, 0, 0, video_Width, this->size().height() - 180, true);
 	}
 	a++;
 	m_mutex.unlock();
@@ -1338,8 +1339,8 @@ void UIMainWindow::showChatRoomWnd()
 //		m_charRoom->resize(chat_Width, chat_Heigth);
 		m_charRoom->move(chat_X, 50);
 		m_charRoom->show();
-		m_MenuTool->resize(video_Width - 50, 50);
-		m_MenuTool->move(50, this->size().height() - 60);
+		m_MenuTool->resize(video_Width - 50, 80);
+		m_MenuTool->move(50, this->size().height() - 100);
 
 		QPoint closeQt = ui.mainclose_pushBtn->pos();
 		ui.mainclose_pushBtn->move(QPoint(closeQt.x() + 295, closeQt.y()));
@@ -1397,7 +1398,7 @@ void UIMainWindow::setVideoPos()
 	{
 		if (m_ShowVideoTimer->isActive())
 			m_ShowVideoTimer->stop();
-		MoveWindow(m_VideoWnd, 0, 0, 960, 605, true);
+		MoveWindow(m_VideoWnd, 0, 0, 960, 540, true);
 	}
 }
 

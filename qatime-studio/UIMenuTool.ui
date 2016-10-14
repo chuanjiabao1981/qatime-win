@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>918</width>
-    <height>68</height>
+    <height>99</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,10 +22,16 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="minimumSize">
+      <size>
+       <width>60</width>
+       <height>30</height>
+      </size>
+     </property>
      <property name="maximumSize">
       <size>
        <width>61</width>
-       <height>53</height>
+       <height>30</height>
       </size>
      </property>
      <property name="cursor">
@@ -61,6 +67,12 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="minimumSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
       <property name="maximumSize">
        <size>
         <width>30</width>
@@ -83,6 +95,12 @@
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>16</width>
+        <height>32</height>
+       </size>
       </property>
       <property name="maximumSize">
        <size>
@@ -127,6 +145,12 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="minimumSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
       <property name="maximumSize">
        <size>
         <width>30</width>
@@ -161,6 +185,12 @@
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>16</width>
+        <height>32</height>
+       </size>
       </property>
       <property name="maximumSize">
        <size>
@@ -200,6 +230,12 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
      </property>
      <property name="maximumSize">
       <size>
@@ -244,6 +280,12 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>111</width>
+       <height>66</height>
+      </size>
      </property>
      <property name="maximumSize">
       <size>
@@ -331,6 +373,12 @@
    </item>
    <item>
     <widget class="QCheckBox" name="app_pushBtn">
+     <property name="minimumSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
      <property name="cursor">
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
@@ -365,6 +413,12 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
      </property>
      <property name="maximumSize">
       <size>
