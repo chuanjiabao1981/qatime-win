@@ -298,6 +298,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_UILessontable.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="UIMenuTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIMenuTool.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UIMenuTool.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="loginwindow.h">
@@ -396,6 +405,12 @@
     <CustomBuild Include="UILessontable.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="UIMenuTool.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIMenuTool.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_loginwindow.h">
@@ -489,6 +504,9 @@
       <Filter>YxChat</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UILessontable.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UIMenuTool.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

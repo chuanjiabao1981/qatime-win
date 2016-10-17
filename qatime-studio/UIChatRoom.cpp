@@ -4,6 +4,7 @@
 #include <QMovie>
 #include "UIMessageBox.h"
 #include <QScrollBar>
+#include <QClipboard>
 
 #include "YxChat/nim_sdk_helper.h"
 #include "YxChat/session_callback.h"
@@ -82,14 +83,52 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	ui.timeWidget->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
 	ui.timeWidget->setGridVisible(true);	
 
-//	ui.text_proclamation->setStyleSheet();
-//	ui.button_brow->setStyleSheet("QToolTip{backgroud： white}");
+	// 消息编辑框粘贴过滤代码
+	ui.textEdit->setContextMenuPolicy(Qt::NoContextMenu);
+	ui.textEdit->installEventFilter(this);
 }
 
 UIChatRoom::~UIChatRoom()
 {
 	m_StudentInfo.clear();
 }
+
+// 消息编辑框粘贴过滤代码
+bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
+{
+	if (target == ui.textEdit) {
+		if (event->type() == QEvent::KeyPress) {
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+			if (keyEvent->matches(QKeySequence::Paste))
+			{
+				qDebug() << "Ctrl + V";
+				QClipboard *board = QApplication::clipboard();
+				QString strClip = board->text();
+				strClip.replace("￼", "");
+				ui.textEdit->insertPlainText(strClip);
+				return true;
+			}
+			else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
+			{
+				emit ui.button_sendMseeage->clicked();
+				return true;
+			}
+		}
+		if (event->type() == QEvent::MouseButtonRelease) {
+			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+			if (mouseEvent->button() == Qt::MidButton) {
+				qDebug() << "Mouse MidButton Release";
+				QClipboard *board = QApplication::clipboard();
+				QString strClip = board->text();
+				strClip.replace("￼", "");
+				ui.textEdit->insertPlainText(strClip);
+				return true;
+			}
+		}
+	}
+	return QWidget::eventFilter(target, event);
+}
+
 // 弹出聊天框
 void UIChatRoom::clickTalk()
 {	
@@ -544,6 +583,7 @@ void UIChatRoom::proclamationTextChage()
 		ui.button_sendMseeage_3->setEnabled(true);
 	}
 }
+
 // 关闭日历槽函数
 void UIChatRoom::colseCalendar()
 {
@@ -607,6 +647,9 @@ void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 							if (!strName.isEmpty())
 								strName += "，";
 
+							if (m_StudentInfo.size() == 0)
+								return;
+
 							strName += *m_StudentInfo.find(QString::fromStdString(ids[i]));
 						}
 					}
@@ -647,6 +690,7 @@ void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		else
 			ui.text_talk->append(qContent);
 		ui.text_talk->append("");
+		ui.text_talk->moveCursor(QTextCursor::End);
 	}
 }
 
@@ -802,6 +846,9 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 						{
 							if (!strName.isEmpty())
 								strName += "，";
+
+							if (m_StudentInfo.size() == 0)
+								return;
 
 							strName += *m_StudentInfo.find(QString::fromStdString(ids[i]));
 						}
@@ -1123,5 +1170,4 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 	QNetworkRequest request(url);
 	request.setRawHeader("Remember-Token", mRemeberToken.toUtf8());	
 	reply = manager.post(request, append);
-//	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
 }

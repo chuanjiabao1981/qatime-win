@@ -63,7 +63,8 @@ private:
 	QString							mRemeberToken;
 
 	void initEmotion();
-	
+protected:
+	virtual bool eventFilter(QObject *watched, QEvent *event);
 private slots:
 	void clickTalk();									// 弹出聊天框
 	void clickStudentList();							// 弹出学生列表

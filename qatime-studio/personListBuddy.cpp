@@ -29,7 +29,7 @@ void personListBuddy::initFindPeople()
 	secLinEdit->setFixedWidth(220);
 	secLinEdit->setPlaceholderText("请输入要查的姓名");
 	secLinEdit->setAlignment(Qt::AlignCenter);//居中对齐
-	secFindButton->move(225, 4);
+	secFindButton->move(215, 4);
 	secFindButton->setText("查找");
 }
 void personListBuddy::initNotFind()
@@ -43,7 +43,7 @@ void personListBuddy::initNotFind()
 	notFind->hide();
 	firstButton = new QCheckBox(this);
 	connect(firstButton, SIGNAL(clicked(bool)), this, SLOT(stopAllTalk(bool)));
-	firstButton->move(250, 5);
+	firstButton->move(235, 5);
 	firstButton->setText("全禁");
 }
 
@@ -67,7 +67,7 @@ void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID)
     //布局
     head->move(5,1);
     name->move(7+16+10,10);
-	button->move(250, 5);
+	button->move(235, 5);
 	button->setText("禁言");
 
 	setNetworkPic(szUrl);
