@@ -3,10 +3,7 @@
 UIMenuTool::UIMenuTool(QWidget *parent)
 	: QWidget(parent)
 {
-	ui.setupUi(this);
-	ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: red;border-radius: 10px; }"
-		"QPushButton{border: 2px groove gray; border - style: outset;}"
-		"QPushButton:pressed{border-style: inset; }");
+	ui.setupUi(this);	
 	ui.Audio_checkBox->setStyleSheet("QCheckBox{spacing: 2px;color: white;}"
 		"QCheckBox::indicator{width: 32px;height: 32px;}"
 		"QCheckBox::indicator:unchecked{image: url(./images/mic_open.png);}"
@@ -39,8 +36,15 @@ UIMenuTool::UIMenuTool(QWidget *parent)
 		"QCheckBox::indicator:checked{image: url(./images/corner.png);}"
 		"QCheckBox::indicator:unchecked:pressed{image: url(./images/corner_push.png);}"
 		"QCheckBox::indicator:checked:pressed{image: url(./images/corner_push.png);}");
-
-	connect(ui.Live_pushBtn, SIGNAL(clicked()), this, SLOT(slot_startOrStopLiveStream()));
+	ui.fulsereen_checkBox->setStyleSheet("QCheckBox{spacing: 2px;color: white;}"
+		"QCheckBox::indicator{width: 28px;height: 28px;}"
+		"QCheckBox::indicator:unchecked{image: url(./images/fullScreen.png);}"
+		"QCheckBox::indicator:checked{image: url(./images/fullQuit.png);}"
+		"QCheckBox::indicator:unchecked:pressed{image: url(./images/fullScreen.png);}"
+		"QCheckBox::indicator:checked:pressed{image: url(./images/fullQuit.png);}");
+	ui.fulsereen_checkBox->setEnabled(false);
+	connect(ui.fulsereen_checkBox, SIGNAL(stateChanged(int)), this, SLOT(slot_fulSereen(int)));
+//	connect(ui.Live_pushBtn, SIGNAL(clicked()), this, SLOT(slot_startOrStopLiveStream()));
 	connect(ui.Audio_checkBox, SIGNAL(stateChanged(int)), this, SLOT(AudioStatus(int)));
 	connect(ui.video_checkBox, SIGNAL(stateChanged(int)), this, SLOT(VideoStatus(int)));
 	connect(ui.fullscreen_checkBox, SIGNAL(stateChanged(int)), this, SLOT(FullScreenStatus(int)));
@@ -49,23 +53,37 @@ UIMenuTool::UIMenuTool(QWidget *parent)
 	connect(ui.videoCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeVideo(int)));
 	connect(ui.ratio_pushBtn, SIGNAL(clicked()), this, SLOT(clickChangeRatio()));
 	connect(ui.lesson_pushButton, SIGNAL(clicked()), this, SLOT(clickLessonList()));
+//	ui.time_label->hide();
+
+	m_timers = new UITimers(this);
+	m_timers->setWindowFlags(Qt::FramelessWindowHint);
+	connect(m_timers, SIGNAL(emit_startOrStopLiveStream()), parent, SLOT(slot_startOrStopLiveStream()));
+	m_timers->setTimeLabelVisible(false);
+	m_timers->setParent(this);
 }
 
 UIMenuTool::~UIMenuTool()
 {
 
 }
+void UIMenuTool::setFullEnabled()
+{
+	ui.fulsereen_checkBox->setEnabled(true);
+}
+
 void UIMenuTool::setRatioText(QString text)
 {
 	ui.ratio_pushBtn->setText(text);
 }
 void UIMenuTool::setTimeLabelVisible(bool b)
 {
-	ui.time_label->setVisible(b);
+//	ui.time_label->setVisible(b);
+	m_timers->setTimeLabelVisible(b);
 }
 void UIMenuTool::setTimeLabelText(QString text)
 {
-	ui.time_label->setText(text);
+//	ui.time_label->setText(text);
+	m_timers->setTimeLabelText(text);
 }
 void UIMenuTool::setLessonEnabled(bool bEnable)
 {
@@ -105,7 +123,8 @@ void UIMenuTool::setVideoCheckState(Qt::CheckState state)
 }
 void UIMenuTool::setLivePushBtnText(QString text)
 {
-	ui.Live_pushBtn->setText(text);
+	//ui.Live_pushBtn->setText(text);
+	m_timers->setLivePushBtnText("开始直播");
 }
 
 QPoint UIMenuTool::getGeometry()
@@ -115,6 +134,11 @@ QPoint UIMenuTool::getGeometry()
 //	return ui.Audio_checkBox->mapToParent(ui.Audio_checkBox->pos());
 	QPoint point(this->size().width() / 800 * 180, 0);
 	 return point;
+}
+//隐藏右侧聊天框
+void UIMenuTool::slot_fulSereen(int b)
+{
+	emit emit_FulSereen(b);
 }
 
 //开始直播
@@ -161,4 +185,15 @@ void UIMenuTool::clickChangeRatio()
 void UIMenuTool::clickLessonList()
 {
 	emit emit_clickLessonList();
+}
+
+void UIMenuTool::moveLiveBtn()
+{
+	QRect rect = ui.time_label->geometry();
+	m_timers->move(rect.left(), rect.top());
+}
+
+void UIMenuTool::InitMoveLiveBtn()
+{
+	m_timers->move(this->size().width()/2 - 60 +20, 16);
 }

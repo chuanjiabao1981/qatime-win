@@ -73,7 +73,6 @@ private:
 	QString							m_liveToken;		// 直播心跳时需要（开始直播时返回token）
 
 	UIMenuTool*						m_MenuTool;			//  工具按钮	
-
 	int a;
 	int chat_X;	//聊天位置x
 	int chat_Y; //聊天位置y
@@ -99,6 +98,7 @@ private:
 	void clickChangeVideo(int);							// 弹出摄像头选择框
 	void clickChangeRatio();							// 弹出分辨率框
 	void clickLessonList();								// 弹出课程表
+	void fullSereen(int b);									// 隐藏聊天区
 	void setVideoPos();									// 设置视频位置
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result); // 添加caption

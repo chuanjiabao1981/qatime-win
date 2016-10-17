@@ -179,7 +179,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_charRoom = new UIChatRoom(this);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
 	chat_X = this->size().width()-m_charRoom->size().width()-10;
-	chat_Y = 50;
+	chat_Y = 45;
 	chat_Width = m_charRoom->size().width();
 	chat_Heigth = m_charRoom->size().height();
 	m_charRoom->move(chat_X, chat_Y);
@@ -189,8 +189,8 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	m_MenuTool = new UIMenuTool(this);
 	m_MenuTool->setWindowFlags(Qt::FramelessWindowHint);
-	m_MenuTool->resize(video_Width - 50, 80);
-	m_MenuTool->move(50, this->size().height() - 100);
+	m_MenuTool->resize(video_Width - 50, 80);	
+	m_MenuTool->move(20, this->size().height() - 100);
 	m_MenuTool->show();
 	connect(m_MenuTool, SIGNAL(emit_startOrStopLiveStream()), this, SLOT(slot_startOrStopLiveStream()));
 	connect(m_MenuTool, SIGNAL(emit_AudioStatus(int)), this, SLOT(AudioStatus(int)));
@@ -201,13 +201,14 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(m_MenuTool, SIGNAL(emit_clickChangeVideo(int)), this, SLOT(clickChangeVideo(int)));
 	connect(m_MenuTool, SIGNAL(emit_clickChangeRatio()), this, SLOT(clickChangeRatio()));
 	connect(m_MenuTool, SIGNAL(emit_clickLessonList()), this, SLOT(clickLessonList()));
+	connect(m_MenuTool, SIGNAL(emit_FulSereen(int)), this, SLOT(fullSereen(int)));
+	m_MenuTool->InitMoveLiveBtn();
 
 //	ui.line_2->setVisible(false);
 //	ui.video_checkBox->setCheckState(Qt::CheckState::Checked);
 	m_MenuTool->setVideoCheckState(Qt::CheckState::Checked);
 //	ui.time_label->setVisible(false);
-	m_MenuTool->setTimeLabelVisible(false);
-	ui.expansion_pushBtn->raise();
+	
 }
 
 UIMainWindow::~UIMainWindow()
@@ -269,7 +270,28 @@ UIMainWindow::~UIMainWindow()
 		m_LessonTable = NULL;
 	}
 }
+void UIMainWindow::fullSereen(int b)
+{	
+	if (b)
+	{
+		m_charRoom->setHidden(b);
+		m_VideoInfo->resize(m_charRoom->size().width() + m_VideoInfo->size().width(), m_VideoInfo->size().height());
+		PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, m_VideoInfo->size().width(), m_VideoInfo->size().height());
+		m_MenuTool->resize(m_charRoom->size().width() + m_MenuTool->size().width(), m_MenuTool->size().height());
+//		m_timers->move((m_charRoom->size().width() + m_MenuTool->size().width()) / 2 - 60, this->size().height() - 90);
+		m_MenuTool->moveLiveBtn();
+	}
+	else
+	{
+		m_charRoom->setHidden(b);
+//		m_timers->move((m_MenuTool->size().width() / 2) - 30 , this->size().height() - 90);
+		m_VideoInfo->resize(m_VideoInfo->size().width() -m_charRoom->size().width() , m_VideoInfo->size().height());
+		PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, m_VideoInfo->size().width(), m_VideoInfo->size().height());
+		m_MenuTool->resize(m_MenuTool->size().width() - m_charRoom->size().width() , m_MenuTool->size().height());
+		m_MenuTool->moveLiveBtn();
+	}
 
+}
 void UIMainWindow::MinDialog()
 {
 	showMinimized();
@@ -322,7 +344,7 @@ void UIMainWindow::setTeacherInfo(QJsonObject &data)
 	QString strWelcome = "欢迎 ";
 	strWelcome += teacherName;
 	strWelcome += " 老师登录答疑时间，祝您直播愉快！";
-	ui.welcome_label->setText(strWelcome);
+//	ui.welcome_label->setText(strWelcome);
 	ui.welcome_label_2->setText(strWelcome);
 
 	// 设置老师头像
@@ -346,7 +368,7 @@ void UIMainWindow::setAutoTeacherInfo(QString teacherID, QString teacherName, QS
 	QString strWelcome = "欢迎 ";
 	strWelcome += teacherName;
 	strWelcome += " 老师登录答疑时间，祝您直播愉快！";
-	ui.welcome_label->setText(strWelcome);
+//	ui.welcome_label->setText(strWelcome);
 	ui.welcome_label_2->setText(strWelcome);
 
 	// 设置老师头像
@@ -422,7 +444,8 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 			m_charRoom->resize(chat_Width, this->size().height() - 90 + 30);
 		}
 		m_MenuTool->resize(video_Width-50, 80);
-		m_MenuTool->move(50, this->size().height() - 100);
+		m_MenuTool->move(20, this->size().height() - 100);
+		m_MenuTool->moveLiveBtn();
 		m_VideoInfo->resize(video_Width, this->size().height() - 180);
 		m_AuxiliaryPanel->resize(m_AuxiliaryPanel->size().width(),this->size().height()-140);
 		PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, (WPARAM)video_Width, (LPARAM)(this->size().height() - 180));
@@ -467,7 +490,7 @@ void UIMainWindow::slot_startOrStopLiveStream()
 					m_iTimerCount = 0;						// 重置秒数
 // 					ui.time_label->setText("00:00:00");		// 重置时间
 // 					ui.time_label->setVisible(false);		// 隐藏
-					m_MenuTool->setTimeLabelText("00:00:00");
+					m_MenuTool->setTimeLabelText("开始直播");
 					m_MenuTool->setTimeLabelVisible(false);
 				}
 
@@ -515,7 +538,7 @@ void UIMainWindow::slot_startOrStopLiveStream()
 // 			m_VideoInfo->setPlugFlowUrl(url);
  			m_VideoInfo->StartLiveVideo();
 			SendVideoMsg((UINT)MSG_VIDEO_START_LIVE);
-			ui.Live_pushBtn->setText("结束直播");
+			m_MenuTool->setLivePushBtnText("结束直播");
 // =======
 // 			if (m_VideoInfo->m_videoSourceType == EN_NLSS_VIDEOIN_NONE)
 // 			{
@@ -774,7 +797,6 @@ void UIMainWindow::slot_onCountTimeout()
 //	ui.time_label->show();
 	m_MenuTool->setTimeLabelText(str);
 	m_MenuTool->setTimeLabelVisible(true);
-
 }
 
 void UIMainWindow::slot_onHeartTimeout()
@@ -1211,6 +1233,7 @@ void UIMainWindow::returnClick()
 
 void UIMainWindow::setCurChatRoom(QString chatID, QString courseid)
 {
+	m_MenuTool->setFullEnabled();
 	if (m_charRoom)
 	{
 		ui.welcome_label_2->setVisible(false);
@@ -1368,7 +1391,8 @@ void UIMainWindow::showChatRoomWnd()
 		m_charRoom->move(chat_X, 50);
 		m_charRoom->show();
 		m_MenuTool->resize(video_Width - 50, 80);
-		m_MenuTool->move(50, this->size().height() - 100);
+		m_MenuTool->move(20, this->size().height() - 100);
+		m_MenuTool->moveLiveBtn();
 
 		QPoint closeQt = ui.mainclose_pushBtn->pos();
 		ui.mainclose_pushBtn->move(QPoint(closeQt.x() + 295, closeQt.y()));
