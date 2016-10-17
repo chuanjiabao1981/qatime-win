@@ -94,7 +94,7 @@ private:
 	void FullScreenStatus(int iStatus);					// 切换全屏视频源
 	void slot_onCountTimeout();							// 计时器 改变直播时间
 	void slot_onHeartTimeout();							// 5分一次，发送心跳
-	void OtherApp();									// 其它APP应用
+	void OtherApp(int i);									// 其它APP应用
 	void clickChangeAudio(int);
 	void clickChangeVideo(int);							// 弹出摄像头选择框
 	void clickChangeRatio();							// 弹出分辨率框

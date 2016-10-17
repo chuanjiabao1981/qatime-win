@@ -30,6 +30,11 @@ UIAuxiliaryPanel::UIAuxiliaryPanel(QWidget *parent)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
+
+	setAutoFillBackground(true);;
+	QPalette p = palette();
+	p.setColor(QPalette::Window, QColor("white"));
+	setPalette(p);
 	
 	init();
 }

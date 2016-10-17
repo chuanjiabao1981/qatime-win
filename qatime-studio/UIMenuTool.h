@@ -43,7 +43,7 @@ public slots:
 	void FullScreenStatus(int iStatus);					// 切换全屏视频源
 	void OtherApp(int i);								// 其它APP应用
 	void clickChangeAudio(int i);
-	void clickChangeVideo(int i);							// 弹出摄像头选择框
+	void clickChangeVideo(int i);						// 弹出摄像头选择框
 	void clickChangeRatio();							// 弹出分辨率框
 	void clickLessonList();								// 弹出课程表
 private:

@@ -20,7 +20,7 @@
 #define MSG_CLIENT_RECORD				MSG_START_COUNT	+ 1		//接收历史消息
 #define MSG_LOGIN						MSG_START_COUNT	+ 2		//登录消息
 #define MSG_MEMBERS_INFO				MSG_START_COUNT	+ 3		//成员信息
-
+#define MSG_VIDEO_CHANGE_SIZE			MSG_START_COUNT	+ 4		//改变窗口大小
 
 // 和qatime_video交互用到的消息
 struct VideoInfo

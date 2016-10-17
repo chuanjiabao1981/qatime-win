@@ -20,6 +20,7 @@
 #include <QHBoxLayout>
 #include <iosfwd>
 #include <sstream>
+#include <QDesktopWidget>
 
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6
@@ -43,11 +44,13 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
 	//	setFixedSize(QSize(985, 770));
+	setMinimumSize(QSize(985, 720));
 	RECT rc;
 	SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0);
 	a = 0;
 	ui.person_pushButton->setFlat(true);
 	connect(ui.mainmin_pushBtn, SIGNAL(clicked()), this, SLOT(MinDialog()));
+	connect(ui.MinMax_pushBtn, SIGNAL(clicked()), this, SLOT(MaxDialog()));
 	connect(ui.mainclose_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
 	connect(ui.expansion_pushBtn, SIGNAL(clicked()), this, SLOT(Expansion()));
 // 	connect(ui.Live_pushBtn, SIGNAL(clicked()), this, SLOT(slot_startOrStopLiveStream()));
@@ -89,6 +92,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_AuxiliaryPanel->setWindowFlags(Qt::FramelessWindowHint);
 	m_AuxiliaryPanel->setParent(this);
 	m_AuxiliaryPanel->move(5, 40);
+	m_AuxiliaryPanel->resize(590, 580);
 	m_AuxiliaryPanel->hide();
 
 	m_AudioChangeInfo = new UIAudioChange(this);
@@ -168,8 +172,10 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	QPixmap pixmap(QCoreApplication::applicationDirPath() + "/images/btn_07.png");
 	QPixmap pixmap1(QCoreApplication::applicationDirPath() + "/images/btn_off.png");
+	QPixmap pixmap2(QCoreApplication::applicationDirPath() + "/images/btn_08.png");
 	ui.mainmin_pushBtn->setPixmap(pixmap, 4);
 	ui.mainclose_pushBtn->setPixmap(pixmap1, 4);
+	ui.MinMax_pushBtn->setPixmap(pixmap2,4);
 	m_charRoom = new UIChatRoom(this);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
 	chat_X = this->size().width()-m_charRoom->size().width()-10;
@@ -271,7 +277,16 @@ void UIMainWindow::MinDialog()
 
 void UIMainWindow::MaxDialog()
 {
-	showMaximized();
+	if (this->isMaximized())
+	{
+		showNormal();
+		resizeEvent(NULL);
+	}
+	else
+	{
+		showMaximized();
+		resizeEvent(NULL);
+	}
 }
 
 void UIMainWindow::CloseDialog()
@@ -389,7 +404,7 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 {
 	m_mutex.lock();
 	int w, h;
-	if (a > 0)
+	if (a > 0 && e != NULL)
 	{
 		w = e->size().width() - e->oldSize().width();
 		h = e->size().height() - e->oldSize().height();
@@ -398,7 +413,7 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 		video_Heigth += h;
 		chat_Heigth += h;
 	}
-	if (a > 1)
+	if (a > 1 || e == NULL)
 	{
 
 		if (!m_charRoom->isHidden())
@@ -409,7 +424,8 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 		m_MenuTool->resize(video_Width-50, 80);
 		m_MenuTool->move(50, this->size().height() - 100);
 		m_VideoInfo->resize(video_Width, this->size().height() - 180);
-		MoveWindow(m_VideoWnd, 0, 0, video_Width, this->size().height() - 180, true);
+		m_AuxiliaryPanel->resize(m_AuxiliaryPanel->size().width(),this->size().height()-140);
+		PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, (WPARAM)video_Width, (LPARAM)(this->size().height() - 180));
 	}
 	a++;
 	m_mutex.unlock();
@@ -610,6 +626,20 @@ void UIMainWindow::clickChangeAudio(int)
 	HideOtherUI(m_AudioChangeInfo);
 	if (m_AudioChangeInfo && m_VideoInfo)
 	{
+// 		std::string str = "m_szData";
+// 		COPYDATASTRUCT cpd;
+// 
+// 		cpd.cbData = str.length() + 1;
+// 
+// 		//GetLength()只是取得实际字符的长度，没有包括'\0'.
+// 
+// 		cpd.lpData = (void*)str.data();
+// 
+// 		HWND hWnd = FindWindow(L"NLSLiveForm", L"QATIME_HELPER");
+// 		::SendMessage(hWnd, WM_COPYDATA, (WPARAM)this->winId(), (LPARAM)&cpd);
+// 
+// 		return;
+
 		if (m_AudioChangeInfo->isVisible())
 		{
 			m_AudioChangeInfo->hide();
@@ -658,11 +688,9 @@ void UIMainWindow::clickChangeRatio()
 			return;
 		}
 
-// 		int x = ui.ratio_pushBtn->geometry().x();
-// 		int y = ui.ratio_pushBtn->geometry().y();
-		int x = video_Width / 8;
-		int y = video_Heigth;
-		m_RatioChangeInfo->move(QPoint(x - 10, y));
+		int x = ui.ratio_pushBtn->geometry().x();
+ 		int y = ui.ratio_pushBtn->geometry().y();
+		m_RatioChangeInfo->move(QPoint(15, size().height()-160));
 		m_RatioChangeInfo->show();
 	}
 }
@@ -680,7 +708,7 @@ void UIMainWindow::AudioStatus(int iStatus)
 	}
 }
 
-void UIMainWindow::OtherApp()
+void UIMainWindow::OtherApp(int i)
 {
 	HideOtherUI();
 	if (m_OtherAppInfo->isVisible())
@@ -830,8 +858,8 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 			m_VideoInfo->show();
 
 			// 当选中其他应用时，摄像头和全屏都不可用
-			ui.video_checkBox->setCheckState(Qt::CheckState::Unchecked);
-			ui.fullscreen_checkBox->setCheckState(Qt::CheckState::Unchecked);
+			m_MenuTool->setVideoCheckState(Qt::CheckState::Unchecked);
+			m_MenuTool->setFullScreenCheck(false);
 			return true;
 		}
 		break;
