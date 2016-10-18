@@ -36,6 +36,11 @@ struct StructVideo
 	std::string url;
 	HWND hwnd;
 };
+struct MEDIA_DEVICE_DRIVE_INFO1
+{
+	char* device_path_;
+	char* friendly_name_;
+};
 
 class UIMainWindow : public QWidget
 {
@@ -121,8 +126,8 @@ public:
 	void ShowAuxiliary();									// 显示辅导班
 	void InitAudioList();
 	void InitVideoList();
-	void setAudioChangeIndex(int index);					//  改变麦克风
-	void setVideoChangeIndex(int index);					//  改变视频头
+	void setAudioChangeIndex(QString path);					//  改变麦克风
+	void setVideoChangeIndex(QString path);					//  改变视频头
 	void setRatioChangeIndex(int index);					//  改变分辨率
 
 

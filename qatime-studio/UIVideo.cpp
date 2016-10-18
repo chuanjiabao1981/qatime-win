@@ -3,6 +3,7 @@
 #include "windows.h"
 #include <iosfwd>
 #include <sstream>
+#include "define.h"
 
 QMutex UIVideo::m_mutex;
 ST_NLSS_VIDEO_SAMPLER UIVideo::m_SvideoSampler;
@@ -75,7 +76,7 @@ UIVideo::UIVideo(QWidget *parent)
 	//查找关闭进程
 	//	FindAndKillProcessByName(szExecFileName);
 #ifdef _DEBUG
-	BOOL bIsSuc = CreateProcess(L"G:\\workspace\\qatime-win\\qatime-studio\\Bin\\Debug\\win_video.exe", (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+	BOOL bIsSuc = CreateProcess(L"C:\\Users\\lenovo\\Downloads\\LiveVideo_Windows_Src_V1.0.0 (1)\\LiveVideo_Windows_Src_V1.0.0\\Demo_src\\nls_demo\\bin\\win_video.exe", (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
 #else
 	BOOL bIsSuc = CreateProcess(szTempPath, (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
 #endif
@@ -466,14 +467,22 @@ void UIVideo::SetResumeVideo()
 //	Nlss_ResumeVideoLiveStream(m_hNlssService);
 }
 
-void UIVideo::SetPauseAudio()
+void UIVideo::SetPauseAudio(HWND hwnd)
 {
 //	Nlss_PauseAudioLiveStream(m_hNlssService);
+	if (IsWindow(hwnd))
+	{
+		::SendMessage(hwnd, MSG_DEVICE_AUDIO_CLOSE, 0, 0);
+	}
 }
 
-void UIVideo::SetResumeAudio()
+void UIVideo::SetResumeAudio(HWND hwnd)
 {
 //	Nlss_ResumeAudioLiveStream(m_hNlssService);
+	if (IsWindow(hwnd))
+	{
+		::SendMessage(hwnd, MSG_DEVICE_AUDIO_CLOSE, 1, 0);
+	}
 }
 
 void UIVideo::ChangeLiveVideo()
@@ -590,4 +599,26 @@ void UIVideo::SetMainWnd(UIMainWindow* wnd)
 void UIVideo::SetVideoWnd(HWND hWnd)
 {
 	m_VideoWnd = hWnd;
+}
+
+void UIVideo::SetChangeVideoAudio(HWND hwnd, QString path, bool bVideo)
+{
+	COPYDATASTRUCT sendData;
+	char result[MAX_PATH];
+	QByteArray chPath = path.toLatin1();
+
+	if (bVideo)
+		strcpy(result, chPath.data());
+	else
+		strcpy(result, path.toLocal8Bit().data());
+
+	ZeroMemory(&sendData, sizeof(sendData));
+	sendData.lpData = result;
+	sendData.cbData = MAX_PATH;
+
+	if (IsWindow(hwnd))
+	{
+		int iType = bVideo ? 0:1;
+		::SendMessage(hwnd, WM_COPYDATA, iType, (LPARAM)&sendData);
+	}
 }

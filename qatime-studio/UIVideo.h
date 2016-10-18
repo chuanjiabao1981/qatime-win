@@ -150,8 +150,8 @@ public:
 	bool IsCurrentLiving();								// 当前是否直播
 	void SetPauseVideo();								// 暂停视频发送
 	void SetResumeVideo();								// 恢复视频发送
-	void SetPauseAudio();								// 暂停音频发送
-	void SetResumeAudio();								// 恢复音频发送;
+	void SetPauseAudio(HWND hwnd);						// 暂停音频发送
+	void SetResumeAudio(HWND hwnd);						// 恢复音频发送;
 	void ChangeLiveVideo();								// 改变视频源
 	void StopCaptureVideo();							// 停止采集
 	void setPlugFlowUrl(QString url);					// 设置推流url
@@ -161,6 +161,7 @@ public:
 	void sendCoutom(ST_NLSS_VIDEO_SAMPLER	m_SvideoSampler);
 	void SetMainWnd(UIMainWindow* wnd);
 	void SetVideoWnd(HWND hWnd);
+	void SetChangeVideoAudio(HWND hwnd, QString path, bool bVideo=true);
 };
 
 #endif // UIVideo_H

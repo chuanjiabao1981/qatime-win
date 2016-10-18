@@ -36,4 +36,6 @@ struct VideoInfo
 #define MSG_VIDEO_FULLSCREEN			MSG_VIDEO_CUSTOM + 5	//全屏桌面
 #define MSG_VIDEO_OTHREAPP				MSG_VIDEO_CUSTOM + 6	//其他应用
 #define MSG_VIDEO_SELECTAPP				MSG_VIDEO_CUSTOM + 7	//其他应用选取消息
-
+#define MSG_DEVICE_VIDEO				MSG_VIDEO_CUSTOM + 8	//获取摄像头信息
+#define MSG_DEVICE_AUDIO				MSG_VIDEO_CUSTOM + 9	//获取麦克风信息
+#define MSG_DEVICE_AUDIO_CLOSE			MSG_VIDEO_CUSTOM + 10	//关闭或开启麦克风信息

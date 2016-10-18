@@ -91,6 +91,9 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="handleWidth">
+        <number>0</number>
+       </property>
        <widget class="QCheckBox" name="Audio_checkBox">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -168,6 +171,9 @@
       <widget class="QSplitter" name="splitter">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="handleWidth">
+        <number>0</number>
        </property>
        <widget class="QCheckBox" name="video_checkBox">
         <property name="sizePolicy">

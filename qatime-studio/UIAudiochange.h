@@ -27,11 +27,12 @@ public:
 	QButtonGroup*	m_pAudioGroup;
 	QVBoxLayout *   m_pVBox;
 
+	int				iCount;
 private slots:
-	void onRadioClick(int id, bool bCheck);
+	void onRadioClick(QAbstractButton *btn);
 
 public:
-	void SetAudioInfo(int iAudioNum, ST_NLSS_INDEVICE_INF* AudioDevices);
+	void SetAudioInfo(int iAudioNum, QString strName, QString path);
 	void setAudioChange(UIMainWindow* Parent);
 };
 

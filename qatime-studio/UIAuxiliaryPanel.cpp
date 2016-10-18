@@ -418,15 +418,6 @@ void UIAuxiliaryPanel::on_treeWidget_clicked(QTreeWidgetItem * item, int column)
 }
 void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 {
-// 	HWND hWnd1 = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
-// 	StructVideo* p = new StructVideo;
-// 	p->url = "123";
-// 	p->hwnd = hWnd1;
-// 	
-// 	HWND hWnd = FindWindow(L"NLSLiveForm", L"QATIME_HELPER");
-// 	HWND hWnd = FindWindow(L"LoginWinClass", L"exe");
-// 	::SendMessage(hWnd, MSG_VIDEO_START_LIVE, (WPARAM)p, 0);
-// 	return;
 	//TODO Ë«»÷´¥·¢µÄº¯Êý
 	QString status = (QString)terrWidget->data(0,QT_TOOLBOXLITEMSTATUS).toString();
 	if (status.isNull())

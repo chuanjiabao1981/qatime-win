@@ -18,6 +18,7 @@ public:
 	UIVideoChange(QWidget *parent = 0);
 	~UIVideoChange();
 
+	int iCount;
 private:
 	Ui::UIVideoChange   ui;
 	UIMainWindow*		m_Parent;
@@ -26,11 +27,11 @@ private:
 	QVBoxLayout *		m_pVBox;
 
 private slots:
-	void onRadioClick(int id, bool bCheck);
+	void onRadioClick(QAbstractButton *btn);
 
 public:
-	void SetVideoInfo(int iAudioNum, ST_NLSS_INDEVICE_INF* AudioDevices);
 	void setVideoChange(UIMainWindow* Parent);
+	void SetVideoInfo(int iAudioNum, QString strName, QString path);
 };
 
 #endif // UIVIDEOCHANGE_H

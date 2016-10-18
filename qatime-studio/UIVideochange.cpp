@@ -3,8 +3,12 @@
 UIVideoChange::UIVideoChange(QWidget *parent)
 	: QWidget(parent)
 	, m_Parent(NULL)
+	, iCount(0)
 {
 	ui.setupUi(this);
+	m_pVBox = new QVBoxLayout;
+	m_pVideoGroup = new QButtonGroup;
+	connect(m_pVideoGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(onRadioClick(QAbstractButton*)));
 }
 
 UIVideoChange::~UIVideoChange()
@@ -20,33 +24,32 @@ void UIVideoChange::setVideoChange(UIMainWindow* Parent)
 	m_Parent = Parent;
 }
 
-void UIVideoChange::SetVideoInfo(int iAudioNum, ST_NLSS_INDEVICE_INF* AudioDevices)
+void UIVideoChange::onRadioClick(QAbstractButton *btn)
+{
+	QRadioButton* radio = (QRadioButton*)btn;
+	QString strpath = radio->accessibleDescription();
+	m_Parent->setVideoChangeIndex(strpath);
+	hide();
+}
+
+void UIVideoChange::SetVideoInfo(int iAudioNum, QString strName,QString path)
 {
 	if (iAudioNum == 0)
 		return;
 
 	int height = iAudioNum * 30;
 	ui.video_groupBox->setMinimumHeight(height);
+	
+	QRadioButton* radio = new QRadioButton();
+	radio->setText(strName);
+	radio->setAccessibleDescription(path);
+	m_pVBox->addWidget(radio);
+	m_pVideoGroup->addButton(radio, iCount);
 
-	m_pVBox = new QVBoxLayout;
-	m_pVideoGroup = new QButtonGroup;
-	for (int i = 0; i < iAudioNum; i++)
-	{
-		QRadioButton* radio = new QRadioButton();
-		radio->setText(QString::fromLocal8Bit(AudioDevices[i].paFriendlyName));
-		radio->setAccessibleDescription(QString::number(i));
-		m_pVBox->addWidget(radio);
-		m_pVideoGroup->addButton(radio, i);
-
-		if (i == 0)
-			radio->setChecked(true);
-	}
-	connect(m_pVideoGroup, SIGNAL(buttonToggled(int, bool)), this, SLOT(onRadioClick(int, bool)));
+	if (iCount == 0)
+		radio->setChecked(true);
+	
 	ui.video_groupBox->setLayout(m_pVBox);
-}
 
-void UIVideoChange::onRadioClick(int id, bool bCheck)
-{
-	m_Parent->setVideoChangeIndex(m_pVideoGroup->checkedId());
-	hide();
+	iCount++;
 }
