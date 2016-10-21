@@ -50,6 +50,8 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0);
 	a = 0;
 	ui.person_pushButton->setFlat(true);
+	ui.label->hide();
+//	ui.lesson_label->setText()
 	connect(ui.mainmin_pushBtn, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.MinMax_pushBtn, SIGNAL(clicked()), this, SLOT(MaxDialog()));
 	connect(ui.mainclose_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
@@ -205,7 +207,14 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(m_MenuTool, SIGNAL(emit_FulSereen(int)), this, SLOT(fullSereen(int)));
 	m_MenuTool->InitMoveLiveBtn();
 
-	m_MenuTool->setVideoCheckState(Qt::CheckState::Checked);	
+
+//	ui.line_2->setVisible(false);
+//	ui.video_checkBox->setCheckState(Qt::CheckState::Checked);
+	m_MenuTool->setVideoCheckState(Qt::CheckState::Checked);
+	showMax = true;
+//	ui.time_label->setVisible(false);
+//	resize(this->size().width(), this->size().height());	
+//	MaxDialog();
 }
 
 UIMainWindow::~UIMainWindow()
@@ -268,9 +277,10 @@ UIMainWindow::~UIMainWindow()
 	}
 }
 void UIMainWindow::fullSereen(int b)
-{	
+{		
 	if (b)
 	{
+		ui.label->hide();
 		m_charRoom->setHidden(b);
 		m_VideoInfo->resize(m_charRoom->size().width() + m_VideoInfo->size().width(), m_VideoInfo->size().height());
 		PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, m_VideoInfo->size().width(), m_VideoInfo->size().height());
@@ -279,13 +289,13 @@ void UIMainWindow::fullSereen(int b)
 	}
 	else
 	{
+		ui.label->show();
 		m_charRoom->setHidden(b);
 		m_VideoInfo->resize(m_VideoInfo->size().width() -m_charRoom->size().width() , m_VideoInfo->size().height());
 		PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, m_VideoInfo->size().width(), m_VideoInfo->size().height());
 		m_MenuTool->resize(m_MenuTool->size().width() - m_charRoom->size().width() , m_MenuTool->size().height());
 		m_MenuTool->moveLiveBtn();
 	}
-
 }
 void UIMainWindow::MinDialog()
 {
@@ -339,8 +349,8 @@ void UIMainWindow::setTeacherInfo(QJsonObject &data)
 	QString strWelcome = "欢迎 ";
 	strWelcome += teacherName;
 	strWelcome += " 老师登录答疑时间，祝您直播愉快！";
-//	ui.welcome_label->setText(strWelcome);
-	ui.welcome_label_2->setText(strWelcome);
+	ui.lesson_label->setText(strWelcome);
+//	ui.welcome_label_2->setText(strWelcome);
 
 	// 设置老师头像
 	QString teacherPhoto_url = data["avatar_url"].toString();
@@ -363,8 +373,8 @@ void UIMainWindow::setAutoTeacherInfo(QString teacherID, QString teacherName, QS
 	QString strWelcome = "欢迎 ";
 	strWelcome += teacherName;
 	strWelcome += " 老师登录答疑时间，祝您直播愉快！";
-//	ui.welcome_label->setText(strWelcome);
-	ui.welcome_label_2->setText(strWelcome);
+	ui.lesson_label->setText(strWelcome);
+//	ui.welcome_label_2->setText(strWelcome);
 
 	// 设置老师头像
 	m_AuxiliaryPanel->setNetworkPic(teacherUrl);
@@ -1164,7 +1174,8 @@ void UIMainWindow::setCurChatRoom(QString chatID, QString courseid)
 			m_charRoom->setCurChatID(chatID, courseid);
 			m_charRoom->clearAll();
 			RequestMember();
-		}
+		}		
+		
 	}
 }
 
@@ -1301,10 +1312,11 @@ void UIMainWindow::showChatRoomWnd()
 {
 	if (m_charRoom && !m_charRoom->isVisible())
 	{
+		ui.label->show();
 		resize(this->size().width() + chat_Width, this->height());
 		m_VideoInfo->resize(video_Width-=chat_Width, video_Heigth);
 		m_charRoom->move(chat_X, 50);
-		m_charRoom->show();
+		m_charRoom->show();		
 		m_MenuTool->resize(video_Width - 50, 80);
 		m_MenuTool->move(20, this->size().height() - 100);
 		m_MenuTool->moveLiveBtn();
@@ -1314,8 +1326,20 @@ void UIMainWindow::showChatRoomWnd()
 
 		QPoint minQt = ui.mainmin_pushBtn->pos();
 		ui.mainmin_pushBtn->move(QPoint(minQt.x() + 295, minQt.y()));
+
 	}
-}
+	if (showMax)
+	{
+		showMax = false;
+		int x = QApplication::desktop()->width() - this->width() - m_charRoom->width();
+		chat_X += x;
+		video_Width += x;
+		showMaximized();
+	}
+	
+}	
+
+	
 
 void UIMainWindow::clickLessonList()
 {
@@ -1445,3 +1469,14 @@ void UIMainWindow::returnChangeStatus()
 		RequestError(error, false);
 	}
 }
+// void UIMainWindow::setLiveBtnEnable(bool bEnable)
+// {
+//	ui.video_checkBox->setEnabled(bEnable);
+//	m_MenuTool->setVideoEnabled(bEnable);
+//	ui.fullscreen_checkBox->setEnabled(bEnable);
+//	m_MenuTool->setFullScreenEnabled(bEnable);
+//	ui.app_pushBtn->setEnabled(bEnable);
+//	m_MenuTool->setLessonEnabled(bEnable);
+
+
+

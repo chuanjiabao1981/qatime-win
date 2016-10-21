@@ -86,6 +86,7 @@ private:
 	int chat_Width;//聊天区大小宽度
 	int chat_Heigth;//聊天区大小 高度
 	QMutex	m_mutex;
+	bool  showMax;
 
 	private slots :
 	void MinDialog();									// 最小化对话框
@@ -150,7 +151,7 @@ public:
 	void SendRequestStatus();
 	void RequestStatus();
 	void SendChangeStatusMsg(QString id);
-	void returnChangeStatus();
+	void returnChangeStatus();	
 };
 
 #endif // UIMAINWINDOW_H

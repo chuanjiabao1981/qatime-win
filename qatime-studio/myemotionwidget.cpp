@@ -7,6 +7,7 @@
 #include <QHeaderView>
 #include "myemotionitemwidget.h"
 #include <QtPlugin>
+#include <QMouseEvent>
 MyEmotionWidget::MyEmotionWidget(QWidget *parent)
 	: QTableWidget(parent)
 	, m_tableRow(0)
@@ -18,8 +19,9 @@ MyEmotionWidget::MyEmotionWidget(QWidget *parent)
 	, m_emotionMovieSize(QSize(0 , 0))
 {
 	loadStyleSheet();
+//	QWidget::installEventFilter(this);//为这个窗口安装过滤器
 // 	initWindow();
-// 	installEventFilter(this);
+ 	installEventFilter(this);
 }
 
 MyEmotionWidget::~MyEmotionWidget()
@@ -254,7 +256,10 @@ bool MyEmotionWidget::eventFilter(QObject* object, QEvent* event)
 // 	{
 // 		this->hide();
 // 		qDebug() << "WindowDeactivate___________";
-// 	}
-
+// 	}	
+	if (QEvent::WindowDeactivate == event->type())//窗口停用，及一般人认为的失去焦点
+	{
+		hide();//或者关闭窗口,加入自己的操作.
+	}
 	return __super::eventFilter(object, event);
 }

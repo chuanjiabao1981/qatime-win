@@ -145,7 +145,7 @@ void LoginWindow::loginFinished()
 		mainWin->setRemeberToken(m_teacherToken);
 		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->ShowAuxiliary();
-		mainWin->setLoginWindow(this);
+		mainWin->setLoginWindow(this);		
 		mainWin->show();
 		this->hide();
 	}

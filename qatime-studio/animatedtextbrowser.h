@@ -14,6 +14,7 @@ private slots:
 	void animate(int);
 signals:
 	void colseCalendar();
+	void colseBrow();
 protected:
 	void mousePressEvent(QMouseEvent *e);       //--鼠标按下事件 
 private:

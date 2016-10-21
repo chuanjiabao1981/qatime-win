@@ -28,8 +28,10 @@ void personListBuddy::initFindPeople()
 	secLinEdit->move(5, 5);
 	secLinEdit->setFixedWidth(220);
 	secLinEdit->setPlaceholderText("请输入要查的姓名");
-	secLinEdit->setAlignment(Qt::AlignCenter);//居中对齐
-	secFindButton->move(215, 4);
+	secLinEdit->setAlignment(Qt::AlignCenter);//居中对齐	
+	secLinEdit->setStyleSheet("QLineEdit{ bordercolor:red; font:10pt}");
+	secFindButton->resize(48, 22);
+	secFindButton->move(230, 4);
 	secFindButton->setText("查找");
 }
 void personListBuddy::initNotFind()

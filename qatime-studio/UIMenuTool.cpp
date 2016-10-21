@@ -42,7 +42,7 @@ UIMenuTool::UIMenuTool(QWidget *parent)
 		"QCheckBox::indicator:checked{image: url(./images/fullQuit.png);}"
 		"QCheckBox::indicator:unchecked:pressed{image: url(./images/fullScreen.png);}"
 		"QCheckBox::indicator:checked:pressed{image: url(./images/fullQuit.png);}");
-	ui.fulsereen_checkBox->setEnabled(false);
+	ui.fulsereen_checkBox->hide();
 	connect(ui.fulsereen_checkBox, SIGNAL(stateChanged(int)), this, SLOT(slot_fulSereen(int)));
 //	connect(ui.Live_pushBtn, SIGNAL(clicked()), this, SLOT(slot_startOrStopLiveStream()));
 	connect(ui.Audio_checkBox, SIGNAL(stateChanged(int)), this, SLOT(AudioStatus(int)));
@@ -68,7 +68,7 @@ UIMenuTool::~UIMenuTool()
 }
 void UIMenuTool::setFullEnabled()
 {
-	ui.fulsereen_checkBox->setEnabled(true);
+	ui.fulsereen_checkBox->show();
 }
 
 void UIMenuTool::setRatioText(QString text)

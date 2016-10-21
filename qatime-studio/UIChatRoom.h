@@ -65,6 +65,7 @@ private:
 	void initEmotion();
 protected:
 	virtual bool eventFilter(QObject *watched, QEvent *event);
+	void mousePressEvent(QMouseEvent *event);
 private slots:
 	void clickTalk();									// 弹出聊天框
 	void clickStudentList();							// 弹出学生列表
@@ -84,6 +85,7 @@ private slots:
 	void putTalkCancel();								// 点击【取消发布】按钮
 	void proclamationTextChage();						// 发布编辑框输入文字设置发布按钮是否可以被点击。
 	void colseCalendar();								// 关闭日历槽函数
+	void colseBrow();									// 关闭表情槽函数
 	void calendaCurrentPageChanged(int year, int month);// 日历当前页面被改变
 private:
 	void		initSDK();									// 初始化云信SDK

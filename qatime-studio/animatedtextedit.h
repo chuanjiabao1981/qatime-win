@@ -2,7 +2,7 @@
 #define ANIMATEDTEXTEDIT_H
 
 #include <QTextEdit>
-
+#include <QMouseEvent>
 class AnimatedTextEdit : public QTextEdit
 {
 	Q_OBJECT
@@ -17,7 +17,10 @@ public:
 	private slots:
 	void animate(int);
 
-
+signals:
+	void colseBrow();  //关闭表情
+protected:
+	void mousePressEvent(QMouseEvent *e);       //--鼠标按下事件 
 private:
 	QList<QUrl> lstUrl;
 	QList<QMovie *> lstMovie;

@@ -50,4 +50,12 @@ void AnimatedTextEdit::animate(int)
 		setLineWrapColumnOrWidth(lineWrapColumnOrWidth()); // ..Ë¢ÐÂÏÔÊ¾
 	}
 }
+void AnimatedTextEdit::mousePressEvent(QMouseEvent *e)
+{
+	if (Qt::LeftButton == e->button())
+	{		
+		emit colseBrow();
+	}
+}
+
 

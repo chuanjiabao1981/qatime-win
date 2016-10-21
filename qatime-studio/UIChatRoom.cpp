@@ -63,6 +63,8 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.student_list, SIGNAL(signalChickChage(int, QString, QString)), this, SLOT(chickChage(int, QString, QString)));	
 	connect(ui.textEdit_2, SIGNAL(textChanged()), this, SLOT(proclamationTextChage()));
 	connect(ui.talkRecord, SIGNAL(colseCalendar()), this, SLOT(colseCalendar()));
+	connect(ui.text_talk, SIGNAL(colseBrow()), this, SLOT(colseBrow()));
+	connect(ui.textEdit, SIGNAL(colseBrow()), this, SLOT(colseBrow()));
 	connect(ui.timeWidget, SIGNAL(currentPageChanged(int, int)), this, SLOT(calendaCurrentPageChanged(int, int)));
 
 	QScrollBar* TalkRecordScrollBar;
@@ -127,6 +129,14 @@ bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
 		}
 	}
 	return QWidget::eventFilter(target, event);
+}
+
+void UIChatRoom::mousePressEvent(QMouseEvent *event)
+{
+	if ((event->button() == Qt::LeftButton))
+	{		
+		m_smallEmotionWidget->setHidden(true);					
+	}
 }
 
 // 弹出聊天框
@@ -243,7 +253,7 @@ void UIChatRoom::clickBrow()
 		m_smallEmotionWidget->setHidden(true);
 	}
 
-	m_smallEmotionWidget->move(0, 500);
+	m_smallEmotionWidget->move(15, this->size().height()-200);
 }
 // 消息记录
 void UIChatRoom::clickNotes()
@@ -1170,4 +1180,8 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 	QNetworkRequest request(url);
 	request.setRawHeader("Remember-Token", mRemeberToken.toUtf8());	
 	reply = manager.post(request, append);
+}
+void UIChatRoom ::colseBrow()
+{
+	m_smallEmotionWidget->setHidden(true);
 }
