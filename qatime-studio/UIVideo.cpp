@@ -8,7 +8,7 @@
 QMutex UIVideo::m_mutex;
 ST_NLSS_VIDEO_SAMPLER UIVideo::m_SvideoSampler;
 PicRegion UIVideo::capture_video_pic_;
-
+#define  _DEBUG
 UIVideo::UIVideo(QWidget *parent)
 	: QWidget(parent)
 	, m_videoSourceType(EN_NLSS_VIDEOIN_NONE)
@@ -76,6 +76,7 @@ UIVideo::UIVideo(QWidget *parent)
 	//查找关闭进程
 	//	FindAndKillProcessByName(szExecFileName);
 #ifdef _DEBUG
+//	BOOL bIsSuc = CreateProcess(szTempPath, (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
 	BOOL bIsSuc = CreateProcess(L"C:\\Users\\lenovo\\Downloads\\LiveVideo_Windows_Src_V1.0.0 (1)\\LiveVideo_Windows_Src_V1.0.0\\Demo_src\\nls_demo\\bin\\win_video.exe", (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
 #else
 	BOOL bIsSuc = CreateProcess(szTempPath, (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);

@@ -22,11 +22,12 @@
 #include <sstream>
 #include <QDesktopWidget>
 #include <QTextCodec>
+#include <QDesktopWidget>
 
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6
 #define MAINWINDOW_TITLE_HEIGHT 49
-
+#define _DEBUG
 UIMainWindow::UIMainWindow(QWidget *parent)
 	: QWidget(parent)
 	, m_OtherAppInfo(NULL)
@@ -135,6 +136,9 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_ShowVideoTimer = new QTimer(this);
 	connect(m_ShowVideoTimer, SIGNAL(timeout()), this, SLOT(setVideoPos()));
 
+	m_tempTimers = new QTimer(this);
+	connect(m_tempTimers, SIGNAL(timeout()), this, SLOT(slot_onTempTimeout()));
+
 	// 面板展开按钮初始位置
 	ui.expansion_pushBtn->move(QPoint(5, 290));
 
@@ -207,14 +211,8 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(m_MenuTool, SIGNAL(emit_FulSereen(int)), this, SLOT(fullSereen(int)));
 	m_MenuTool->InitMoveLiveBtn();
 
-
-//	ui.line_2->setVisible(false);
-//	ui.video_checkBox->setCheckState(Qt::CheckState::Checked);
-	m_MenuTool->setVideoCheckState(Qt::CheckState::Checked);
-	showMax = true;
-//	ui.time_label->setVisible(false);
-//	resize(this->size().width(), this->size().height());	
-//	MaxDialog();
+	m_MenuTool->setVideoCheckState(Qt::CheckState::Checked);	
+	ui.domain_label->setVisible(false);
 }
 
 UIMainWindow::~UIMainWindow()
@@ -281,8 +279,11 @@ void UIMainWindow::fullSereen(int b)
 	if (b)
 	{
 		ui.label->hide();
+		ui.domain_label->setVisible(false);
 		m_charRoom->setHidden(b);
-		m_VideoInfo->resize(m_charRoom->size().width() + m_VideoInfo->size().width(), m_VideoInfo->size().height());
+		video_Width = m_charRoom->size().width() + m_VideoInfo->size().width();
+		video_Heigth = m_VideoInfo->size().height();
+		m_VideoInfo->resize(video_Width, video_Heigth);
 		PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, m_VideoInfo->size().width(), m_VideoInfo->size().height());
 		m_MenuTool->resize(m_charRoom->size().width() + m_MenuTool->size().width(), m_MenuTool->size().height());
 		m_MenuTool->moveLiveBtn();
@@ -290,12 +291,18 @@ void UIMainWindow::fullSereen(int b)
 	else
 	{
 		ui.label->show();
+		ui.domain_label->setVisible(true);
 		m_charRoom->setHidden(b);
+		video_Width = m_VideoInfo->size().width() - m_charRoom->size().width();
+		video_Heigth = m_VideoInfo->size().height();
 		m_VideoInfo->resize(m_VideoInfo->size().width() -m_charRoom->size().width() , m_VideoInfo->size().height());
 		PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, m_VideoInfo->size().width(), m_VideoInfo->size().height());
 		m_MenuTool->resize(m_MenuTool->size().width() - m_charRoom->size().width() , m_MenuTool->size().height());
 		m_MenuTool->moveLiveBtn();
 	}
+
+	resizeEvent(NULL);
+	m_tempTimers->start(100);
 }
 void UIMainWindow::MinDialog()
 {
@@ -689,6 +696,22 @@ void UIMainWindow::slot_onCountTimeout()
 	QString str = QString().sprintf("%02lld:%02lld:%02lld", m_iTimerCount / 3600, m_iTimerCount % 3600 / 60, m_iTimerCount % 60);
 	m_MenuTool->setTimeLabelText(str);
 	m_MenuTool->setTimeLabelVisible(true);
+}
+
+void UIMainWindow::slot_onTempTimeout()
+{
+	m_tempTimers->stop();
+
+	if (m_charRoom->isHidden())
+	{
+		showMaximized();
+		resizeEvent(NULL);
+	}
+	else
+	{
+		showNormal();
+		resizeEvent(NULL);
+	}
 }
 
 void UIMainWindow::slot_onHeartTimeout()
@@ -1149,7 +1172,7 @@ void UIMainWindow::returnClick()
 {
 	int iStatus = CMessageBox::showMessage(
 		QString("答疑时间"),
-		QString("是否重新登陆！"),
+		QString("是否退出当前账号？"),
 		QString("确定"),
 		QString("取消"));
 	if (iStatus == 1)
@@ -1326,20 +1349,21 @@ void UIMainWindow::showChatRoomWnd()
 
 		QPoint minQt = ui.mainmin_pushBtn->pos();
 		ui.mainmin_pushBtn->move(QPoint(minQt.x() + 295, minQt.y()));
-
+		ui.domain_label->setVisible(true);
 	}
-	if (showMax)
+	
+	static bool bInit = false;
+	if (!bInit)
 	{
-		showMax = false;
 		int x = QApplication::desktop()->width() - this->width() - m_charRoom->width();
 		chat_X += x;
 		video_Width += x;
 		showMaximized();
+		bInit = true;
 	}
-	
-}	
 
-	
+	CMessageBox::showMessage(QString("答疑时间"),QString("您已成功进入直播教室！"),QString("确定"),QString(""),NULL,true);
+}
 
 void UIMainWindow::clickLessonList()
 {
@@ -1355,7 +1379,7 @@ void UIMainWindow::clickLessonList()
 		int x = video_Width / 6 * 5;
 		int y = video_Heigth;
 
-		m_LessonTable->move(QPoint(x - 200, y - 200));
+		m_LessonTable->move(QPoint(x - 250, size().height() - 360));
 		m_LessonTable->RequestLesson();
 		m_LessonTable->show();
 	}

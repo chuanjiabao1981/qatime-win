@@ -77,7 +77,8 @@ private:
 	HWND							m_VideoWnd;			// 视频窗口句柄
 	QString							m_liveToken;		// 直播心跳时需要（开始直播时返回token）
 
-	UIMenuTool*						m_MenuTool;			//  工具按钮	
+	UIMenuTool*						m_MenuTool;			//  工具按钮
+	QTimer*							m_tempTimers;		// 临时的定时器，用完记得关掉
 	int a;
 	int chat_X;	//聊天位置x
 	int chat_Y; //聊天位置y
@@ -99,6 +100,7 @@ private:
 	void FullScreenStatus(int iStatus);					// 切换全屏视频源
 	void slot_onCountTimeout();							// 计时器 改变直播时间
 	void slot_onHeartTimeout();							// 5分一次，发送心跳
+	void slot_onTempTimeout();							// 临时应用
 	void OtherApp(int i);									// 其它APP应用
 	void clickChangeAudio(int);
 	void clickChangeVideo(int);							// 弹出摄像头选择框

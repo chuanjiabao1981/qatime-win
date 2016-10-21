@@ -45,29 +45,39 @@ protected:
 
 CMessageBox::~CMessageBox()
 {
-
+	//É¾³ý¶¨Ê±Æ÷
+	if (m_hideTimers)
+	{
+		if (m_hideTimers->isActive())
+			m_hideTimers->stop();
+		delete m_hideTimers;
+		m_hideTimers = NULL;
+	}
 }
 
 int CMessageBox::showMessage(
 	 const QString & title, const QString & text,
 	const QString& btn0,
 	const QString& btn1,
-	QWidget *parent)
+	QWidget *parent,
+	bool bTip)
 {
-	CMessageBox m(title, text, btn0, btn1, parent);
+	CMessageBox m(title, text, btn0, btn1, parent,bTip);
 	return m.exec();
 }
 
 CMessageBox::CMessageBox(const QString& title,const QString & text,
 	const QString& btn0,
 	const QString& btn1,
-	QWidget *parent)
+	QWidget *parent,
+	bool bTip)
 	: QDialog(parent, Qt::Dialog | Qt::Popup | Qt::FramelessWindowHint)
 	, m_pImage(NULL)
 	, m_pInnerText(NULL)
 	, m_pBtnClose(NULL)
 	, m_qsImage(title)
 	, m_qsText(text)
+	, m_hideTimers(NULL)
 {
 	setFixedSize(MESSAGEBOX_FIXED_WIDTH, MESSAGEBOX_FIXED_HEIGHT);
 	setAttribute(Qt::WA_TranslucentBackground);
@@ -113,6 +123,13 @@ CMessageBox::CMessageBox(const QString& title,const QString & text,
 	initUI();
 
 	connect(m_pBtnClose, SIGNAL(clicked(bool)), this, SLOT(slot_titleClose(bool)));
+
+	if (bTip)
+	{
+		m_hideTimers = new QTimer;
+		connect(m_hideTimers, SIGNAL(timeout()), this, SLOT(slot_onCountTimeout()));
+		m_hideTimers->start(1500);
+	}
 }
 
 void CMessageBox::initUI()
@@ -249,6 +266,11 @@ void CMessageBox::slot_titleClose(bool /*bChecked*/)
 void CMessageBox::slot_btnclicked(int nId, bool /*bChecked*/)
 {
 	done(nId);
+}
+
+void CMessageBox::slot_onCountTimeout()
+{
+	done(0);
 }
 
 bool CMessageBox::nativeEvent(const QByteArray &eventType, void *message, long *result)

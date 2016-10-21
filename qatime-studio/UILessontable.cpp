@@ -214,6 +214,7 @@ void UILessonTable::returnLesson()
 	else if (obj["status"].toInt() == 0)
 	{
 		m_MainWindow->RequestError(error);
+		return;
 	}
 
 	int iCount = ui.lessonTable_tableWidget->rowCount();

@@ -14,6 +14,7 @@
 #include <QToolTip>
 #include <QNetworkRequest>
 
+#define  _DEBUG
 typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
 typedef void(*nim_client_cleanup)(const char *json_extension);
 typedef void(*nim_client_login)(const char *app_token, const char *account, const char *password, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
@@ -1000,8 +1001,6 @@ void UIChatRoom::ReceiverLoginMsg(nim::LoginRes* pRes)
 		// 从云信再次获取群成员信息
 		QueryGroup();
 	}
-
-	QToolTip::showText(QCursor::pos(), "您已成功进入直播教室！");
 }
 
 // 初始化获取群成员的禁言状态

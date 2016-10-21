@@ -9,6 +9,7 @@
 #define _LS_MEDIACAPTURE_UI_MESSAGEBOX_H_
 #include <QtWidgets/QDialog>
 #include <windowsx.h>
+#include <QTimer>
 
 class QLabel;
 class CButton;
@@ -25,16 +26,18 @@ public:
 		const QString & title, const QString & text,
 		const QString& btn0,
 		const QString& btn1 = QString(),	
-		QWidget *parent = NULL);
+		QWidget *parent = NULL,
+		bool bTip=false);
 
 protected:
-	CMessageBox(const QString & title, const QString & text, const QString & btn0, const QString & btn1, QWidget *parent = NULL);
+	CMessageBox(const QString & title, const QString & text, const QString & btn0, const QString & btn1, QWidget *parent = NULL, bool bTip=false);
 
 	void initUI();
 
 	protected Q_SLOTS:
 	void slot_titleClose(bool);
 	void slot_btnclicked(int, bool);
+	void slot_onCountTimeout();
 
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result);
@@ -54,6 +57,8 @@ private:
 
 	QPushButton* m_pButtonConfirm;
 	QPushButton* m_pButtonCancel;
+
+	QTimer*     m_hideTimers;
 };
 
 #endif //_LS_MEDIACAPTURE_UI_MESSAGEBOX_H_

@@ -9,6 +9,8 @@
 #include "UIMessageBox.h"
 #include <QToolTip>
 #include "define.h"
+#include <iosfwd>
+#include <sstream>
 
 #define QT_TOOLBOXINDEX			100				//QTableWidgetItem索引
 #define QT_TOOLBOXCOURSEID		101				//Toolbox对应的辅导班ID
@@ -59,8 +61,6 @@ void UIAuxiliaryPanel::init()
 	ui.return_pushButton->setIcon(QIcon("./images/quit.png"));
 	ui.return_pushButton->setIconSize(QSize(16, 16));
 	ui.return_pushButton->setText("切换账号");
-
-	connect(this, SIGNAL(emitShowTip()), this, SLOT(ShowTip()));
 }
 
 void UIAuxiliaryPanel::setParent(UIMainWindow* parent)
@@ -266,8 +266,8 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 		GetItemTextColor(pLesson->LessonStatus(), qColor);
 		
 		// 显示箭头图标
-		QTableWidgetItem *pItemIcon = new QTableWidgetItem(qIcon, "");
-		pItemIcon->setBackground(brush);		
+//		QTableWidgetItem *pItemIcon = new QTableWidgetItem(qIcon, "");
+//		pItemIcon->setBackground(brush);		
 
 		// 显示编号
 		QString strNum = QString().sprintf("%02d", nNum);
@@ -296,53 +296,55 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 		imageItem1->setTextColor(0, qColor);
 		imageItem1->setTextColor(1, qColor);
 		imageItem1->setTextColor(2, qColor);
-		QIcon qIconOld("./images/empty.png");
-		imageItem1->setIcon(0, qIconOld);
+ //		QIcon qIconOld("./images/empty1.png");
+		imageItem1->setIcon(0, qIcon);
 		delete pLesson;
 	}
 }
 
 void UIAuxiliaryPanel::GetItemColor(QString strStatus, QBrush& brush, QIcon& qIcon)
 {
+	QString icon = "./images/empty1.png";
+	QString icon1 = "./images/empty2.png";
 	if (strStatus == "init")
 	{
 		brush = QColor::fromRgb(255, 255, 255);
-		qIcon = QIcon("./images/empty.png");
+		qIcon = QIcon(icon);
 	}
 	else if (strStatus == "ready")
 	{
 		brush = QColor::fromRgb(255, 243, 200);
-		qIcon = QIcon("./images/empty.png");
+		qIcon = QIcon(icon1);
 	}
 	else if (strStatus == "teaching")
 	{
 		brush = QColor::fromRgb(255, 243, 200);
-		qIcon = QIcon("./images/teaching.png");
+		qIcon = QIcon(icon1);
 	}
 	else if (strStatus == "paused")
 	{
 		brush = QColor::fromRgb(255, 243, 200);
-		qIcon = QIcon("./images/empty.png");
+		qIcon = QIcon(icon1);
 	}
 	else if (strStatus == "closed")
 	{
 		brush = QColor::fromRgb(255, 243, 200);
-		qIcon = QIcon("./images/empty.png");
+		qIcon = QIcon(icon1);
 	}
 	else if (strStatus == "finished")
 	{
 		brush = QColor::fromRgb(255, 255, 255);
-		qIcon = QIcon("./images/empty.png");
+		qIcon = QIcon(icon);
 	}
 	else if (strStatus == "billing")
 	{
 		brush = QColor::fromRgb(255, 255, 255);
-		qIcon = QIcon("./images/empty.png");
+		qIcon = QIcon(icon);
 	}
 	else if (strStatus == "completed")
 	{
 		brush = QColor::fromRgb(255, 255, 255);
-		qIcon = QIcon("./images/empty.png");
+		qIcon = QIcon(icon);
 	}
 }
 
@@ -495,6 +497,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 
 				m_FirstLessonItem->setData(0, QT_TOOLBOXLITEMSTATUS, status);
 				m_FirstLessonItem->setText(2, "已结束");
+				m_FirstLessonItem->setIcon(0, qIcon);
 				m_Parent->SendChangeStatusMsg(sID);
 			}
 		}
@@ -513,7 +516,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	// 去掉上一节课的箭头
 	if (m_pTreeCurrentItem)
 	{
-		QIcon qIconOld("./images/empty.png");
+		QIcon qIconOld("./images/empty2.png");
 		m_pTreeCurrentItem->setIcon(0,qIconOld);
 		m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#000000"));
 		m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#000000"));
@@ -533,7 +536,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	m_Parent->setVideoLesson(m_lessonName);
 	m_Parent->showChatRoomWnd();
 
-	emit emitShowTip();
+//	emit emitShowTip();
 //	setFocus();
 }
 
@@ -556,7 +559,6 @@ void UIAuxiliaryPanel::returnClick()
 
 void UIAuxiliaryPanel::ShowTip()
 {
-	setFocus();
 	QToolTip::showText(QCursor::pos(), "您已成功进入直播教室！");
 }
 

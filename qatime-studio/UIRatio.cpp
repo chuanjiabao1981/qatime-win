@@ -32,12 +32,12 @@ void UIRatio::SetRatioInfo()
 	radio->setText("标清  适合网络一般的用户使用");
 	m_pVBox->addWidget(radio);
 	m_pGroup->addButton(radio, 0);
-	radio->setChecked(true);
 		
 	QRadioButton* radio1 = new QRadioButton();
 	radio1->setText("高清  适合宽带较高的用户使用");
 	m_pVBox->addWidget(radio1);
 	m_pGroup->addButton(radio1, 1);
+	radio1->setChecked(true);
 	
 	connect(m_pGroup, SIGNAL(buttonToggled(int, bool)), this, SLOT(onRadioClick(int, bool)));
 	ui.Ratio_groupBox->setLayout(m_pVBox);

@@ -69,7 +69,7 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="text">
-        <string>标清</string>
+        <string>高清</string>
        </property>
       </widget>
      </item>

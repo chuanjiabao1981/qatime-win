@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>321</width>
-    <height>269</height>
+    <height>260</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,7 +48,7 @@
      <x>0</x>
      <y>0</y>
      <width>320</width>
-     <height>271</height>
+     <height>260</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -61,8 +61,8 @@
   <widget class="QPushButton" name="cancel_pushButton">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>240</y>
+     <x>96</x>
+     <y>235</y>
      <width>51</width>
      <height>20</height>
     </rect>
@@ -74,8 +74,8 @@
   <widget class="QPushButton" name="ok_pushButton">
    <property name="geometry">
     <rect>
-     <x>254</x>
-     <y>240</y>
+     <x>170</x>
+     <y>235</y>
      <width>51</width>
      <height>20</height>
     </rect>
