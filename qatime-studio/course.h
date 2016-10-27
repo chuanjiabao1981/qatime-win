@@ -16,6 +16,7 @@ public:
     void		readJson(const QJsonObject &json);
 	QJsonArray  JsonLesson();
 	QString		url();
+	QString		CameraURL();
 	QString		ChatId();
 private:
     int			mId;
@@ -24,6 +25,7 @@ private:
 	QString		mProgress;			// 进度
 	QJsonArray	mJsonArray;			// 课程json
 	QString		mURL;				// 课程推流的URL
+	QString		mCameraURL;			// 摄像头推流地址		
 	QString		mChatId;			// 云信会话ID
 };
 

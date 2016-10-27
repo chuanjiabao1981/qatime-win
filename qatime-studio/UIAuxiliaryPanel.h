@@ -48,6 +48,7 @@ private:
 	QString							m_auxiliaryID;			//当前辅导班ID
 	QString							m_lessonID;				//当前课程ID
 	QString							m_url;					//当前的推流地址
+	QString							m_CameraUrl;			//当前的摄像头推流地址
 	QTreeWidgetItem*				m_pTreeCurrentItem;		//当前课程的树item
 	bool							m_bPreview;				//当前是否是直播状态(决定当前课程的切换)
 	QString							m_lessonName;			//课程名字
@@ -82,7 +83,7 @@ private:
 	* @param[QString]	      辅导班ID
 	*/
 	void setCourseInfoToTree(QJsonArray courses, QString url, QString tableName, QTreeWidgetItem* pTableWidget,
-							 QString chatID, QString courseID);		
+							 QString chatID, QString courseID, QString cameraUrl);		
 	void GetItemTextColor(QString strStatus, QColor& qColor);
 public:
 	void init();
@@ -93,6 +94,7 @@ public:
 	void setNetworkPic(const QString &szUrl);								// 显示网络图片
 	QString getLessonID();													// 获取课程ID
 	QString getURL();														// 获取推流url
+	QString getCameraURL();													// 获取摄像头推流url
 	QString getCouresID();													// 获取辅导班ID
 	QString getChatID();													// 获取当前会话ID
 	void setPreview(bool bPreview);

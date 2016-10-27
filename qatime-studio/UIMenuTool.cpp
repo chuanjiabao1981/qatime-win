@@ -42,7 +42,6 @@ UIMenuTool::UIMenuTool(QWidget *parent)
 		"QCheckBox::indicator:checked{image: url(./images/fullQuit.png);}"
 		"QCheckBox::indicator:unchecked:pressed{image: url(./images/fullScreen.png);}"
 		"QCheckBox::indicator:checked:pressed{image: url(./images/fullQuit.png);}");
-	ui.fulsereen_checkBox->hide();
 	connect(ui.fulsereen_checkBox, SIGNAL(stateChanged(int)), this, SLOT(slot_fulSereen(int)));
 //	connect(ui.Live_pushBtn, SIGNAL(clicked()), this, SLOT(slot_startOrStopLiveStream()));
 	connect(ui.Audio_checkBox, SIGNAL(stateChanged(int)), this, SLOT(AudioStatus(int)));
@@ -97,9 +96,9 @@ void UIMenuTool::setFullScreenEnabled(bool bEnable)
 {
 	ui.fullscreen_checkBox->setEnabled(bEnable);
 }
-void UIMenuTool::setFullScreenCheck(bool bEnable)
+void UIMenuTool::setFullScreenCheck(Qt::CheckState status)
 {
-	ui.fullscreen_checkBox->setCheckState(Qt::CheckState::Unchecked);
+	ui.fullscreen_checkBox->setCheckState(status);
 }
 bool UIMenuTool::getFullScreenIsChecked()
 {
@@ -121,10 +120,10 @@ void UIMenuTool::setVideoCheckState(Qt::CheckState state)
 {
 	ui.video_checkBox->setCheckState(state);
 }
-void UIMenuTool::setLivePushBtnText(QString text)
+void UIMenuTool::setLivePushBtnText(bool bStart)
 {
 	//ui.Live_pushBtn->setText(text);
-	m_timers->setLivePushBtnText("¿ªÊ¼Ö±²¥");
+	m_timers->setLivePushBtnText(bStart);
 }
 
 QPoint UIMenuTool::getGeometry()

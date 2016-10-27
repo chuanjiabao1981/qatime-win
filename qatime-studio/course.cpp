@@ -23,13 +23,21 @@ void Course::readJson(const QJsonObject &json)
 	// 课程
 	mJsonArray = json["lessons"].toArray();
 
-	// 推流地址
-	mURL = json["push_address"].toString();
+	// 白板推流地址
+	mURL = json["board"].toString();
+
+	// 摄像头推流地址
+	mCameraURL = json["camera"].toString();
 }
 
 QString Course::url()
 {
 	return mURL;
+}
+
+QString Course::CameraURL()
+{
+	return mCameraURL;
 }
 
 QString Course::id()

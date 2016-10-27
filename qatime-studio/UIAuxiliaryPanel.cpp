@@ -20,6 +20,7 @@
 #define QT_TOOLBOXLITEMSTATUS	105				//课程状态	
 #define QT_TOOLBOXLESSONNAME	106				//课程名字
 #define QT_TOOLBOXCHATID		107				//云信会话ID（一个辅导班对应一个ID）
+#define QT_TOOLBOXCAMERAURL		108				//Toolbox对应的摄像头推流url
 
 UIAuxiliaryPanel::UIAuxiliaryPanel(QWidget *parent)
 	: QWidget(parent)	
@@ -241,7 +242,7 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 		m_teacher_treewidget->setColumnWidth(1, 140);
 		m_teacher_treewidget->setColumnWidth(2, 40);
 		imageItem1->setSizeHint(0, QSize(200, 25));	
-		setCourseInfoToTree(course->JsonLesson(), course->url(), strItemName, imageItem1,course->ChatId(),course->id());
+		setCourseInfoToTree(course->JsonLesson(), course->url(), strItemName, imageItem1,course->ChatId(),course->id(),course->CameraURL());
 		
 		delete course;
 		nNum++;		
@@ -249,7 +250,7 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 	ui.teacher_verticalLayout->addWidget(m_teacher_treewidget);
 }
 
-void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QString tableName, QTreeWidgetItem* pTableWidget, QString chatID, QString courseID)
+void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QString tableName, QTreeWidgetItem* pTableWidget, QString chatID, QString courseID, QString cameraUrl)
 {
 	int nNum = 0;	// 编号
 	foreach(const QJsonValue & value, courses)
@@ -283,6 +284,7 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 			imageItem1->setData(0, QT_TOOLBOXCHATID, chatID);
 			imageItem1->setData(0, QT_TOOLBOXCOURSEID, courseID);
 			imageItem1->setData(0, QT_TOOLBOXLESSONNAME, pLesson->name());
+			imageItem1->setData(0, QT_TOOLBOXCAMERAURL, cameraUrl);
 			imageItem1->setTextAlignment(i, Qt::AlignHCenter | Qt::AlignVCenter);
 			imageItem1->setBackground(i, brush);
 			imageItem1->setToolTip(0,pLesson->name());
@@ -392,6 +394,11 @@ QString UIAuxiliaryPanel::getLessonID()
 QString UIAuxiliaryPanel::getURL()
 {
 	return m_url;
+}
+
+QString UIAuxiliaryPanel::getCameraURL()
+{
+	return m_CameraUrl;
 }
 
 QString UIAuxiliaryPanel::getCouresID()
@@ -509,6 +516,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	m_url = (QString)terrWidget->data(0, QT_TOOLBOXLESSONURL).toString();
 	m_auxiliaryID = (QString)terrWidget->data(0, QT_TOOLBOXCOURSEID).toString();
 	m_lessonName = (QString)terrWidget->data(0, QT_TOOLBOXLESSONNAME).toString();
+	m_CameraUrl = (QString)terrWidget->data(0, QT_TOOLBOXCAMERAURL).toString();
 
 	QString tableName = (QString)terrWidget->data(0,QT_TOOLBOXLITEMNAME).toString();
 	QString tabText = terrWidget->parent()->text(0);
@@ -534,7 +542,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	m_chatID = (QString)terrWidget->data(0, QT_TOOLBOXCHATID).toString();
 	m_Parent->setCurChatRoom(m_chatID, m_auxiliaryID);
 	m_Parent->setVideoLesson(m_lessonName);
-	m_Parent->showChatRoomWnd();
+//	m_Parent->showChatRoomWnd();
 
 //	emit emitShowTip();
 //	setFocus();

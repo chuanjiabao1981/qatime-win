@@ -19,6 +19,8 @@
 #include "loginwindow.h"
 #include "UILessontable.h"
 #include "UIMenuTool.h"
+#include "UICamera.h"
+#include "UISidescreen.h"
 #include <QMutex>
 #pragma execution_character_set("utf-8")
 #define STARTLS_ASYNC
@@ -30,6 +32,8 @@ class UIVideoChange;
 class UIRatio;
 class UILessonTable;
 class UIVideo;
+class UICamera;
+class UISideScreen;
 
 struct StructVideo
 {
@@ -64,10 +68,13 @@ private:
 	UIOtherApp*					    m_OtherAppInfo;		// 其它应用信息窗口
 	UILessonTable*					m_LessonTable;		// 课程表窗口
 	UIVideo*						m_VideoInfo;		// 直播窗口
+	UICamera*						m_CameraInfo;		// 摄像头窗口
+	UISideScreen*					m_SideScreenTool;	// 副屏窗口上的工具条窗口
 	QString							m_teacherID;		// 老师ID
 	QTimer*							m_CountTimer;		// 计时器
 	QTimer*							m_HeartTimer;		// 心跳
 	QTimer*							m_ShowVideoTimer;	// 显示视频
+	QTimer*							m_ShowCameraTimer;	// 显示摄像头
 	INT64							m_iTimerCount;		// 计时器秒数
 	bool							m_bOtherApp;		// 播放其他应用
 
@@ -75,6 +82,7 @@ private:
 	UIVideoChange*					m_VideoChangeInfo;	// 摄像头选择窗口
 	UIRatio*						m_RatioChangeInfo;	// 分辨率窗口
 	HWND							m_VideoWnd;			// 视频窗口句柄
+	HWND							m_CameraWnd;		// 摄像头窗口句柄
 	QString							m_liveToken;		// 直播心跳时需要（开始直播时返回token）
 
 	UIMenuTool*						m_MenuTool;			//  工具按钮
@@ -89,7 +97,13 @@ private:
 	QMutex	m_mutex;
 	bool  showMax;
 
-	private slots :
+	int								m_SwichScreenTimerId;	// 切屏定时器
+	int                             m_ShowChatRoomTimerId;	// 显示会话窗口定时器
+	QRect							m_videoRect;
+	QRect							m_cameraRect;
+	QWidget*						m_VideoOrCamera;		//初始对象白板
+	QWidget*						m_CameraOrVideo;		//初始对象摄像头
+private slots :
 	void MinDialog();									// 最小化对话框
 	void MaxDialog();									// 最大化对话框
 	void CloseDialog();									// 关闭对话框
@@ -106,14 +120,18 @@ private:
 	void clickChangeVideo(int);							// 弹出摄像头选择框
 	void clickChangeRatio();							// 弹出分辨率框
 	void clickLessonList();								// 弹出课程表
-	void fullSereen(int b);									// 隐藏聊天区
+	void fullSereen(int b);								// 隐藏聊天区
 	void setVideoPos();									// 设置视频位置
+	void setCameraPos();								// 设置视频头位置
+	void HideSideScreen();								// 隐藏摄像头屏幕
+	void SwichScreen();									// 切换屏幕
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result); // 添加caption
 	virtual void resizeEvent(QResizeEvent *);			// 设置窗口圆角
 	virtual void paintEvent(QPaintEvent *event);
 	virtual void closeEvent(QCloseEvent *e);
 	virtual void focusInEvent(QFocusEvent *e);
+	virtual void timerEvent(QTimerEvent *event);
 
 public:
 	void setTeacherInfo(QJsonObject& data);					// 设置老师信息
@@ -146,7 +164,8 @@ public:
 	void showChatRoomWnd();									// 显示聊天会话
 	void LessonTable_Auxiliary(QString sLessonID, QString sCourseID); //程表中选择课程——关联到辅导班
 	void setLiveBtnEnable(bool bEnable);
-	void SendVideoMsg(UINT iMsg);							// 往qatime_video发送消息
+	void SendVideoMsg(UINT iMsg);							// 往win_video发送消息
+	void SendCameraMsg(UINT iMsg);							// 往camera_video发送消息
 	void FinishStartLive();									// 返回开始直播请求的token
 	void FinishStopLive();									// 返回结束直播请求的状态
 	void RequestError(QJsonObject& error, bool bTrue=true);	// 请求返回错误提示

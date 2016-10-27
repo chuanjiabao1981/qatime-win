@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>328</width>
-    <height>656</height>
+    <height>661</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,6 +15,9 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_4">
    <property name="leftMargin">
+    <number>12</number>
+   </property>
+   <property name="topMargin">
     <number>0</number>
    </property>
    <property name="rightMargin">
@@ -23,13 +26,6 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
@@ -145,9 +141,9 @@ p, li { white-space: pre-wrap; }
        <widget class="myLabel" name="timeShow">
         <property name="geometry">
          <rect>
-          <x>115</x>
+          <x>20</x>
           <y>5</y>
-          <width>71</width>
+          <width>70</width>
           <height>20</height>
          </rect>
         </property>
@@ -161,9 +157,9 @@ p, li { white-space: pre-wrap; }
        <widget class="QToolButton" name="toolButton_1">
         <property name="geometry">
          <rect>
-          <x>95</x>
+          <x>0</x>
           <y>5</y>
-          <width>21</width>
+          <width>20</width>
           <height>20</height>
          </rect>
         </property>
@@ -174,9 +170,9 @@ p, li { white-space: pre-wrap; }
        <widget class="QToolButton" name="toolButton_2">
         <property name="geometry">
          <rect>
-          <x>180</x>
+          <x>90</x>
           <y>5</y>
-          <width>21</width>
+          <width>20</width>
           <height>20</height>
          </rect>
         </property>
@@ -189,7 +185,7 @@ p, li { white-space: pre-wrap; }
          <rect>
           <x>0</x>
           <y>38</y>
-          <width>299</width>
+          <width>310</width>
           <height>501</height>
          </rect>
         </property>
@@ -201,32 +197,10 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
-       <widget class="QLabel" name="recordLabel">
-        <property name="geometry">
-         <rect>
-          <x>7</x>
-          <y>5</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(242, 242, 242);</string>
-        </property>
-        <property name="text">
-         <string>消息记录</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-        </property>
-       </widget>
        <widget class="QToolButton" name="toolButton_3">
         <property name="geometry">
          <rect>
-          <x>255</x>
+          <x>277</x>
           <y>5</y>
           <width>31</width>
           <height>21</height>

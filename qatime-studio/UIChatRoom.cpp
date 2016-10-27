@@ -14,7 +14,10 @@
 #include <QToolTip>
 #include <QNetworkRequest>
 
-#define  _DEBUG
+#ifdef TEST
+	#define _DEBUG
+#else
+#endif
 typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
 typedef void(*nim_client_cleanup)(const char *json_extension);
 typedef void(*nim_client_login)(const char *app_token, const char *account, const char *password, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
@@ -45,7 +48,6 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	, m_RecordTime(QDateTime::currentDateTime())
 {
 	ui.setupUi(this);
-	setWindowTitle("QATIME");
 	connect(ui.button_talk, SIGNAL(clicked()), this, SLOT(clickTalk()));
 	connect(ui.button_proclamation, SIGNAL(clicked()), this, SLOT(clickProclamation()));
 	connect(ui.button_studentList, SIGNAL(clicked()), this, SLOT(clickStudentList()));
@@ -224,7 +226,6 @@ void UIChatRoom::clickProclamation()
 	ui.proclamationWidget->setHidden(false);
 	ui.button_sendMseeage_3->hide();
 	ui.textEdit_2->hide();
-	ui.button_sendMseeage_2->show();
 	ui.text_proclamation->show();
 	ui.text_talk->setHidden(true);
 	ui.student_list->setHidden(true);
@@ -236,6 +237,11 @@ void UIChatRoom::clickProclamation()
 	ui.textEdit->setHidden(true);
 	
 	ui.text_proclamation->setGeometry(QRect(0,40,299,650));
+
+	if (!m_CurCourseID.isEmpty())
+		ui.button_sendMseeage_2->show();
+	else
+		ui.button_sendMseeage_2->hide();
 }
 // 清屏
 void UIChatRoom::clickCleanText()

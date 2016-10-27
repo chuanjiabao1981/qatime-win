@@ -14,7 +14,7 @@ class UITimers : public QWidget
 public:
 	UITimers(QWidget *parent = 0);
 	~UITimers();
-	void setLivePushBtnText(QString text);
+	void setLivePushBtnText(bool bStart);
 	void setTimeLabelVisible(bool b);
 	void setTimeLabelText(QString text);
 	void setParent(UIMenuTool* p);

@@ -14,8 +14,7 @@ personList::personList(QWidget *parent) :
     setFocusPolicy(Qt::NoFocus);       // 去除item选中时的虚线边框
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);//水平滚动条关闭
     initMenu();	
-//	initFronUi();
-	initSecUi();
+//	initSecUi();
 	timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(timeOutSet()));
 }

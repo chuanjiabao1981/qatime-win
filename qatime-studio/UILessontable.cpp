@@ -8,6 +8,11 @@
 #define QT_TOOLBOXLESSONID		102				//对应的课程ID
 #define QT_TOOLBOXSTATUS		103				//对应的课程状态
 
+#ifdef TEST
+	#define _DEBUG
+#else
+#endif
+
 UILessonTable::UILessonTable(QWidget *parent)
 	: QWidget(parent)
 	, m_bInit(false)

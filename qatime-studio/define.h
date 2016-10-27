@@ -39,3 +39,7 @@ struct VideoInfo
 #define MSG_DEVICE_VIDEO				MSG_VIDEO_CUSTOM + 8	//获取摄像头信息
 #define MSG_DEVICE_AUDIO				MSG_VIDEO_CUSTOM + 9	//获取麦克风信息
 #define MSG_DEVICE_AUDIO_CLOSE			MSG_VIDEO_CUSTOM + 10	//关闭或开启麦克风信息
+
+// 直播摄像头
+#define MSG_CAMERA_CUSTOM				4200	
+#define MSG_CAMERA_HWND					MSG_CAMERA_CUSTOM + 1	//camera窗口句柄

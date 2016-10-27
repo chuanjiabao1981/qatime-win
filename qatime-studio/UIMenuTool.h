@@ -14,13 +14,13 @@ public:
 	UIMenuTool(QWidget *parent = 0);
 	~UIMenuTool();
 
-	void setLivePushBtnText(QString text);
+	void setLivePushBtnText(bool bStart);
 	QPoint getGeometry();
 	void setMenuCheckState(Qt::CheckState state);
 	void setVideoCheckState(Qt::CheckState state);
 	bool getisChecked();
 	void setVideoEnabled(bool bEnable);
-	void setFullScreenCheck(bool bEnable);
+	void setFullScreenCheck(Qt::CheckState status);
 	bool getFullScreenIsChecked();
 	void setFullScreenEnabled(bool bEnable);
 	void setAppEnabled(bool bEnable);
@@ -41,7 +41,7 @@ signals:
 	void emit_clickChangeVideo(int);					// 弹出摄像头选择框
 	void emit_clickChangeRatio();						// 弹出分辨率框
 	void emit_clickLessonList();						// 弹出课程表
-	void emit_FulSereen(int b);								// 隐藏右侧聊天区
+	void emit_FulSereen(int b);							// 隐藏右侧聊天区
 public slots:
 	void slot_startOrStopLiveStream();					// 开始直播
 	void VideoStatus(int iStatus);						// 视频状态（直播中暂停、继续的控制）

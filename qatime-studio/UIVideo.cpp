@@ -8,7 +8,10 @@
 QMutex UIVideo::m_mutex;
 ST_NLSS_VIDEO_SAMPLER UIVideo::m_SvideoSampler;
 PicRegion UIVideo::capture_video_pic_;
-#define  _DEBUG
+#ifdef TEST
+	#define _DEBUG
+#else
+#endif
 UIVideo::UIVideo(QWidget *parent)
 	: QWidget(parent)
 	, m_videoSourceType(EN_NLSS_VIDEOIN_NONE)
@@ -75,11 +78,17 @@ UIVideo::UIVideo(QWidget *parent)
 	PROCESS_INFORMATION	pi;
 	//查找关闭进程
 	//	FindAndKillProcessByName(szExecFileName);
-#ifdef _DEBUG
-//	BOOL bIsSuc = CreateProcess(szTempPath, (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
-	BOOL bIsSuc = CreateProcess(L"G:\\workspace\\qatime-win\\qatime-studio\\Bin\\Debug\\win_video.exe", (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+
+#ifdef TEST
+	CreateProcess(szTempPath, (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+	return;
 #else
-	BOOL bIsSuc = CreateProcess(szTempPath, (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+#endif
+
+#ifdef _DEBUG
+	CreateProcess(L"C:\\Users\\lenovo\\Downloads\\LiveVideo_Windows_Src_V1.0.0 (1)\\LiveVideo_Windows_Src_V1.0.0\\Demo_src\\nls_demo\\bin\\win_video.exe", (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+#else
+	CreateProcess(szTempPath, (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
 #endif
 }
 
@@ -581,15 +590,12 @@ void UIVideo::StopCaptureVideo()
 
 void UIVideo::setLessonName(QString strLessonName)
 {
-	//[当前直播课程]
-	ui.lessonName_label->setText(strLessonName);
+
 }
 
 void UIVideo::setPersonNum(int num)
 {
-	ui.person_label->setIcon(QIcon("./images/eyes.png"));
-	ui.person_label->setIconSize(QSize(16, 16));
-	ui.person_label->setText(QString::number(num));
+
 }
 
 void UIVideo::SetMainWnd(UIMainWindow* wnd)
