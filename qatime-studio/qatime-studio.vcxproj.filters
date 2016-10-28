@@ -307,12 +307,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_UIMenuTool.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UITimers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UITimers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="UITimers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -333,6 +327,12 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_UISidescreen.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UITimers.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UITimers.cpp">
+      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

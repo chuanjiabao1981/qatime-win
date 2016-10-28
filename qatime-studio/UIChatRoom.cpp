@@ -1076,6 +1076,10 @@ bool UIChatRoom::AddStudent(QString iconUrl, QString name, QString accid)
 void UIChatRoom::AddStudentNumbers(int num)
 {
 	ui.student_list->setStrdentNumbers(num);
+	if (num==0)
+	{
+		ui.student_list->clear();
+	}
 }
 
 // 添加公告
