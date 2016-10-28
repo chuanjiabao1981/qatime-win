@@ -691,6 +691,7 @@ void UIMainWindow::clickChangeAudio(int)
 			return;
 		}
 
+		m_AudioChangeInfo->move(QPoint(15, size().height() - 110 - m_AudioChangeInfo->height()));
 		m_AudioChangeInfo->show();
 	}
 }
@@ -709,6 +710,7 @@ void UIMainWindow::clickChangeVideo(int)
 			return;
 		}
 
+		m_VideoChangeInfo->move(QPoint(15, size().height() - 110 - m_VideoChangeInfo->height()));
 		m_VideoChangeInfo->show();
 	}
 }
@@ -724,8 +726,6 @@ void UIMainWindow::clickChangeRatio()
 			return;
 		}
 
-		int x = ui.ratio_pushBtn->geometry().x();
- 		int y = ui.ratio_pushBtn->geometry().y();
 		m_RatioChangeInfo->move(QPoint(15, size().height()-170));
 		m_RatioChangeInfo->show();
 	}
