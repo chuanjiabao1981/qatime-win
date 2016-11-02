@@ -31,6 +31,7 @@ public:
 	void moveLiveBtn();
 	void InitMoveLiveBtn();
 	void setFullEnabled();
+	void setLiveBtnImg();
 signals:
 	void emit_startOrStopLiveStream();					// 开始直播
 	void emit_VideoStatus(int iStatus);					// 视频状态（直播中暂停、继续的控制）

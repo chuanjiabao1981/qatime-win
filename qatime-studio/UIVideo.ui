@@ -46,7 +46,7 @@
         <enum>Qt::LeftToRight</enum>
        </property>
        <property name="styleSheet">
-        <string notr="true">border-image: url(:/LoginWindow/images/video.png);</string>
+        <string notr="true">border-image: url(:/LoginWindow/images/video_back1.png);</string>
        </property>
        <property name="text">
         <string/>

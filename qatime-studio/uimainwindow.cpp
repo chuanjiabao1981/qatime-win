@@ -1687,3 +1687,7 @@ void UIMainWindow::timerEvent(QTimerEvent *event)
 	}
 }
 
+void UIMainWindow::setPausedBtn()
+{
+	m_MenuTool->setLiveBtnImg();
+}

@@ -298,8 +298,30 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 		imageItem1->setTextColor(0, qColor);
 		imageItem1->setTextColor(1, qColor);
 		imageItem1->setTextColor(2, qColor);
- //		QIcon qIconOld("./images/empty1.png");
 		imageItem1->setIcon(0, qIcon);
+
+		// 异常退出状态
+		if (pLesson->LessonStatus() == "paused")
+		{
+			m_pTreeCurrentItem = imageItem1;
+
+			m_lessonID = pLesson->LessonID();
+			m_url = url;
+			m_auxiliaryID = courseID;
+			m_lessonName = pLesson->name();
+			m_CameraUrl = cameraUrl;
+
+			//设置父节点颜色
+			m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#FF0000"));
+			m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#FF0000"));
+			m_pTreeCurrentItem->parent()->setExpanded(true);
+
+			//进入聊天室
+			m_chatID = chatID;
+			m_Parent->setCurChatRoom(m_chatID, m_auxiliaryID);
+			m_Parent->setVideoLesson(m_lessonName);
+			m_Parent->setPausedBtn();
+		}
 		delete pLesson;
 	}
 }
@@ -308,6 +330,7 @@ void UIAuxiliaryPanel::GetItemColor(QString strStatus, QBrush& brush, QIcon& qIc
 {
 	QString icon = "./images/empty1.png";
 	QString icon1 = "./images/empty2.png";
+	QString icon2 = "./images/teaching.png";
 	if (strStatus == "init")
 	{
 		brush = QColor::fromRgb(255, 255, 255);
@@ -326,7 +349,7 @@ void UIAuxiliaryPanel::GetItemColor(QString strStatus, QBrush& brush, QIcon& qIc
 	else if (strStatus == "paused")
 	{
 		brush = QColor::fromRgb(255, 243, 200);
-		qIcon = QIcon(icon1);
+		qIcon = QIcon(icon2);
 	}
 	else if (strStatus == "closed")
 	{
@@ -455,6 +478,15 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 			QString());
 		return;
 	}
+	if (m_pTreeCurrentItem!=NULL && (QString)m_pTreeCurrentItem->data(0, QT_TOOLBOXLITEMSTATUS).toString() == "paused")
+	{
+		CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString("请先完成当前直播！"),
+			QString("确定"),
+			QString());
+		return;
+	}
 	// 直播中不准切换课程
 	if (m_bPreview)
 	{
@@ -542,10 +574,6 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	m_chatID = (QString)terrWidget->data(0, QT_TOOLBOXCHATID).toString();
 	m_Parent->setCurChatRoom(m_chatID, m_auxiliaryID);
 	m_Parent->setVideoLesson(m_lessonName);
-//	m_Parent->showChatRoomWnd();
-
-//	emit emitShowTip();
-//	setFocus();
 }
 
 void UIAuxiliaryPanel::on_itemExpanded(QTreeWidgetItem* terrWidget)

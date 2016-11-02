@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="LoginWindow">
+    <file>images/video_back1.png</file>
     <file>images/starimage.png</file>
     <file>images/camera_1.png</file>
     <file>images/camera_close.png</file>

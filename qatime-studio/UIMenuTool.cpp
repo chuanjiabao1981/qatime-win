@@ -196,3 +196,8 @@ void UIMenuTool::InitMoveLiveBtn()
 {
 	m_timers->move(this->size().width()/2 - 60 +20, 16);
 }
+
+void UIMenuTool::setLiveBtnImg()
+{
+	m_timers->setImage();
+}

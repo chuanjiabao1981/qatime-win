@@ -377,7 +377,7 @@
      <item>
       <widget class="QWidget" name="video_widget" native="true">
        <property name="styleSheet">
-        <string notr="true">border-image: url(:/LoginWindow/images/video.png);</string>
+        <string notr="true">border-image: url(:/LoginWindow/images/video_back.png);</string>
        </property>
       </widget>
      </item>

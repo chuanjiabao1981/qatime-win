@@ -18,6 +18,7 @@ public:
 	void setTimeLabelVisible(bool b);
 	void setTimeLabelText(QString text);
 	void setParent(UIMenuTool* p);
+	void setImage();
 public slots:	
 	void slot_startOrStopLiveStream();
 signals:

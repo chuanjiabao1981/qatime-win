@@ -173,6 +173,7 @@ public:
 	void RequestStatus();
 	void SendChangeStatusMsg(QString id);
 	void returnChangeStatus();	
+	void setPausedBtn();									// 改变直播按钮图片
 };
 
 #endif // UIMAINWINDOW_H

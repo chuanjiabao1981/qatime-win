@@ -39,3 +39,8 @@ void UITimers::setParent(UIMenuTool* p)
 {
 	m_Parent = p;
 }
+
+void UITimers::setImage()
+{
+	ui.Live_pushBtn->setStyleSheet("QPushButton{border-image: url(./images/Continue.png); }");
+}
