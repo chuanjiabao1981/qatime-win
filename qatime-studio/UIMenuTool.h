@@ -32,6 +32,7 @@ public:
 	void InitMoveLiveBtn();
 	void setFullEnabled();
 	void setLiveBtnImg();
+	void SetWhiteBtnStatus(bool bShow);
 signals:
 	void emit_startOrStopLiveStream();					// 开始直播
 	void emit_VideoStatus(int iStatus);					// 视频状态（直播中暂停、继续的控制）
@@ -43,6 +44,7 @@ signals:
 	void emit_clickChangeRatio();						// 弹出分辨率框
 	void emit_clickLessonList();						// 弹出课程表
 	void emit_FulSereen(int b);							// 隐藏右侧聊天区
+	void emit_WhiteBoard();							// 白板
 public slots:
 	void slot_startOrStopLiveStream();					// 开始直播
 	void VideoStatus(int iStatus);						// 视频状态（直播中暂停、继续的控制）
@@ -53,7 +55,8 @@ public slots:
 	void clickChangeVideo(int i);						// 弹出摄像头选择框
 	void clickChangeRatio();							// 弹出分辨率框
 	void clickLessonList();								// 弹出课程表
-	void slot_fulSereen(int b);								// 隐藏聊天窗口
+	void slot_fulSereen(int b);							// 隐藏聊天窗口
+	void WhiteBoardStatus();							// 白板
 private:
 	Ui::UIMenuTool ui;
 	UITimers *						m_timers;			//  开始直播的时间和按钮

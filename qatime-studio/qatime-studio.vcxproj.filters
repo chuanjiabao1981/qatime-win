@@ -41,6 +41,9 @@
     <Filter Include="YxChat">
       <UniqueIdentifier>{623320f6-5445-4cb7-b218-ded375d9fc7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="WhiteBoard">
+      <UniqueIdentifier>{3d7c82af-569a-438f-a9fd-689fa75269ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -334,6 +337,24 @@
     <ClCompile Include="GeneratedFiles\Release\moc_UITimers.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_boardwindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_boardwindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_scribblearea.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_scribblearea.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="WhiteBoard\boardwindow.cpp">
+      <Filter>WhiteBoard</Filter>
+    </ClCompile>
+    <ClCompile Include="WhiteBoard\scribblearea.cpp">
+      <Filter>WhiteBoard</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="loginwindow.h">
@@ -456,6 +477,15 @@
     <CustomBuild Include="UISidescreen.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="WhiteBoard\boardwindow.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="WhiteBoard\scribblearea.h">
+      <Filter>WhiteBoard</Filter>
+    </CustomBuild>
+    <CustomBuild Include="WhiteBoard\boardwindow.h">
+      <Filter>WhiteBoard</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_loginwindow.h">
@@ -490,9 +520,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIRatio.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UIChatRoom.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="YxChat\net_export.h">
       <Filter>YxChat</Filter>
@@ -554,13 +581,19 @@
     <ClInclude Include="GeneratedFiles\ui_UIMenuTool.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UITimers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UICamera.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UISidescreen.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_boardwindow.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UIChatRoom.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UITimers.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

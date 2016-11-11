@@ -42,6 +42,8 @@ UIMenuTool::UIMenuTool(QWidget *parent)
 		"QCheckBox::indicator:checked{image: url(./images/fullQuit.png);}"
 		"QCheckBox::indicator:unchecked:pressed{image: url(./images/fullScreen.png);}"
 		"QCheckBox::indicator:checked:pressed{image: url(./images/fullQuit.png);}");
+	ui.Whiteboard_pushButton->setStyleSheet("QPushButton{border-image:url(./images/Whiteboard.png);}");
+	
 	connect(ui.fulsereen_checkBox, SIGNAL(stateChanged(int)), this, SLOT(slot_fulSereen(int)));
 //	connect(ui.Live_pushBtn, SIGNAL(clicked()), this, SLOT(slot_startOrStopLiveStream()));
 	connect(ui.Audio_checkBox, SIGNAL(stateChanged(int)), this, SLOT(AudioStatus(int)));
@@ -52,6 +54,7 @@ UIMenuTool::UIMenuTool(QWidget *parent)
 	connect(ui.videoCorner_pushBtn, SIGNAL(stateChanged(int)), this, SLOT(clickChangeVideo(int)));
 	connect(ui.ratio_pushBtn, SIGNAL(clicked()), this, SLOT(clickChangeRatio()));
 	connect(ui.lesson_pushButton, SIGNAL(clicked()), this, SLOT(clickLessonList()));
+	connect(ui.Whiteboard_pushButton, SIGNAL(clicked()), this, SLOT(WhiteBoardStatus()));
 //	ui.time_label->hide();
 
 	m_timers = new UITimers(this);
@@ -200,4 +203,17 @@ void UIMenuTool::InitMoveLiveBtn()
 void UIMenuTool::setLiveBtnImg()
 {
 	m_timers->setImage();
+}
+
+void UIMenuTool::WhiteBoardStatus()
+{
+	emit emit_WhiteBoard();
+}
+
+void UIMenuTool::SetWhiteBtnStatus(bool bShow)
+{
+	if (bShow)
+		ui.Whiteboard_pushButton->setStyleSheet("QPushButton{border-image:url(./images/Whiteboard.png);}");
+	else
+		ui.Whiteboard_pushButton->setStyleSheet("QPushButton{border-image:url(./images/Whiteboard_1.png);}");
 }

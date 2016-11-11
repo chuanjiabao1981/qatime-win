@@ -101,8 +101,13 @@ private:
 	int                             m_ShowChatRoomTimerId;	// 显示会话窗口定时器
 	QRect							m_videoRect;
 	QRect							m_cameraRect;
-	QWidget*						m_VideoOrCamera;		//初始对象白板
-	QWidget*						m_CameraOrVideo;		//初始对象摄像头
+	QWidget*						m_VideoOrCamera;		// 初始对象白板
+	QWidget*						m_CameraOrVideo;		// 初始对象摄像头
+
+	// 鼠标按下拖动的操作
+	QPoint							m_startPos;
+	QPoint							m_clickPos;
+	QPoint							m_WndCurPos;
 private slots :
 	void MinDialog();									// 最小化对话框
 	void MaxDialog();									// 最大化对话框
@@ -125,6 +130,7 @@ private slots :
 	void setCameraPos();								// 设置视频头位置
 	void HideSideScreen();								// 隐藏摄像头屏幕
 	void SwichScreen();									// 切换屏幕
+	void WhiteBoard();								// 切换白板
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result); // 添加caption
 	virtual void resizeEvent(QResizeEvent *);			// 设置窗口圆角
@@ -132,6 +138,7 @@ protected:
 	virtual void closeEvent(QCloseEvent *e);
 	virtual void focusInEvent(QFocusEvent *e);
 	virtual void timerEvent(QTimerEvent *event);
+	virtual bool eventFilter(QObject *target, QEvent *event);
 
 public:
 	void setTeacherInfo(QJsonObject& data);					// 设置老师信息

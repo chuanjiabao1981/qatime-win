@@ -23,6 +23,7 @@
 #include <QDesktopWidget>
 #include <QTextCodec>
 #include <QDesktopWidget>
+#include <QMouseEvent>
 
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6
@@ -55,7 +56,6 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
-	//	setFixedSize(QSize(985, 770));
 	setMinimumSize(QSize(985, 720));
 	RECT rc;
 	SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&rc, 0);
@@ -205,18 +205,19 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	QPixmap pixmap(QCoreApplication::applicationDirPath() + "/images/btn_07.png");
 	QPixmap pixmap1(QCoreApplication::applicationDirPath() + "/images/btn_off.png");
-	QPixmap pixmap2(QCoreApplication::applicationDirPath() + "/images/btn_08.png");
-	ui.mainmin_pushBtn->setPixmap(pixmap, 4);
-	ui.mainclose_pushBtn->setPixmap(pixmap1, 4);
-	ui.MinMax_pushBtn->setPixmap(pixmap2,4);
+//	QPixmap pixmap2(QCoreApplication::applicationDirPath() + "/images/btn_08.png");
+	QPixmap pixmap2(QCoreApplication::applicationDirPath() + "/images/max.png");
+	ui.mainmin_pushBtn->setPixmap(pixmap, 1);
+	ui.mainclose_pushBtn->setPixmap(pixmap1, 1);
+	ui.MinMax_pushBtn->setPixmap(pixmap2,1);
 	m_charRoom = new UIChatRoom(this);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
 	chat_X = this->size().width()-m_charRoom->size().width()-10;
-	chat_Y = 45+190;//45
+	chat_Y = 45+195;//45
 	chat_Width = m_charRoom->size().width();
 	chat_Heigth = m_charRoom->size().height();
 	m_charRoom->move(chat_X, chat_Y);
-	m_charRoom->resize(chat_Width, this->size().height() - 90 + 30 - 190);
+	m_charRoom->resize(chat_Width, this->size().height() - 90 + 30 - 195);
 	m_charRoom->show();
 
 	m_CameraInfo->move(chat_X + 20, 50 + 20);
@@ -240,12 +241,14 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(m_MenuTool, SIGNAL(emit_clickChangeRatio()), this, SLOT(clickChangeRatio()));
 	connect(m_MenuTool, SIGNAL(emit_clickLessonList()), this, SLOT(clickLessonList()));
 	connect(m_MenuTool, SIGNAL(emit_FulSereen(int)), this, SLOT(fullSereen(int)));
+	connect(m_MenuTool, SIGNAL(emit_WhiteBoard()), this, SLOT(WhiteBoard()));
 	m_MenuTool->InitMoveLiveBtn();
 	m_MenuTool->setVideoCheckState(Qt::CheckState::Checked);
-	m_MenuTool->setFullScreenCheck(Qt::CheckState::Checked);
+	m_MenuTool->setFullScreenCheck(Qt::CheckState::Unchecked);
 	ui.domain_label->setVisible(true);
 
 //	m_ShowChatRoomTimerId = startTimer(300);
+	ui.titel_pushButton->installEventFilter(this);
 }
 
 UIMainWindow::~UIMainWindow()
@@ -359,6 +362,32 @@ void UIMainWindow::fullSereen(int b)
 	resizeEvent(NULL);
 //	m_tempTimers->start(100);
 }
+
+void UIMainWindow::WhiteBoard()
+{
+	if (!m_MenuTool->getFullScreenIsChecked() && !m_bOtherApp)
+	{
+		QToolTip::showText(QCursor::pos(), "至少开启一个主直播！");
+		return;
+	}
+
+	if (m_MenuTool->getFullScreenIsChecked())
+	{
+		m_bOtherApp = false;
+		m_MenuTool->setFullScreenCheck(Qt::CheckState::Unchecked);
+	}
+
+	if (m_bOtherApp)
+	{
+		m_bOtherApp = false;
+		ShowWindow(m_VideoWnd, SW_HIDE);
+		m_VideoInfo->SetWhiteBoard();
+	}
+
+	m_VideoInfo->SetWhiteBoardHidden(true);
+	m_MenuTool->SetWhiteBtnStatus(true);
+}
+
 void UIMainWindow::MinDialog()
 {
 	showMinimized();
@@ -368,11 +397,15 @@ void UIMainWindow::MaxDialog()
 {
 	if (this->isMaximized())
 	{
+		QPixmap pixmap2(QCoreApplication::applicationDirPath() + "/images/max.png");
+		ui.MinMax_pushBtn->setPixmap(pixmap2,1);
 		showNormal();
 		resizeEvent(NULL);
 	}
 	else
 	{
+		QPixmap pixmap2(QCoreApplication::applicationDirPath() + "/images/restore.png");
+		ui.MinMax_pushBtn->setPixmap(pixmap2,1);
 		showMaximized();
 		resizeEvent(NULL);
 	}
@@ -523,8 +556,8 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 			}
 			else
 			{
-				m_charRoom->move(chat_X, 50 + 190);
-				m_charRoom->resize(chat_Width, this->size().height() - 90 + 30 - 190);
+				m_charRoom->move(chat_X, 50 + 195);
+				m_charRoom->resize(chat_Width, this->size().height() - 90 + 30 - 195);
 			}
 		}
 		
@@ -600,6 +633,9 @@ void UIMainWindow::slot_startOrStopLiveStream()
 			}
 
  			m_VideoInfo->StartLiveVideo();
+
+			if (!m_MenuTool->getFullScreenIsChecked() && !m_bOtherApp)
+				m_VideoInfo->SetWhiteBoard();
 			SendVideoMsg((UINT)MSG_VIDEO_START_LIVE);
 			SendCameraMsg((UINT)MSG_VIDEO_START_LIVE);
 			m_MenuTool->setLivePushBtnText(false);
@@ -647,6 +683,8 @@ void UIMainWindow::FullScreenStatus(int iStatus)
 		//改变副屏幕上的状态
 		if (m_CameraOrVideo == m_VideoInfo)
 			m_SideScreenTool->ChangeTip("主直播开启中");
+
+		m_MenuTool->SetWhiteBtnStatus(false);
 	}
 	else
 	{
@@ -655,8 +693,13 @@ void UIMainWindow::FullScreenStatus(int iStatus)
 
 		ShowWindow(m_VideoWnd, SW_HIDE);
 
-		if (m_CameraOrVideo == m_VideoInfo)
-			m_SideScreenTool->ChangeTip("主直播关闭中");
+		if (!m_VideoInfo->IsWhiteBoardVisible())
+		{
+			m_VideoInfo->SetWhiteBoardHidden(true);
+		}
+
+		m_MenuTool->SetWhiteBtnStatus(true);
+		m_VideoInfo->SetWhiteBoard();
 	}
 }
 
@@ -863,8 +906,9 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 			m_bOtherApp = true;
 			ShowWindow(m_VideoWnd, SW_SHOW);
 
-			// 当选中其他应用时，全屏不可用
+			// 当选中其他应用时，全屏、白板都不可用
 			m_MenuTool->setFullScreenCheck(Qt::CheckState::Unchecked);
+			m_MenuTool->SetWhiteBtnStatus(Qt::Unchecked);
 			return true;
 		}
 		break;
@@ -1399,7 +1443,7 @@ void UIMainWindow::showChatRoomWnd()
 //		ui.label->show();
 		resize(this->size().width() + chat_Width, this->height());
 		m_VideoOrCamera->resize(video_Width-=chat_Width, video_Heigth);
-		m_charRoom->move(chat_X, 50+190);
+		m_charRoom->move(chat_X, 50+195);
 		m_charRoom->show();		
 		m_MenuTool->resize(video_Width - 50, 80);
 		m_MenuTool->move(20, this->size().height() - 100);
@@ -1480,6 +1524,8 @@ void UIMainWindow::setVideoPos()
 		if (m_ShowVideoTimer->isActive())
 			m_ShowVideoTimer->stop();
 		MoveWindow(m_VideoWnd, 0, 0, 960, 540, true);
+		ShowWindow(m_VideoWnd, SW_HIDE);
+//		m_MenuTool->moveLiveBtn();
 	}
 }
 
@@ -1500,7 +1546,7 @@ void UIMainWindow::SendVideoMsg(UINT iMsg)
 		if (iMsg == MSG_VIDEO_START_LIVE)
 		{
 			QString url = m_AuxiliaryPanel->getURL();
-
+//			url = "rtmp://pa0a19f55.live.126.net/live/d215bb5fb7f54ee8b493a35fbf4fd091?wsSecret=0ac0d9d7451bd8742656dce1b2555384&wsTime=1478781630";
 			COPYDATASTRUCT sendData;
 			char result[MAX_PATH];
 			QByteArray chPath = url.toLatin1();
@@ -1528,7 +1574,7 @@ void UIMainWindow::SendCameraMsg(UINT iMsg)
 		if (iMsg == MSG_VIDEO_START_LIVE)
 		{
 			QString url = m_AuxiliaryPanel->getCameraURL();
-
+//			url = "rtmp://pa0a19f55.live.126.net/live/4573d53687b74e4bba3f8cc404af6a84?wsSecret=1987bc5f71bd199004a529e4c2a220c7&wsTime=1478249276";
 			COPYDATASTRUCT sendData;
 			char result[MAX_PATH];
 			QByteArray chPath = url.toLatin1();
@@ -1624,8 +1670,8 @@ void UIMainWindow::HideSideScreen()
 	{
 		m_CameraOrVideo->setHidden(false);
 
-		m_charRoom->move(chat_X, 50 + 190);
-		m_charRoom->resize(m_charRoom->width(), this->size().height() - 90 + 30 - 190);
+		m_charRoom->move(chat_X, 50 + 195);
+		m_charRoom->resize(m_charRoom->width(), this->size().height() - 90 + 30 - 195);
 	}
 	else
 	{
@@ -1663,8 +1709,8 @@ void UIMainWindow::SwichScreen()
 	{
 		if (IsWindowVisible(m_VideoWnd))
 			m_SideScreenTool->ChangeTip("主直播开启中");
-		else
-			m_SideScreenTool->ChangeTip("主直播关闭中");
+//		else
+//			m_SideScreenTool->ChangeTip("主直播关闭中");
 	}
 	else
 	{
@@ -1690,4 +1736,26 @@ void UIMainWindow::timerEvent(QTimerEvent *event)
 void UIMainWindow::setPausedBtn()
 {
 	m_MenuTool->setLiveBtnImg();
+}
+
+// 拖动标题做的处理
+bool UIMainWindow::eventFilter(QObject *target, QEvent *event)
+{
+	if (target == ui.titel_pushButton)
+	{
+		static int i = 0;
+		QMouseEvent* pMe = static_cast<QMouseEvent*>(event);
+		if (event->type() == QEvent::MouseButtonPress)
+		{
+			m_startPos = pMe->globalPos();
+			m_WndCurPos = this->pos();
+		}
+		else if (event->type() == QEvent::MouseMove)
+		{
+			m_clickPos = pMe->globalPos();
+			this->move(m_WndCurPos + (m_clickPos - m_startPos));
+		}
+		return false;
+	}
+	return false;
 }

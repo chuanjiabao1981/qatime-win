@@ -31,6 +31,7 @@ UIVideo::UIVideo(QWidget *parent)
 	, m_CurrentVideoIndex(0)
 	, m_bStopLiveFinish(true)
 	, m_Parent(NULL)
+	, m_BoadWnd(NULL)
 {
 	ui.setupUi(this);
 
@@ -60,6 +61,11 @@ UIVideo::UIVideo(QWidget *parent)
 	EnumAvailableMediaDevices();
 
 	SetMediaCapture(m_hNlssService);
+
+	// 创建白板
+	m_BoadWnd = new BoardWindow(this);
+	m_BoadWnd->setWindowFlags(Qt::FramelessWindowHint);
+	m_BoadWnd->show();
 
 	// 启动直播视频
 	TCHAR szTempPath[MAX_PATH] = { 0 };
@@ -114,6 +120,12 @@ UIVideo::~UIVideo()
 
 	if (m_Parent)
 		m_Parent = NULL;
+
+	if (m_BoadWnd)
+	{
+		delete m_BoadWnd;
+		m_BoadWnd = NULL;
+	}
 }
 
 void UIVideo::setPlugFlowUrl(QString url)
@@ -628,4 +640,25 @@ void UIVideo::SetChangeVideoAudio(HWND hwnd, QString path, bool bVideo)
 		int iType = bVideo ? 0:1;
 		::SendMessage(hwnd, WM_COPYDATA, iType, (LPARAM)&sendData);
 	}
+}
+
+void UIVideo::SetWhiteBoard()
+{
+	::PostMessage(m_VideoWnd, MSG_WHITEBOARD, (WPARAM)(HWND)this->winId(), 0);
+}
+
+void UIVideo::resizeEvent(QResizeEvent *e)
+{
+	if (m_BoadWnd)
+		m_BoadWnd->resize(e->size().width(),e->size().height());
+}
+
+void UIVideo::SetWhiteBoardHidden(bool bHide)
+{
+	m_BoadWnd->setVisible(bHide);
+}
+
+bool UIVideo::IsWhiteBoardVisible()
+{
+	return m_BoadWnd->isVisible();
 }

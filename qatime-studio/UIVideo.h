@@ -10,6 +10,7 @@
 #include "UIWorkThread.h"
 #include "UIMainwindow.h"
 #include <stdint.h>
+#include "WhiteBoard/boardwindow.h"
 
 #define STARTLS_ASYNC
 #pragma execution_character_set("utf-8")
@@ -98,6 +99,7 @@ private:
 	int								m_iAppChangeIndex;	// 应用路径
 	HWND							m_VideoWnd;			// 视频窗口句柄
 	QTimer*							m_StartLiveTimer;	// 延迟1秒推流
+	BoardWindow*					m_BoadWnd;			// 白板
 
 public:
 	EN_NLSS_VIDEOIN_TYPE			m_videoSourceType;  // 视频源类型
@@ -121,6 +123,7 @@ public:
 
 protected:
 	virtual void paintEvent(QPaintEvent *);
+	virtual void resizeEvent(QResizeEvent *e);
 
 Q_SIGNALS:
 	void sig_changeLiveStatus(bool bTrue);
@@ -162,6 +165,9 @@ public:
 	void SetMainWnd(UIMainWindow* wnd);
 	void SetVideoWnd(HWND hWnd);
 	void SetChangeVideoAudio(HWND hwnd, QString path, bool bVideo=true);
+	void SetWhiteBoard();
+	void SetWhiteBoardHidden(bool bHide);
+	bool IsWhiteBoardVisible();
 };
 
 #endif // UIVideo_H

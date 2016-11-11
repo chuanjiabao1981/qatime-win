@@ -79,12 +79,12 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QPushButton" name="titel_pushButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>40</height>
+        </size>
        </property>
        <property name="font">
         <font>
@@ -93,13 +93,11 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(255, 255, 255);</string>
+        <string notr="true">border-image: url(:/LoginWindow/images/titleColor.png);
+color: rgb(255, 255, 255);</string>
        </property>
        <property name="text">
-        <string>答疑时间  专用直播器V0.2.8</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <string>答疑时间  专用直播器V0.2.9</string>
        </property>
       </widget>
      </item>
