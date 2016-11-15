@@ -110,15 +110,18 @@ static void CallbackQueryTeamMember(const char *tid, const char *id, const char 
 {
 	if (user_data)
 	{
-		Team::QueryTeamMemberCallback* cb_pointer = (Team::QueryTeamMemberCallback*)user_data;
-		if (*cb_pointer)
-		{
-			nim::TeamMemberProperty prop;
-			ParseTeamMemberPropertyJson(PCharToString(result), prop);
-			//PostTaskToUIThread(std::bind((*cb_pointer), prop));
-			//(*cb_pointer)(prop);
-		}
-		delete cb_pointer;
+		
+		nim::TeamMemberProperty prop;
+		ParseTeamMemberPropertyJson(PCharToString(result), prop);
+
+		nim::TeamMemberProperty *pTeamMember = new nim::TeamMemberProperty;
+		pTeamMember->SetNick(prop.GetNick());
+		pTeamMember->SetAccountID(prop.GetAccountID());
+		
+		HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+		PostMessage(hWnd, MSG_MEMBER_INFO, (WPARAM)pTeamMember, 0);
+
+		delete user_data;
 	}
 }
 
@@ -557,17 +560,15 @@ bool Team::QueryTeamMembersAsync(const std::string& tid, /*const QueryTeamMember
 
 bool Team::QueryTeamMemberAsync(const std::string& tid
 	, const std::string& id
-	, const QueryTeamMemberCallback& cb
+	/*, const QueryTeamMemberCallback& cb*/
 	, const std::string& json_extension/* = ""*/)
 {
 	if (tid.empty() || id.empty())
 		return false;
 
 	QueryTeamMemberCallback* cb_pointer = nullptr;
-	if (cb)
-	{
-		cb_pointer = new QueryTeamMemberCallback(cb);
-	}
+	cb_pointer = new QueryTeamMemberCallback();
+	
 	NIM_SDK_GET_FUNC(nim_team_query_team_member_async)(tid.c_str()
 		, id.c_str()
 		, json_extension.c_str()

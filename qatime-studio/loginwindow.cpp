@@ -150,6 +150,7 @@ void LoginWindow::loginFinished()
 		mainWin->ShowAuxiliary();
 		mainWin->setLoginWindow(this);		
 		mainWin->show();
+		SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 		this->hide();
 	}
 	else if (error["code"].toInt() == 1001)
@@ -306,6 +307,7 @@ void LoginWindow::AutoLogin()
 	mainWin->ShowAuxiliary();
 	mainWin->setLoginWindow(this);
 	mainWin->show();
+//	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
 }
 
 bool LoginWindow::IsAutoLogin()

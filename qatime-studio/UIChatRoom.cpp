@@ -5,6 +5,8 @@
 #include "UIMessageBox.h"
 #include <QScrollBar>
 #include <QClipboard>
+#include <QJsonArray>
+#include "member.h"
 
 #include "YxChat/nim_sdk_helper.h"
 #include "YxChat/session_callback.h"
@@ -661,25 +663,21 @@ void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 						int i = 0;
 						for (; i < n && i < 3; i++)
 						{
-							if (!strName.isEmpty())
-								strName += "，";
-
-							if (m_StudentInfo.size() == 0)
-								return;
-
-							strName += *m_StudentInfo.find(QString::fromStdString(ids[i]));
+							m_AddMemberID = ids[i];
+							QueryMember();
+							return;
 						}
 					}
 
-					strName += " 加入了群聊";
-					QTextCursor textCursor = ui.text_talk->textCursor();
-					QTextFrameFormat frameFormat2;
-					frameFormat2.setLeftMargin(80);		//设置左边距
-					frameFormat2.setRightMargin(80);	//设置右边距
-					frameFormat2.setBottomMargin(20);	//设置下边距
-					textCursor.insertFrame(frameFormat2);		//在光标处插入框架
-
-					textCursor.insertText(strName);
+// 					strName += " 加入了群聊";
+// 					QTextCursor textCursor = ui.text_talk->textCursor();
+// 					QTextFrameFormat frameFormat2;
+// 					frameFormat2.setLeftMargin(80);		//设置左边距
+// 					frameFormat2.setRightMargin(80);	//设置右边距
+// 					frameFormat2.setBottomMargin(20);	//设置下边距
+// 					textCursor.insertFrame(frameFormat2);		//在光标处插入框架
+// 
+// 					textCursor.insertText(strName);
 				}
 			}
 		}
@@ -1193,4 +1191,65 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 void UIChatRoom ::colseBrow()
 {
 	m_smallEmotionWidget->setHidden(true);
+}
+
+void UIChatRoom::QueryMember()
+{
+	QString strUrl;
+#ifdef _DEBUG
+	strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+	strUrl.replace("{id}", m_CurCourseID);
+#else
+	strUrl = "http://qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+	strUrl.replace("{id}", m_CurCourseID);
+#endif
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+
+	request.setRawHeader("Remember-Token", mRemeberToken.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIChatRoom::returnMember);
+}
+
+void UIChatRoom::returnMember()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	if (obj["status"].toInt() == 1 && data.contains("members"))
+	{
+		// 群成员信息
+		QJsonArray members = data["members"].toArray();
+		int i = 0;
+		foreach(const QJsonValue & value, members)
+		{
+			QJsonObject obj = value.toObject();
+			YXMember *pMember = new YXMember();
+			pMember->readJsonToMember(value.toObject());
+
+			if (!m_StudentInfo.contains(pMember->accid()) && pMember->accid() != m_accid)
+			{
+				ui.student_list->addStrdent(pMember->url(), pMember->name(), pMember->accid());
+				m_StudentInfo.insert(pMember->accid(), pMember->name());
+
+				QString sName;
+				sName += pMember->name();
+				sName += " 加入了群聊";
+				QTextCursor textCursor = ui.text_talk->textCursor();
+				QTextFrameFormat frameFormat2;
+				frameFormat2.setLeftMargin(80);		//设置左边距
+				frameFormat2.setRightMargin(80);	//设置右边距
+				frameFormat2.setBottomMargin(20);	//设置下边距
+				textCursor.insertFrame(frameFormat2);		//在光标处插入框架
+
+				textCursor.insertText(sName);
+			}
+
+			//用完之后删除
+			delete pMember;
+		}
+	}
 }

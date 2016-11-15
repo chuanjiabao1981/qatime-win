@@ -63,6 +63,7 @@ int CMessageBox::showMessage(
 	bool bTip)
 {
 	CMessageBox m(title, text, btn0, btn1, parent,bTip);
+	SetWindowPos((HWND)m.winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 	return m.exec();
 }
 
@@ -85,7 +86,6 @@ CMessageBox::CMessageBox(const QString& title,const QString & text,
 	setFocusPolicy(Qt::StrongFocus);
 	setMouseTracking(true);
 	setModal(true);
-	m_lBtns.clear();
 	
 	if (!btn0.isEmpty())
 	{

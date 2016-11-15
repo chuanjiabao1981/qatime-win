@@ -349,7 +349,7 @@ public:
 	*/
 	static bool QueryTeamMemberAsync(const std::string& tid
 		, const std::string& id
-		, const QueryTeamMemberCallback& cb
+		/*, const QueryTeamMemberCallback& cb*/
 		, const std::string& json_extension = "");
 
 	/** @fn static bool QueryTeamMemberBlock(const std::string& tid, const std::string& id)

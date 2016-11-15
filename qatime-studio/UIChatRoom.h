@@ -62,6 +62,7 @@ private:
 	QMap<QString, QString>			m_StudentInfo;		// key ：accid 
 	QString							mRemeberToken;
 
+	std::string						m_AddMemberID;		// 新加入的成员ID
 	void initEmotion();
 protected:
 	virtual bool eventFilter(QObject *watched, QEvent *event);
@@ -149,7 +150,8 @@ public slots:
 	void stepMsgDays(QDateTime dateTime);								//聊天记录跨天
 	void clearAll();													//清除聊天记录、公告、群成员
 	void OnSendAnnouncements(QString Announcements);					//发送群公告
-
+	void QueryMember();
+	void returnMember();
 private:
 	QToolButton* pPreMonthButton1;
 	QToolButton* pPreMonthButton;

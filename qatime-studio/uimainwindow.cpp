@@ -247,8 +247,13 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_MenuTool->setFullScreenCheck(Qt::CheckState::Unchecked);
 	ui.domain_label->setVisible(true);
 
-//	m_ShowChatRoomTimerId = startTimer(300);
 	ui.titel_pushButton->installEventFilter(this);
+	ui.label_4->installEventFilter(this);
+
+// 	m_splitLine = new QLabel(this);
+// 	m_splitLine->setStyleSheet("QLabel{background-color:rgb(180, 180, 180);}");
+// 	m_splitLine->move(985,40);
+// 	m_splitLine->resize(2, 675);
 }
 
 UIMainWindow::~UIMainWindow()
@@ -1741,7 +1746,7 @@ void UIMainWindow::setPausedBtn()
 // 拖动标题做的处理
 bool UIMainWindow::eventFilter(QObject *target, QEvent *event)
 {
-	if (target == ui.titel_pushButton)
+	if (target == ui.titel_pushButton || target == ui.label_4)
 	{
 		static int i = 0;
 		QMouseEvent* pMe = static_cast<QMouseEvent*>(event);

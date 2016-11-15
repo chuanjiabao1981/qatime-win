@@ -108,6 +108,8 @@ private:
 	QPoint							m_startPos;
 	QPoint							m_clickPos;
 	QPoint							m_WndCurPos;
+
+	QLabel*							m_splitLine;			// 分割线
 private slots :
 	void MinDialog();									// 最小化对话框
 	void MaxDialog();									// 最大化对话框
