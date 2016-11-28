@@ -253,6 +253,7 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 			imageItem1->setData(0, QT_TOOLBOXCOURSEID, courseID);
 			imageItem1->setData(0, QT_TOOLBOXLESSONNAME, pLesson->name());
 			imageItem1->setData(0, QT_TOOLBOXCAMERAURL, cameraUrl);
+			imageItem1->setData(0, QT_TOOLBOXINDEX, QString().sprintf("%02d  ", nNum));
 			imageItem1->setTextAlignment(i, Qt::AlignHCenter | Qt::AlignVCenter);
 			imageItem1->setBackground(i, brush);
 			imageItem1->setToolTip(0,pLesson->name());
@@ -272,7 +273,7 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 		imageItem1->setTextColor(0, qColor);
 		imageItem1->setTextColor(1, qColor);
 		imageItem1->setTextColor(2, qColor);
-		imageItem1->setIcon(0, qIcon);
+//		imageItem1->setIcon(0, qIcon);
 
 		// 异常退出状态
 		if (pLesson->LessonStatus() == "paused")
@@ -539,8 +540,14 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	// 去掉上一节课的箭头
 	if (m_pTreeCurrentItem)
 	{
-		QIcon qIconOld("./images/empty2.png");
-		m_pTreeCurrentItem->setIcon(0,qIconOld);
+		QIcon qIcon;
+		m_pTreeCurrentItem->setIcon(0, qIcon);
+
+		QString sIndex = (QString)m_pTreeCurrentItem->data(0, QT_TOOLBOXINDEX).toString();
+		QString sCurlessonName = (QString)m_pTreeCurrentItem->data(0, QT_TOOLBOXLESSONNAME).toString();
+		QString sLessonName = sIndex;
+		sLessonName += sCurlessonName;
+		m_pTreeCurrentItem->setText(0, sLessonName);
 		m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#000000"));
 		m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#000000"));
 	}
@@ -548,6 +555,9 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	// 添加当前课的箭头
 	QIcon qIcon("./images/teaching.png");
 	terrWidget->setIcon(0, qIcon);	
+	// 修改显示的课程名称，去掉索引号
+	QString strlessonName = (QString)terrWidget->data(0, QT_TOOLBOXLESSONNAME).toString();
+	terrWidget->setText(0, strlessonName);
 	// 设置当前item
 	m_pTreeCurrentItem = terrWidget;	
 	m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#FF0000"));
