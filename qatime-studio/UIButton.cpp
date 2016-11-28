@@ -70,7 +70,10 @@ void CButton::setImage(QString qsImage, int nState /*= 4*/)
 		if (s.height() ==0 && s.width()==0)
 		{
 			setText(qsImage);
-			setStyleSheet("QPushButton{background:url(./images/AuxiliaryPanelBack.png);}");
+			if (qsImage == "È·¶¨")
+				setStyleSheet("QPushButton{background:url(./images/chatBtnColor.png); color:rgb(255,255,255);}");
+			else
+				setStyleSheet("QPushButton{background:url(./images/AuxiliaryPanelBack.png);}");
 			return;
 		}
 

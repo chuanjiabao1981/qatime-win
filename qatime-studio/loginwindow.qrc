@@ -1,13 +1,32 @@
 <RCC>
   <qresource prefix="LoginWindow">
+    <file>images/fabu.png</file>
+    <file>images/cancel.png</file>
+    <file>images/ok1.png</file>
+    <file>images/eyes.png</file>
+    <file>images/left.png</file>
+    <file>images/msgretrun.png</file>
+    <file>images/find.png</file>
+    <file>images/chatBtn.png</file>
+    <file>images/login_log.png</file>
+    <file>images/right.png</file>
+    <file>images/chatBtnColor.png</file>
+    <file>images/hoverChat.png</file>
+    <file>images/hoverCamera.png</file>
+    <file>images/btn_off.png</file>
+    <file>images/nochat.png</file>
+    <file>images/set.png</file>
+    <file>images/login_close.png</file>
+    <file>images/t_photo.png</file>
+    <file>images/alpha.png</file>
     <file>images/titleColor.png</file>
     <file>images/video_back1.png</file>
-    <file>images/starimage.png</file>
     <file>images/camera_1.png</file>
     <file>images/camera_close.png</file>
     <file>images/switch.png</file>
     <file>images/camera_pack.png</file>
     <file>images/msgRecord.png</file>
+    <file>images/eyes.png</file>
     <file>images/clearScreen.png</file>
     <file>images/face.png</file>
     <file>images/AuxiliaryPanelBack.png</file>
@@ -28,12 +47,8 @@
     <file>images/userpass.png</file>
     <file>images/logo.png</file>
     <file>images/chat.png</file>
-    <file>images/video.png</file>
     <file>images/expansion.png</file>
     <file>images/close.png</file>
-    <file>images/camera.png</file>
-    <file>images/close.png</file>
-    <file>images/camera.png</file>
     <file>images/minsize.png</file>
   </qresource>
 </RCC>

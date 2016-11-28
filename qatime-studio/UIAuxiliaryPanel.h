@@ -60,13 +60,9 @@ signals:
 	void emitShowTip();
 
 private slots:
-	void DrawBack();
 	//TODO zp 
 	void on_treeWidget_clicked(QTreeWidgetItem * item, int column);
 	void on_DoubleClicked(QTreeWidgetItem* terrWidget, int index);
-	void on_itemExpanded(QTreeWidgetItem* terrWidget);
-	void on_itemCollapsed(QTreeWidgetItem* terrWidget);
-	void returnClick();
 	void ShowTip();
 
 private:
@@ -90,8 +86,6 @@ public:
 	void setAuxiliaryInfo(QJsonObject &obj);
 	void setRemeberToken(const QString &token);
 	void setTeacherID(const QString &teacherID);
-	void setTeacherName(const QString &teacherName);
-	void setNetworkPic(const QString &szUrl);								// 显示网络图片
 	QString getLessonID();													// 获取课程ID
 	QString getURL();														// 获取推流url
 	QString getCameraURL();													// 获取摄像头推流url

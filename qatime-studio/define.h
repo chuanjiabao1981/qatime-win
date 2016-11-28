@@ -13,6 +13,7 @@
 #define MSG_LESSON_STATUS_FINISHED		"已结束"
 #define MSG_LESSON_STATUS_BILLING		"已结束"
 #define MSG_LESSON_STATUS_COMPLETED		"已结束"
+#define MSG_LESSON_STATUS_MISSED		"待补课"
 
 
 #define MSG_START_COUNT					5000
@@ -43,6 +44,7 @@ struct VideoInfo
 #define MSG_WHITEBOARD					MSG_VIDEO_CUSTOM + 11	//白板
 #define MSG_VIDEO_SUSPEND				MSG_VIDEO_CUSTOM + 12   //直播暂停
 #define MSG_VIDEO_CONTINUE				MSG_VIDEO_CUSTOM + 13   //直播继续
+#define MSG_DEVICE_BACK					MSG_VIDEO_CUSTOM + 14	//推黑色背景流
 
 // 直播摄像头
 #define MSG_CAMERA_CUSTOM				4200	

@@ -7,6 +7,7 @@
 #include <QClipboard>
 #include <QJsonArray>
 #include "member.h"
+#include <QScrollBar>
 
 #include "YxChat/nim_sdk_helper.h"
 #include "YxChat/session_callback.h"
@@ -36,9 +37,10 @@ typedef void(*nim_client_set_multiport_push_config)(const char *switch_content, 
 typedef void(*nim_client_get_multiport_push_config)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
 
 
-QColor timeColor(100, 100, 100);
-QColor contentColor(0, 0, 0);
+QColor timeColor(153, 153, 153);
+QColor contentColor(102, 102, 102);
 QColor nameColor(85, 170, 255);
+QColor selfColor(190,11,11);
 
 UIChatRoom::UIChatRoom(QWidget *parent)
 	: QWidget(parent)
@@ -50,6 +52,11 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	, m_RecordTime(QDateTime::currentDateTime())
 {
 	ui.setupUi(this);
+	setAutoFillBackground(true);
+	QPalette p = palette();
+	p.setColor(QPalette::Window, QColor("white"));
+	setPalette(p);
+
 	connect(ui.button_talk, SIGNAL(clicked()), this, SLOT(clickTalk()));
 	connect(ui.button_proclamation, SIGNAL(clicked()), this, SLOT(clickProclamation()));
 	connect(ui.button_studentList, SIGNAL(clicked()), this, SLOT(clickStudentList()));
@@ -93,6 +100,13 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	// 消息编辑框粘贴过滤代码
 	ui.textEdit->setContextMenuPolicy(Qt::NoContextMenu);
 	ui.textEdit->installEventFilter(this);
+	ui.textEdit->setStyleSheet("border: 1px solid #57cff8;");
+
+	style(ui.text_proclamation);
+	style(ui.talkRecord);
+	style(ui.text_talk);
+
+	ui.student_list->setStyleSheet("border-image: url(:/LoginWindow/images/nochat.png);");
 }
 
 UIChatRoom::~UIChatRoom()
@@ -147,21 +161,13 @@ void UIChatRoom::mousePressEvent(QMouseEvent *event)
 // 弹出聊天框
 void UIChatRoom::clickTalk()
 {	
-	QPalette   pal,pal_1,pal_2;
-	pal.setColor(QPalette::ButtonText, QColor(86,171,228));
-	pal_1.setColor(QPalette::ButtonText, QColor(100, 100, 100));
-	ui.button_talk->setPalette(pal);
-	ui.button_studentList->setPalette(pal_1);
-	ui.button_proclamation->setPalette(pal_1);
-	ui.button_talk->setIcon(QIcon("./images/button_talk1.png"));
-	ui.button_talk->setIconSize(QSize(22, 22));
-	ui.button_studentList->setIcon(QIcon("./images/button_studentList.png"));
-	ui.button_studentList->setIconSize(QSize(22, 22));
-	ui.button_proclamation->setIcon(QIcon("./images/button_proclamation.png"));
-	ui.button_proclamation->setIconSize(QSize(22, 22));
- 	ui.button_talk->setStyleSheet("background-color: rgb(255,255,255);");
- 	ui.button_studentList->setStyleSheet("background-color: rgb(255,255,255);");
- 	ui.button_proclamation->setStyleSheet("background-color: rgb(255,255,255);");
+	QPalette   pal;
+	pal.setColor(QPalette::ButtonText, QColor(153, 153, 153));
+	ui.button_studentList->setPalette(pal);
+	ui.button_proclamation->setPalette(pal);
+	ui.button_talk->setStyleSheet("border-image: url(:/LoginWindow/images/chatBtn.png);color:#58cff9;");
+ 	ui.button_studentList->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
+ 	ui.button_proclamation->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
 
 	ui.button_brow->setHidden(false);
 	ui.button_cleanText->setHidden(false);
@@ -177,21 +183,13 @@ void UIChatRoom::clickTalk()
 // 弹出学生列表
 void UIChatRoom::clickStudentList()
 {
-	QPalette   pal, pal_1, pal_2;
-	pal.setColor(QPalette::ButtonText, QColor(86, 171, 228));
-	pal_1.setColor(QPalette::ButtonText, QColor(100, 100, 100));
-	ui.button_talk->setPalette(pal_1);
-	ui.button_studentList->setPalette(pal);
-	ui.button_proclamation->setPalette(pal_1);
-	ui.button_talk->setIcon(QIcon("./images/button_talk.png"));
-	ui.button_talk->setIconSize(QSize(22, 22));
-	ui.button_studentList->setIcon(QIcon("./images/button_studentList1.png"));
-	ui.button_studentList->setIconSize(QSize(22, 22));
-	ui.button_proclamation->setIcon(QIcon("./images/button_proclamation.png"));
-	ui.button_proclamation->setIconSize(QSize(22, 22));
-// 	ui.button_talk->setStyleSheet("background-color: rgb(225,225,225);");
-// 	ui.button_studentList->setStyleSheet("background-color: rgb(229,241,251);");
-// 	ui.button_proclamation->setStyleSheet("background-color: rgb(225,225,225);");
+	QPalette   pal;
+	pal.setColor(QPalette::ButtonText, QColor(153, 153, 153));
+	ui.button_talk->setPalette(pal);
+	ui.button_proclamation->setPalette(pal);
+	ui.button_studentList->setStyleSheet("border-image: url(:/LoginWindow/images/chatBtn.png);color:#58cff9;");
+	ui.button_talk->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);color:rgb(153,153,153)");
+	ui.button_proclamation->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
 
 	ui.button_brow->setHidden(true);
 	ui.button_cleanText->setHidden(true);
@@ -203,32 +201,24 @@ void UIChatRoom::clickStudentList()
 	ui.student_list->setHidden(false);
 	ui.msgRecord->setHidden(true);
 	ui.student_list->initMenu();
+
+	QRect rc =ui.student_list->geometry();
 }
 // 弹出公告框
 void UIChatRoom::clickProclamation()
 {
-	QPalette   pal, pal_1, pal_2;
-	pal.setColor(QPalette::ButtonText, QColor(86, 171, 228));
-	pal_1.setColor(QPalette::ButtonText, QColor(100, 100, 100));
-	ui.button_talk->setPalette(pal_1);
-	ui.button_studentList->setPalette(pal_1);
-	ui.button_proclamation->setPalette(pal);
-	ui.button_talk->setIcon(QIcon("./images/button_talk.png"));
-	ui.button_talk->setIconSize(QSize(22,22));
-	ui.button_studentList->setIcon(QIcon("./images/button_studentList.png"));
-	ui.button_studentList->setIconSize(QSize(22, 22));
-	ui.button_proclamation->setIcon(QIcon("./images/button_proclamation1.png"));
-	ui.button_proclamation->setIconSize(QSize(22, 22));
-// 	ui.button_talk->setStyleSheet("background-color: rgb(225,225,225);\font-color:black;");
-// 	ui.button_talk->setStyleSheet("font-color: rgb(0,0,0);");
-// 	ui.button_studentList->setStyleSheet("background-color: rgb(225,225,225);");
-// 	ui.button_proclamation->setStyleSheet("background-color: rgb(229,241,251);");
+	QPalette   pal;
+	pal.setColor(QPalette::ButtonText, QColor(153, 153, 153));
+	ui.button_talk->setPalette(pal);
+	ui.button_studentList->setPalette(pal);
+	ui.button_proclamation->setStyleSheet("border-image: url(:/LoginWindow/images/chatBtn.png);color:#58cff9;");
+	ui.button_talk->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);color:rgb(153,153,153)");
+	ui.button_studentList->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
 
-	ui.button_sendMseeage_cancel->hide();
-	ui.proclamationWidget->setHidden(false);
-	ui.button_sendMseeage_3->hide();
-	ui.textEdit_2->hide();
-	ui.text_proclamation->show();
+ 	ui.button_sendMseeage_cancel->hide();
+ 	ui.proclamationWidget->setHidden(false);
+ 	ui.button_sendMseeage_3->hide();
+ 	ui.textEdit_2->hide();
 	ui.text_talk->setHidden(true);
 	ui.student_list->setHidden(true);
 	ui.msgRecord->setHidden(true);	
@@ -237,8 +227,9 @@ void UIChatRoom::clickProclamation()
 	ui.button_notes->setHidden(true);
 	ui.button_sendMseeage->setHidden(true);
 	ui.textEdit->setHidden(true);
-	
-	ui.text_proclamation->setGeometry(QRect(0,40,299,650));
+ 	
+	ui.text_proclamation->show();
+	ui.text_proclamation->setGeometry(QRect(0,40,280,280));
 
 	if (!m_CurCourseID.isEmpty())
 		ui.button_sendMseeage_2->show();
@@ -262,7 +253,7 @@ void UIChatRoom::clickBrow()
 		m_smallEmotionWidget->setHidden(true);
 	}
 
-	m_smallEmotionWidget->move(15, this->size().height()-200);
+	m_smallEmotionWidget->move(0, this->size().height()-210);
 }
 // 消息记录
 void UIChatRoom::clickNotes()
@@ -318,8 +309,8 @@ void UIChatRoom::initEmotion()
 	// 初始化小表情框;
 	m_smallEmotionWidget = new MyEmotionWidget(this);
 	connect(m_smallEmotionWidget, SIGNAL(emitFileName(QString)), this, SLOT(setBrow(QString)));
-	m_smallEmotionWidget->setRowAndColumn(10, 8);
-	m_smallEmotionWidget->setEmotionSize(QSize(32, 32));
+	m_smallEmotionWidget->setRowAndColumn(10, 9);
+	m_smallEmotionWidget->setEmotionSize(QSize(33, 33));
 	m_smallEmotionWidget->setEmotionMovieSize(QSize(24, 24));
 	m_smallEmotionWidget->setMaxRow(4);
 	m_smallEmotionWidget->initTableWidget();
@@ -407,14 +398,17 @@ void UIChatRoom::clickSendMseeage()
 		stringToHtmlFilter(sendText);
 		if (m_isBorw != false)
 		{
-			QString name = "(自己) ";
-			stringToHtml(name, nameColor);
+			QString name = m_TeachterName;
+			name += "(我) ";
+			stringToHtml(name, selfColor);
 			stringToHtml(timeStr, timeColor);
 			ui.text_talk->append(name + timeStr);
 			ui.text_talk->append("");
 			for (int i = 0; i < textList.size(); i++)
 			{
-				ui.text_talk->insertHtml(textList.at(i));
+				QString string = textList.at(i);
+				stringToHtml(string, contentColor);
+				ui.text_talk->insertHtml(string);
 				if (i <= textList.size() - 2)
 				{
 					ui.text_talk->insertHtml("<img src='" + m_borw.at(i) + "'/>");  //   此处的test 即 url
@@ -426,9 +420,11 @@ void UIChatRoom::clickSendMseeage()
 		}
 		else
 		{
-			QString qName = "(自己) ";
+			QString qName = m_TeachterName;
+			qName += "(我) ";
 			stringToHtml(timeStr, timeColor);
-			stringToHtml(qName, nameColor);
+			stringToHtml(qName, selfColor);
+			stringToHtml(sendText, contentColor);
 			ui.text_talk->append(qName + timeStr);
 			ui.text_talk->append(sendText);
 		}
@@ -540,7 +536,7 @@ void UIChatRoom::QueryRecord(QString dtstr)
 // 点击【发布公告】按钮
 void UIChatRoom::announce()
 {
-	ui.text_proclamation->setGeometry(QRect(0, 40+80, 299, 650-80));
+	ui.text_proclamation->setGeometry(QRect(0, 40+80, 299, 280-80));
 	ui.button_sendMseeage_cancel->show();
 	ui.button_sendMseeage_3->show();	
 	ui.textEdit_2->show();
@@ -550,7 +546,7 @@ void UIChatRoom::announce()
 // 点击【发布】按钮
 void UIChatRoom::putTalk()
 {
-	ui.text_proclamation->setGeometry(QRect(0, 40, 299, 650));
+	ui.text_proclamation->setGeometry(QRect(0, 40, 299, 280));
 	ui.button_sendMseeage_cancel->hide();
 	ui.button_sendMseeage_3->hide();
 	ui.textEdit_2->hide();
@@ -582,7 +578,7 @@ void UIChatRoom::putTalk()
 // 点击【取消】按钮
 void UIChatRoom::putTalkCancel()
 {
-	ui.text_proclamation->setGeometry(QRect(0, 40, 299, 650));
+	ui.text_proclamation->setGeometry(QRect(0, 40, 299, 280));
 	ui.button_sendMseeage_cancel->hide();
 	ui.button_sendMseeage_3->hide();
 	ui.textEdit_2->hide();
@@ -634,8 +630,9 @@ void UIChatRoom::PackageMsg(nim::IMMessage &msg)
 
 
 // 接收消息
-void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
+bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 {
+	bool bValid = false;
 	if (pMsg->type_ == nim::kNIMMessageTypeNotification) // 过滤系统消息
 	{
 		Json::Value json;
@@ -665,23 +662,14 @@ void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 						{
 							m_AddMemberID = ids[i];
 							QueryMember();
-							return;
+							bValid = true;
+							return bValid;
 						}
 					}
-
-// 					strName += " 加入了群聊";
-// 					QTextCursor textCursor = ui.text_talk->textCursor();
-// 					QTextFrameFormat frameFormat2;
-// 					frameFormat2.setLeftMargin(80);		//设置左边距
-// 					frameFormat2.setRightMargin(80);	//设置右边距
-// 					frameFormat2.setBottomMargin(20);	//设置下边距
-// 					textCursor.insertFrame(frameFormat2);		//在光标处插入框架
-// 
-// 					textCursor.insertText(strName);
 				}
 			}
 		}
-		return;
+		return bValid;
 	}
 
 	// 判断当前过来的消息，是不是此会话窗口
@@ -706,7 +694,11 @@ void UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 			ui.text_talk->append(qContent);
 		ui.text_talk->append("");
 		ui.text_talk->moveCursor(QTextCursor::End);
+
+		bValid = true;
 	}
+
+	return bValid;
 }
 
 bool UIChatRoom::IsHasFace(QString qContect)
@@ -802,7 +794,29 @@ void UIChatRoom::ShowMsgs(const std::vector<nim::IMMessage> &msg)
 		m_farst_msg_time = msg[len - 1].timetag_;
 	}
 	else
+	{
+		QString strTip = "没有更多消息记录了！";
+		QString strText = ui.talkRecord->toPlainText();
+		if (strText.indexOf(strTip)>=0)
+			return;
+		
+		int fontwidth = fontMetrics().width(strTip);
+		int iMargin = 300 - fontwidth;
+		QTextCursor textCursor = ui.talkRecord->textCursor();
+		textCursor.movePosition(QTextCursor::Start);
+
+		QTextFrameFormat frameFormat2;
+		frameFormat2.setLeftMargin(iMargin / 2);	//设置左边距
+		frameFormat2.setRightMargin(iMargin / 2);	//设置右边距
+		frameFormat2.setBottomMargin(20);	//设置下边距
+		textCursor.insertFrame(frameFormat2);		//在光标处插入框架
+
+		QTextCharFormat fmt;
+		fmt.setForeground(contentColor);
+		textCursor.setCharFormat(fmt);
+		textCursor.insertText(strTip);
 		return;
+	}
 
 	// 滚动条跳转到新加载消息的位置(用时间做标识)
 	for (size_t i = 0; i < len; i++)
@@ -870,15 +884,20 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 					}
 
 					strName += " 加入了群聊";
+					int fontwidth = fontMetrics().width(strName);
+					int iMargin = 300 - fontwidth;
 					QTextCursor textCursor = ui.talkRecord->textCursor();
 					textCursor.movePosition(QTextCursor::Start);
 
 					QTextFrameFormat frameFormat2;
-					frameFormat2.setLeftMargin(80);		//设置左边距
-					frameFormat2.setRightMargin(80);	//设置右边距
+					frameFormat2.setLeftMargin(iMargin/2);	//设置左边距
+					frameFormat2.setRightMargin(iMargin / 2);	//设置右边距
 					frameFormat2.setBottomMargin(20);	//设置下边距
 					textCursor.insertFrame(frameFormat2);		//在光标处插入框架
 
+					QTextCharFormat fmt;
+					fmt.setForeground(contentColor);
+					textCursor.setCharFormat(fmt);
 					textCursor.insertText(strName);
 				}
 			}
@@ -895,11 +914,18 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 	QString qContent = QString::fromStdString(strContent);
 	QString qName;
 	if (pMsg.sender_accid_ == m_accid.toStdString())
-		strName = "(自己)";
+	{
+		strName = m_TeachterName.toStdString();
+		strName += "(我) ";
+		qName = QString::fromStdString(strName);
+		stringToHtml(qName, selfColor);
+	}
+	else
+	{
+		qName = QString::fromStdString(strName);
+		stringToHtml(qName, nameColor);
+	}
 	
-	// 格式化消息
-	qName = QString::fromStdString(strName);
-	stringToHtml(qName, nameColor);
 	stringToHtml(qTime, timeColor);
 	stringToHtml(qContent, contentColor);
 
@@ -1010,6 +1036,8 @@ void UIChatRoom::ReceiverLoginMsg(nim::LoginRes* pRes)
 // 初始化获取群成员的禁言状态
 void UIChatRoom::ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg)
 {
+	ui.student_list->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
+
 	for (auto it : *pMemberMsg)
 	{
 		if (it.IsMute())
@@ -1120,12 +1148,18 @@ void UIChatRoom::stepDays(QDateTime dateTime)
 		QTextCursor textCursor = ui.talkRecord->textCursor();
 		textCursor.movePosition(QTextCursor::Start);
 
+		int fontwidth = fontMetrics().width(oldDay);
+		int iMargin = 300 - fontwidth;
+
 		QTextFrameFormat frameFormat2;
-		frameFormat2.setLeftMargin(110);	//设置左边距
-		frameFormat2.setRightMargin(110);	//设置右边距
+		frameFormat2.setLeftMargin(iMargin/2);	//设置左边距
+		frameFormat2.setRightMargin(iMargin/2);	//设置右边距
 		frameFormat2.setBottomMargin(20);	//设置右边距
 		textCursor.insertFrame(frameFormat2);		//在光标处插入框架
 
+		QTextCharFormat fmt;
+		fmt.setForeground(contentColor);
+		textCursor.setCharFormat(fmt);
 		textCursor.insertText(oldDay);
 	}
 
@@ -1146,12 +1180,18 @@ void UIChatRoom::stepMsgDays(QDateTime dateTime)
 	{
 		QTextCursor textCursor = ui.text_talk->textCursor();
 
+		int fontwidth = fontMetrics().width(newDay);
+		int iMargin = 300 - fontwidth;
+
 		QTextFrameFormat frameFormat2;
-		frameFormat2.setLeftMargin(110);	//设置左边距
-		frameFormat2.setRightMargin(110);	//设置右边距
+		frameFormat2.setLeftMargin(iMargin/2);	//设置左边距
+		frameFormat2.setRightMargin(iMargin/2);	//设置右边距
 		frameFormat2.setBottomMargin(10);	//设置右边距
 		textCursor.insertFrame(frameFormat2);		//在光标处插入框架
 
+		QTextCharFormat fmt;
+		fmt.setForeground(contentColor);
+		textCursor.setCharFormat(fmt);
 		textCursor.insertText(newDay);
 	}
 
@@ -1238,13 +1278,18 @@ void UIChatRoom::returnMember()
 				QString sName;
 				sName += pMember->name();
 				sName += " 加入了群聊";
+				int fontwidth = fontMetrics().width(sName);
+				int iMargin = 300 - fontwidth;
 				QTextCursor textCursor = ui.text_talk->textCursor();
 				QTextFrameFormat frameFormat2;
-				frameFormat2.setLeftMargin(80);		//设置左边距
-				frameFormat2.setRightMargin(80);	//设置右边距
+				frameFormat2.setLeftMargin(iMargin/2);	//设置左边距
+				frameFormat2.setRightMargin(iMargin/2);	//设置右边距
 				frameFormat2.setBottomMargin(20);	//设置下边距
 				textCursor.insertFrame(frameFormat2);		//在光标处插入框架
 
+				QTextCharFormat fmt;
+				fmt.setForeground(contentColor);
+				textCursor.setCharFormat(fmt);
 				textCursor.insertText(sName);
 			}
 
@@ -1252,4 +1297,74 @@ void UIChatRoom::returnMember()
 			delete pMember;
 		}
 	}
+}
+
+void UIChatRoom::style(QTextBrowser *style)
+{
+	if (style)
+	{
+		// 设置滚动条样式
+		style->verticalScrollBar()->setStyleSheet("QScrollBar:vertical"
+			"{"
+			"width:8px;"
+			"background:rgba(0,0,0,0%);"
+			"margin:0px,0px,0px,0px;"
+			"padding-top:9px;"
+			"padding-bottom:9px;"
+			"}"
+			"QScrollBar::handle:vertical"
+			"{"
+			"width:8px;"
+			"background:rgba(0,0,0,25%);"
+			" border-radius:4px;"
+			"min-height:20;"
+			"}"
+			"QScrollBar::handle:vertical:hover"
+			"{"
+			"width:8px;"
+			"background:rgba(0,0,0,50%);"
+			" border-radius:4px;"
+			"min-height:20;"
+			"}"
+			"QScrollBar::add-line:vertical"
+			"{"
+			"height:9px;width:8px;"
+			"border-image:url(:/images/a/3.png);"
+			"subcontrol-position:bottom;"
+			"}"
+			"QScrollBar::sub-line:vertical"
+			"{"
+			"height:9px;width:8px;"
+			"border-image:url(:/images/a/1.png);"
+			"subcontrol-position:top;"
+			"}"
+			"QScrollBar::add-line:vertical:hover"
+			"{"
+			"height:9px;width:8px;"
+			"border-image:url(:/images/a/4.png);"
+			"subcontrol-position:bottom;"
+			"}"
+			"QScrollBar::sub-line:vertical:hover"
+			"{"
+			"height:9px;width:8px;"
+			"border-image:url(:/images/a/2.png);"
+			"subcontrol-position:top;"
+			"}"
+			"QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical"
+			"{"
+			"background:rgba(0,0,0,10%);"
+			"border-radius:4px;"
+			"}"
+			);
+	}
+}
+
+void UIChatRoom::SetStudentName(int iNum)
+{
+	QString liveNum = "学员";
+	liveNum += "(";
+	liveNum.append(QString::number(iNum));
+	liveNum += ")";
+	
+	ui.button_studentList->setText(liveNum);
 }

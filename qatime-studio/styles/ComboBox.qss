@@ -1,9 +1,11 @@
 QComboBox {
-    color:#1c1c1c;
-    border: 1px solid #cbcbcb;
+    color:#323232;
+	background-color: #FFFFFF;
+    border: 0px solid #CCCCCC;
     border-radius: 0px;
     padding: 1px;
     font: 12px "Microsoft YaHei UI";	
+	outline: 0px
 }
 
 QComboBox::drop-down {
@@ -19,15 +21,16 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
- 
+    image: url(images/drawdown.png);
 }
 
 QComboBox QAbstractItemView
 {
-   color:#1c1c1c;
+   color:#323232;
+   background-color:#FFFFFF;
    border:none;
-   selection-background-color:#1c1c1c;
-   selection-color: #ffffff; 
-   height: 30px;
+   selection-background-color:#57cff8;
+   selection-color: #FFFFFF; 
+   min-height: 17px;
    font: 12pt
 }

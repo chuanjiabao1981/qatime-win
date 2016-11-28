@@ -63,9 +63,9 @@ UIVideo::UIVideo(QWidget *parent)
 	SetMediaCapture(m_hNlssService);
 
 	// 创建白板
-	m_BoadWnd = new BoardWindow(this);
-	m_BoadWnd->setWindowFlags(Qt::FramelessWindowHint);
-	m_BoadWnd->show();
+// 	m_BoadWnd = new BoardWindow(this);
+// 	m_BoadWnd->setWindowFlags(Qt::FramelessWindowHint);
+// 	m_BoadWnd->show();
 
 	// 启动直播视频
 	TCHAR szTempPath[MAX_PATH] = { 0 };
@@ -491,7 +491,6 @@ void UIVideo::SetResumeVideo()
 
 void UIVideo::SetPauseAudio(HWND hwnd)
 {
-//	Nlss_PauseAudioLiveStream(m_hNlssService);
 	if (IsWindow(hwnd))
 	{
 		::SendMessage(hwnd, MSG_DEVICE_AUDIO_CLOSE, 0, 0);
@@ -500,7 +499,6 @@ void UIVideo::SetPauseAudio(HWND hwnd)
 
 void UIVideo::SetResumeAudio(HWND hwnd)
 {
-//	Nlss_ResumeAudioLiveStream(m_hNlssService);
 	if (IsWindow(hwnd))
 	{
 		::SendMessage(hwnd, MSG_DEVICE_AUDIO_CLOSE, 1, 0);

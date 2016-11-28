@@ -61,16 +61,17 @@ private:
 	QTextCursor*					m_TextCursor;
 	QMap<QString, QString>			m_StudentInfo;		// key ：accid 
 	QString							mRemeberToken;
-
 	std::string						m_AddMemberID;		// 新加入的成员ID
 	void initEmotion();
+public:
+	QString							m_TeachterName;		// 老师名字
 protected:
 	virtual bool eventFilter(QObject *watched, QEvent *event);
 	void mousePressEvent(QMouseEvent *event);
 private slots:
 	void clickTalk();									// 弹出聊天框
 	void clickStudentList();							// 弹出学生列表
-	void clickProclamation();							// 弹出讨论框
+	void clickProclamation();							// 弹出公告
 	void clickCleanText();								// 清屏
 	void clickBrow();									// 表情按钮
 	void clickNotes();									// 消息记录
@@ -93,6 +94,7 @@ private:
 	bool		LoadConfig(const std::string& app_data_dir,const std::string& app_install_dir, nim::SDKConfig &config); //加载配置
 	std::string GetJsonStringWithNoStyled(const QJsonObject& values);				   //json类型转换
 	void		PackageMsg(nim::IMMessage &msg);
+	void        style(QTextBrowser *style);
 	/**
 	* 登录结果回调
 	* @param[in] json_params 返回的信息，Json数据转化的字符串
@@ -125,7 +127,7 @@ private:
 
 public:
 	void	setChatInfo(QJsonObject &chatInfo, QString token);	// 设置云信账户信息
-	void	ReceiverMsg(nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
+	bool	ReceiverMsg(nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
 	void	ReceiverRecordMsg(nim::QueryMsglogResult* pMsg);	// 接收历史消息记录
 	void	ReceiverLoginMsg(nim::LoginRes* pRes);				// 接收登录结果
 	void	ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg); //接收群成员信息
@@ -139,6 +141,7 @@ public:
 	void	ParseFace(QString qContect);						// 解析接收到的消息
 	bool	IsHasFace(QString qContect);						// 判断是否有表情
 	QString BuildFaceToUrl(QString qFace);						// 通过表情返回url路径（例如：传入[em_1]返回./images/em_1.gif）
+	void	SetStudentName(int iNum);
 public slots:
 	void chickChage(int, QString, QString);
 	bool AddStudent(QString iconUrl, QString name, QString accid);		//添加成员

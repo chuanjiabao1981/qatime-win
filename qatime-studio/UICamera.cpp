@@ -11,8 +11,32 @@
 
 UICamera::UICamera(QWidget *parent)
 	: QWidget(parent)
+	, m_CameraTimer(NULL)
 {
 	ui.setupUi(this);
+
+	m_CameraTimer = new QTimer(this);
+	connect(m_CameraTimer, SIGNAL(timeout()), this, SLOT(OpenCamera()));
+	m_CameraTimer->start(500);
+}
+
+UICamera::~UICamera()
+{
+	if (m_CameraTimer)
+	{
+		delete m_CameraTimer;
+		m_CameraTimer = NULL;
+	}
+}
+
+void UICamera::SetMainWindow(UIMainWindow* parent)
+{
+	m_parent = parent;
+}
+
+void UICamera::OpenCamera()
+{
+	m_CameraTimer->stop();
 
 	// 启动直播摄像头视频
 	TCHAR szTempPath[MAX_PATH] = { 0 };
@@ -42,14 +66,4 @@ UICamera::UICamera(QWidget *parent)
 #else
 	CreateProcess(szTempPath, (LPWSTR)wszCmdLine.c_str(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
 #endif
-}
-
-UICamera::~UICamera()
-{
-
-}
-
-void UICamera::SetMainWindow(UIMainWindow* parent)
-{
-	m_parent = parent;
 }

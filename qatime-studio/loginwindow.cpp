@@ -8,6 +8,8 @@
 #include "ShellApi.h"
 #include <QHBoxLayout>
 #include "QShortcut"
+#include <QDesktopWidget>
+#include <QApplication>
 
 #ifdef TEST
 	#define _DEBUG
@@ -28,6 +30,10 @@ LoginWindow::LoginWindow(QWidget *parent)
 	, mainWin(NULL)
 {
 	ui.setupUi(this);
+	setAutoFillBackground(true);;
+	QPalette p = palette();
+	p.setColor(QPalette::Window, QColor(255,255,255));
+	setPalette(p);
 
 	connect(ui.login_pushBtn, SIGNAL(clicked()), this, SLOT(OnLogIn()));
 	connect(ui.homepage_pushBtn, SIGNAL(clicked()), this, SLOT(BrowseHomePage()));
@@ -37,8 +43,12 @@ LoginWindow::LoginWindow(QWidget *parent)
 	connect(ui.close_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
 	connect(ui.remember_checkBox, SIGNAL(stateChanged(int)), this, SLOT(changedRemeber(int)));
 
-	ui.UserName_Edit->setTextMargins(30, 3, 20, 3);
-	ui.UserPass_Edit->setTextMargins(30, 3, 20, 3);
+	ui.UserName_Edit->setTextMargins(45, 3, 20, 3); 
+	ui.UserName_Edit->setStyleSheet("QLineEdit:hover{ border: 1px solid #57cff8 }"
+		"QLineEdit{ border: 1px solid #cccccc }");
+	ui.UserPass_Edit->setTextMargins(45, 3, 20, 3);
+	ui.UserPass_Edit->setStyleSheet("QLineEdit:hover{ border: 1px solid #57cff8 }"
+		"QLineEdit{ border: 1px solid #cccccc }");
 
 	ReadSetting();
 	InitUserName();
@@ -48,11 +58,17 @@ LoginWindow::LoginWindow(QWidget *parent)
 	setTabOrder(ui.UserName_Edit, ui.UserPass_Edit);
 	setTabOrder(ui.UserPass_Edit, ui.login_pushBtn);
 
-	QPixmap pixmap(QCoreApplication::applicationDirPath() + "/images/btn_07.png");
-	QPixmap pixmap1(QCoreApplication::applicationDirPath() + "/images/btn_off.png");
-	ui.min_pushBtn->setPixmap(pixmap, 4);
-	ui.close_pushBtn->setPixmap(pixmap1, 4);
+	QPixmap pixmap(QCoreApplication::applicationDirPath() + "/images/login_min.png");
+	QPixmap pixmap1(QCoreApplication::applicationDirPath() + "/images/login_close.png");
+	ui.min_pushBtn->setPixmap(pixmap, 1);
+	ui.close_pushBtn->setPixmap(pixmap1, 1);
+	ui.homepage_pushBtn->installEventFilter(this);
 
+	ui.remember_checkBox->setStyleSheet("QCheckBox::indicator{width: 65px;height: 13px;}"
+		"QCheckBox::indicator:unchecked{image: url(./images/remenber_uncheck.png);}"
+		"QCheckBox::indicator:checked{image: url(./images/remenber_check.png);}");
+
+	ui.back_label->setStyleSheet("border: 1px solid #059ed5;");
 }
 
 LoginWindow::~LoginWindow()
@@ -189,14 +205,18 @@ void LoginWindow::BrowseHomePage()
 
 void LoginWindow::RegisterAccount()
 {
-	lstrcat(m_pathHomePage, L"//teachers//new");
-	ShellExecute(NULL, L"open", m_pathHomePage, NULL, NULL, SW_SHOW);
+	TCHAR m_pathRegister[MAX_PATH] = { 0 };
+	lstrcat(m_pathRegister, m_pathHomePage);
+	lstrcat(m_pathRegister, L"//teachers//new");
+	ShellExecute(NULL, L"open", m_pathRegister, NULL, NULL, SW_SHOW);
 }
 
 void LoginWindow::FindPassword()
 {
-	lstrcat(m_pathHomePage, L"//passwords//new");
-	ShellExecute(NULL, L"open", m_pathHomePage, NULL, NULL, SW_SHOW);
+	TCHAR m_pathPass[MAX_PATH] = { 0 };
+	lstrcat(m_pathPass, m_pathHomePage);
+	lstrcat(m_pathPass, L"//passwords//new");
+	ShellExecute(NULL, L"open", m_pathPass, NULL, NULL, SW_SHOW);
 }
 
 void LoginWindow::MinDialog()
@@ -242,9 +262,13 @@ void LoginWindow::changedRemeber(int i)
 	lstrcat(szTempPath, L"\\config.ini");
 
 	if (i == 0)
-		WritePrivateProfileString(L"CONFIG_PATH", L"REMEBER", L"0",szTempPath);
+	{
+		WritePrivateProfileString(L"CONFIG_PATH", L"REMEBER", L"0", szTempPath);
+	}
 	else
-		WritePrivateProfileString(L"CONFIG_PATH", L"REMEBER", L"1",szTempPath);
+	{
+		WritePrivateProfileString(L"CONFIG_PATH", L"REMEBER", L"1", szTempPath);
+	}
 }
 
 void LoginWindow::RemeberPassword()
@@ -302,12 +326,12 @@ void LoginWindow::AutoLogin()
 	mainWin = new UIMainWindow();
 	mainWin->setWindowFlags(Qt::FramelessWindowHint);
 	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
-	mainWin->setRemeberToken(m_teacherToken);
-	mainWin->setAutoTeacherInfo(m_teacherID, m_teacherName,m_teacherUrl,m_accid,m_accidToken);
-	mainWin->ShowAuxiliary();
-	mainWin->setLoginWindow(this);
+ 	mainWin->setRemeberToken(m_teacherToken);
+ 	mainWin->setAutoTeacherInfo(m_teacherID, m_teacherName,m_teacherUrl,m_accid,m_accidToken);
+ 	mainWin->ShowAuxiliary();
+ 	mainWin->setLoginWindow(this);
 	mainWin->show();
-//	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 }
 
 bool LoginWindow::IsAutoLogin()
@@ -319,10 +343,10 @@ void LoginWindow::Checking()
 {
 	QString strUrl;
 #ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses";
+	strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
 	strUrl.replace("{teacher_id}", m_teacherID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses";
+	strUrl = "http://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
 	strUrl.replace("{teacher_id}", m_teacherID);
 #endif
 
@@ -354,4 +378,26 @@ void LoginWindow::CheckingFinished()
 	{
 		AutoLogin();
 	}
+}
+
+// 拖动标题做的处理
+bool LoginWindow::eventFilter(QObject *target, QEvent *event)
+{
+	if (target == ui.homepage_pushBtn)
+	{
+		static int i = 0;
+		QMouseEvent* pMe = static_cast<QMouseEvent*>(event);
+		if (event->type() == QEvent::MouseButtonPress)
+		{
+			m_startPos = pMe->globalPos();
+			m_WndCurPos = this->pos();
+		}
+		else if (event->type() == QEvent::MouseMove)
+		{
+			m_clickPos = pMe->globalPos();
+			this->move(m_WndCurPos + (m_clickPos - m_startPos));
+		}
+		return false;
+	}
+	return false;
 }
