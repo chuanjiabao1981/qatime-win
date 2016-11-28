@@ -18,7 +18,7 @@ MyEmotionWidget::MyEmotionWidget(QWidget *parent)
 	, m_emotionSize(QSize(0 , 0))
 	, m_emotionMovieSize(QSize(0 , 0))
 {
-	loadStyleSheet();
+//	loadStyleSheet();
 //	QWidget::installEventFilter(this);//为这个窗口安装过滤器
 // 	initWindow();
  	installEventFilter(this);

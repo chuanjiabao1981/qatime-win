@@ -55,6 +55,6 @@ private:
 	personListBuddy *buddySec;
 	personListBuddy *buddyLast;
 	QTimer *timer;//设置提示弹出时间
-    
+	QLabel* backImage;
 };
 #endif // PERSONLIST_H

@@ -49,19 +49,11 @@ UIAuxiliaryPanel::~UIAuxiliaryPanel()
 }
 
 void UIAuxiliaryPanel::init()
-{		
-	connect(ui.drawBack_pushBtn, SIGNAL(clicked()), this, SLOT(DrawBack()));	
+{			
 	m_teacher_treewidget = new QTreeWidget(this);
 	connect(m_teacher_treewidget, SIGNAL(itemClicked(QTreeWidgetItem * item, int column)), this, SLOT(on_treeWidget_clicked(QTreeWidgetItem * item, int column)));
 	connect(m_teacher_treewidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(on_DoubleClicked(QTreeWidgetItem*, int)));
-	connect(m_teacher_treewidget, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(on_itemExpanded(QTreeWidgetItem*)));
-	connect(m_teacher_treewidget, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(on_itemCollapsed(QTreeWidgetItem*)));
 	m_teacher_treewidget->setHeaderHidden(true);
-
-	connect(ui.return_pushButton, SIGNAL(clicked()), this, SLOT(returnClick()));
-	ui.return_pushButton->setIcon(QIcon("./images/quit.png"));
-	ui.return_pushButton->setIconSize(QSize(16, 16));
-	ui.return_pushButton->setText("切换账号");
 }
 
 void UIAuxiliaryPanel::setParent(UIMainWindow* parent)
@@ -77,32 +69,6 @@ void UIAuxiliaryPanel::setRemeberToken(const QString &token)
 void UIAuxiliaryPanel::setTeacherID(const QString &teacherID)
 {
 	m_teacherID = teacherID;
-}
-
-void UIAuxiliaryPanel::setTeacherName(const QString &teacherName)
-{
-	QString strTeacher = teacherName;
-	strTeacher += "老师";
-	ui.teacherName_label->setText(strTeacher);
-}
-
-void UIAuxiliaryPanel::setNetworkPic(const QString &szUrl)
-{
-	QUrl url(szUrl);
-	QNetworkAccessManager manager;
-	QEventLoop loop;
-
-	QNetworkReply *reply = manager.get(QNetworkRequest(url));
-	//请求结束并下载完成后，退出子事件循环 
-	QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-	//开启子事件循环 
-	loop.exec();
-
-	QByteArray jpegData = reply->readAll();
-	QPixmap pixmap;
-	pixmap.loadFromData(jpegData);
-	QPixmap scaledPixmap = pixmap.scaled(QSize(64,64), Qt::KeepAspectRatio);
-	ui.teacherPhoto_Label->setPixmap(scaledPixmap);
 }
 
 void UIAuxiliaryPanel::style(QTableWidget* pTableWidget)
@@ -194,11 +160,6 @@ void UIAuxiliaryPanel::style(QTableWidget* pTableWidget)
 	}
 }
 
-void UIAuxiliaryPanel::DrawBack()
-{
-	this->setVisible(false);
-}
-
 void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 {
 	int nNum = 0;
@@ -238,10 +199,17 @@ void UIAuxiliaryPanel::setAuxiliaryInfo(QJsonObject &obj)
 		imageItem1->setText(2, course->progress());
 		imageItem1->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
 		imageItem1->setTextAlignment(0, Qt::AlignLeft | Qt::AlignVCenter);
-		m_teacher_treewidget->setColumnWidth(0, 355);
-		m_teacher_treewidget->setColumnWidth(1, 140);
+		m_teacher_treewidget->setColumnWidth(0, 205);
+		m_teacher_treewidget->setColumnWidth(1, 78);
 		m_teacher_treewidget->setColumnWidth(2, 40);
 		imageItem1->setSizeHint(0, QSize(200, 25));	
+
+		QFont font;
+		font.setPointSize(10);
+		font.setFamily(("微软雅黑"));
+		imageItem1->setFont(0, font);
+		imageItem1->setFont(2, font);
+
 		setCourseInfoToTree(course->JsonLesson(), course->url(), strItemName, imageItem1,course->ChatId(),course->id(),course->CameraURL());
 		
 		delete course;
@@ -264,17 +232,17 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 		QIcon qIcon;
 		QColor qColor;
 		GetItemColor(pLesson->LessonStatus(), brush, qIcon);
-		GetItemTextColor(pLesson->LessonStatus(), qColor);
-		
-		// 显示箭头图标
-//		QTableWidgetItem *pItemIcon = new QTableWidgetItem(qIcon, "");
-//		pItemIcon->setBackground(brush);		
+		GetItemTextColor(pLesson->LessonStatus(), qColor);	
 
 		// 显示编号
 		QString strNum = QString().sprintf("%02d", nNum);
-		strNum += "      ";
+		strNum += "  ";
 		strNum += pLesson->name();
-		QTreeWidgetItem *imageItem1 = new QTreeWidgetItem(pTableWidget, QStringList(strNum));		
+		QTreeWidgetItem *imageItem1 = new QTreeWidgetItem(pTableWidget, QStringList(strNum));
+		QFont font;
+		font.setPointSize(9);
+		font.setFamily(("微软雅黑"));
+
 		for (int i = 0; i <= 3; i++)
 		{			
 			imageItem1->setData(0,QT_TOOLBOXLESSONID, pLesson->LessonID());
@@ -288,8 +256,14 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 			imageItem1->setTextAlignment(i, Qt::AlignHCenter | Qt::AlignVCenter);
 			imageItem1->setBackground(i, brush);
 			imageItem1->setToolTip(0,pLesson->name());
+			imageItem1->setToolTip(1, pLesson->LessonTime());
+			imageItem1->setToolTip(2, pLesson->ChinaLessonStatus());
+			imageItem1->setFont(i,font);
 		}
-		imageItem1->setText(1, pLesson->LessonTime());
+
+		QString sLesson = pLesson->LessonTime();
+		sLesson.remove(0, 11);
+		imageItem1->setText(1, sLesson);
 		imageItem1->setText(2, pLesson->ChinaLessonStatus());	
 		imageItem1->setSizeHint(0, QSize(20, 20));
 		imageItem1->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
@@ -371,6 +345,11 @@ void UIAuxiliaryPanel::GetItemColor(QString strStatus, QBrush& brush, QIcon& qIc
 		brush = QColor::fromRgb(255, 255, 255);
 		qIcon = QIcon(icon);
 	}
+	else if (strStatus == "missed")
+	{
+		brush = QColor::fromRgb(255, 255, 255);
+		qIcon = QIcon(icon);
+	}
 }
 
 void UIAuxiliaryPanel::GetItemTextColor(QString strStatus, QColor& qColor)
@@ -404,6 +383,10 @@ void UIAuxiliaryPanel::GetItemTextColor(QString strStatus, QColor& qColor)
 		qColor = QColor::fromRgb(145, 145, 145);
 	}
 	else if (strStatus == "completed")
+	{
+		qColor = QColor::fromRgb(145, 145, 145);
+	}
+	else if (strStatus == "missed")
 	{
 		qColor = QColor::fromRgb(145, 145, 145);
 	}
@@ -469,7 +452,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 		}
 		return;
 	}
-	if (status == "finished" || status == "billing" || status == "completed" || status == "init")
+	if (status == "finished" || status == "billing" || status == "completed" || status == "init" || status =="missed")
 	{
 		CMessageBox::showMessage(
 			QString("答疑时间"),
@@ -571,26 +554,10 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#FF0000"));
 
 	//进入聊天室
+	m_Parent->LivePage();
 	m_chatID = (QString)terrWidget->data(0, QT_TOOLBOXCHATID).toString();
 	m_Parent->setCurChatRoom(m_chatID, m_auxiliaryID);
 	m_Parent->setVideoLesson(m_lessonName);
-}
-
-void UIAuxiliaryPanel::on_itemExpanded(QTreeWidgetItem* terrWidget)
-{
-	QIcon qIcon=QIcon("./images/course_expand.png");
-//	terrWidget->setIcon(0, qIcon);
-}
-
-void UIAuxiliaryPanel::on_itemCollapsed(QTreeWidgetItem* terrWidget)
-{
-	QIcon qIcon = QIcon("./images/course_back.png");
-//	terrWidget->setIcon(0, qIcon);
-}
-
-void UIAuxiliaryPanel::returnClick()
-{
-	m_Parent->returnClick();
 }
 
 void UIAuxiliaryPanel::ShowTip()
@@ -653,6 +620,8 @@ void UIAuxiliaryPanel::ChangeLessonStatus(QString sLessonID, QString Status)
 					strChinaStatus = MSG_LESSON_STATUS_BILLING;
 				else if (Status == "completed")
 					strChinaStatus = MSG_LESSON_STATUS_COMPLETED;
+				else if (Status == "missed")
+					strChinaStatus = MSG_LESSON_STATUS_MISSED;
 
 				terrWidget->setText(2, strChinaStatus);
 				terrWidget->setData(0, QT_TOOLBOXLITEMSTATUS, Status);
@@ -694,4 +663,6 @@ SelLessonStatus UIAuxiliaryPanel::SwitchLesson(QTreeWidgetItem* terrWidget)
 			return Ready;
 		}
 	}
+
+	return NullStatus;
 }

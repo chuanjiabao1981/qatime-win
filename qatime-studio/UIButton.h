@@ -8,7 +8,7 @@
 #ifndef _LS_MEDIACAPTURE_UI_BUTTON_H_
 #define _LS_MEDIACAPTURE_UI_BUTTON_H_
 #include <QtWidgets/QPushButton>
-
+#pragma execution_character_set("utf-8")
 
 class CButton : public QPushButton
 {

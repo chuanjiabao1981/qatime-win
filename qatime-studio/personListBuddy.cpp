@@ -6,7 +6,7 @@ personListBuddy::personListBuddy(QWidget *parent) :
     QWidget(parent)
 {
  //   initUi();
-	this->setFixedSize(QSize(300, 30));
+	this->setFixedSize(QSize(320, 30));
 }
 
 personListBuddy::~personListBuddy()
@@ -24,15 +24,21 @@ void personListBuddy::initFindPeople()
 	secLinEdit = new QLineEdit(this);
 	connect(secLinEdit, SIGNAL(textChanged(const QString)), this, SLOT(findName(const QString)));
 	secFindButton = new QPushButton(this);
-	connect(secFindButton, SIGNAL(clicked()), this, SLOT(findName()));	
-	secLinEdit->move(5, 5);
-	secLinEdit->setFixedWidth(220);
+	connect(secFindButton, SIGNAL(clicked()), this, SLOT(findName()));
+
+	secLinEdit->move(1, 1);
+	secLinEdit->setFixedWidth(283);
+	secLinEdit->setFixedHeight(28);
 	secLinEdit->setPlaceholderText("请输入要查的姓名");
-	secLinEdit->setAlignment(Qt::AlignCenter);//居中对齐	
-	secLinEdit->setStyleSheet("QLineEdit{ bordercolor:red; font:10pt}");
-	secFindButton->resize(48, 22);
-	secFindButton->move(230, 4);
-	secFindButton->setText("查找");
+	secLinEdit->setAlignment(Qt::AlignLeft);//居左对齐	
+	secLinEdit->setStyleSheet("QLineEdit{ bordercolor:red; font:10pt}"
+		"QLineEdit:hover{ border: 1px solid rgb(0,0,0) }"
+		"QLineEdit{ border: 1px solid #cccccc }");
+	secFindButton->setStyleSheet("border-image: url(:/LoginWindow/images/find.png)");
+	secFindButton->resize(33, 28);
+	secFindButton->move(283, 1);
+	secFindButton->setCursor(Qt::PointingHandCursor);
+//	secFindButton->setText("查找");
 }
 void personListBuddy::initNotFind()
 {
@@ -45,7 +51,7 @@ void personListBuddy::initNotFind()
 	notFind->hide();
 	firstButton = new QCheckBox(this);
 	connect(firstButton, SIGNAL(clicked(bool)), this, SLOT(stopAllTalk(bool)));
-	firstButton->move(235, 5);
+	firstButton->move(272, 7);
 	firstButton->setText("全禁");
 }
 
@@ -67,9 +73,9 @@ void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID)
     color.setColor(QPalette::Text,Qt::gray);
 //    sign->setPalette(color);
     //布局
-    head->move(5,1);
-    name->move(7+16+10,10);
-	button->move(235, 5);
+    head->move(0,0);
+    name->move(7+16+10,8);
+	button->move(272, 7);
 	button->setText("禁言");
 
 	setNetworkPic(szUrl);

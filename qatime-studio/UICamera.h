@@ -17,7 +17,9 @@ public:
 private:
 	Ui::UICamera ui;
 	UIMainWindow*    m_parent;
-
+	QTimer*          m_CameraTimer;
+private slots :
+	void OpenCamera();
 public:
 	void SetMainWindow(UIMainWindow* hwnd);
 };

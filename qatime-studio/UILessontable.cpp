@@ -42,8 +42,8 @@ void UILessonTable::init()
 	ui.lessonTable_tableWidget->horizontalHeader()->setSectionsMovable(false);
 	ui.lessonTable_tableWidget->horizontalHeader()->setSectionsClickable(false);
 
-	ui.lessonTable_tableWidget->verticalHeader()->setDefaultSectionSize(25); //设置行高
-	ui.lessonTable_tableWidget->setFrameShape(QFrame::NoFrame); //设置无边框
+	ui.lessonTable_tableWidget->verticalHeader()->setDefaultSectionSize(30); //设置行高
+//	ui.lessonTable_tableWidget->setFrameShape(QFrame::NoFrame); //设置无边框
 	ui.lessonTable_tableWidget->setShowGrid(false); //设置不显示格子线
 	ui.lessonTable_tableWidget->verticalHeader()->setVisible(false); //设置垂直头不可见
 	ui.lessonTable_tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);  //可多选（Ctrl、Shift、  Ctrl+A都可以）
@@ -51,13 +51,14 @@ void UILessonTable::init()
 	ui.lessonTable_tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); //设置不可编辑
 	ui.lessonTable_tableWidget->horizontalHeader()->resizeSection(0, 5); //设置表头第一列的宽度为30
 	ui.lessonTable_tableWidget->horizontalHeader()->resizeSection(1, 25); //设置表头第一列的宽度为30
-	ui.lessonTable_tableWidget->horizontalHeader()->resizeSection(2, 80); //设置表头第二列的宽度为70
-	ui.lessonTable_tableWidget->horizontalHeader()->resizeSection(3, 180); //设置表头第三列的宽度为200
+	ui.lessonTable_tableWidget->horizontalHeader()->resizeSection(2, 90); //设置表头第二列的宽度为70
+	ui.lessonTable_tableWidget->horizontalHeader()->resizeSection(3, 190); //设置表头第三列的宽度为200
 	ui.lessonTable_tableWidget->horizontalHeader()->setFixedHeight(30); //设置表头的高度
 	ui.lessonTable_tableWidget->setStyleSheet("selection-background-color:lightblue;");  //设置选中背景色
 	ui.lessonTable_tableWidget->horizontalHeader()->setVisible(false);
 
 	// 设置滚动条样式
+	ui.lessonTable_tableWidget->horizontalScrollBar()->setVisible(false);
 	ui.lessonTable_tableWidget->verticalScrollBar()->setStyleSheet("QScrollBar:vertical"
 		"{"
 		"width:8px;"
@@ -137,6 +138,10 @@ void UILessonTable::RequestLesson()
 
 void UILessonTable::returnLesson()
 {
+	QFont font;
+	font.setPointSize(10);
+	font.setFamily(("微软雅黑"));
+
 	QByteArray result = reply->readAll();
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
@@ -203,6 +208,8 @@ void UILessonTable::returnLesson()
 					pItemNum->setData(QT_TOOLBOXLESSONID, m_LessonID);
 					pItemNum->setData(QT_TOOLBOXCOURSEID, m_CourseID);
 					pItemNum->setData(QT_TOOLBOXSTATUS, m_Status);
+					pItemNum->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+					pItemNum->setFont(font);
 					ui.lessonTable_tableWidget->setItem(i, 2, pItemNum);
 
 					QTableWidgetItem *pItemName = new QTableWidgetItem(m_LessonName);
@@ -210,6 +217,7 @@ void UILessonTable::returnLesson()
 					pItemName->setData(QT_TOOLBOXLESSONID, m_LessonID);
 					pItemName->setData(QT_TOOLBOXCOURSEID, m_CourseID);
 					pItemName->setData(QT_TOOLBOXSTATUS, m_Status);
+					pItemName->setFont(font);
 					ui.lessonTable_tableWidget->setItem(i, 3, pItemName);
 					i++;
 				}

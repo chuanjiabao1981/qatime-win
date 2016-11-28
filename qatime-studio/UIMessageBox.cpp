@@ -16,8 +16,8 @@
 #include "UIMessageBox.h"
 
 
-#define MESSAGEBOX_FIXED_HEIGHT 180
-#define MESSAGEBOX_FIXED_WIDTH  340
+#define MESSAGEBOX_FIXED_HEIGHT 150
+#define MESSAGEBOX_FIXED_WIDTH  300
 #define MESSAGEBOX_FIXED_TITLE_HEIGHT 128
 
 class CSpliter : public QWidget
@@ -36,7 +36,7 @@ protected:
 
 		QRect rt = rect();
 		p.setPen(Qt::NoPen);
-		QBrush b(QColor(0x656565));
+		QBrush b(QColor(0xababab));
 		p.setBrush(b);
 		p.drawRect(rt.left(), rt.top(), rt.width(), rt.height());
 	};
@@ -219,7 +219,7 @@ void CMessageBox::initUI()
 					m_pInnerText->setPalette(pe);
 
 					m_pInnerText->setWordWrap(true);
-					m_pInnerText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter | Qt::AlignJustify | Qt::AlignAbsolute);
+					m_pInnerText->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter | Qt::AlignJustify | Qt::AlignAbsolute);
 					m_pInnerText->setText(m_qsText);
 				}
 
@@ -252,7 +252,7 @@ void CMessageBox::initUI()
 
 			pLayout->addLayout(pBottomLayout);
 		}
-		pLayout->addSpacing(20);
+//		pLayout->addSpacing(20);
 
 	}
 	setLayout(pLayout);
@@ -311,9 +311,9 @@ void CMessageBox::paintEvent(QPaintEvent *)
 	
 	QPainter p(this);
 	QRect rt = rect();
-	QPen pen(QColor(0x141415), 0);
+	QPen pen(QColor(0xababab), 0);
 	p.setPen(pen);
-	QBrush b(QColor(0xf9f9f9));
+	QBrush b(QColor(0xffffff));
 	p.setBrush(b);
 	p.drawRect(rt.left(), rt.top(), rt.width() - 1, rt.height() - 1);
 }

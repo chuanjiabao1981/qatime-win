@@ -10,11 +10,12 @@ personList::personList(QWidget *parent) :
 	, buddyFirst(NULL)
 	, buddySec(NULL)
 	, buddyLast(NULL)
+	, backImage(NULL)
 {
     setFocusPolicy(Qt::NoFocus);       // 去除item选中时的虚线边框
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);//水平滚动条关闭
     initMenu();	
-//	initSecUi();
+
 	timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(timeOutSet()));
 }
@@ -160,6 +161,7 @@ void personList::initSecUi()
 	this->setItemWidget(newItem, buddySec);	
 	newItem->setHidden(false);
 	buddySec->secLinEdit->raise();
+	newItem->setBackgroundColor(QColor(153,153,153));
 
 	buddyLast = new personListBuddy();
 	buddyLast->initNotFind();	

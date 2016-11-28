@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>321</width>
-    <height>260</height>
+    <width>338</width>
+    <height>286</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,29 +17,38 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>30</y>
-     <width>300</width>
-     <height>200</height>
+     <y>40</y>
+     <width>320</width>
+     <height>237</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(191, 191, 191);</string>
    </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>0</y>
-     <width>300</width>
-     <height>30</height>
+     <y>10</y>
+     <width>101</width>
+     <height>20</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>微软雅黑</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(230, 230, 230);</string>
+    <string notr="true"/>
    </property>
    <property name="text">
-    <string>今天课程表</string>
+    <string>今日课程安排</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -47,12 +56,12 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>320</width>
-     <height>260</height>
+     <width>341</width>
+     <height>301</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(230, 230, 230);</string>
+    <string notr="true">background-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
     <string/>
@@ -61,27 +70,43 @@
   <widget class="QPushButton" name="cancel_pushButton">
    <property name="geometry">
     <rect>
-     <x>96</x>
-     <y>235</y>
-     <width>51</width>
-     <height>20</height>
+     <x>217</x>
+     <y>10</y>
+     <width>57</width>
+     <height>21</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>微软雅黑</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-image: url(:/LoginWindow/images/cancel.png);</string>
+   </property>
    <property name="text">
-    <string>取消</string>
+    <string/>
    </property>
   </widget>
   <widget class="QPushButton" name="ok_pushButton">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>235</y>
-     <width>51</width>
-     <height>20</height>
+     <x>273</x>
+     <y>10</y>
+     <width>57</width>
+     <height>21</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>微软雅黑</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border-image: url(:/LoginWindow/images/ok1.png);</string>
+   </property>
    <property name="text">
-    <string>确认</string>
+    <string/>
    </property>
   </widget>
   <zorder>label_2</zorder>
@@ -91,6 +116,8 @@
   <zorder>ok_pushButton</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="loginwindow.qrc"/>
+ </resources>
  <connections/>
 </ui>

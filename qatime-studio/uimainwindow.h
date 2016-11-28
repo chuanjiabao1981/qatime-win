@@ -20,8 +20,13 @@
 #include "UILessontable.h"
 #include "UIMenuTool.h"
 #include "UICamera.h"
-#include "UISidescreen.h"
 #include <QMutex>
+#include "Rangecapture.h"
+#include "UISetparam.h"
+#include "UIHoverwindow.h"
+#include "UISeelivewnd.h"
+#include "UIScreentip.h"
+#include "UIPersonNum.h"
 #pragma execution_character_set("utf-8")
 #define STARTLS_ASYNC
 
@@ -33,7 +38,12 @@ class UIRatio;
 class UILessonTable;
 class UIVideo;
 class UICamera;
-class UISideScreen;
+class RangeCapture;
+class UISetParam;
+class UIHoverWindow;
+class UISeeLiveWnd;
+class UIScreenTip;
+class UIPersonNum;
 
 struct StructVideo
 {
@@ -69,7 +79,12 @@ private:
 	UILessonTable*					m_LessonTable;		// 课程表窗口
 	UIVideo*						m_VideoInfo;		// 直播窗口
 	UICamera*						m_CameraInfo;		// 摄像头窗口
-	UISideScreen*					m_SideScreenTool;	// 副屏窗口上的工具条窗口
+	UISetParam*						m_SetParam;			// 设置参数窗口
+	UIHoverWindow*					m_HoverWnd;			// 悬浮窗口
+	UISeeLiveWnd*					m_SeeLiveWnd;		// 直播窗口放大
+	UIScreenTip*					m_ScreenTip;		// 全屏提示框
+	UIPersonNum*					m_PersonNum;		// 观看人数
+
 	QString							m_teacherID;		// 老师ID
 	QTimer*							m_CountTimer;		// 计时器
 	QTimer*							m_HeartTimer;		// 心跳
@@ -85,8 +100,10 @@ private:
 	HWND							m_CameraWnd;		// 摄像头窗口句柄
 	QString							m_liveToken;		// 直播心跳时需要（开始直播时返回token）
 
-	UIMenuTool*						m_MenuTool;			//  工具按钮
+	UIMenuTool*						m_MenuTool;			// 工具按钮
 	QTimer*							m_tempTimers;		// 临时的定时器，用完记得关掉
+	QTimer*							m_ScreenTipTimer;	// 启动全屏提示
+	RangeCapture*					m_RangeCapture;		// 区域抓取窗口
 	int a;
 	int chat_X;	//聊天位置x
 	int chat_Y; //聊天位置y
@@ -108,31 +125,28 @@ private:
 	QPoint							m_startPos;
 	QPoint							m_clickPos;
 	QPoint							m_WndCurPos;
-
-	QLabel*							m_splitLine;			// 分割线
 private slots :
 	void MinDialog();									// 最小化对话框
-	void MaxDialog();									// 最大化对话框
 	void CloseDialog();									// 关闭对话框
-	void Expansion();									// 收缩面板
 	void slot_startOrStopLiveStream();					// 开始直播
 	void VideoStatus(int iStatus);						// 视频状态（直播中暂停、继续的控制）
 	void AudioStatus(int iStatus);						// 声音状态（直播中暂停、继续的控制）
-	void FullScreenStatus(int iStatus);					// 切换全屏视频源
+	void SwitchScreenStatus(int iStatus);					// 切换全屏视频源
 	void slot_onCountTimeout();							// 计时器 改变直播时间
 	void slot_onHeartTimeout();							// 5分一次，发送心跳
 	void slot_onTempTimeout();							// 临时应用
-	void OtherApp(int i);									// 其它APP应用
-	void clickChangeAudio(int);
-	void clickChangeVideo(int);							// 弹出摄像头选择框
-	void clickChangeRatio();							// 弹出分辨率框
+	void slot_ScreenTipTimeout();
+	void SetParamWindow();								// 设置参数窗口
 	void clickLessonList();								// 弹出课程表
-	void fullSereen(int b);								// 隐藏聊天区
 	void setVideoPos();									// 设置视频位置
 	void setCameraPos();								// 设置视频头位置
 	void HideSideScreen();								// 隐藏摄像头屏幕
-	void SwichScreen();									// 切换屏幕
-	void WhiteBoard();								// 切换白板
+	void WhiteBoard();									// 切换白板
+	void returnClick();									// 切换账号
+
+private:
+	void setNetworkPic(const QString &szUrl);			// 显示网络图片
+
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result); // 添加caption
 	virtual void resizeEvent(QResizeEvent *);			// 设置窗口圆角
@@ -141,6 +155,8 @@ protected:
 	virtual void focusInEvent(QFocusEvent *e);
 	virtual void timerEvent(QTimerEvent *event);
 	virtual bool eventFilter(QObject *target, QEvent *event);
+	virtual void enterEvent(QEvent *);
+	virtual void leaveEvent(QEvent *);
 
 public:
 	void setTeacherInfo(QJsonObject& data);					// 设置老师信息
@@ -154,15 +170,12 @@ public:
 	void SendStopLiveHttpMsg(bool bConnect=true);			// 往服务器发送直播停止消息
 	void SendHeartBeatHttpMsg();							// 往服务器发送直播心跳消息（5分钟一次）
 	void ShowAuxiliary();									// 显示辅导班
-	void InitAudioList();
-	void InitVideoList();
 	void setAudioChangeIndex(QString path);					//  改变麦克风
 	void setVideoChangeIndex(QString path);					//  改变视频头
 	void setRatioChangeIndex(int index);					//  改变分辨率
 
 
 	void HideOtherUI( QWidget* self=NULL);					//  隐藏其他界面
-	void returnClick();
 	void setLoginWindow(LoginWindow* parent);
 	void setCurChatRoom(QString chatID, QString courseid);	// 进入聊天室
 	void RequestKey();										// 申请云信key
@@ -172,7 +185,6 @@ public:
 	void setVideoLesson(QString lessonName);				// 设置视频上显示的课程
 	void showChatRoomWnd();									// 显示聊天会话
 	void LessonTable_Auxiliary(QString sLessonID, QString sCourseID); //程表中选择课程——关联到辅导班
-	void setLiveBtnEnable(bool bEnable);
 	void SendVideoMsg(UINT iMsg);							// 往win_video发送消息
 	void SendCameraMsg(UINT iMsg);							// 往camera_video发送消息
 	void FinishStartLive();									// 返回开始直播请求的token
@@ -183,6 +195,8 @@ public:
 	void SendChangeStatusMsg(QString id);
 	void returnChangeStatus();	
 	void setPausedBtn();									// 改变直播按钮图片
+	void LivePage();										// 切换到直播页
+	void setComeBack();										// 从放大的窗口返回到小窗口
 };
 
 #endif // UIMAINWINDOW_H

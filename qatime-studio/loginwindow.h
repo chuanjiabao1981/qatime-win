@@ -23,10 +23,16 @@ public:
 	LoginWindow(QWidget *parent = 0);
 	~LoginWindow();
 
+	// 鼠标按下拖动的操作
+	QPoint							m_startPos;
+	QPoint							m_clickPos;
+	QPoint							m_WndCurPos;
+
 protected:
 	void mousePressEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);
 	void mouseReleaseEvent(QMouseEvent *e);
+	virtual bool eventFilter(QObject *target, QEvent *event);
 
 private slots :
 	void OnLogIn();				// 立即登陆

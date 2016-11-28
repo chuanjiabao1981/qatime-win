@@ -88,6 +88,10 @@ QString Lesson::ChinaLessonStatus()
 	{
 		strChinaStatus = MSG_LESSON_STATUS_COMPLETED;
 	}
+	else if (mStatus == "missed")
+	{
+		strChinaStatus = MSG_LESSON_STATUS_MISSED;
+	}
 
 	return strChinaStatus;
 }
