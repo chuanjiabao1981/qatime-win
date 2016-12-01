@@ -290,6 +290,8 @@ void UIAuxiliaryPanel::setCourseInfoToTree(QJsonArray courses, QString url, QStr
 			m_pTreeCurrentItem->parent()->setTextColor(0, QColor("#FF0000"));
 			m_pTreeCurrentItem->parent()->setTextColor(2, QColor("#FF0000"));
 			m_pTreeCurrentItem->parent()->setExpanded(true);
+			imageItem1->setIcon(0, qIcon);
+			imageItem1->setText(0, m_lessonName);
 
 			//进入聊天室
 			m_chatID = chatID;
@@ -457,7 +459,7 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	{
 		CMessageBox::showMessage(
 			QString("答疑时间"),
-			QString("不能切换至已结束/未开始的课程！"),
+			QString("不能切换至该课程！"),
 			QString("确定"),
 			QString());
 		return;

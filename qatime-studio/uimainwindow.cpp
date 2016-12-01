@@ -116,18 +116,14 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	m_RangeCapture = new RangeCapture();
 	m_RangeCapture->setWindowFlags(Qt::FramelessWindowHint);
+	m_RangeCapture->setMainWindow(this);
+	m_RangeCapture->move(0, 0);
 	m_RangeCapture->hide();
 
 	m_HoverWnd = new UIHoverWindow();
 	m_HoverWnd->setWindowFlags(Qt::FramelessWindowHint);
 	m_HoverWnd->setParentWindow(this);
 	m_HoverWnd->hide();
-
-// 	m_PersonNum = new UIPersonNum(this);
-// 	m_PersonNum->setWindowFlags(Qt::FramelessWindowHint);
-// 	m_PersonNum->resize(40, 20);
-// 	m_PersonNum->move(210,190);
-// 	m_PersonNum->show();
 
 	// 直播按钮
 	ui.Live_pushBtn->setText("开始直播");
@@ -156,24 +152,41 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_ScreenTipTimer->start(2000);
 
 	// 设置摄像头视频源样式
-	ui.video_checkBox->setStyleSheet("QCheckBox::indicator{width: 62px;height: 20px;}"
+	ui.video_checkBox->setStyleSheet("QCheckBox::indicator{width: 18px;height: 16px;}"
 		"QCheckBox::indicator:unchecked{image: url(./images/camera_open.png);}"
 		"QCheckBox::indicator:checked{image: url(./images/camera_close.png);}");
 
 	// 设置麦克风样式
-	ui.Audio_checkBox->setStyleSheet("QCheckBox::indicator{width: 55px;height: 20px;}"
+	ui.Audio_checkBox->setStyleSheet("QCheckBox::indicator{width: 18px;height: 16px;}"
 		"QCheckBox::indicator:unchecked{image: url(./images/mic_open.png);}"
 		"QCheckBox::indicator:checked{image: url(./images/mic_close.png);}");
 
 	// 设置窗口切换样式
-	ui.switchScreen_checkBox->setStyleSheet("QCheckBox::indicator{width: 69px;height: 20px;}"
+	ui.switchScreen_checkBox->setStyleSheet("QCheckBox::indicator{width: 18px;height: 16px;}"
 		"QCheckBox::indicator:unchecked{image: url(./images/switch.png);}"
 		"QCheckBox::indicator:checked{image: url(./images/switch.png);}");
 
 	// 设置参数窗口
-	ui.set_checkBox->setStyleSheet("QCheckBox::indicator{width: 50px;height: 20px;}"
+	ui.set_checkBox->setStyleSheet("QCheckBox::indicator{width: 18px;height: 16px;}"
 		"QCheckBox::indicator:unchecked{image: url(./images/set.png);}"
 		"QCheckBox::indicator:checked{image: url(./images/set.png);}");
+
+	// 关闭窗口采集样式
+	ui.close_radioButton->setStyleSheet("QRadioButton::indicator{width: 62px;height: 22px;}"
+		"QRadioButton::indicator:unchecked{image: url(./images/captureclose_uncheck.png);}"
+		"QRadioButton::indicator:checked{image: url(./images/captureclose_check.png);}"
+		"QRadioButton::indicator:checked:disabled{image:url(./images/captureclose_disabled.png);}"
+		"QRadioButton::indicator:unchecked:disabled{image:url(./images/captureclose_disabled.png);}");
+
+	// 窗口采集样式
+	ui.rect_radioButton->setStyleSheet("QRadioButton::indicator{width: 62px;height: 22px;}"
+		"QRadioButton::indicator:unchecked{image: url(./images/capturerect_uncheck.png);}"
+		"QRadioButton::indicator:checked{image: url(./images/capturerect_check.png);}");
+
+	// 全屏采集样式
+	ui.full_radioButton->setStyleSheet("QRadioButton::indicator{width: 62px;height: 22px;}"
+		"QRadioButton::indicator:unchecked{image: url(./images/capturefull_uncheck.png);}"
+		"QRadioButton::indicator:checked{image: url(./images/capturefull_check.png);}");
 
 	QPixmap pixmap(QCoreApplication::applicationDirPath() + "/images/login_min.png");
 	QPixmap pixmap1(QCoreApplication::applicationDirPath() + "/images/login_close.png");
@@ -182,6 +195,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	
 	m_charRoom = new UIChatRoom(ui.chat_widget);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
+	m_charRoom->setMainWindow(this);
  	m_charRoom->move(10, 0);
 	m_charRoom->resize(m_charRoom->size().width(), ui.chat_widget->size().height());
 	m_charRoom->show();
@@ -200,6 +214,10 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	font.setPointSize(12);
 	font.setFamily(("微软雅黑"));
 	ui.tabWidget->setFont(font);
+
+	ui.close_radioButton->installEventFilter(this);
+	ui.rect_radioButton->installEventFilter(this);
+	ui.full_radioButton->installEventFilter(this);
 }
 
 UIMainWindow::~UIMainWindow()
@@ -288,7 +306,7 @@ UIMainWindow::~UIMainWindow()
 
 void UIMainWindow::WhiteBoard()
 {
-	m_RangeCapture->show();
+	m_RangeCapture->setShowOrHide(true);
 	SetWindowPos((HWND)m_RangeCapture->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 }
 
@@ -297,7 +315,7 @@ void UIMainWindow::MinDialog()
 	//需求更改为，点击最小化，隐藏此窗口，弹出悬浮窗
 	this->hide();
 	QDesktopWidget *dsk = QApplication::desktop();
-	SetWindowPos((HWND)m_HoverWnd->winId(), HWND_TOPMOST, dsk->width() - 44, 678, 0, 0, SWP_NOSIZE);
+	SetWindowPos((HWND)m_HoverWnd->winId(), HWND_TOPMOST, dsk->width() - 45, dsk->height()*0.6, 0, 0, SWP_NOSIZE);
 	m_HoverWnd->resize(44, m_HoverWnd->size().height());
 	m_HoverWnd->SetNumber();
 	m_HoverWnd->show();
@@ -318,6 +336,13 @@ void UIMainWindow::CloseDialog()
 		//隐藏设置窗口
 		if (m_SetParam)
 			m_SetParam->setVisible(false);
+
+		if (m_RangeCapture)
+			m_RangeCapture->setShowOrHide(false);
+
+		if (m_ScreenTip)
+			m_ScreenTip->setVisible(false);
+		
 		close();
 	}
 }
@@ -493,6 +518,8 @@ void UIMainWindow::slot_startOrStopLiveStream()
 				{
 					m_HeartTimer->stop();					// 停止发送心跳
 				}
+
+				ui.close_radioButton->setEnabled(true);
 			}
 			else
 				return;
@@ -517,6 +544,15 @@ void UIMainWindow::slot_startOrStopLiveStream()
 				return;
 			}
 
+			if (ui.close_radioButton->isChecked())
+			{
+				CMessageBox::showMessage(
+					QString("答疑时间"),
+					QString("请选择采集模式后再开始直播！"),
+					QString("确定"));
+				return;
+			}
+
  			m_VideoInfo->StartLiveVideo();
 			SendVideoMsg((UINT)MSG_VIDEO_START_LIVE);
 			SendCameraMsg((UINT)MSG_VIDEO_START_LIVE);
@@ -528,6 +564,8 @@ void UIMainWindow::slot_startOrStopLiveStream()
 
 			m_CountTimer->start(1000);
 			m_HeartTimer->start(1000 * 60 * 5);
+
+			ui.close_radioButton->setEnabled(false);
 		}
 
 		m_AuxiliaryPanel->setPreview(!bLiving);
@@ -1294,6 +1332,9 @@ void UIMainWindow::setVideoPos()
 			m_ShowVideoTimer->stop();
 		MoveWindow(m_VideoWnd, 0, 0, 316, 179, true);
 		ui.video_widget->setVisible(false);
+		
+		if (m_RangeCapture)
+			m_RangeCapture->setVideoWnd(m_VideoWnd);
 	}
 }
 
@@ -1304,6 +1345,13 @@ void UIMainWindow::setCameraPos()
 		if (m_ShowCameraTimer->isActive())
 			m_ShowCameraTimer->stop();
 		MoveWindow(m_CameraWnd, 0, 0, 317, 178, true);
+
+		if (m_RangeCapture)
+		{
+			m_RangeCapture->setShowOrHide(true);
+			m_RangeCapture->ToRectDialog();
+			SetWindowPos((HWND)m_RangeCapture->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+		}
 	}
 }
 
@@ -1314,6 +1362,7 @@ void UIMainWindow::SendVideoMsg(UINT iMsg)
 		if (iMsg == MSG_VIDEO_START_LIVE)
 		{
 			QString url = m_AuxiliaryPanel->getURL();
+//			url = "rtmp://pa0a19f55.live.126.net/live/1243a663c3e54b099d1cc35ee83a7921?wsSecret=e9f02c94465ba21c6e1316e5233fd5d3&wsTime=1480509627";
 			COPYDATASTRUCT sendData;
 			char result[MAX_PATH];
 			QByteArray chPath = url.toLatin1();
@@ -1341,6 +1390,7 @@ void UIMainWindow::SendCameraMsg(UINT iMsg)
 		if (iMsg == MSG_VIDEO_START_LIVE)
 		{
 			QString url = m_AuxiliaryPanel->getCameraURL();
+//			url = "rtmp://pa0a19f55.live.126.net/live/02dce8e380034cf9b2ef1f9c26c4234c?wsSecret=9322d438e9410afd21bdd9785b15a4bb&wsTime=1480509609";
 			COPYDATASTRUCT sendData;
 			char result[MAX_PATH];
 			QByteArray chPath = url.toLatin1();
@@ -1470,7 +1520,6 @@ bool UIMainWindow::eventFilter(QObject *target, QEvent *event)
 {
 	if (target == ui.titel_pushButton)
 	{
-		static int i = 0;
 		QMouseEvent* pMe = static_cast<QMouseEvent*>(event);
 		if (event->type() == QEvent::MouseButtonPress)
 		{
@@ -1507,6 +1556,53 @@ bool UIMainWindow::eventFilter(QObject *target, QEvent *event)
 			}
 		}
 		return false;
+	}
+	else if (target == ui.full_radioButton)
+	{
+		if (event->type() == QEvent::MouseButtonPress)
+		{
+			if (ui.full_radioButton->isChecked())
+				return false;
+			
+			bool bCheck = ui.close_radioButton->isChecked();
+			m_RangeCapture->setShowOrHide(true);
+			m_RangeCapture->ToFullDialog(bCheck);
+
+			ShowWindow(m_VideoWnd, SW_SHOW);
+			ui.close_radioButton->setEnabled(true);
+		}
+	}
+	else if (target == ui.rect_radioButton)
+	{
+		if (event->type() == QEvent::MouseButtonPress)
+		{
+			if (ui.rect_radioButton->isChecked())
+				return false;
+			
+			if ( m_RangeCapture)
+			{
+				m_RangeCapture->setShowOrHide(true);
+				m_RangeCapture->ToRectDialog();
+				SetWindowPos((HWND)m_RangeCapture->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
+				ShowWindow(m_VideoWnd, SW_SHOW);
+			}
+		}
+	}
+	else if (target == ui.close_radioButton)
+	{
+		if (event->type() == QEvent::MouseButtonPress)
+		{
+			if (!ui.close_radioButton->isEnabled())
+				return false;
+			
+			if (ui.rect_radioButton->isChecked())
+				m_RangeCapture->SetCurRect();
+			
+			m_RangeCapture->setShowOrHide(false);
+
+			ShowWindow(m_VideoWnd, SW_HIDE);
+		}
 	}
 	return false;
 }
@@ -1561,6 +1657,7 @@ void UIMainWindow::setNetworkPic(const QString &szUrl)
 	pixmap.loadFromData(jpegData);
 	QPixmap scaledPixmap = pixmap.scaled(QSize(70, 70), Qt::KeepAspectRatio);
 	ui.teacherPhoto_Label->setPixmap(scaledPixmap);
+	m_teacherImg = scaledPixmap.toImage();
 }
 
 // 切换到直播页
@@ -1575,4 +1672,19 @@ void UIMainWindow::setComeBack()
 	m_CameraInfo->setParent(ui.camera_widget, Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
 	m_CameraInfo->show();
 	m_CameraInfo->move(0, 0);
+}
+
+QImage UIMainWindow::TeacherPhotoPixmap()
+{
+	return m_teacherImg;
+}
+
+void UIMainWindow::clickRectRadio()
+{
+	ui.rect_radioButton->setChecked(true);
+}
+
+void UIMainWindow::clickFullRadio()
+{
+	ui.full_radioButton->setChecked(true);
 }

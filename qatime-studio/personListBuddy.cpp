@@ -1,6 +1,7 @@
 #include "personlistbuddy.h"
 #include <QPainter>
 #include <QSize>
+
 #pragma execution_character_set("utf-8")
 personListBuddy::personListBuddy(QWidget *parent) :
     QWidget(parent)
@@ -77,7 +78,7 @@ void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID)
     name->move(7+16+10,8);
 	button->move(272, 7);
 	button->setText("½ûÑÔ");
-
+//	QString URL = "http://qatime-testing.oss-cn-beijing.aliyuncs.com/avatars/8dba956b321d278c40f6b4eb84f05543.jpg";
 	setNetworkPic(szUrl);
 	name->setText(strName);
 //    sign->move(54,27);

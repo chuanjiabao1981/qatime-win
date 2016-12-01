@@ -84,9 +84,9 @@
 color: rgb(102, 102, 102);</string>
    </property>
    <property name="text">
-    <string>答疑时间直播器默认使用全屏采集
-模式，点击开始即可直播！（最小
-化可隐藏至屏幕右边缘）</string>
+    <string>答疑时间直播助手默认已开启窗口
+采集模式，点击开始即可直播！
+（最小化可隐藏至屏幕右边缘）</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="tip_checkBox">

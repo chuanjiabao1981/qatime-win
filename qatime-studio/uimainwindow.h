@@ -44,6 +44,7 @@ class UIHoverWindow;
 class UISeeLiveWnd;
 class UIScreenTip;
 class UIPersonNum;
+class UIChatRoom;
 
 struct StructVideo
 {
@@ -125,6 +126,8 @@ private:
 	QPoint							m_startPos;
 	QPoint							m_clickPos;
 	QPoint							m_WndCurPos;
+
+	QImage							m_teacherImg;
 private slots :
 	void MinDialog();									// 最小化对话框
 	void CloseDialog();									// 关闭对话框
@@ -197,6 +200,11 @@ public:
 	void setPausedBtn();									// 改变直播按钮图片
 	void LivePage();										// 切换到直播页
 	void setComeBack();										// 从放大的窗口返回到小窗口
+	QImage TeacherPhotoPixmap();							// 老师头像的pixmap
+
+	// RangeCapture窗口抓取交互函数
+	void clickFullRadio();
+	void clickRectRadio();
 };
 
 #endif // UIMAINWINDOW_H

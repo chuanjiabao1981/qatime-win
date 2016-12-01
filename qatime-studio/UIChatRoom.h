@@ -5,6 +5,7 @@
 #include "ui_UIChatRoom.h"
 #include "myemotionwidget.h"
 #include <QLabel>
+#include "uimainwindow.h"
 
 //---云信
 #include "nim_client_def.h"
@@ -19,6 +20,8 @@
 #include "YxChat/nim_cpp_msglog.h"
 #include <QNetworkAccessManager>
 
+class UIMainWindow;
+
 class UIChatRoom : public QWidget
 {
 	Q_OBJECT
@@ -29,6 +32,7 @@ public:
 	void stringToHtmlFilter(QString &str);					//QString转htlm
 	void stringToHtml(QString &str, QColor crl);			//QString转htlm带颜色
 	void imgPathToHtml(QString &path);						//edit 设置图片
+	void setMainWindow(UIMainWindow* parent);
 public slots:
 	void setBrow(QString path);
 
@@ -62,6 +66,7 @@ private:
 	QMap<QString, QString>			m_StudentInfo;		// key ：accid 
 	QString							mRemeberToken;
 	std::string						m_AddMemberID;		// 新加入的成员ID
+	UIMainWindow*					m_parent;			// 主窗口对象
 	void initEmotion();
 public:
 	QString							m_TeachterName;		// 老师名字

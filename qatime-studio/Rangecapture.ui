@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>369</width>
-    <height>265</height>
+    <width>640</width>
+    <height>640</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,24 +45,34 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="rect_pushButton">
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>微软雅黑</family>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
        <property name="styleSheet">
-        <string notr="true">background-color: rgb(0, 0, 0);
-color: rgb(255, 255, 255);</string>
+        <string notr="true">color: rgb(255, 255, 255);
+border-image: url(:/LoginWindow/images/chatBtnColor.png);</string>
        </property>
        <property name="text">
-        <string>区域抓取</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="styleSheet">
-        <string notr="true">background-color: rgb(0, 0, 0);
-color: rgb(255, 255, 255);</string>
-       </property>
-       <property name="text">
-        <string>全屏抓取</string>
+        <string>区域窗口</string>
        </property>
       </widget>
      </item>
@@ -94,9 +104,14 @@ color: rgb(255, 255, 255);</string>
      </property>
     </spacer>
    </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+   </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="loginwindow.qrc"/>
+ </resources>
  <connections/>
 </ui>

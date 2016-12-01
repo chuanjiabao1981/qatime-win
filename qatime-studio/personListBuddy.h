@@ -11,6 +11,7 @@
 #include <QNetworkReply>
 #include <QLineEdit>
 #include <QPushButton>
+
 //自定义信息Item类  
 class personListBuddy : public QWidget  
 {  

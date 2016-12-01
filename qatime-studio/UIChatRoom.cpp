@@ -50,6 +50,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	, kMsgLogNumberShow(20)
 	, m_switchTime(false)
 	, m_RecordTime(QDateTime::currentDateTime())
+	, m_parent(NULL)
 {
 	ui.setupUi(this);
 	setAutoFillBackground(true);
@@ -402,6 +403,15 @@ void UIChatRoom::clickSendMseeage()
 			name += "(我) ";
 			stringToHtml(name, selfColor);
 			stringToHtml(timeStr, timeColor);
+
+			// 本人头像_______________________________________
+// 			QImage image = m_parent->TeacherPhotoPixmap();
+// 			QImage NewImage = image.scaled(30, 30);
+// 
+// 			QTextCursor cursor = ui.text_talk->textCursor();
+// 			cursor.insertImage(QImage(NewImage));
+// 			ui.text_talk->insertHtml(name + timeStr);
+			//____________________________________________________
 			ui.text_talk->append(name + timeStr);
 			ui.text_talk->append("");
 			for (int i = 0; i < textList.size(); i++)
@@ -425,6 +435,13 @@ void UIChatRoom::clickSendMseeage()
 			stringToHtml(timeStr, timeColor);
 			stringToHtml(qName, selfColor);
 			stringToHtml(sendText, contentColor);
+
+			// 本人头像
+// 			QImage image = m_parent->TeacherPhotoPixmap();
+// 			QImage NewImage = image.scaled(30, 30);
+// 			QTextCursor cursor = ui.text_talk->textCursor();
+// 			cursor.insertImage(QImage(NewImage));
+// 			ui.text_talk->insertHtml(qName + timeStr);
 			ui.text_talk->append(qName + timeStr);
 			ui.text_talk->append(sendText);
 		}
@@ -679,6 +696,7 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 
 		std::string strName = pMsg->readonly_sender_nickname_;
 		std::string strContent = pMsg->content_;
+		std::string strID = pMsg->sender_accid_;
 
 		QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg->timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
 		stringToHtml(qTime, timeColor);
@@ -687,11 +705,28 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		stringToHtml(qName, nameColor);
 
 		QString qContent = QString::fromStdString(strContent);		
+
+		// 聊天头像
+// 		personListBuddy* Buddy = NULL;
+// 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
+// 		if (Buddy)
+// 		{
+// 			QPixmap* pixmap= (QPixmap*)Buddy->head->pixmap();
+// 			QImage image = pixmap->toImage().scaled(30, 30);
+// 
+// 			QTextCursor cursor = ui.text_talk->textCursor();
+// 			cursor.insertImage(QImage(image));
+// 			ui.text_talk->insertHtml(qName + " " + qTime);
+// 		}
+
 		ui.text_talk->append(qName + " " + qTime);
 		if (IsHasFace(qContent)) // 有表情则解析，没有表情直接输出
 			ParseFace(qContent);
 		else
+		{
+			stringToHtml(qContent, contentColor);
 			ui.text_talk->append(qContent);
+		}
 		ui.text_talk->append("");
 		ui.text_talk->moveCursor(QTextCursor::End);
 
@@ -1367,4 +1402,9 @@ void UIChatRoom::SetStudentName(int iNum)
 	liveNum += ")";
 	
 	ui.button_studentList->setText(liveNum);
+}
+
+void UIChatRoom::setMainWindow(UIMainWindow* parent)
+{
+	m_parent = parent;
 }
