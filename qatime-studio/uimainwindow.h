@@ -27,6 +27,8 @@
 #include "UISeelivewnd.h"
 #include "UIScreentip.h"
 #include "UIPersonNum.h"
+#include "Livestatusmanager.h"
+#include "UIChatHtml.h"
 #pragma execution_character_set("utf-8")
 #define STARTLS_ASYNC
 
@@ -45,6 +47,7 @@ class UISeeLiveWnd;
 class UIScreenTip;
 class UIPersonNum;
 class UIChatRoom;
+class LiveStatusManager;
 
 struct StructVideo
 {
@@ -56,7 +59,12 @@ struct MEDIA_DEVICE_DRIVE_INFO1
 	char* device_path_;
 	char* friendly_name_;
 };
-
+enum CameraStatus
+{
+	CameraStatusInit=0,		//未直播
+	CameraStatusTeaching,	//直播中
+	CameraStatusClose,		//已关闭
+};
 class UIMainWindow : public QWidget
 {
 	Q_OBJECT
@@ -85,10 +93,11 @@ private:
 	UISeeLiveWnd*					m_SeeLiveWnd;		// 直播窗口放大
 	UIScreenTip*					m_ScreenTip;		// 全屏提示框
 	UIPersonNum*					m_PersonNum;		// 观看人数
+	LiveStatusManager*				m_LiveStatusManager;// 直播状态更新类
+	UIChatHtml*						m_ChatHtml;			// 聊天窗的html
 
 	QString							m_teacherID;		// 老师ID
 	QTimer*							m_CountTimer;		// 计时器
-	QTimer*							m_HeartTimer;		// 心跳
 	QTimer*							m_ShowVideoTimer;	// 显示视频
 	QTimer*							m_ShowCameraTimer;	// 显示摄像头
 	INT64							m_iTimerCount;		// 计时器秒数
@@ -128,6 +137,12 @@ private:
 	QPoint							m_WndCurPos;
 
 	QImage							m_teacherImg;
+	// 直播需要的参数
+	QString							m_sBoardRtmp;			// 白板推流地址
+	QString							m_sCemeraRtmp;			// 摄像头推流地址
+	
+	bool							bHasCamera;				// 有无摄像头
+	CameraStatus					m_EnumStatus;			// 摄像头直播状态
 private slots :
 	void MinDialog();									// 最小化对话框
 	void CloseDialog();									// 关闭对话框
@@ -136,7 +151,6 @@ private slots :
 	void AudioStatus(int iStatus);						// 声音状态（直播中暂停、继续的控制）
 	void SwitchScreenStatus(int iStatus);					// 切换全屏视频源
 	void slot_onCountTimeout();							// 计时器 改变直播时间
-	void slot_onHeartTimeout();							// 5分一次，发送心跳
 	void slot_onTempTimeout();							// 临时应用
 	void slot_ScreenTipTimeout();
 	void SetParamWindow();								// 设置参数窗口
@@ -169,9 +183,7 @@ public:
 	void AuxiliaryRequestFinished();						// 辅导班http请求
 	void LessonRequestFinished();							// 课程http请求
 	void EnumAvailableMediaDevices();						// 枚举设备
-	void SendStartLiveHttpMsg();							// 往服务器发送直播开始消息
 	void SendStopLiveHttpMsg(bool bConnect=true);			// 往服务器发送直播停止消息
-	void SendHeartBeatHttpMsg();							// 往服务器发送直播心跳消息（5分钟一次）
 	void ShowAuxiliary();									// 显示辅导班
 	void setAudioChangeIndex(QString path);					//  改变麦克风
 	void setVideoChangeIndex(QString path);					//  改变视频头
@@ -190,8 +202,6 @@ public:
 	void LessonTable_Auxiliary(QString sLessonID, QString sCourseID); //程表中选择课程——关联到辅导班
 	void SendVideoMsg(UINT iMsg);							// 往win_video发送消息
 	void SendCameraMsg(UINT iMsg);							// 往camera_video发送消息
-	void FinishStartLive();									// 返回开始直播请求的token
-	void FinishStopLive();									// 返回结束直播请求的状态
 	void RequestError(QJsonObject& error, bool bTrue=true);	// 请求返回错误提示
 	void SendRequestStatus();
 	void RequestStatus();
@@ -201,10 +211,15 @@ public:
 	void LivePage();										// 切换到直播页
 	void setComeBack();										// 从放大的窗口返回到小窗口
 	QImage TeacherPhotoPixmap();							// 老师头像的pixmap
+	void showErrorTip(QString sError);						// 显示错误信息
+	void setBoradCamera(QString sBoard, QString sCamera);	// 设置推流信息
 
 	// RangeCapture窗口抓取交互函数
 	void clickFullRadio();
 	void clickRectRadio();
+
+	void startLiveStream();									// 服务器返回teaching后，才开始正式推流
+	bool IsHasCamera();										// 有无摄像头
 };
 
 #endif // UIMAINWINDOW_H

@@ -345,7 +345,18 @@ void UIChatRoom::stringToHtml(QString &str, QColor crl)
 	array.append(crl.green());
 	array.append(crl.blue());
 	QString strC(array.toHex());
-	str = QString("<span style=\" color:#%1;\">%2</span>").arg(strC).arg(str);
+	str = QString("<span style=\" color:#%1;\">%2</span>").arg(strC).arg(str);	
+}
+
+void UIChatRoom::stringToHtmlPos(QString &str, QColor crl)
+{
+	QByteArray array;
+	array.append(crl.red());
+	array.append(crl.green());
+	array.append(crl.blue());
+	QString strC(array.toHex());
+//	str = QString("<span style=\" color:#%1; padding-left:70px;\">%2</span>").arg(strC).arg(str); 
+	str = QString("<span style=\" color:#%1; line - height:50px; height:50px;\">%2</span>").arg(strC).arg(str);
 }
 
 void UIChatRoom::imgPathToHtml(QString &path)
@@ -401,12 +412,13 @@ void UIChatRoom::clickSendMseeage()
 		{
 			QString name = m_TeachterName;
 			name += "(我) ";
-			stringToHtml(name, selfColor);
-			stringToHtml(timeStr, timeColor);
+			//格式化颜色
+			stringToHtmlPos(name, selfColor);
+			stringToHtmlPos(timeStr, timeColor);
 
 			// 本人头像_______________________________________
 // 			QImage image = m_parent->TeacherPhotoPixmap();
-// 			QImage NewImage = image.scaled(30, 30);
+// 			QImage NewImage = image.scaled(18, 18);
 // 
 // 			QTextCursor cursor = ui.text_talk->textCursor();
 // 			cursor.insertImage(QImage(NewImage));
@@ -432,13 +444,13 @@ void UIChatRoom::clickSendMseeage()
 		{
 			QString qName = m_TeachterName;
 			qName += "(我) ";
-			stringToHtml(timeStr, timeColor);
-			stringToHtml(qName, selfColor);
+			stringToHtmlPos(timeStr, timeColor);
+			stringToHtmlPos(qName, selfColor);
 			stringToHtml(sendText, contentColor);
 
 			// 本人头像
 // 			QImage image = m_parent->TeacherPhotoPixmap();
-// 			QImage NewImage = image.scaled(30, 30);
+// 			QImage NewImage = image.scaled(18, 18);
 // 			QTextCursor cursor = ui.text_talk->textCursor();
 // 			cursor.insertImage(QImage(NewImage));
 // 			ui.text_talk->insertHtml(qName + timeStr);
@@ -447,6 +459,7 @@ void UIChatRoom::clickSendMseeage()
 		}
 
 		ui.text_talk->append("");
+//		ui.text_talk->append("");
 		ui.text_talk->acceptRichText();
 		ui.text_talk->moveCursor(QTextCursor::End);
 		ui.textEdit->clear();
@@ -712,7 +725,7 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 // 		if (Buddy)
 // 		{
 // 			QPixmap* pixmap= (QPixmap*)Buddy->head->pixmap();
-// 			QImage image = pixmap->toImage().scaled(30, 30);
+// 			QImage image = pixmap->toImage().scaled(18, 18);
 // 
 // 			QTextCursor cursor = ui.text_talk->textCursor();
 // 			cursor.insertImage(QImage(image));
@@ -728,6 +741,7 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 			ui.text_talk->append(qContent);
 		}
 		ui.text_talk->append("");
+//		ui.text_talk->append("");
 		ui.text_talk->moveCursor(QTextCursor::End);
 
 		bValid = true;
@@ -971,7 +985,7 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 	textCursor.insertText("\n");
 	textCursor.insertHtml(qContent);
 	textCursor.insertText("\n\r");
-
+	
 	m_switchTime = false;	
 }
 
@@ -1053,8 +1067,6 @@ void UIChatRoom::setKeyAndLogin(QString key)
 		CMessageBox::showMessage(QString("答疑时间"), QString("失败！"), QString("确定"), QString("取消"));
 		return;
 	}
-
-	
 
 	m_bLogin = true;
 }
@@ -1228,6 +1240,7 @@ void UIChatRoom::stepMsgDays(QDateTime dateTime)
 		fmt.setForeground(contentColor);
 		textCursor.setCharFormat(fmt);
 		textCursor.insertText(newDay);
+		ui.text_talk->moveCursor(QTextCursor::End);
 	}
 
 	m_ReceiveTime = dateTime;
@@ -1326,6 +1339,7 @@ void UIChatRoom::returnMember()
 				fmt.setForeground(contentColor);
 				textCursor.setCharFormat(fmt);
 				textCursor.insertText(sName);
+				ui.text_talk->moveCursor(QTextCursor::End);
 			}
 
 			//用完之后删除

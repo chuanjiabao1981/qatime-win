@@ -167,7 +167,7 @@ void RangeCapture::setShowOrHide(bool bShow)
 	if (m_RangeWnd == NULL)
 	{
 		m_RangeWnd = new UIRangeWnd();
-		m_RangeWnd->setWindowFlags(Qt::FramelessWindowHint);
+		m_RangeWnd->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 		m_RangeWnd->SetMainWnd(this);
 		m_RangeWnd->resize(21, 150);
 		QRect rc = this->geometry();

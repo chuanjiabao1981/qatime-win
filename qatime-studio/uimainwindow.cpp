@@ -60,6 +60,10 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, m_ScreenTip(NULL)
 	, m_ScreenTipTimer(NULL)
 	, m_PersonNum(NULL)
+	, m_LiveStatusManager(NULL)
+	, bHasCamera(false)
+	, m_EnumStatus(CameraStatusTeaching)
+	, m_ChatHtml(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
@@ -115,7 +119,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_LessonTable->hide();
 
 	m_RangeCapture = new RangeCapture();
-	m_RangeCapture->setWindowFlags(Qt::FramelessWindowHint);
+	m_RangeCapture->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 	m_RangeCapture->setMainWindow(this);
 	m_RangeCapture->move(0, 0);
 	m_RangeCapture->hide();
@@ -125,17 +129,19 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_HoverWnd->setParentWindow(this);
 	m_HoverWnd->hide();
 
+	m_LiveStatusManager = new LiveStatusManager(this);
+	m_LiveStatusManager->setMainWindow(this);
+
+	m_ChatHtml = new UIChatHtml();
+	m_ChatHtml->hide();
+
 	// 直播按钮
 	ui.Live_pushBtn->setText("开始直播");
 	ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
 
-	// 计时器 改变直播时间
+	// 计时器 改变直播计时时间
 	m_CountTimer = new QTimer(this);
 	connect(m_CountTimer, SIGNAL(timeout()), this, SLOT(slot_onCountTimeout()));
-
-	// 直播开始后每5分钟发送一次心跳
-	m_HeartTimer = new QTimer(this);
-	connect(m_HeartTimer, SIGNAL(timeout()), this, SLOT(slot_onHeartTimeout()));
 
 	m_ShowVideoTimer = new QTimer(this);
 	connect(m_ShowVideoTimer, SIGNAL(timeout()), this, SLOT(setVideoPos()));
@@ -255,15 +261,6 @@ UIMainWindow::~UIMainWindow()
 		m_CountTimer = NULL;
 	}
 
-	//删除定时器
-	if (m_HeartTimer)
-	{
-		if (m_HeartTimer->isActive())
-			m_HeartTimer->stop();
-		delete m_HeartTimer;
-		m_HeartTimer = NULL;
-	}
-
 	if (m_LoginWindow)
 		m_LoginWindow = NULL;
 
@@ -302,6 +299,12 @@ UIMainWindow::~UIMainWindow()
 		delete m_ScreenTip;
 		m_ScreenTip = NULL;
 	}
+
+	if (m_LiveStatusManager)
+	{
+		delete m_LiveStatusManager;
+		m_LiveStatusManager = NULL;
+	}
 }
 
 void UIMainWindow::WhiteBoard()
@@ -331,7 +334,7 @@ void UIMainWindow::CloseDialog()
 	if (iStatus == 1)
 	{
 		// 发送结束直播消息再关闭
-		SendStopLiveHttpMsg(false);
+		m_LiveStatusManager->SendStopLiveHttpMsg(false);
 
 		//隐藏设置窗口
 		if (m_SetParam)
@@ -500,8 +503,9 @@ void UIMainWindow::slot_startOrStopLiveStream()
 				
 				m_VideoInfo->StopLiveVideo();
 				SendVideoMsg((UINT)MSG_VIDEO_STOP_LIVE);
-				SendCameraMsg((UINT)MSG_VIDEO_STOP_LIVE);
-				SendStopLiveHttpMsg();
+				if (IsHasCamera() && m_EnumStatus != CameraStatusClose)
+					SendCameraMsg((UINT)MSG_VIDEO_STOP_LIVE);
+				m_LiveStatusManager->SendStopLiveHttpMsg();
 
 				if (m_CountTimer->isActive())
 				{
@@ -514,12 +518,8 @@ void UIMainWindow::slot_startOrStopLiveStream()
 						m_HoverWnd->SetLiveTimer("00:00:00");
 				}
 
-				if (m_HeartTimer->isActive())
-				{
-					m_HeartTimer->stop();					// 停止发送心跳
-				}
-
 				ui.close_radioButton->setEnabled(true);
+				m_AuxiliaryPanel->setPreview(false);
 			}
 			else
 				return;
@@ -553,24 +553,31 @@ void UIMainWindow::slot_startOrStopLiveStream()
 				return;
 			}
 
- 			m_VideoInfo->StartLiveVideo();
-			SendVideoMsg((UINT)MSG_VIDEO_START_LIVE);
-			SendCameraMsg((UINT)MSG_VIDEO_START_LIVE);
-
-			ui.time_label->setVisible(true);
-			ui.Live_pushBtn->setText("结束直播");
-			ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: red;border-radius: 5px; border: 2px solid red;}");
-			SendStartLiveHttpMsg();
-
-			m_CountTimer->start(1000);
-			m_HeartTimer->start(1000 * 60 * 5);
-
-			ui.close_radioButton->setEnabled(false);
+			
+			if (!IsHasCamera())
+				m_EnumStatus = CameraStatusClose;
+			m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_AuxiliaryPanel->getLessonID(),mRemeberToken);
 		}
-
-		m_AuxiliaryPanel->setPreview(!bLiving);
-		m_VideoInfo->show();
 	}
+}
+
+void UIMainWindow::startLiveStream()
+{
+	m_VideoInfo->StartLiveVideo();
+	SendVideoMsg((UINT)MSG_VIDEO_START_LIVE);
+
+	if (IsHasCamera() && m_EnumStatus != CameraStatusClose)
+		SendCameraMsg((UINT)MSG_VIDEO_START_LIVE);
+
+	ui.time_label->setVisible(true);
+	ui.Live_pushBtn->setText("结束直播");
+	ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: red;border-radius: 5px; border: 2px solid red;}");
+
+	m_CountTimer->start(1000);
+	m_LiveStatusManager->StartHeartBeat();
+
+	ui.close_radioButton->setEnabled(false);
+	m_AuxiliaryPanel->setPreview(true);
 }
 
 void UIMainWindow::VideoStatus(int iStatus)
@@ -581,12 +588,36 @@ void UIMainWindow::VideoStatus(int iStatus)
 	if (iStatus)
 	{
 		ShowWindow(m_CameraWnd, SW_HIDE);
-		PostMessage(m_CameraWnd,MSG_DEVICE_BACK,0,0);
+		if (m_VideoInfo)
+		{
+			m_EnumStatus = CameraStatusClose;
+
+			if (!IsHasCamera())
+				return;
+
+			if (!m_VideoInfo->IsCurrentLiving())
+				return;
+
+			SendCameraMsg((UINT)MSG_VIDEO_STOP_LIVE);
+			m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
+		}
 	}
 	else
 	{
 		ShowWindow(m_CameraWnd, SW_SHOW);
-		PostMessage(m_CameraWnd, MSG_VIDEO_CAMERA, 0, 0);
+		if (m_VideoInfo)
+		{
+			m_EnumStatus = CameraStatusTeaching;
+
+			if (!IsHasCamera())
+				return;
+
+			if (!m_VideoInfo->IsCurrentLiving())
+				return;
+
+			SendCameraMsg((UINT)MSG_VIDEO_START_LIVE);
+			m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
+		}
 	}
 }
 
@@ -617,21 +648,7 @@ void UIMainWindow::SetParamWindow()
 // 	m_CameraInfo->show();
 // 	m_CameraInfo->move(4, 29);
 //  	return;
-	if (m_SetParam == NULL)
-	{
-		m_SetParam = new UISetParam();
-		m_SetParam->setWindowFlags(Qt::FramelessWindowHint);
-		m_SetParam->setParent(this);
-		m_SetParam->show();
-		SetWindowPos((HWND)m_SetParam->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-
-		PostMessage(m_VideoWnd, MSG_DEVICE_AUDIO, 0, 0);
-		PostMessage(m_VideoWnd, MSG_DEVICE_VIDEO, 0, 0);
-	}
-	else
-	{
-		m_SetParam->setVisible(!m_SetParam->isVisible());
-	}
+	m_SetParam->setVisible(!m_SetParam->isVisible());
 }
 
 void UIMainWindow::slot_onCountTimeout()
@@ -668,11 +685,6 @@ void UIMainWindow::slot_ScreenTipTimeout()
 		SetWindowPos((HWND)m_ScreenTip->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 		m_ScreenTip->show();
 	}
-}
-
-void UIMainWindow::slot_onHeartTimeout()
-{
-	SendHeartBeatHttpMsg();
 }
 
 bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
@@ -771,6 +783,7 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 			// 0：摄像头 1：麦克风
 			if (pMsg->wParam == 0)
 			{
+				bHasCamera = true;
 				m_SetParam->setVideoParam(iCount, QString(QLatin1String(m_result.friendly_name_)), QString(QLatin1String(m_result.device_path_)));
 			}
 			else if (pMsg->wParam == 1)
@@ -859,101 +872,6 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 		}
 	}
 	return false;
-}
-
-void UIMainWindow::SendStartLiveHttpMsg()
-{
-	QString strUrl;
-#ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
-	strUrl.replace("{lessons_id}", m_AuxiliaryPanel->getLessonID());
-#else
-	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
-	strUrl.replace("{lessons_id}", m_AuxiliaryPanel->getLessonID());
-#endif
-
-	QUrl url = QUrl(strUrl);
-	QNetworkRequest request(url);
-
-	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
-	reply = manager.get(request);
-	connect(reply, &QNetworkReply::finished, this, &UIMainWindow::FinishStartLive);
-}
-
-void UIMainWindow::FinishStartLive()
-{
-	QByteArray result = reply->readAll();
-	QJsonDocument document(QJsonDocument::fromJson(result));
-	QJsonObject obj = document.object();
-	QJsonObject data = obj["data"].toObject();
-	QJsonObject error = obj["error"].toObject();
-	if (obj["status"].toInt() == 1 && data.contains("live_token"))
-	{
-		m_liveToken = data["live_token"].toString();
-		SendRequestStatus();
-	}
-	else if (obj["status"].toInt() == 0)
-	{
-		RequestError(error);
-	}
-}
-
-void UIMainWindow::SendHeartBeatHttpMsg()
-{
-	QString strUrl;
-#ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heartbeat?token={token}";
-	strUrl.replace("{lessons_id}", m_AuxiliaryPanel->getLessonID());
-	strUrl.replace("{token}", m_liveToken);
-#else
-	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heartbeat?token={token}";
-	strUrl.replace("{lessons_id}", m_AuxiliaryPanel->getLessonID());
-	strUrl.replace("{token}", m_liveToken);
-#endif
-
-	QUrl url = QUrl(strUrl);
-	QNetworkRequest request(url);
-
-	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
-	reply = manager.get(request);
-}
-
-void UIMainWindow::SendStopLiveHttpMsg(bool bConnect)
-{
-	QString strUrl;
-#ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
-	strUrl.replace("{lessons_id}", m_AuxiliaryPanel->getLessonID());
-#else
-	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
-	strUrl.replace("{lessons_id}", m_AuxiliaryPanel->getLessonID());
-#endif
-
-	QUrl url = QUrl(strUrl);
-	QNetworkRequest request(url);
-	QString str = this->mRemeberToken;
-
-	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
-	reply = manager.get(request);
-	if (bConnect)
-		connect(reply, &QNetworkReply::finished, this, &UIMainWindow::FinishStopLive);
-}
-
-void UIMainWindow::FinishStopLive()
-{
-	QByteArray result = reply->readAll();
-	QJsonDocument document(QJsonDocument::fromJson(result));
-	QJsonObject obj = document.object();
-	QJsonObject data = obj["data"].toObject();
-	QJsonObject error = obj["error"].toObject();
-	if (obj["status"].toInt() == 1 )
-	{
-		SendRequestStatus();
-	}
-	else if (obj["status"].toInt() == 0)
-	{
-		RequestError(error);
-	}
 }
 
 void UIMainWindow::SendRequestStatus()
@@ -1113,7 +1031,7 @@ void UIMainWindow::returnClick()
 	if (iStatus == 1)
 	{
 		// 发送结束直播消息再关闭
-		SendStopLiveHttpMsg(false);
+		m_LiveStatusManager->SendStopLiveHttpMsg(false);
 
 		if (m_LoginWindow)
 			m_LoginWindow->ReturnLogin();
@@ -1335,6 +1253,18 @@ void UIMainWindow::setVideoPos()
 		
 		if (m_RangeCapture)
 			m_RangeCapture->setVideoWnd(m_VideoWnd);
+
+		if (m_SetParam == NULL)
+		{
+			m_SetParam = new UISetParam();
+			m_SetParam->setWindowFlags(Qt::FramelessWindowHint);
+			m_SetParam->setParent(this);
+			m_SetParam->hide();
+			SetWindowPos((HWND)m_SetParam->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
+			PostMessage(m_VideoWnd, MSG_DEVICE_AUDIO, 0, 0);
+			PostMessage(m_VideoWnd, MSG_DEVICE_VIDEO, 0, 0);
+		}
 	}
 }
 
@@ -1687,4 +1617,22 @@ void UIMainWindow::clickRectRadio()
 void UIMainWindow::clickFullRadio()
 {
 	ui.full_radioButton->setChecked(true);
+}
+
+void UIMainWindow::setBoradCamera(QString sBoard, QString sCamera)
+{
+	m_sBoardRtmp = sBoard;
+	m_sCemeraRtmp = sCamera;
+}
+void UIMainWindow::showErrorTip(QString sError)
+{
+	CMessageBox::showMessage(
+		QString("答疑时间"),
+		QString(sError),
+		QString("确定"));
+}
+
+bool UIMainWindow::IsHasCamera()
+{
+	return bHasCamera;
 }

@@ -42,7 +42,7 @@
      <string notr="true">color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
-     <string>  答疑时间直播助手V0.5.0</string>
+     <string>  答疑时间直播助手V0.5.2</string>
     </property>
    </widget>
    <widget class="QPushButton" name="homepage_pushBtn">

@@ -31,6 +31,7 @@ public:
 	~UIChatRoom();
 	void stringToHtmlFilter(QString &str);					//QString转htlm
 	void stringToHtml(QString &str, QColor crl);			//QString转htlm带颜色
+	void stringToHtmlPos(QString &str, QColor crl);			//QString转html带颜色切位置上移
 	void imgPathToHtml(QString &path);						//edit 设置图片
 	void setMainWindow(UIMainWindow* parent);
 public slots:

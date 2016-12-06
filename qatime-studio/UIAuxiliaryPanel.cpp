@@ -440,19 +440,6 @@ void UIAuxiliaryPanel::on_DoubleClicked(QTreeWidgetItem* terrWidget, int index)
 	QString status = (QString)terrWidget->data(0,QT_TOOLBOXLITEMSTATUS).toString();
 	if (status.isNull())
 	{
-		if (!m_pCurrenDoubTree)
-		{				
-			m_pCurrenDoubTree = terrWidget;
-			return;
-		}
-		if (terrWidget == m_pCurrenDoubTree)
-		{
-			return;
-		}
-		else
-		{			
-			m_pCurrenDoubTree = terrWidget;
-		}
 		return;
 	}
 	if (status == "finished" || status == "billing" || status == "completed" || status == "init" || status =="missed")

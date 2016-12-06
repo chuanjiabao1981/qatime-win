@@ -15,6 +15,9 @@
 #define MSG_LESSON_STATUS_COMPLETED		"已结束"
 #define MSG_LESSON_STATUS_MISSED		"待补课"
 
+#define TIP_GET_RTMP_ERROR				"加入直播间异常，请稍后再试！"
+#define TIP_START_LIVE_ERROR			"服务器异常，请稍后再试！"
+
 
 #define MSG_START_COUNT					5000
 #define MSG_CLIENT_RECEIVE				MSG_START_COUNT			//接收消息ID

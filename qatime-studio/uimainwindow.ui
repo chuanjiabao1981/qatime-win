@@ -584,7 +584,7 @@ border-image: url(:/LoginWindow/images/titleColor.png);
 text-align : left;</string>
    </property>
    <property name="text">
-    <string>  答疑时间直播器V0.5.0</string>
+    <string>  答疑时间直播器V0.5.2</string>
    </property>
    <property name="flat">
     <bool>false</bool>
