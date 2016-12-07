@@ -28,7 +28,7 @@
 #include "UIScreentip.h"
 #include "UIPersonNum.h"
 #include "Livestatusmanager.h"
-#include "UIChatHtml.h"
+#include "UIHelpword.h"
 #pragma execution_character_set("utf-8")
 #define STARTLS_ASYNC
 
@@ -94,7 +94,7 @@ private:
 	UIScreenTip*					m_ScreenTip;		// 全屏提示框
 	UIPersonNum*					m_PersonNum;		// 观看人数
 	LiveStatusManager*				m_LiveStatusManager;// 直播状态更新类
-	UIChatHtml*						m_ChatHtml;			// 聊天窗的html
+	UIHelpWord*						m_HelpWord;			// 帮助文档
 
 	QString							m_teacherID;		// 老师ID
 	QTimer*							m_CountTimer;		// 计时器
@@ -136,7 +136,7 @@ private:
 	QPoint							m_clickPos;
 	QPoint							m_WndCurPos;
 
-	QImage							m_teacherImg;
+	QString							m_teacherImg;
 	// 直播需要的参数
 	QString							m_sBoardRtmp;			// 白板推流地址
 	QString							m_sCemeraRtmp;			// 摄像头推流地址
@@ -160,6 +160,7 @@ private slots :
 	void HideSideScreen();								// 隐藏摄像头屏幕
 	void WhiteBoard();									// 切换白板
 	void returnClick();									// 切换账号
+	void HelpDialog();									// 帮助文档
 
 private:
 	void setNetworkPic(const QString &szUrl);			// 显示网络图片
@@ -210,7 +211,7 @@ public:
 	void setPausedBtn();									// 改变直播按钮图片
 	void LivePage();										// 切换到直播页
 	void setComeBack();										// 从放大的窗口返回到小窗口
-	QImage TeacherPhotoPixmap();							// 老师头像的pixmap
+	QString TeacherPhotoPixmap();							// 老师头像的pixmap
 	void showErrorTip(QString sError);						// 显示错误信息
 	void setBoradCamera(QString sBoard, QString sCamera);	// 设置推流信息
 

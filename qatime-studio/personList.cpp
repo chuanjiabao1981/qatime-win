@@ -312,7 +312,20 @@ personListBuddy* personList::findID(const QString id)
 	personListBuddy* Buddy = NULL;
 
 	if (!id.isEmpty() && !IdStudents.isEmpty() && !groupMap.isEmpty())
-		Buddy = *groupMap.find(*IdStudents.find(id));
+	{
+		QMap<QString, QListWidgetItem*>::iterator iter;
+		QListWidgetItem* item = NULL;
+		iter = IdStudents.find(id);
+		if (iter == IdStudents.end())
+		{
+			return Buddy;
+		}
+		else
+		{
+			item = *iter;
+			Buddy = *groupMap.find(item);
+		}
+	}
 	
 	return Buddy;
 }

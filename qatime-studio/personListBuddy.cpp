@@ -162,11 +162,14 @@ void personListBuddy::setNetworkPic(const QString &szUrl)
 	{
 		QPixmap scaledPixmap = pixmap.scaled(pixSize, Qt::KeepAspectRatio);
 		head->setPixmap(scaledPixmap);
+		head->setAccessibleDescription(szUrl);
 	}
 	else // 否则显示备用图片
 	{
-		pixmap = QPixmap("./images/teacherPhoto.png");
+		QString sUrl = "./images/teacherPhoto.png";
+		pixmap = QPixmap(sUrl);
 		QPixmap scaledPixmap = pixmap.scaled(QSize(24, 24), Qt::KeepAspectRatio);
 		head->setPixmap(scaledPixmap);
+		head->setAccessibleDescription(sUrl);
 	}
 }

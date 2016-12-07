@@ -6,6 +6,7 @@
 #include "myemotionwidget.h"
 #include <QLabel>
 #include "uimainwindow.h"
+#include "UIChatHtml.h"
 
 //---云信
 #include "nim_client_def.h"
@@ -42,6 +43,7 @@ private:
 	
 	QNetworkAccessManager manager;
 	QNetworkReply *reply;
+	UIChatHtml*						m_ChatHtml;			// 聊天窗的html
 
 	//表情框	
 	MyEmotionWidget*				m_smallEmotionWidget;
@@ -68,6 +70,7 @@ private:
 	QString							mRemeberToken;
 	std::string						m_AddMemberID;		// 新加入的成员ID
 	UIMainWindow*					m_parent;			// 主窗口对象
+	int								m_studentNum;		// 当前学生数量
 	void initEmotion();
 public:
 	QString							m_TeachterName;		// 老师名字

@@ -147,6 +147,29 @@ void LoginWindow::loginFinished()
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
 	QJsonObject error = obj["error"].toObject();
+
+	/////
+	// 记住老师信息，用于自动登录
+// 	m_teacherToken = data["remember_token"].toString();
+// 	QJsonObject objInfo = data["user"].toObject();
+// 	m_teacherID = QString::number(objInfo["id"].toInt());
+// 	m_teacherName = objInfo["name"].toString();
+// 	m_teacherUrl = objInfo["avatar_url"].toString();
+// 	m_accid = objInfo["chat_account"].toObject()["accid"].toString();
+// 	m_accidToken = objInfo["chat_account"].toObject()["token"].toString();
+// 
+// 	mainWin = new UIMainWindow();
+// 	mainWin->setWindowFlags(Qt::FramelessWindowHint);
+// 	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
+// 	mainWin->setRemeberToken(m_teacherToken);
+// 	mainWin->setTeacherInfo(data["user"].toObject());
+// 	mainWin->ShowAuxiliary();
+// 	mainWin->setLoginWindow(this);
+// 	mainWin->show();
+// 	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+// 	this->hide();
+// 	return;
+	////////
 	if (obj["status"].toInt() == 1 && data.contains("remember_token"))
 	{
 		// 记住老师信息，用于自动登录

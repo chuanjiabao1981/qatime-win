@@ -23,9 +23,12 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab">
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <attribute name="title">
      <string>直播</string>
     </attribute>
@@ -457,6 +460,9 @@ color: rgb(255, 255, 255);</string>
     <zorder>person_pushButton</zorder>
    </widget>
    <widget class="QWidget" name="tab_2">
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <attribute name="title">
      <string>辅导教室</string>
     </attribute>
@@ -654,6 +660,34 @@ text-align : left;</string>
     <string/>
    </property>
   </widget>
+  <widget class="QPushButton" name="help_pushButton">
+   <property name="geometry">
+    <rect>
+     <x>284</x>
+     <y>97</y>
+     <width>55</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>微软雅黑</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="cursor">
+    <cursorShape>PointingHandCursor</cursorShape>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
   <zorder>label_4</zorder>
   <zorder>tabWidget</zorder>
   <zorder>teacherPhoto_Label</zorder>
@@ -664,6 +698,7 @@ text-align : left;</string>
   <zorder>titel_pushButton</zorder>
   <zorder>return_pushButton</zorder>
   <zorder>right_label</zorder>
+  <zorder>help_pushButton</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

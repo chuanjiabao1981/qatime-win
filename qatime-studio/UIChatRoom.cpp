@@ -51,6 +51,8 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	, m_switchTime(false)
 	, m_RecordTime(QDateTime::currentDateTime())
 	, m_parent(NULL)
+	, m_ChatHtml(NULL)
+	, m_studentNum(0)
 {
 	ui.setupUi(this);
 	setAutoFillBackground(true);
@@ -108,11 +110,19 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	style(ui.text_talk);
 
 	ui.student_list->setStyleSheet("border-image: url(:/LoginWindow/images/nochat.png);");
+
+ 	m_ChatHtml = new UIChatHtml(ui.text_talk);
+ 	m_ChatHtml->show();
 }
 
 UIChatRoom::~UIChatRoom()
 {
 	m_StudentInfo.clear();
+	if (m_ChatHtml)
+	{
+		delete m_ChatHtml;
+		m_ChatHtml = NULL;
+	}
 }
 
 // 消息编辑框粘贴过滤代码
@@ -240,7 +250,8 @@ void UIChatRoom::clickProclamation()
 // 清屏
 void UIChatRoom::clickCleanText()
 {
-	ui.text_talk->clear();
+//	ui.text_talk->clear();
+	m_ChatHtml->ClearHtml();
 }
 // 表情按钮
 void UIChatRoom::clickBrow()
@@ -404,64 +415,38 @@ void UIChatRoom::clickSendMseeage()
 		// 跨天处理
 		stepMsgDays(time);
 
+		QString contect;
 		QString timeStr = time.toString("hh:mm:ss");
-		QString imgPath = "./images/username.png";
-		imgPathToHtml(imgPath);
-		stringToHtmlFilter(sendText);
 		if (m_isBorw != false)
 		{
 			QString name = m_TeachterName;
 			name += "(我) ";
-			//格式化颜色
-			stringToHtmlPos(name, selfColor);
-			stringToHtmlPos(timeStr, timeColor);
-
-			// 本人头像_______________________________________
-// 			QImage image = m_parent->TeacherPhotoPixmap();
-// 			QImage NewImage = image.scaled(18, 18);
-// 
-// 			QTextCursor cursor = ui.text_talk->textCursor();
-// 			cursor.insertImage(QImage(NewImage));
-// 			ui.text_talk->insertHtml(name + timeStr);
-			//____________________________________________________
-			ui.text_talk->append(name + timeStr);
-			ui.text_talk->append("");
+			
+			// 本人头像
+			QString image = m_parent->TeacherPhotoPixmap();
 			for (int i = 0; i < textList.size(); i++)
 			{
 				QString string = textList.at(i);
-				stringToHtml(string, contentColor);
-				ui.text_talk->insertHtml(string);
+				contect += string;
 				if (i <= textList.size() - 2)
 				{
-					ui.text_talk->insertHtml("<img src='" + m_borw.at(i) + "'/>");  //   此处的test 即 url
-					ui.text_talk->addAnimation(QUrl(m_borw.at(i)), m_borw.at(i));  //添加一个动画
+					QString borw;
+					borw.append("[" + m_borw.at(i).split("/").at(2).split(".").at(0) + "]");
+					contect += borw;
 				}						
-				
 			}
 			m_isBorw = false;
+			m_ChatHtml->sendMsg(image, name, timeStr, contect);
 		}
 		else
 		{
 			QString qName = m_TeachterName;
 			qName += "(我) ";
-			stringToHtmlPos(timeStr, timeColor);
-			stringToHtmlPos(qName, selfColor);
-			stringToHtml(sendText, contentColor);
 
 			// 本人头像
-// 			QImage image = m_parent->TeacherPhotoPixmap();
-// 			QImage NewImage = image.scaled(18, 18);
-// 			QTextCursor cursor = ui.text_talk->textCursor();
-// 			cursor.insertImage(QImage(NewImage));
-// 			ui.text_talk->insertHtml(qName + timeStr);
-			ui.text_talk->append(qName + timeStr);
-			ui.text_talk->append(sendText);
+ 			QString image = m_parent->TeacherPhotoPixmap();
+			m_ChatHtml->sendMsg(image,qName, timeStr, sendText);
 		}
-
-		ui.text_talk->append("");
-//		ui.text_talk->append("");
-		ui.text_talk->acceptRichText();
-		ui.text_talk->moveCursor(QTextCursor::End);
 		ui.textEdit->clear();
 	}
 	else
@@ -712,38 +697,25 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		std::string strID = pMsg->sender_accid_;
 
 		QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg->timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
-		stringToHtml(qTime, timeColor);
-
 		QString qName = QString::fromStdString(strName);
-		stringToHtml(qName, nameColor);
-
 		QString qContent = QString::fromStdString(strContent);		
 
 		// 聊天头像
-// 		personListBuddy* Buddy = NULL;
-// 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
-// 		if (Buddy)
-// 		{
-// 			QPixmap* pixmap= (QPixmap*)Buddy->head->pixmap();
-// 			QImage image = pixmap->toImage().scaled(18, 18);
-// 
-// 			QTextCursor cursor = ui.text_talk->textCursor();
-// 			cursor.insertImage(QImage(image));
-// 			ui.text_talk->insertHtml(qName + " " + qTime);
-// 		}
+		QString img;
+		personListBuddy* Buddy = NULL;
+		Buddy = ui.student_list->findID(QString::fromStdString(strID));
+		if (Buddy)
+			img= Buddy->head->accessibleDescription();
 
 		ui.text_talk->append(qName + " " + qTime);
-		if (IsHasFace(qContent)) // 有表情则解析，没有表情直接输出
-			ParseFace(qContent);
-		else
-		{
-			stringToHtml(qContent, contentColor);
-			ui.text_talk->append(qContent);
-		}
-		ui.text_talk->append("");
-//		ui.text_talk->append("");
-		ui.text_talk->moveCursor(QTextCursor::End);
-
+		m_ChatHtml->receiverMsg(img,qName, qTime, qContent);
+// 		if (IsHasFace(qContent)) // 有表情则解析，没有表情直接输出
+// 			ParseFace(qContent);
+// 		else
+// 		{
+// 			stringToHtml(qContent, contentColor);
+// 			ui.text_talk->append(qContent);
+// 		}
 		bValid = true;
 	}
 
@@ -1225,22 +1197,7 @@ void UIChatRoom::stepMsgDays(QDateTime dateTime)
 	QString oldDay = m_ReceiveTime.toString("MM-dd");
 	if (newDay != oldDay && !ui.text_talk->toPlainText().isEmpty())
 	{
-		QTextCursor textCursor = ui.text_talk->textCursor();
-
-		int fontwidth = fontMetrics().width(newDay);
-		int iMargin = 300 - fontwidth;
-
-		QTextFrameFormat frameFormat2;
-		frameFormat2.setLeftMargin(iMargin/2);	//设置左边距
-		frameFormat2.setRightMargin(iMargin/2);	//设置右边距
-		frameFormat2.setBottomMargin(10);	//设置右边距
-		textCursor.insertFrame(frameFormat2);		//在光标处插入框架
-
-		QTextCharFormat fmt;
-		fmt.setForeground(contentColor);
-		textCursor.setCharFormat(fmt);
-		textCursor.insertText(newDay);
-		ui.text_talk->moveCursor(QTextCursor::End);
+		m_ChatHtml->CenterMsg(newDay);
 	}
 
 	m_ReceiveTime = dateTime;
@@ -1326,20 +1283,10 @@ void UIChatRoom::returnMember()
 				QString sName;
 				sName += pMember->name();
 				sName += " 加入了群聊";
-				int fontwidth = fontMetrics().width(sName);
-				int iMargin = 300 - fontwidth;
-				QTextCursor textCursor = ui.text_talk->textCursor();
-				QTextFrameFormat frameFormat2;
-				frameFormat2.setLeftMargin(iMargin/2);	//设置左边距
-				frameFormat2.setRightMargin(iMargin/2);	//设置右边距
-				frameFormat2.setBottomMargin(20);	//设置下边距
-				textCursor.insertFrame(frameFormat2);		//在光标处插入框架
+				
+				m_ChatHtml->CenterMsg(sName);
 
-				QTextCharFormat fmt;
-				fmt.setForeground(contentColor);
-				textCursor.setCharFormat(fmt);
-				textCursor.insertText(sName);
-				ui.text_talk->moveCursor(QTextCursor::End);
+				SetStudentName(m_studentNum + 1);
 			}
 
 			//用完之后删除
@@ -1410,6 +1357,7 @@ void UIChatRoom::style(QTextBrowser *style)
 
 void UIChatRoom::SetStudentName(int iNum)
 {
+	m_studentNum = iNum;
 	QString liveNum = "学员";
 	liveNum += "(";
 	liveNum.append(QString::number(iNum));

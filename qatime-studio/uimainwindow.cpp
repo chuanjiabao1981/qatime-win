@@ -63,7 +63,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, m_LiveStatusManager(NULL)
 	, bHasCamera(false)
 	, m_EnumStatus(CameraStatusTeaching)
-	, m_ChatHtml(NULL)
+	, m_HelpWord(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
@@ -131,9 +131,6 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	m_LiveStatusManager = new LiveStatusManager(this);
 	m_LiveStatusManager->setMainWindow(this);
-
-	m_ChatHtml = new UIChatHtml();
-	m_ChatHtml->hide();
 
 	// 直播按钮
 	ui.Live_pushBtn->setText("开始直播");
@@ -224,6 +221,10 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	ui.close_radioButton->installEventFilter(this);
 	ui.rect_radioButton->installEventFilter(this);
 	ui.full_radioButton->installEventFilter(this);
+
+	ui.help_pushButton->setIcon(QIcon("./images/help.png"));
+	ui.help_pushButton->setText("帮助");
+	connect(ui.help_pushButton, SIGNAL(clicked()), this, SLOT(HelpDialog()));
 }
 
 UIMainWindow::~UIMainWindow()
@@ -305,6 +306,12 @@ UIMainWindow::~UIMainWindow()
 		delete m_LiveStatusManager;
 		m_LiveStatusManager = NULL;
 	}
+
+	if (m_HelpWord)
+	{
+		delete m_HelpWord;
+		m_HelpWord = NULL;
+	}
 }
 
 void UIMainWindow::WhiteBoard()
@@ -345,6 +352,9 @@ void UIMainWindow::CloseDialog()
 
 		if (m_ScreenTip)
 			m_ScreenTip->setVisible(false);
+
+		if (m_HelpWord)
+			m_HelpWord->setVisible(false);
 		
 		close();
 	}
@@ -1587,7 +1597,7 @@ void UIMainWindow::setNetworkPic(const QString &szUrl)
 	pixmap.loadFromData(jpegData);
 	QPixmap scaledPixmap = pixmap.scaled(QSize(70, 70), Qt::KeepAspectRatio);
 	ui.teacherPhoto_Label->setPixmap(scaledPixmap);
-	m_teacherImg = scaledPixmap.toImage();
+	m_teacherImg = szUrl;
 }
 
 // 切换到直播页
@@ -1604,7 +1614,7 @@ void UIMainWindow::setComeBack()
 	m_CameraInfo->move(0, 0);
 }
 
-QImage UIMainWindow::TeacherPhotoPixmap()
+QString UIMainWindow::TeacherPhotoPixmap()
 {
 	return m_teacherImg;
 }
@@ -1635,4 +1645,18 @@ void UIMainWindow::showErrorTip(QString sError)
 bool UIMainWindow::IsHasCamera()
 {
 	return bHasCamera;
+}
+
+void UIMainWindow::HelpDialog()
+{
+	if (m_HelpWord ==NULL)
+	{
+		m_HelpWord = new UIHelpWord();
+		m_HelpWord->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+		m_HelpWord->show();
+		SetWindowPos((HWND)m_HelpWord->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+		return;
+	}
+
+	m_HelpWord->setVisible(!m_HelpWord->isVisible());
 }
