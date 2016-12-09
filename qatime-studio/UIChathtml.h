@@ -16,9 +16,9 @@ public:
 	UIChatHtml(QWidget *parent = 0);
 	~UIChatHtml();
 
+	QWebEngineView*		m_TalkView;
 private:
 	Ui::UIChatHtml  ui;
-	QWebEngineView*		m_TalkView;
 
 protected:
 	void mousePressEvent(QMouseEvent *e);       //--鼠标按下事件 

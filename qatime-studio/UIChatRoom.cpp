@@ -53,6 +53,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	, m_parent(NULL)
 	, m_ChatHtml(NULL)
 	, m_studentNum(0)
+	, m_proclamationHeight(0)
 {
 	ui.setupUi(this);
 	setAutoFillBackground(true);
@@ -157,6 +158,10 @@ bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
 				return true;
 			}
 		}
+		if (event->type() == QEvent::FocusOut)
+		{
+			// 失去焦点（鼠标不在窗体内，则隐藏窗体）
+		}
 	}
 	return QWidget::eventFilter(target, event);
 }
@@ -187,6 +192,7 @@ void UIChatRoom::clickTalk()
 	ui.textEdit->setHidden(false);
 	ui.proclamationWidget->setHidden(true);
 	ui.text_talk->setHidden(false);
+	ui.label->setHidden(false);
 	ui.student_list->setHidden(true);
 	ui.msgRecord->setHidden(true);	
 	ui.text_talk->moveCursor(QTextCursor::End);
@@ -238,9 +244,10 @@ void UIChatRoom::clickProclamation()
 	ui.button_notes->setHidden(true);
 	ui.button_sendMseeage->setHidden(true);
 	ui.textEdit->setHidden(true);
+	ui.label->setHidden(true);
  	
 	ui.text_proclamation->show();
-	ui.text_proclamation->setGeometry(QRect(0,40,280,280));
+	ui.text_proclamation->setGeometry(QRect(0, 40, 280, m_proclamationHeight));
 
 	if (!m_CurCourseID.isEmpty())
 		ui.button_sendMseeage_2->show();
@@ -292,6 +299,7 @@ void UIChatRoom::clickNotes()
 	ui.button_notes->setHidden(true);
 	ui.button_sendMseeage->setHidden(true);
 	ui.textEdit->setHidden(true);
+	ui.label->setHidden(true);
 	ui.msgRecord->setHidden(false);	
 	ui.timeWidget->hide();
 	ui.talkRecord->clear();		// 清除消息记录
@@ -551,7 +559,7 @@ void UIChatRoom::QueryRecord(QString dtstr)
 // 点击【发布公告】按钮
 void UIChatRoom::announce()
 {
-	ui.text_proclamation->setGeometry(QRect(0, 40+80, 299, 280-80));
+	ui.text_proclamation->setGeometry(QRect(0, 40 + 80, 299, m_proclamationHeight - 80));
 	ui.button_sendMseeage_cancel->show();
 	ui.button_sendMseeage_3->show();	
 	ui.textEdit_2->show();
@@ -561,7 +569,7 @@ void UIChatRoom::announce()
 // 点击【发布】按钮
 void UIChatRoom::putTalk()
 {
-	ui.text_proclamation->setGeometry(QRect(0, 40, 299, 280));
+	ui.text_proclamation->setGeometry(QRect(0, 40, 299, m_proclamationHeight));
 	ui.button_sendMseeage_cancel->hide();
 	ui.button_sendMseeage_3->hide();
 	ui.textEdit_2->hide();
@@ -593,7 +601,7 @@ void UIChatRoom::putTalk()
 // 点击【取消】按钮
 void UIChatRoom::putTalkCancel()
 {
-	ui.text_proclamation->setGeometry(QRect(0, 40, 299, 280));
+	ui.text_proclamation->setGeometry(QRect(0, 40, 299, m_proclamationHeight));
 	ui.button_sendMseeage_cancel->hide();
 	ui.button_sendMseeage_3->hide();
 	ui.textEdit_2->hide();
@@ -709,13 +717,6 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 
 		ui.text_talk->append(qName + " " + qTime);
 		m_ChatHtml->receiverMsg(img,qName, qTime, qContent);
-// 		if (IsHasFace(qContent)) // 有表情则解析，没有表情直接输出
-// 			ParseFace(qContent);
-// 		else
-// 		{
-// 			stringToHtml(qContent, contentColor);
-// 			ui.text_talk->append(qContent);
-// 		}
 		bValid = true;
 	}
 
@@ -1369,4 +1370,27 @@ void UIChatRoom::SetStudentName(int iNum)
 void UIChatRoom::setMainWindow(UIMainWindow* parent)
 {
 	m_parent = parent;
+}
+
+// 初始化自适应的高度
+void UIChatRoom::setAdaptHeight(int iHeight)
+{
+	ui.talkRecord->setFixedHeight(iHeight-90);
+	m_proclamationHeight = iHeight - 105;
+}
+
+// 拉伸以后变化的高度
+void UIChatRoom::setResize(int iWidth, int iHeight)
+{
+	ui.talkRecord->setFixedSize(ui.talkRecord->width()+iWidth, ui.talkRecord->height() + iHeight);
+	if (m_ChatHtml->m_TalkView)
+	{
+		int iWidthi = m_ChatHtml->m_TalkView->width();
+		m_ChatHtml->m_TalkView->setFixedSize(m_ChatHtml->m_TalkView->width() + iWidth,m_ChatHtml->m_TalkView->height() + iHeight);
+	}
+}
+
+bool UIChatRoom::IsFous()
+{
+	return ui.textEdit->hasFocus();
 }

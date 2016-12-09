@@ -71,6 +71,7 @@ private:
 	std::string						m_AddMemberID;		// 新加入的成员ID
 	UIMainWindow*					m_parent;			// 主窗口对象
 	int								m_studentNum;		// 当前学生数量
+	int								m_proclamationHeight;// 公告高度
 	void initEmotion();
 public:
 	QString							m_TeachterName;		// 老师名字
@@ -151,6 +152,9 @@ public:
 	bool	IsHasFace(QString qContect);						// 判断是否有表情
 	QString BuildFaceToUrl(QString qFace);						// 通过表情返回url路径（例如：传入[em_1]返回./images/em_1.gif）
 	void	SetStudentName(int iNum);
+	void	setAdaptHeight(int iHeight);						// 自适应高度
+	void	setResize(int iWidth, int iHeight);					// 宽度 高度
+	bool	IsFous();
 public slots:
 	void chickChage(int, QString, QString);
 	bool AddStudent(QString iconUrl, QString name, QString accid);		//添加成员

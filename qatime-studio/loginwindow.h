@@ -10,6 +10,7 @@
 #include <string.h>
 #include <wtypes.h>
 #include "UIMainwindow.h"
+#include <QSystemTrayIcon>
 
 #pragma execution_character_set("utf-8")
 
@@ -42,6 +43,8 @@ private slots :
 	void MinDialog();			// 最小化对话框
 	void CloseDialog();			// 关闭对话框
 	void changedRemeber(int i);	// 记住账号
+	void trayiconActivated(QSystemTrayIcon::ActivationReason);
+
 private:
 	void loginFinished();		// 登陆完成的返回事件
 
@@ -70,12 +73,15 @@ private:
 	QString m_accid;
 	QString m_accidToken;
 
+	QSystemTrayIcon *trayIcon;
+
 public:
 	void ReturnLogin();			// 重新登陆
 	void ReadSetting();			// 读取配置文件路径信息
 	bool IsAutoLogin();			// 是否自动登录
 	void Checking();			// 验证当前token是否可用
 	void CheckingFinished();
+	void CreateTray();			// 创建托盘
 };
 
 #endif // LOGINWINDOW_H

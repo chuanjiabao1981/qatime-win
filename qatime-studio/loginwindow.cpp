@@ -25,9 +25,11 @@ TCHAR m_pathAccid[MAX_PATH] = { 0 };
 TCHAR m_pathAccidToken[MAX_PATH] = { 0 };
 int	  m_iRemeber = 0;
 
+#define MAINWINDOW_MAXHEIGHT 832	//客户端最大高度
 LoginWindow::LoginWindow(QWidget *parent)
 	: QMainWindow(parent)
 	, mainWin(NULL)
+	, trayIcon(NULL)
 {
 	ui.setupUi(this);
 	setAutoFillBackground(true);;
@@ -69,6 +71,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 		"QCheckBox::indicator:checked{image: url(./images/remenber_check.png);}");
 
 	ui.back_label->setStyleSheet("border: 1px solid #059ed5;");
+	CreateTray();
 }
 
 LoginWindow::~LoginWindow()
@@ -77,6 +80,12 @@ LoginWindow::~LoginWindow()
 	{
 		delete mainWin;
 		mainWin = NULL;
+	}
+
+	if (trayIcon)
+	{
+		delete trayIcon;
+		trayIcon = NULL;
 	}
 }
 
@@ -148,28 +157,19 @@ void LoginWindow::loginFinished()
 	QJsonObject data = obj["data"].toObject();
 	QJsonObject error = obj["error"].toObject();
 
-	/////
+	// 测试
+	mainWin = new UIMainWindow();
+	mainWin->setWindowFlags(Qt::FramelessWindowHint);
+	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
+	mainWin->setRemeberToken(m_teacherToken);
+	mainWin->setTeacherInfo(data["user"].toObject());
+	mainWin->ShowAuxiliary();
+	mainWin->setLoginWindow(this);
+	mainWin->show();
+	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	this->hide();
+	return;
 	// 记住老师信息，用于自动登录
-// 	m_teacherToken = data["remember_token"].toString();
-// 	QJsonObject objInfo = data["user"].toObject();
-// 	m_teacherID = QString::number(objInfo["id"].toInt());
-// 	m_teacherName = objInfo["name"].toString();
-// 	m_teacherUrl = objInfo["avatar_url"].toString();
-// 	m_accid = objInfo["chat_account"].toObject()["accid"].toString();
-// 	m_accidToken = objInfo["chat_account"].toObject()["token"].toString();
-// 
-// 	mainWin = new UIMainWindow();
-// 	mainWin->setWindowFlags(Qt::FramelessWindowHint);
-// 	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
-// 	mainWin->setRemeberToken(m_teacherToken);
-// 	mainWin->setTeacherInfo(data["user"].toObject());
-// 	mainWin->ShowAuxiliary();
-// 	mainWin->setLoginWindow(this);
-// 	mainWin->show();
-// 	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-// 	this->hide();
-// 	return;
-	////////
 	if (obj["status"].toInt() == 1 && data.contains("remember_token"))
 	{
 		// 记住老师信息，用于自动登录
@@ -423,4 +423,57 @@ bool LoginWindow::eventFilter(QObject *target, QEvent *event)
 		return false;
 	}
 	return false;
+}
+
+void LoginWindow::CreateTray()
+{
+	return;
+	QIcon icon = QIcon("./images/favicon.png");
+	trayIcon = new QSystemTrayIcon(this);
+	trayIcon->setIcon(icon);
+	trayIcon->setToolTip("答疑时间");
+	trayIcon->show();
+
+	// 添加单 / 双击鼠标相应
+	connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+		this, SLOT(trayiconActivated(QSystemTrayIcon::ActivationReason)));
+}
+
+void LoginWindow::trayiconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+	switch (reason)
+	{
+	case QSystemTrayIcon::Unknown:
+		{
+			int i = 0;
+			i++;
+		}
+		break;
+	case QSystemTrayIcon::Context:
+		{
+			int i = 0;
+			i++;
+		}
+		break;
+	case QSystemTrayIcon::DoubleClick:
+		{
+			int i = 0;
+			i++;
+		}
+		break;
+	case QSystemTrayIcon::Trigger:
+		{
+			int i = 0;
+			i++;
+		}
+		break;
+	case QSystemTrayIcon::MiddleClick:
+		{
+			int i = 0;
+			i++;
+		}
+		break;
+	default:
+		break;
+	}
 }

@@ -29,6 +29,7 @@
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6
 #define MAINWINDOW_TITLE_HEIGHT 130
+#define MAINWINDOW_MAXHEIGHT	832		//客户端最大高度
 
 #ifdef TEST
 	#define _DEBUG
@@ -64,11 +65,17 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, bHasCamera(false)
 	, m_EnumStatus(CameraStatusTeaching)
 	, m_HelpWord(NULL)
+	, m_icount(0)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
-	setMinimumSize(QSize(342, 720));
-//	setAttribute(Qt::WA_TranslucentBackground, false);
+	QDesktopWidget *dsk = QApplication::desktop();
+	//除去任务栏的高度
+	int iHeight = dsk->height() - 40;
+	if (iHeight < MAINWINDOW_MAXHEIGHT)
+	{
+		setAdaptHeight(iHeight - 10);
+	}
 
 	connect(ui.mainmin_pushBtn, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.mainclose_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
@@ -201,6 +208,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_charRoom->setMainWindow(this);
  	m_charRoom->move(10, 0);
 	m_charRoom->resize(m_charRoom->size().width(), ui.chat_widget->size().height());
+	m_charRoom->setAdaptHeight(ui.chat_widget->size().height());
 	m_charRoom->show();
 
 	ui.titel_pushButton->installEventFilter(this);
@@ -314,6 +322,12 @@ UIMainWindow::~UIMainWindow()
 	}
 }
 
+void UIMainWindow::setAdaptHeight(int iHeight)
+{
+	setMaximumSize(QSize(342, iHeight));
+	ui.tabWidget->setMaximumHeight(iHeight - 71);
+	ui.chat_widget->setMaximumHeight(iHeight - 382);
+}
 void UIMainWindow::WhiteBoard()
 {
 	m_RangeCapture->setShowOrHide(true);
@@ -452,9 +466,9 @@ void UIMainWindow::AuxiliaryRequestFinished()
 
 void UIMainWindow::resizeEvent(QResizeEvent *e)
 {
-/*	m_mutex.lock();
+	m_mutex.lock();
 	int w, h;
-	if (a > 0 && e != NULL)
+	if (m_icount > 0 && e != NULL)
 	{
 		w = e->size().width() - e->oldSize().width();
 		h = e->size().height() - e->oldSize().height();
@@ -463,34 +477,28 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 		video_Heigth += h;
 		chat_Heigth += h;
 	}
-	if (a > 1 || e == NULL)
+	if (m_icount > 0 || e == NULL)
 	{
-		m_CameraOrVideo->move(chat_X + 20, 50 + 20);
-		m_CameraOrVideo->resize(302, 169);
+// 		m_CameraOrVideo->move(chat_X + 20, 50 + 20);
+// 		m_CameraOrVideo->resize(302, 169);
 
-		if (!m_charRoom->isHidden())
+		if (m_charRoom)
 		{
-			if (m_CameraOrVideo->isHidden())
-			{
-				m_charRoom->move(chat_X, 50 + 20);
-				m_charRoom->resize(chat_Width, this->size().height() - 90 + 30 - 20);
-			}
-			else
-			{
-				m_charRoom->move(chat_X, 50 + 195);
-				m_charRoom->resize(chat_Width, this->size().height() - 90 + 30 - 195);
-			}
+			ui.tabWidget->setFixedSize(ui.tabWidget->width()+w, ui.tabWidget->height() + h);
+			ui.chat_widget->setFixedSize(ui.chat_widget->width()+w, ui.chat_widget->height() + h);
+			m_charRoom->setFixedSize(m_charRoom->width()+w,m_charRoom->height() + h);
+			m_charRoom->setResize(w,h);
 		}
 		
-		m_VideoOrCamera->resize(video_Width, this->size().height() - 180);
-		m_AuxiliaryPanel->resize(m_AuxiliaryPanel->size().width(),this->size().height()-140);
-		if (m_VideoOrCamera == m_VideoInfo)
-			PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, (WPARAM)video_Width, (LPARAM)(this->size().height() - 180));
-		else
-			PostMessage(m_CameraWnd, MSG_VIDEO_CHANGE_SIZE, (WPARAM)video_Width, (LPARAM)(this->size().height() - 180));
+// 		m_VideoOrCamera->resize(video_Width, this->size().height() - 180);
+// 		m_AuxiliaryPanel->resize(m_AuxiliaryPanel->size().width(),this->size().height()-140);
+// 		if (m_VideoOrCamera == m_VideoInfo)
+// 			PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, (WPARAM)video_Width, (LPARAM)(this->size().height() - 180));
+// 		else
+// 			PostMessage(m_CameraWnd, MSG_VIDEO_CHANGE_SIZE, (WPARAM)video_Width, (LPARAM)(this->size().height() - 180));
 	}
-	a++;
-	m_mutex.unlock();*/
+	m_icount++;
+	m_mutex.unlock();
 }
 
 void UIMainWindow::slot_startOrStopLiveStream()
@@ -945,7 +953,7 @@ void UIMainWindow::paintEvent(QPaintEvent *event)
 		QPainterPath path;
 		path.setFillRule(Qt::WindingFill);
 
-		for (int j = 0; j < 40; j++)
+		for (int j = 0; j < 95; j++)
 		{
 			path.addRect(4 - i, j - i, this->width() - (4 - i) * 2, this->height() - (2 - i) * 2);
 		}
@@ -1199,7 +1207,6 @@ void UIMainWindow::showChatRoomWnd()
 	if (m_charRoom && !m_charRoom->isVisible())
 	{
 		resize(this->size().width() + chat_Width, this->height());
-//		m_VideoOrCamera->resize(video_Width-=chat_Width, video_Heigth);
 		m_charRoom->move(chat_X, 50+195);
 		m_charRoom->show();		
 
@@ -1209,25 +1216,6 @@ void UIMainWindow::showChatRoomWnd()
 		QPoint minQt = ui.mainmin_pushBtn->pos();
 		ui.mainmin_pushBtn->move(QPoint(minQt.x() + 295, minQt.y()));
 	}
-
-// 	if (m_CameraOrVideo)
-// 	{
-// 		m_CameraOrVideo->move(chat_X + 20, 50 + 20);
-// 		m_CameraOrVideo->resize(302, 169);
-// 		m_CameraOrVideo->show();
-// 	}
-	
-// 	static bool bInit = false;
-// 	if (!bInit)
-// 	{
-// 		int x = QApplication::desktop()->width() - this->width() - m_charRoom->width();
-// 		chat_X += x;
-// 		video_Width += x;
-// 		showMaximized();
-// 		bInit = true;
-// 	}
-// 
-// 	CMessageBox::showMessage(QString("答疑时间"),QString("您已成功进入直播教室！"),QString("确定"),QString(""),NULL,true);
 }
 
 void UIMainWindow::clickLessonList()
@@ -1240,7 +1228,7 @@ void UIMainWindow::clickLessonList()
 			return;
 		}
 
-		m_LessonTable->move(QPoint(2, 160));
+		m_LessonTable->move(QPoint(2, 95));
 		m_LessonTable->RequestLesson();
 		m_LessonTable->show();
 	}
@@ -1549,7 +1537,7 @@ bool UIMainWindow::eventFilter(QObject *target, QEvent *event)
 
 void UIMainWindow::enterEvent(QEvent *)
 {
-/*	QRect rc;
+	QRect rc;
 	QRect rect;
 	rect = this->geometry();
 	rc.setRect(rect.x(), rect.y(), rect.width(), rect.height());
@@ -1558,26 +1546,30 @@ void UIMainWindow::enterEvent(QEvent *)
 		rect.setX(rc.x());
 		rect.setY(0);
 		move(rc.x(), -2);
-	}*/
+	}
 }
 
 void UIMainWindow::leaveEvent(QEvent *)
 {
-/*	QRect rc;
-	QRect rect;
-	rect = this->geometry();
-	if (rect.contains(QCursor::pos()))
-		return;
-
-	rc.setRect(rect.x(), rect.y(), rect.width(), rect.height());
-	if (rect.top() <= 0)
-	{
-		this->hide();
-
-		QDesktopWidget *dsk = QApplication::desktop();
-		m_HoverWnd->move(dsk->width()-50,120);
-		m_HoverWnd->show();
-	}*/
+// 	QRect rc;
+// 	QRect rect;
+// 	rect = this->geometry();
+// 	if (rect.contains(QCursor::pos()))
+// 		return;
+// 
+// 	rc.setRect(rect.x(), rect.y(), rect.width(), rect.height());
+// 	if (rect.top() <= 0)
+// 	{
+// 		if (m_charRoom->IsFous())
+// 		{
+// 			return;
+// 		}
+// 		this->hide();
+// 
+// 		QDesktopWidget *dsk = QApplication::desktop();
+// 		m_HoverWnd->move(dsk->width()-44,150);
+// 		m_HoverWnd->show();
+// 	}
 }
 
 void UIMainWindow::setNetworkPic(const QString &szUrl)

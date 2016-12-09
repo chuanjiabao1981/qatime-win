@@ -17,13 +17,13 @@
    <property name="geometry">
     <rect>
      <x>1</x>
-     <y>130</y>
+     <y>70</y>
      <width>340</width>
-     <height>701</height>
+     <height>761</height>
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <property name="cursor">
@@ -65,9 +65,9 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>296</y>
+       <y>286</y>
        <width>331</width>
-       <height>381</height>
+       <height>451</height>
       </rect>
      </property>
     </widget>
@@ -481,10 +481,10 @@ color: rgb(255, 255, 255);</string>
   <widget class="QLabel" name="teacherPhoto_Label">
    <property name="geometry">
     <rect>
-     <x>136</x>
+     <x>10</x>
      <y>30</y>
-     <width>70</width>
-     <height>70</height>
+     <width>30</width>
+     <height>30</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -497,10 +497,10 @@ color: rgb(255, 255, 255);</string>
   <widget class="QLabel" name="teacherName_label">
    <property name="geometry">
     <rect>
-     <x>136</x>
-     <y>99</y>
+     <x>40</x>
+     <y>30</y>
      <width>71</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="font">
@@ -545,22 +545,6 @@ color: rgb(255, 255, 255);</string>
    </property>
    <property name="flat">
     <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_4">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>30</y>
-     <width>356</width>
-     <height>811</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(5, 158, 213);</string>
-   </property>
-   <property name="text">
-    <string/>
    </property>
   </widget>
   <widget class="QPushButton" name="titel_pushButton">
@@ -631,10 +615,10 @@ text-align : left;</string>
   <widget class="QLabel" name="photo_label">
    <property name="geometry">
     <rect>
-     <x>136</x>
+     <x>10</x>
      <y>30</y>
-     <width>70</width>
-     <height>70</height>
+     <width>30</width>
+     <height>30</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -664,7 +648,7 @@ text-align : left;</string>
    <property name="geometry">
     <rect>
      <x>284</x>
-     <y>97</y>
+     <y>30</y>
      <width>55</width>
      <height>23</height>
     </rect>
@@ -688,7 +672,6 @@ text-align : left;</string>
     <bool>true</bool>
    </property>
   </widget>
-  <zorder>label_4</zorder>
   <zorder>tabWidget</zorder>
   <zorder>teacherPhoto_Label</zorder>
   <zorder>teacherName_label</zorder>

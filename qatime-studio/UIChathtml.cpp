@@ -1,6 +1,7 @@
 #include "UIChathtml.h"
 #include <QDir>
 #include <QMouseEvent>
+#include <QObject>
 
 UIChatHtml::UIChatHtml(QWidget *parent)
 	: QWidget(parent)
@@ -73,9 +74,8 @@ void UIChatHtml::initHtml()
 	QString strUrl = QDir::currentPath() + "/style.html";
 	m_TalkView->setUrl(QUrl(strUrl));
 	m_TalkView->show();
-	m_TalkView->resize(318, 283);
-
-//	m_TalkView->installEventFilter(this);
+	int iHeight = this->parentWidget()->parentWidget()->parentWidget()->height()-100;
+	m_TalkView->resize(318, this->parentWidget()->parentWidget()->parentWidget()->height()-100);
 }
 // 拖动标题做的处理
 bool UIChatHtml::eventFilter(QObject *target, QEvent *event)

@@ -114,7 +114,7 @@ private:
 	QTimer*							m_tempTimers;		// 临时的定时器，用完记得关掉
 	QTimer*							m_ScreenTipTimer;	// 启动全屏提示
 	RangeCapture*					m_RangeCapture;		// 区域抓取窗口
-	int a;
+	int m_icount;
 	int chat_X;	//聊天位置x
 	int chat_Y; //聊天位置y
 	int video_Width; //播放区大小
@@ -221,6 +221,7 @@ public:
 
 	void startLiveStream();									// 服务器返回teaching后，才开始正式推流
 	bool IsHasCamera();										// 有无摄像头
+	void setAdaptHeight(int iHeight);						// 设置自适应高度
 };
 
 #endif // UIMAINWINDOW_H

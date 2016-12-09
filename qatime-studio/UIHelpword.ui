@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>786</height>
+    <height>818</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -125,7 +125,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -145,7 +145,7 @@
         </size>
        </property>
        <property name="text">
-        <string>直播助手的主要功能是为了方便老师能够便捷的管理自己的辅导班，并且快速高效的进行直播授课，实现与学生互动交流；主要功能包含：辅导教室管理、课程直播、聊天互动、发布公告、管理学生发言、聊天记录查询等。</string>
+        <string/>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -166,7 +166,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -195,7 +195,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -224,7 +224,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -253,7 +253,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -282,7 +282,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -311,7 +311,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -340,7 +340,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -369,7 +369,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -398,7 +398,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -427,7 +427,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -456,7 +456,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -485,7 +485,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -514,7 +514,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -543,7 +543,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -572,7 +572,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -601,7 +601,7 @@
        <property name="font">
         <font>
          <family>微软雅黑</family>
-         <pointsize>12</pointsize>
+         <pointsize>10</pointsize>
         </font>
        </property>
        <property name="styleSheet">
