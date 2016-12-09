@@ -158,17 +158,17 @@ void LoginWindow::loginFinished()
 	QJsonObject error = obj["error"].toObject();
 
 	// 测试
-	mainWin = new UIMainWindow();
-	mainWin->setWindowFlags(Qt::FramelessWindowHint);
-	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
-	mainWin->setRemeberToken(m_teacherToken);
-	mainWin->setTeacherInfo(data["user"].toObject());
-	mainWin->ShowAuxiliary();
-	mainWin->setLoginWindow(this);
-	mainWin->show();
-	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-	this->hide();
-	return;
+// 	mainWin = new UIMainWindow();
+// 	mainWin->setWindowFlags(Qt::FramelessWindowHint);
+// 	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
+// 	mainWin->setRemeberToken(m_teacherToken);
+// 	mainWin->setTeacherInfo(data["user"].toObject());
+// 	mainWin->ShowAuxiliary();
+// 	mainWin->setLoginWindow(this);
+// 	mainWin->show();
+// 	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+// 	this->hide();
+// 	return;
 	// 记住老师信息，用于自动登录
 	if (obj["status"].toInt() == 1 && data.contains("remember_token"))
 	{

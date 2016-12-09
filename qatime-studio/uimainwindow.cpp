@@ -87,7 +87,6 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(ui.set_checkBox, SIGNAL(clicked()), this, SLOT(SetParamWindow()));
  	connect(ui.lesson_pushButton, SIGNAL(clicked()), this, SLOT(clickLessonList()));
 	ui.time_label->hide();
-	ui.person_pushButton->hide();
 	
 	m_SeeLiveWnd = new UISeeLiveWnd();
 	m_SeeLiveWnd->setWindowFlags(Qt::FramelessWindowHint);
@@ -212,6 +211,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_charRoom->show();
 
 	ui.titel_pushButton->installEventFilter(this);
+	ui.titel1_pushButton->installEventFilter(this);
 
 	// TabWidget背景变换
 	ui.tabWidget->setStyleSheet("QTabWidget:pane{border: 1px solid white;background-color:white;}");
@@ -479,8 +479,12 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 	}
 	if (m_icount > 0 || e == NULL)
 	{
-// 		m_CameraOrVideo->move(chat_X + 20, 50 + 20);
-// 		m_CameraOrVideo->resize(302, 169);
+		ui.title_widget->resize(ui.title_widget->width() + w, ui.title_widget->height());
+		ui.help_widget->resize(ui.help_widget->width() + w, ui.help_widget->height());
+		ui.welcome_widget->resize(ui.welcome_widget->width() + w, ui.welcome_widget->height());
+		ui.btn_widget->resize(ui.btn_widget->width() + w, ui.btn_widget->height());
+		ui.videoCamera_widget->resize(ui.videoCamera_widget->width() + w, ui.videoCamera_widget->height());
+		ui.right_label->move(ui.right_label->geometry().left() + w, ui.right_label->geometry().top());
 
 		if (m_charRoom)
 		{
@@ -1160,10 +1164,6 @@ void UIMainWindow::returnMember()
 		m_charRoom->QueryGroup();
 
 		// 设置观看人数
-// 		ui.person_pushButton->setIcon(QIcon("./images/eyes.png"));
-// 		ui.person_pushButton->setIconSize(QSize(16, 16));
-//		ui.person_pushButton->setStyleSheet("border-image:url(./images/eyes.png);");
-		
 		m_charRoom->SetStudentName(i);
 
 		// 群公告信息
@@ -1446,7 +1446,7 @@ void UIMainWindow::setPausedBtn()
 // 拖动标题做的处理
 bool UIMainWindow::eventFilter(QObject *target, QEvent *event)
 {
-	if (target == ui.titel_pushButton)
+	if (target == ui.titel_pushButton || target == ui.titel1_pushButton)
 	{
 		QMouseEvent* pMe = static_cast<QMouseEvent*>(event);
 		if (event->type() == QEvent::MouseButtonPress)
