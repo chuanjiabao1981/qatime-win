@@ -201,17 +201,13 @@ void CMessageBox::initUI()
 			m_pInnerText = new QLabel();
 			if (m_pInnerText)
 			{
-				
-
 				if (m_qsText.isEmpty())
 
 				{
 					m_pInnerText->setPixmap(QString("./images/tuxing.png"));
-				
 				}
 				else
 				{
-					
 					m_pInnerText->setFont(font);
 
 					QPalette pe1;
@@ -227,7 +223,7 @@ void CMessageBox::initUI()
 			}
 
 
-			pMiddleLayout->addSpacing(52);
+			pMiddleLayout->addSpacing(34);
 
 			pLayout->addLayout(pMiddleLayout);
 		}

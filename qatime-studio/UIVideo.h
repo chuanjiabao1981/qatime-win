@@ -100,6 +100,7 @@ private:
 	HWND							m_VideoWnd;			// 视频窗口句柄
 	QTimer*							m_StartLiveTimer;	// 延迟1秒推流
 	BoardWindow*					m_BoadWnd;			// 白板
+	QPixmap*						m_pBkImage;			// 背景
 
 public:
 	EN_NLSS_VIDEOIN_TYPE			m_videoSourceType;  // 视频源类型
@@ -168,6 +169,7 @@ public:
 	void SetWhiteBoard();
 	void SetWhiteBoardHidden(bool bHide);
 	bool IsWhiteBoardVisible();
+	void setBkImage(QString qsImage);
 };
 
 #endif // UIVideo_H

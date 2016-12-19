@@ -25,17 +25,16 @@ typedef void(*nim_talk_reg_recall_msg_cb)(const char *json_extension, nim_talk_r
 
 static void CallbackSendMsgAck(const char *result, const void *callback)
 {
-	if (callback)
-	{
-		Talk::SendMsgAckCallback* cb_pointer = (Talk::SendMsgAckCallback*)callback;
-		if (*cb_pointer)
-		{
-			SendMessageArc arc;
-			ParseSendMessageAck(PCharToString(result), arc);
-//			PostTaskToUIThread(std::bind((*cb_pointer), arc));
-			//(*cb_pointer)(arc);
-		}
-	}
+	SendMessageArc arc;
+	ParseSendMessageAck(PCharToString(result), arc);
+	SendMessageArc* arcNew = new SendMessageArc;
+	arcNew->msg_id_ = arc.msg_id_;
+	arcNew->msg_timetag_ = arc.msg_timetag_;
+	arcNew->rescode_ = arc.rescode_;
+	arcNew->talk_id_ = arc.talk_id_;
+
+	HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+	PostMessage(hWnd, MSG_SEND_MSG_STATUS, (WPARAM)arcNew, 0);
 }
 
 static void CallbackReceiveMsg(const char *content, const char *json_extension, const void *callback)
@@ -103,15 +102,21 @@ static void CallbackReceiveMessages(const char *content, const char *json_extens
 
 static void CallbackFileUploadProcess(__int64 uploaded_size, __int64 file_size, const char *json_extension, const void *callback)
 {
-	if (callback)
-	{
-		Talk::FileUpPrgCallback* cb_pointer = (Talk::FileUpPrgCallback*)callback;
-		if (*cb_pointer)
-		{
-//			PostTaskToUIThread(std::bind((*cb_pointer), uploaded_size, file_size));
-			//(*cb_pointer)(uploaded_size, file_size);
-		}
-	}
+// 	if (callback)
+// 	{
+// 		Talk::FileUpPrgCallback* cb_pointer = (Talk::FileUpPrgCallback*)callback;
+// 		if (cb_pointer)
+// 		{
+			HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+			PostMessage(hWnd, MSG_PICTURE_PROCESS, (WPARAM)uploaded_size, (LPARAM)file_size);
+
+// 			if (uploaded_size == file_size)
+// 			{
+// 				delete cb_pointer;
+// 				cb_pointer = NULL;
+// 			}
+// 		}
+// 	}
 }
 
 static bool FilterTeamNotification(const char *content, const char *json_extension, const void *callback)
@@ -143,6 +148,7 @@ void Talk::RegSendMsgCb(const SendMsgAckCallback& cb, const std::string& json_ex
 
 void Talk::SendMsg(const std::string& json_msg, const std::string& json_extension/* = ""*/, FileUpPrgCallback* pcb/* = nullptr*/)
 {
+	return NIM_SDK_GET_FUNC(nim_talk_send_msg)(json_msg.c_str(), json_extension.c_str(), &CallbackFileUploadProcess, pcb);
 	if (pcb)
 	{
 		return NIM_SDK_GET_FUNC(nim_talk_send_msg)(json_msg.c_str(), nullptr, &CallbackFileUploadProcess, pcb);

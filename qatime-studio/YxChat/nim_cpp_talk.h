@@ -37,6 +37,7 @@ public:
 	typedef std::function<void(__int64, __int64)>	FileUpPrgCallback;	/**< 发送多媒体消息文件上传过程回调模板 */
 	typedef std::function<bool(const IMMessage&)> TeamNotificationFilter; /**< 群通知过滤器 */
 	typedef std::function<void(const NIMResCode, const std::list<RecallMsgNotify>&)>	RecallMsgsCallback;	/**< 消息撤回通知回调模板 */
+	typedef std::function<void(const IMMessage&)>	FileUpCallback;	/**< 发送多媒体消息文件上传过程回调模板 */
 
 	/** @fn static void RegSendMsgCb(const SendMsgCallback& cb, const std::string& json_extension = "")
 	* 注册发送消息回调函数 （必须全局注册,统一接受回调后分发消息到具体的会话。注意：客户端发包之后,服务器不一定会返回！！！）

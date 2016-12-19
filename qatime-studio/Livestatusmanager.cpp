@@ -17,6 +17,7 @@ LiveStatusManager::LiveStatusManager(QObject *parent)
 	, m_HeartFailTimer(NULL)
 	, m_StopFailTimer(NULL)
 	, m_SwitchFailTimer(NULL)
+	, m_iBeatStep(0)
 {
 	m_iGetRtmpCount = GET_RTMP_FAIL_COUNT;
 	m_TGetRtmpTimer = new QTimer(this);
@@ -109,7 +110,7 @@ void LiveStatusManager::GetRtmpAddressAndHeartBeat(QString lessonID, QString sTo
 	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{id}/live_info";
 	strUrl.replace("{id}", lessonID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{id}/live_info";
+	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{id}/live_info";
 	strUrl.replace("{id}", lessonID);
 #endif
 
@@ -171,7 +172,7 @@ void LiveStatusManager::HeartBeatTimer()
 	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
 	strUrl.replace("{lessons_id}", m_lessonID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
 	strUrl.replace("{lessons_id}", m_lessonID);
 #endif
 
@@ -191,6 +192,9 @@ void LiveStatusManager::HeartBeatTimer()
 	append.append("&timestamp=");
 	append += time;
 
+	QString strHeartBeat = "HearBeat:";
+	strHeartBeat += append;
+//	qDebug()<<strHeartBeat;
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat);
@@ -234,7 +238,7 @@ void LiveStatusManager::HeartBeatFailTimer()
 	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
 	strUrl.replace("{lessons_id}", m_lessonID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
 	strUrl.replace("{lessons_id}", m_lessonID);
 #endif
 
@@ -245,10 +249,13 @@ void LiveStatusManager::HeartBeatFailTimer()
 	append += m_sLiveToken;
 	append.append("&beat_step=");
 	qInfo(append);
-	append += m_iBeatStep;
+	append += QString::number(m_iBeatStep);
 	append.append("&timestamp=");
 	append += m_Time;
 
+	QString strHeartBeat = "HearBeat:";
+	strHeartBeat += append;
+//	qDebug() << strHeartBeat;
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat);
@@ -265,7 +272,7 @@ void LiveStatusManager::SendStartLiveHttpMsg(int iBoard, int iCamera, QString sL
 	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
 	strUrl.replace("{lessons_id}", m_lessonID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
+	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
 	strUrl.replace("{lessons_id}", m_lessonID);
 #endif
 
@@ -298,10 +305,10 @@ void LiveStatusManager::FinishStartLive()
 		{
 			if (m_parent)
 			{
-				// 更新开始直播按钮、计时器等状态
-				m_parent->startLiveStream();
 				// 更新课程状态
 				m_parent->SendRequestStatus();
+
+				StartHeartBeat();
 			}
 		}
 		else
@@ -327,7 +334,7 @@ void LiveStatusManager::SendStopLiveHttpMsg(bool bConnect)
 	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
 	strUrl.replace("{lessons_id}", m_lessonID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
+	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
 	strUrl.replace("{lessons_id}", m_lessonID);
 #endif
 
@@ -401,7 +408,7 @@ void LiveStatusManager::SendCameraSwitchMsg(int iBoard, int iCamera)
 	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_switch";
 	strUrl.replace("{lessons_id}", m_lessonID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_switch";
+	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_switch";
 	strUrl.replace("{lessons_id}", m_lessonID);
 #endif
 

@@ -330,3 +330,50 @@ personListBuddy* personList::findID(const QString id)
 	return Buddy;
 }
 
+// 拉伸屏幕宽度，按钮也需要改变位置
+void  personList::setAllWidth(int iWidth)
+{
+	if (iWidth == 0)
+		return;
+
+	int iCount = this->count();
+	if (iCount == 0)
+		return;
+
+	personListBuddy* Buddy = NULL;
+	for (int i = 2; i < iCount;i++)
+	{
+		QListWidgetItem* pItem = this->item(i);
+		if (pItem)
+		{
+			Buddy = *groupMap.find(pItem);
+			if (Buddy)
+			{
+				QRect rc;
+				if (Buddy->button)
+				{
+					rc = Buddy->button->geometry();
+					Buddy->button->move(rc.left() + iWidth, rc.top());
+					Buddy->setFixedWidth(Buddy->width() + iWidth);
+				}
+			}
+		}
+	}
+
+	if (buddySec)
+	{
+		buddySec->secLinEdit->setFixedWidth(buddySec->secLinEdit->width() + iWidth);
+		QRect rc;
+		rc = buddySec->secFindButton->geometry();
+		buddySec->secFindButton->move(rc.left() + iWidth, rc.top());
+		buddySec->setFixedWidth(buddySec->width() + iWidth);
+	}
+
+	if (buddyLast)
+	{
+		QRect rc;
+		rc = buddyLast->firstButton->geometry();
+		buddyLast->firstButton->move(rc.left() + iWidth, rc.top());
+		buddyLast->setFixedWidth(buddyLast->width() + iWidth);
+	}
+}

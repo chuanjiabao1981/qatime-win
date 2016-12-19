@@ -34,6 +34,7 @@ public:
 	UIAuxiliaryPanel(QWidget *parent = 0);
 	~UIAuxiliaryPanel();
 
+	QTreeWidget*					m_teacher_treewidget;	//修改版老师面板
 private:
 	Ui::UIAuxiliaryPanel ui;
 
@@ -42,7 +43,6 @@ private:
 	QNetworkReply*					reply;
 
 	UIMainWindow*					m_Parent;
-	QTreeWidget*					m_teacher_treewidget;	//修改版老师面板
 	QString							m_teacherID;			//老师ID
 	QString							m_teacherName;			//老师名字
 	QString							m_auxiliaryID;			//当前辅导班ID

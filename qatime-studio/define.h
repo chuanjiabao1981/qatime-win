@@ -26,6 +26,8 @@
 #define MSG_MEMBERS_INFO				MSG_START_COUNT	+ 3		//成员信息
 #define MSG_VIDEO_CHANGE_SIZE			MSG_START_COUNT	+ 4		//改变窗口大小
 #define MSG_MEMBER_INFO					MSG_START_COUNT	+ 5		//单个成员信息
+#define MSG_PICTURE_PROCESS				MSG_START_COUNT	+ 6		//图片发送进度
+#define MSG_SEND_MSG_STATUS				MSG_START_COUNT	+ 7		//发送消息状态
 
 // 和qatime_video交互用到的消息
 struct VideoInfo
@@ -48,6 +50,7 @@ struct VideoInfo
 #define MSG_VIDEO_SUSPEND				MSG_VIDEO_CUSTOM + 12   //直播暂停
 #define MSG_VIDEO_CONTINUE				MSG_VIDEO_CUSTOM + 13   //直播继续
 #define MSG_DEVICE_BACK					MSG_VIDEO_CUSTOM + 14	//推黑色背景流
+#define MSG_VIDEO_LIVE_SUC				MSG_VIDEO_CUSTOM + 15   //直播开始成功
 
 // 直播摄像头
 #define MSG_CAMERA_CUSTOM				4200	

@@ -7,6 +7,7 @@
 #include <QLabel>
 #include "uimainwindow.h"
 #include "UIChatHtml.h"
+#include <vector>
 
 //---云信
 #include "nim_client_def.h"
@@ -22,6 +23,16 @@
 #include <QNetworkAccessManager>
 
 class UIMainWindow;
+class UIChatHtml;
+
+struct MyImageInfo
+{
+	QString			PhotoImg;		//聊天头像
+	QString			name;			//昵称
+	QString			time;			//时间
+	QString			ReceiverImg;	//接收的图片路径
+	std::string		chatID;			//会话id
+};
 
 class UIChatRoom : public QWidget
 {
@@ -72,6 +83,8 @@ private:
 	UIMainWindow*					m_parent;			// 主窗口对象
 	int								m_studentNum;		// 当前学生数量
 	int								m_proclamationHeight;// 公告高度
+	std::vector<MyImageInfo>		m_VerReceiveImg;	// 接收的图片消息队列
+	QTimer*							m_LoadImgTimer;		// 定时器加载图片
 	void initEmotion();
 public:
 	QString							m_TeachterName;		// 老师名字
@@ -99,6 +112,8 @@ private slots:
 	void colseCalendar();								// 关闭日历槽函数
 	void colseBrow();									// 关闭表情槽函数
 	void calendaCurrentPageChanged(int year, int month);// 日历当前页面被改变
+	void clickPic();									// 选择图片
+	void LoadImgTimeout();								// 加载图片定时器
 private:
 	void		initSDK();									// 初始化云信SDK
 	bool		LoadConfig(const std::string& app_data_dir,const std::string& app_install_dir, nim::SDKConfig &config); //加载配置
@@ -135,7 +150,12 @@ private:
 
 	static void OnGetTeamInfoCb(const nim::TeamEvent& team_event);
 
+	QString		UserAppdataPath();
+	void		GenerateUploadImage(const std::wstring src, const std::wstring dest);
+	std::string GetFileMD5(QString path);
+	long		GetFileSize(QString path);
 public:
+	void	SendImage(const std::wstring src, QString &filename, QString msgid="");
 	void	setChatInfo(QJsonObject &chatInfo, QString token);	// 设置云信账户信息
 	bool	ReceiverMsg(nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
 	void	ReceiverRecordMsg(nim::QueryMsglogResult* pMsg);	// 接收历史消息记录
@@ -155,6 +175,8 @@ public:
 	void	setAdaptHeight(int iHeight);						// 自适应高度
 	void	setResize(int iWidth, int iHeight);					// 宽度 高度
 	bool	IsFous();
+	void	UpLoadPicProcess(double iProcess);					// 上传图片进度
+	void	SendStatus(nim::SendMessageArc* arcNew);			// 发送消息返回状态
 public slots:
 	void chickChage(int, QString, QString);
 	bool AddStudent(QString iconUrl, QString name, QString accid);		//添加成员

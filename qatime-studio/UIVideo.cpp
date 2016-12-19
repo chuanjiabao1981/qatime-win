@@ -32,6 +32,7 @@ UIVideo::UIVideo(QWidget *parent)
 	, m_bStopLiveFinish(true)
 	, m_Parent(NULL)
 	, m_BoadWnd(NULL)
+	, m_pBkImage(NULL)
 {
 	ui.setupUi(this);
 
@@ -60,12 +61,8 @@ UIVideo::UIVideo(QWidget *parent)
 	//初始化音视频控件，利用到底层库
 	EnumAvailableMediaDevices();
 
-	SetMediaCapture(m_hNlssService);
+//	SetMediaCapture(m_hNlssService);
 
-	// 创建白板
-// 	m_BoadWnd = new BoardWindow(this);
-// 	m_BoadWnd->setWindowFlags(Qt::FramelessWindowHint);
-// 	m_BoadWnd->show();
 
 	// 启动直播视频
 	TCHAR szTempPath[MAX_PATH] = { 0 };
@@ -126,6 +123,12 @@ UIVideo::~UIVideo()
 		delete m_BoadWnd;
 		m_BoadWnd = NULL;
 	}
+
+	if (m_pBkImage)
+	{
+		delete m_pBkImage;
+		m_pBkImage = NULL;
+	}
 }
 
 void UIVideo::setPlugFlowUrl(QString url)
@@ -135,11 +138,12 @@ void UIVideo::setPlugFlowUrl(QString url)
 
 void UIVideo::SetMediaCapture(_HNLSSERVICE hNlssService)
 {
-// 	PFN_NLSS_STATUS_NTY notify = UIVideo::OnLiveStreamStatusNty;
-// 	Nlss_SetStatusCB(hNlssService, notify);
-// 
+// 	m_hNlssService = hNlssService;
 // 	PFN_NLSS_VIDEOSAMPLER_CB frame_cb = UIVideo::SetVideoSampler;
 // 	Nlss_SetVideoSamplerCB(m_hNlssService, frame_cb);
+
+// 	PFN_NLSS_STATUS_NTY notify = UIVideo::OnLiveStreamStatusNty;
+// 	Nlss_SetStatusCB(hNlssService, notify);
 }
 
 void UIVideo::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
@@ -147,14 +151,12 @@ void UIVideo::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
 	if (pSampler != NULL)
 	{
 		m_mutex.lock();
-
-		if (m_SvideoSampler.puaData)
+		if (pSampler->iWidth * pSampler->iHeight > m_SvideoSampler.iWidth * m_SvideoSampler.iHeight)
 		{
-			delete[]m_SvideoSampler.puaData;
-			m_SvideoSampler.puaData = NULL;
+			if (m_SvideoSampler.puaData)
+				delete[]m_SvideoSampler.puaData;
+			m_SvideoSampler.puaData = new unsigned char[pSampler->iWidth * pSampler->iHeight * 4];
 		}
-
-		m_SvideoSampler.puaData = new unsigned char[pSampler->iWidth * pSampler->iHeight * 4];
 
 		m_SvideoSampler.iWidth = pSampler->iWidth;
 		m_SvideoSampler.iHeight = pSampler->iHeight;
@@ -194,6 +196,16 @@ void UIVideo::paintEvent(QPaintEvent *)
 		qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_RGB32);
 		p.drawImage(rect(), qimage);
 		m_mutex.unlock();
+
+	}
+	else
+	{
+		if (!m_bLiving)
+		{
+			if (NULL != m_pBkImage)
+				p.drawPixmap(QPoint(0, 0), *m_pBkImage);
+		}
+
 	}
 }
 
@@ -659,4 +671,19 @@ void UIVideo::SetWhiteBoardHidden(bool bHide)
 bool UIVideo::IsWhiteBoardVisible()
 {
 	return m_BoadWnd->isVisible();
+}
+
+void UIVideo::setBkImage(QString qsImage)
+{
+	if (!qsImage.isEmpty())
+	{
+		if (NULL == m_pBkImage)
+		{
+			m_pBkImage = new QPixmap(qsImage);
+		}
+		else
+		{
+			m_pBkImage->load(qsImage);
+		}
+	}
 }

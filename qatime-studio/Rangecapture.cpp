@@ -11,8 +11,8 @@
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6
 #define MAINWINDOW_TITLE_HEIGHT 1
-#define RECT_HEIGHT 640
-#define RECT_WIDTH  640
+#define RECT_HEIGHT 832
+#define RECT_WIDTH  832
 
 RangeCapture::RangeCapture(QWidget *parent)
 	: QWidget(parent)
@@ -33,8 +33,17 @@ RangeCapture::RangeCapture(QWidget *parent)
 
 	m_RangeLeft = 0;
 	m_RangeTop = 0;
-	m_RangeWidth = RECT_WIDTH;
-	m_RangeHeight = RECT_HEIGHT;
+
+	if (m_ScreenHeight*0.92 > 832)
+	{
+		m_RangeWidth = RECT_WIDTH;
+		m_RangeHeight = RECT_HEIGHT;
+	}
+	else
+	{
+		m_RangeWidth = m_ScreenHeight*0.92;
+		m_RangeHeight = m_ScreenHeight*0.92;
+	}
 }
 
 RangeCapture::~RangeCapture()

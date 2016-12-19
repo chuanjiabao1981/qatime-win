@@ -35,6 +35,7 @@ public:
 	void initSecUi();
 	void setOlineNum(int olineNum, int allNum);//设置在线人数的接口
 	void cleanStudents();		//清空列表中的数据
+	void setAllWidth(int iWidth);
 signals:
 	void signalChickChage(int,QString, QString);
 public slots:

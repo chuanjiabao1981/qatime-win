@@ -23,7 +23,7 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="title_label">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -42,7 +42,7 @@
      <string notr="true">color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
-     <string>  答疑时间直播助手V0.5.2</string>
+     <string>  答疑时间直播助手V1.0.0</string>
     </property>
    </widget>
    <widget class="QPushButton" name="homepage_pushBtn">
@@ -353,7 +353,7 @@ background-color: rgb(5, 158, 213);</string>
    </widget>
    <zorder>back_label</zorder>
    <zorder>label</zorder>
-   <zorder>label_2</zorder>
+   <zorder>title_label</zorder>
    <zorder>homepage_pushBtn</zorder>
    <zorder>login_pushBtn</zorder>
    <zorder>UserName_Edit</zorder>

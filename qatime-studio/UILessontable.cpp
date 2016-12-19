@@ -123,7 +123,7 @@ void UILessonTable::RequestLesson()
 	strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/schedule";
 	strUrl.replace("{teacher_id}", m_teacherID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/schedule";
+	strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/schedule";
 	strUrl.replace("{teacher_id}", m_teacherID);
 #endif
 

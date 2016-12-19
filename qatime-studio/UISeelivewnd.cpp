@@ -1,5 +1,6 @@
 #include "UISeelivewnd.h"
 #include <QPainter>
+#include <QWindow>
 
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6

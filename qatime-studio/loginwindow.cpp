@@ -23,6 +23,7 @@ TCHAR m_pathTeacherToken[MAX_PATH] = { 0 };
 TCHAR m_pathTeacherUrl[MAX_PATH] = { 0 };
 TCHAR m_pathAccid[MAX_PATH] = { 0 };
 TCHAR m_pathAccidToken[MAX_PATH] = { 0 };
+TCHAR m_pathVersion[MAX_PATH] = { 0 };
 int	  m_iRemeber = 0;
 
 #define MAINWINDOW_MAXHEIGHT 832	//客户端最大高度
@@ -130,9 +131,9 @@ void LoginWindow::OnLogIn()
 	}
 
 #ifdef _DEBUG
-	url = QUrl("http://testing.qatime.cn/api/v1/sessions");
+  	url = QUrl("http://testing.qatime.cn/api/v1/sessions");
 #else
-	url = QUrl("http://qatime.cn/api/v1/sessions");
+	url = QUrl("https://qatime.cn/api/v1/sessions");
 #endif
 	
 	QByteArray append("client_type=pc");
@@ -182,12 +183,13 @@ void LoginWindow::loginFinished()
 		m_accidToken = objInfo["chat_account"].toObject()["token"].toString();
 
 		mainWin = new UIMainWindow();
-		mainWin->setWindowFlags(Qt::FramelessWindowHint);
+		mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 		mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
 		mainWin->setRemeberToken(m_teacherToken);
 		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->ShowAuxiliary();
 		mainWin->setLoginWindow(this);		
+		mainWin->setMainTitle(m_version);
 		mainWin->show();
 		SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 		this->hide();
@@ -267,6 +269,7 @@ void LoginWindow::ReadSetting()
 	GetPrivateProfileString(L"CONFIG_PATH", L"TEACHERURL", L"", m_pathTeacherUrl, MAX_PATH, szTempPath);
 	GetPrivateProfileString(L"CONFIG_PATH", L"ACCID", L"", m_pathAccid, MAX_PATH, szTempPath);
 	GetPrivateProfileString(L"CONFIG_PATH", L"ACCIDTOKEN", L"", m_pathAccidToken, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"VERSION", L"", m_pathVersion, MAX_PATH, szTempPath);
 	m_iRemeber = GetPrivateProfileInt(L"CONFIG_PATH", L"REMEBER", 0, szTempPath);
 
 	m_teacherName = QString::fromStdWString(m_pathTeacherName);
@@ -275,6 +278,11 @@ void LoginWindow::ReadSetting()
 	m_teacherUrl = QString::fromStdWString(m_pathTeacherUrl);
 	m_accid = QString::fromStdWString(m_pathAccid);
 	m_accidToken = QString::fromStdWString(m_pathAccidToken);
+	m_version = QString::fromStdWString(m_pathVersion);
+	
+	QString sVersion = "  答疑时间直播助手{version}";
+	sVersion.replace("{version}", m_version);
+	ui.title_label->setText(sVersion);
 }
 
 void LoginWindow::changedRemeber(int i)
@@ -347,12 +355,13 @@ void LoginWindow::ReturnLogin()
 void LoginWindow::AutoLogin()
 {
 	mainWin = new UIMainWindow();
-	mainWin->setWindowFlags(Qt::FramelessWindowHint);
+	mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
  	mainWin->setRemeberToken(m_teacherToken);
  	mainWin->setAutoTeacherInfo(m_teacherID, m_teacherName,m_teacherUrl,m_accid,m_accidToken);
  	mainWin->ShowAuxiliary();
  	mainWin->setLoginWindow(this);
+	mainWin->setMainTitle(m_version);
 	mainWin->show();
 	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 }
@@ -369,7 +378,7 @@ void LoginWindow::Checking()
 	strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
 	strUrl.replace("{teacher_id}", m_teacherID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
+	strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
 	strUrl.replace("{teacher_id}", m_teacherID);
 #endif
 
@@ -427,7 +436,6 @@ bool LoginWindow::eventFilter(QObject *target, QEvent *event)
 
 void LoginWindow::CreateTray()
 {
-	return;
 	QIcon icon = QIcon("./images/favicon.png");
 	trayIcon = new QSystemTrayIcon(this);
 	trayIcon->setIcon(icon);
@@ -463,8 +471,10 @@ void LoginWindow::trayiconActivated(QSystemTrayIcon::ActivationReason reason)
 		break;
 	case QSystemTrayIcon::Trigger:
 		{
-			int i = 0;
-			i++;
+			if ( mainWin)
+			{
+				mainWin->ShowMain();
+			}
 		}
 		break;
 	case QSystemTrayIcon::MiddleClick:

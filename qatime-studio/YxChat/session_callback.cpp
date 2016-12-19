@@ -128,13 +128,10 @@ void TalkCallback::OnReceiveRecallMsgCallback(nim::NIMResCode code, const std::l
 
 void TalkCallback::OnSendMsgCallback(const nim::SendMessageArc& arc)
 {
-// 	QLOG_APP(L"OnSendMsgCallback: id={0} msg_id={1} code={2}") << arc.talk_id_ << arc.msg_id_ << arc.rescode_;
-// 
-// 	SessionForm* session_form = SessionManager::GetInstance()->Find(arc.talk_id_);
-// 	if (session_form)
-// 		session_form->OnSendMsgCallback(arc.msg_id_, arc.rescode_, arc.msg_timetag_);
-// 
-// 	SessionManager::GetInstance()->RemoveFileUpProgressCb(arc.talk_id_);
+	std::string talkid = arc.talk_id_;
+	std::string msgid = arc.msg_id_;
+	int iError = arc.rescode_;
+	int Error = iError;
 }
 
 void TalkCallback::OnMsgStatusChangedCallback(const nim::MessageStatusChangedResult& res)

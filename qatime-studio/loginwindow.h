@@ -72,7 +72,7 @@ private:
 	QString m_teacherUrl;
 	QString m_accid;
 	QString m_accidToken;
-
+	QString m_version;
 	QSystemTrayIcon *trayIcon;
 
 public:

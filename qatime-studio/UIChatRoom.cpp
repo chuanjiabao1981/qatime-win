@@ -8,6 +8,8 @@
 #include <QJsonArray>
 #include "member.h"
 #include <QScrollBar>
+#include <QProcessEnvironment>
+#include "zoom_image.h"
 
 #include "YxChat/nim_sdk_helper.h"
 #include "YxChat/session_callback.h"
@@ -54,6 +56,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	, m_ChatHtml(NULL)
 	, m_studentNum(0)
 	, m_proclamationHeight(0)
+	, m_LoadImgTimer(NULL)
 {
 	ui.setupUi(this);
 	setAutoFillBackground(true);
@@ -82,6 +85,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.text_talk, SIGNAL(colseBrow()), this, SLOT(colseBrow()));
 	connect(ui.textEdit, SIGNAL(colseBrow()), this, SLOT(colseBrow()));
 	connect(ui.timeWidget, SIGNAL(currentPageChanged(int, int)), this, SLOT(calendaCurrentPageChanged(int, int)));
+	connect(ui.pic_pushButton, SIGNAL(clicked()), this, SLOT(clickPic()));
 
 	QScrollBar* TalkRecordScrollBar;
 	TalkRecordScrollBar = (QScrollBar*)ui.talkRecord->verticalScrollBar();
@@ -113,7 +117,11 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	ui.student_list->setStyleSheet("border-image: url(:/LoginWindow/images/nochat.png);");
 
  	m_ChatHtml = new UIChatHtml(ui.text_talk);
+	m_ChatHtml->setParent(this);
  	m_ChatHtml->show();
+
+	m_LoadImgTimer = new QTimer(this);
+	connect(m_LoadImgTimer, SIGNAL(timeout()), this, SLOT(LoadImgTimeout()));
 }
 
 UIChatRoom::~UIChatRoom()
@@ -123,6 +131,13 @@ UIChatRoom::~UIChatRoom()
 	{
 		delete m_ChatHtml;
 		m_ChatHtml = NULL;
+	}
+
+	if (m_LoadImgTimer)
+	{
+		m_LoadImgTimer->stop();
+		delete m_LoadImgTimer;
+		m_LoadImgTimer = NULL;
 	}
 }
 
@@ -196,6 +211,7 @@ void UIChatRoom::clickTalk()
 	ui.student_list->setHidden(true);
 	ui.msgRecord->setHidden(true);	
 	ui.text_talk->moveCursor(QTextCursor::End);
+	ui.pic_pushButton->setHidden(false);
 }
 // 弹出学生列表
 void UIChatRoom::clickStudentList()
@@ -218,8 +234,7 @@ void UIChatRoom::clickStudentList()
 	ui.student_list->setHidden(false);
 	ui.msgRecord->setHidden(true);
 	ui.student_list->initMenu();
-
-	QRect rc =ui.student_list->geometry();
+	ui.pic_pushButton->setHidden(true);
 }
 // 弹出公告框
 void UIChatRoom::clickProclamation()
@@ -245,6 +260,7 @@ void UIChatRoom::clickProclamation()
 	ui.button_sendMseeage->setHidden(true);
 	ui.textEdit->setHidden(true);
 	ui.label->setHidden(true);
+	ui.pic_pushButton->setHidden(true);
  	
 	ui.text_proclamation->show();
 	ui.text_proclamation->setGeometry(QRect(0, 40, 280, m_proclamationHeight));
@@ -696,7 +712,7 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 	}
 
 	// 判断当前过来的消息，是不是此会话窗口
-	if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0)
+	if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0 && pMsg->type_ == nim::kNIMMessageTypeText)
 	{
 		stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_));
 
@@ -715,8 +731,45 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		if (Buddy)
 			img= Buddy->head->accessibleDescription();
 
-		ui.text_talk->append(qName + " " + qTime);
 		m_ChatHtml->receiverMsg(img,qName, qTime, qContent);
+		bValid = true;
+	}
+	else if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0 && pMsg->type_ == nim::kNIMMessageTypeImage)
+	{
+		stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_));
+
+		std::string strName = pMsg->readonly_sender_nickname_;
+		std::string strContent = pMsg->content_;
+		std::string strID = pMsg->sender_accid_;
+
+		QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg->timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+		QString qName = QString::fromStdString(strName);
+		QString qContent = QString::fromStdString(pMsg->local_res_path_);
+		QString qContentNew = qContent;
+		qContentNew += ".png";
+		qContentNew.replace("\\", "/");
+		// 聊天头像
+		QString img;
+		personListBuddy* Buddy = NULL;
+		Buddy = ui.student_list->findID(QString::fromStdString(strID));
+		if (Buddy)
+			img = Buddy->head->accessibleDescription();
+
+		// 如果下载失败
+		if (!QFile::copy(qContent, qContentNew))
+		{
+			MyImageInfo ImgInfo;
+			ImgInfo.PhotoImg = img;
+			ImgInfo.name = qName;
+			ImgInfo.time = qTime;
+			ImgInfo.ReceiverImg = qContent;
+			ImgInfo.chatID = pMsg->local_talk_id_;
+			m_VerReceiveImg.push_back(ImgInfo);
+			m_LoadImgTimer->start(500);
+			return false;
+		}
+
+		m_ChatHtml->receiverImageMsg(img, qName, qTime, qContentNew);
 		bValid = true;
 	}
 
@@ -980,6 +1033,8 @@ void UIChatRoom::initSDK()
 
 	// 接受消息回调
 	nim::Talk::RegReceiveCb(&nim_comp::TalkCallback::OnReceiveMsgCallback);
+	// 发送消息状态回调
+	nim::Talk::RegSendMsgCb(&nim_comp::TalkCallback::OnSendMsgCallback);
 }
 
 void UIChatRoom::OnLoginCallback(const nim::LoginRes& login_res, const void* user_data)
@@ -1056,7 +1111,7 @@ void UIChatRoom::ReceiverLoginMsg(nim::LoginRes* pRes)
 // 初始化获取群成员的禁言状态
 void UIChatRoom::ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg)
 {
-	ui.student_list->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
+	ui.student_list->setStyleSheet("border-image: url(:/LoginWindow/images/alpha.png);");
 
 	for (auto it : *pMemberMsg)
 	{
@@ -1102,8 +1157,6 @@ void UIChatRoom::chickChage(int b, QString qAccid, QString name)
 	std::string accid = qAccid.toStdString();
 	auto cb = std::bind(OnTeamEventCallback, std::placeholders::_1);
 	nim::Team::MuteMemberAsync(m_CurChatID, accid, b, cb);	
-
-	ui.text_talk->append("");
 }
 
 // 添加成员
@@ -1223,7 +1276,7 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 	strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/announcements";
 	strUrl.replace("{id}", m_CurCourseID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/courses/{id}/announcements";
+	strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/announcements";
 	strUrl.replace("{id}", m_CurCourseID);
 #endif
 
@@ -1246,7 +1299,7 @@ void UIChatRoom::QueryMember()
 	strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/realtime";
 	strUrl.replace("{id}", m_CurCourseID);
 #else
-	strUrl = "http://qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+	strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/realtime";
 	strUrl.replace("{id}", m_CurCourseID);
 #endif
 
@@ -1382,15 +1435,212 @@ void UIChatRoom::setAdaptHeight(int iHeight)
 // 拉伸以后变化的高度
 void UIChatRoom::setResize(int iWidth, int iHeight)
 {
+	// 消息记录
 	ui.talkRecord->setFixedSize(ui.talkRecord->width()+iWidth, ui.talkRecord->height() + iHeight);
+	ui.toolButton_3->move(ui.toolButton_3->geometry().left()+iWidth, ui.toolButton_3->geometry().top());
+	// 聊天
 	if (m_ChatHtml->m_TalkView)
 	{
 		int iWidthi = m_ChatHtml->m_TalkView->width();
+		m_ChatHtml->setFixedSize(m_ChatHtml->m_TalkView->width() + iWidth, m_ChatHtml->m_TalkView->height() + iHeight);
 		m_ChatHtml->m_TalkView->setFixedSize(m_ChatHtml->m_TalkView->width() + iWidth,m_ChatHtml->m_TalkView->height() + iHeight);
 	}
+	// 学生信息
+	ui.student_list->setAllWidth(iWidth);
+
+	// 公告
+	ui.text_proclamation->setFixedWidth(ui.text_proclamation->width()+iWidth);
+	ui.textEdit_2->setFixedWidth(ui.textEdit_2->width() + iWidth);
+	ui.button_sendMseeage_3->move(ui.button_sendMseeage_3->geometry().left() + iWidth, ui.button_sendMseeage_3->geometry().top());
+	ui.button_sendMseeage_cancel->move(ui.button_sendMseeage_cancel->geometry().left() + iWidth, ui.button_sendMseeage_cancel->geometry().top());
+	ui.button_sendMseeage_2->move((ui.text_proclamation->width() - 80) / 2, ui.button_sendMseeage_2->geometry().top());
 }
 
 bool UIChatRoom::IsFous()
 {
 	return ui.textEdit->hasFocus();
+}
+
+void UIChatRoom::SendImage(const std::wstring src, QString &filename, QString msgid/*=""*/)
+{
+	nim::IMMessage msg;
+	PackageMsg(msg);
+	msg.type_ = nim::kNIMMessageTypeImage;
+
+	if (!msgid.isEmpty())
+		msg.client_msg_id_ = msgid.toStdString();
+
+	QString appdata = UserAppdataPath();
+	filename = QString::fromStdString(msg.client_msg_id_);
+
+	QDir dir(appdata);
+	if (!dir.exists())
+		dir.mkdir(appdata);
+	
+	appdata += filename;
+
+	GenerateUploadImage(src, appdata.toStdWString());
+	msg.local_res_path_ = appdata.toStdString();
+
+	nim::IMImage img;
+	img.md5_ = GetFileMD5(appdata);
+	img.size_ = GetFileSize(appdata);
+
+	Gdiplus::Image image(appdata.toStdWString().c_str());
+	if (image.GetLastStatus() != Gdiplus::Ok)
+	{
+		assert(0);
+	}
+	else
+	{
+		img.width_ = image.GetWidth();
+		img.height_ = image.GetHeight();
+	}
+
+	msg.attach_ = img.ToJsonString();
+
+	std::string json_msg = nim::Talk::CreateImageMessage(msg.receiver_accid_, msg.session_type_, msg.client_msg_id_, img, msg.local_res_path_, nim::MessageSetting(), msg.timetag_);
+//	nim::Talk::FileUpPrgCallback* pcb = new nim::Talk::FileUpPrgCallback();
+	nim::Talk::SendMsg(json_msg, msg.client_msg_id_);
+}
+
+QString UIChatRoom::UserAppdataPath()
+{
+	QString appPath = QProcessEnvironment::systemEnvironment().value("APPDATA");
+	appPath += "\\Netease\\NIM\\";
+	appPath.replace("Roaming", "Local");
+	return appPath;
+}
+
+void UIChatRoom::GenerateUploadImage(const std::wstring src, const std::wstring dest)
+{
+	std::wstring mime_type = ZoomImage::GetMimeType(src);
+	if (mime_type.empty())
+		return;
+
+	if (mime_type == kImageGIF)
+	{
+//		nbase::CopyFile(src, dest);
+	}
+	else
+	{
+		std::wstring str = src;
+
+		ZoomImage zoom;
+		zoom.SetImagePath(dest);
+		zoom.SetAutoZoom(true, 1280, 1280);
+		if (zoom.Zoom(str, mime_type == kImagePNG ? kImagePNG : kImageJPEG))
+			return;
+		else if (zoom.ConvertImageFormat(str, mime_type == kImagePNG ? kImagePNG : kImageJPEG))
+			return;
+	}
+}
+
+std::string UIChatRoom::GetFileMD5(QString path)
+{
+	QFile theFile(path);
+	theFile.open(QIODevice::ReadOnly);
+	QByteArray ba = QCryptographicHash::hash(theFile.readAll(), QCryptographicHash::Md5);
+	theFile.close();
+	QString MD5;
+	MD5 = QString(QLatin1String(ba.toHex().constData()));
+	return MD5.toStdString();
+}
+
+long UIChatRoom::GetFileSize(QString path)
+{
+	QFile theFile(path);
+	theFile.open(QIODevice::ReadOnly);
+	long size = theFile.size();
+	theFile.close();
+	return size;
+}
+
+void UIChatRoom::clickPic()
+{
+	if (strcmp(m_CurChatID.c_str(), "") == 0)
+	{
+		QToolTip::showText(QCursor::pos(), "请选择直播间！");
+		return;
+	}
+
+	QString path = QFileDialog::getOpenFileName(this, tr("Open Image"), ".", tr("Image Files(*.jpg *.png)"));
+	if (path.length() == 0)
+		return;
+	else 
+	{
+		QString sMsgID;
+		SendImage(path.toStdWString(), sMsgID);
+
+		// 本人头像
+		QString image = m_parent->TeacherPhotoPixmap();
+		QString name = m_TeachterName;
+		QDateTime time = QDateTime::currentDateTime();//获取系统现在的时间
+		// 跨天处理
+		stepMsgDays(time);
+		QString timeStr = time.toString("hh:mm:ss");
+		name += "(我) ";
+		m_ChatHtml->sendImageMsg(image, name, timeStr, path,sMsgID);
+	}
+}
+
+void UIChatRoom::LoadImgTimeout()
+{
+	if (m_VerReceiveImg.size() == 0)
+	{
+		m_LoadImgTimer->stop();
+	}
+
+	std::vector<MyImageInfo>::iterator it;
+	for (it = m_VerReceiveImg.begin(); it != m_VerReceiveImg.end(); it++)
+	{
+		MyImageInfo VecImg = *it;
+		QString qContentNew = VecImg.ReceiverImg;
+		qContentNew += ".png";
+		qContentNew.replace("\\", "/");
+
+		// 如果下载失败
+		QFile file(qContentNew);
+		if (file.exists())
+		{
+			if (strcmp(VecImg.chatID.c_str(), m_CurChatID.c_str()) == 0)
+				m_ChatHtml->receiverImageMsg(VecImg.PhotoImg, VecImg.name, VecImg.time, qContentNew);
+
+			m_VerReceiveImg.erase(it);
+
+			if (m_VerReceiveImg.size() == 0)
+			{
+				m_LoadImgTimer->stop();
+				return;
+			}
+			return;
+		}
+
+		if (QFile::copy(VecImg.ReceiverImg, qContentNew))
+		{
+			if (strcmp(VecImg.chatID.c_str(), m_CurChatID.c_str()) == 0)
+				m_ChatHtml->receiverImageMsg(VecImg.PhotoImg, VecImg.name, VecImg.time, qContentNew);
+			
+			m_VerReceiveImg.erase(it);
+
+			if (m_VerReceiveImg.size() == 0)
+			{
+				m_LoadImgTimer->stop();
+				return;
+			}
+			return;
+		}
+	}
+}
+
+void UIChatRoom::UpLoadPicProcess(double diff)
+{
+	if (m_ChatHtml)
+		m_ChatHtml->PicProcess(diff);
+}
+
+void UIChatRoom::SendStatus(nim::SendMessageArc* arcNew)
+{
+	if (m_ChatHtml)
+		m_ChatHtml->SendStatus(QString::fromStdString(arcNew->msg_id_));
 }

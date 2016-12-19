@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="LoginWindow">
+    <file>images/pic.png</file>
     <file>images/RangeTuo.png</file>
     <file>images/fabu.png</file>
     <file>images/cancel.png</file>

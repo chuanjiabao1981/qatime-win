@@ -5,6 +5,10 @@
 #pragma execution_character_set("utf-8")
 personListBuddy::personListBuddy(QWidget *parent) :
     QWidget(parent)
+	, button(NULL)
+	, head(NULL)
+	, secLinEdit(NULL)
+	, secFindButton(NULL)
 {
  //   initUi();
 	this->setFixedSize(QSize(320, 30));
@@ -28,16 +32,14 @@ void personListBuddy::initFindPeople()
 	connect(secFindButton, SIGNAL(clicked()), this, SLOT(findName()));
 
 	secLinEdit->move(1, 1);
-	secLinEdit->setFixedWidth(283);
+	secLinEdit->setFixedWidth(287);
 	secLinEdit->setFixedHeight(28);
 	secLinEdit->setPlaceholderText("请输入要查的姓名");
 	secLinEdit->setAlignment(Qt::AlignLeft);//居左对齐	
-	secLinEdit->setStyleSheet("QLineEdit{ bordercolor:red; font:10pt}"
-		"QLineEdit:hover{ border: 1px solid rgb(0,0,0) }"
-		"QLineEdit{ border: 1px solid #cccccc }");
+	secLinEdit->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
 	secFindButton->setStyleSheet("border-image: url(:/LoginWindow/images/find.png)");
 	secFindButton->resize(33, 28);
-	secFindButton->move(283, 1);
+	secFindButton->move(287, 1);
 	secFindButton->setCursor(Qt::PointingHandCursor);
 //	secFindButton->setText("查找");
 }
@@ -78,17 +80,12 @@ void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID)
     name->move(7+16+10,8);
 	button->move(272, 7);
 	button->setText("禁言");
-//	QString URL = "http://qatime-testing.oss-cn-beijing.aliyuncs.com/avatars/8dba956b321d278c40f6b4eb84f05543.jpg";
 	setNetworkPic(szUrl);
 	name->setText(strName);
-//    sign->move(54,27);
-    //装载事件过滤器
- //   head->installEventFilter(this);
 }
 
 void personListBuddy::setOlineNum(int olineNum,int allNum)
 {
-//	peopleNum->setText("观看人数 " + QString::number(olineNum) + "/" + QString::number(allNum));
 	peopleNum->setText("当前观看人数 "+QString::number(olineNum));
 }
 

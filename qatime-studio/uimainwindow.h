@@ -222,6 +222,8 @@ public:
 	void startLiveStream();									// 服务器返回teaching后，才开始正式推流
 	bool IsHasCamera();										// 有无摄像头
 	void setAdaptHeight(int iHeight);						// 设置自适应高度
+	void setMainTitle(QString sVersion);					// 设置版本号
+	void ShowMain();										// 显示主窗口
 };
 
 #endif // UIMAINWINDOW_H

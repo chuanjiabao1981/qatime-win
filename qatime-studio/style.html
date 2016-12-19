@@ -1,4 +1,5 @@
-﻿<html>
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
     <head>
 		<style>
 		.message-new {height: 283px;border-bottom: 1px solid rgb(241,241,241);overflow-y: scroll;}
@@ -10,6 +11,10 @@
 		.new-information img{position:absolute; width: 24px;height: 24px; border-radius: 50%; margin-top:3px;}
 		.information-con {padding-left: 30px;padding-right: 29px; font-size: 13px;color: #555555;font-family: 微软雅黑;}
 		.information-con img{position:relative;width: 24px;height: 24px; border-radius: 50%;}
+		.information-img {padding-left: 30px;padding-right: 29px; font-size: 13px;color: #555555;font-family: 微软雅黑;}
+		.information-img img{position:relative;width: 120px;height: 120px; border-radius: 1%;}
+		.information-progress {padding-left: 30px;padding-right: 29px; padding-top: -18px;font-size: 13px;color: #555555;font-family: 微软雅黑;}
+		.information-progress img{position:relative; width:120px; height:5px; border-radius: 1%;}
 		.logging-nomore {color: #555555;height: 30px;text-align: center;line-height: 30px;font-size: 13px;font-family: 微软雅黑;}
 		
 		.triangle-left{float:left;max-width:300px;border:1px solid #b6b6b7; border-radius:10px;padding:15px;background:#efeff0;margin:0 0 15px 25px; position:relative; display:inline-block;box-shadow:0 4px 8px #888888;word-wrap: break-word;}
@@ -27,7 +32,45 @@
 		.triangle-time{text-align:center;color:#999;font-size:12px; font-family:Arial;clear:both;margin:5px 0;}
 		img{max-width:300px;margin:5px 0;}
 		</style>
-		<script language="JavaScript" >
+		<script type="text/javascript" src="jquery-2.2.4.min.js"></script>
+		<script type="text/javascript" src="qwebchannel.js"></script>
+		<script type="text/javascript" >
+		
+		var widget ;
+		var img;
+		
+		// Initialise web page
+		function initialize() {	
+			initialize_qt() ;
+			img = document.getElementById('img1') ;
+			img.addEventListener('click', on_img_click, false) ;
+        }
+		
+		// Initialise connection to QT C++
+		function initialize_qt() {
+			if (typeof qt != 'undefined') new QWebChannel(qt.webChannelTransport, function(channel) {
+				widget = channel.objects.widget;
+			} );
+		}
+		function on_img_click() {
+			if (typeof widget !== 'undefined') {
+				widget.slotJsClick($(this).attr("src")) ;
+			}
+			else{
+				alert("失败")
+			}
+		}
+		function on_imgfail_click() {
+			if (typeof widget !== 'undefined') {
+				widget.slotJsClick($(this).attr("id")) ;
+			}
+			else{
+				alert("失败")
+			}
+		}
+		function on_img_dbclick() {
+			alert("双击")
+		}
 		function addFile()
    		{
        			var str = '<INPUT type="file" size="50" NAME="File">'
@@ -43,9 +86,21 @@
 		}
 		function clear(){
 			document.body.innerHTML=''
-}
+		}
+		function click(){
+			alert("点击我!")
+		}
+		function initclick(name){
+			img = document.getElementById(name) ;
+			img.addEventListener('click', on_img_click, false) ;
+			img.addEventListener('dblick', on_img_dbclick, false);
+		}
+		function initfailclick(name){
+			img = document.getElementById(name) ;
+			img.addEventListener('click', on_imgfail_click, false) ;
+		}
 		</script>
 	</head>
-	<body id="content" style='background:#FFFFFF' >
+	<body id="content" onload="initialize()" style='background:#FFFFFF' >
 	</body>
 </html>
