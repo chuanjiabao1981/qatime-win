@@ -51,7 +51,7 @@ static void CallbackLogin(const char* json_res, const void *callback)
 		pRes->login_step_ = res.login_step_;
 		pRes->relogin_ = res.relogin_;
 
-		HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+		HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
 		PostMessage(hWnd, MSG_LOGIN, (WPARAM)pRes, 0);
 		
 		//PostTaskToUIThread(std::bind((*cb), res));

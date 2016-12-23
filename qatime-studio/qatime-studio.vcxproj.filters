@@ -466,6 +466,24 @@
     <ClCompile Include="GeneratedFiles\Release\moc_imagewidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="UIBulletscreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIBulletscreen.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UIBulletscreen.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="UIBulletset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIBulletset.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UIBulletset.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="loginwindow.h">
@@ -660,6 +678,18 @@
     <CustomBuild Include="imagewidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="UIBulletscreen.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIBulletscreen.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIBulletset.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIBulletset.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_loginwindow.h">
@@ -798,6 +828,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIViewimage.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UIBulletscreen.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UIBulletset.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

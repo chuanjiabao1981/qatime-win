@@ -30,7 +30,7 @@ void UIAudioChange::onRadioClick(QAbstractButton *btn)
 {
 	QRadioButton* radio = (QRadioButton*)btn;
 	QString strpath = radio->accessibleDescription();
-	m_Parent->setAudioChangeIndex(strpath);
+//	m_Parent->setAudioChangeIndex(strpath);
 	hide();
 }
 

@@ -28,7 +28,7 @@ void UIVideoChange::onRadioClick(QAbstractButton *btn)
 {
 	QRadioButton* radio = (QRadioButton*)btn;
 	QString strpath = radio->accessibleDescription();
-	m_Parent->setVideoChangeIndex(strpath);
+//	m_Parent->setRadioIndex(strpath);
 	hide();
 }
 

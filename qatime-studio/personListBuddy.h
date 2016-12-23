@@ -20,23 +20,26 @@ public:
     explicit personListBuddy(QWidget *parent = 0);  
 	~personListBuddy();
 	void initFirst();			//初始化第一行 
-	void initFindPeople();		//初始化第二行
-	void initNotFind();			//初始化没有找到好友提示
+	void initFindPeople(int iWidth);		//初始化第二行
+	void initNotFind(int iWidth);			//初始化没有找到好友提示
 	QLabel *peopleNum;			//第一行的label
 	QCheckBox* firstButton;		//第一行的按钮
 	QLineEdit* secLinEdit;		//第二行的输入框
 	QPushButton* secFindButton;	//第二行的查找按钮
 	QLabel *notFind;			//最后一行。没有找到好友的时候显示。
-	void initUi(const QString &szUrl,QString strName,QString ID);//初始化Ui
+	void initUi(const QString &szUrl, QString strName, QString ID, int iWidth);//初始化Ui
 	QLabel *head;  //头像label  
     QLabel *name;  //用户名  
 	bool isOline;	//是否在线
 	QString m_ID;		//用户ID
 	QPixmap headPath;//需要加载的头像
 	QCheckBox* button; //按钮  
+	bool	m_bZoom;
 //  QLabel *sign;  //个性签名  
 	void setOlineNum(int olineNum, int allNum);	
 	void setCheckBox(bool bCheck);
+	bool IsZoom();
+	void SetZoom(bool bZoom);
 signals:  
 	void emitRadioChange(int,QString,QString);
 	void signalRadioChange(bool);

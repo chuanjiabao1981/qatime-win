@@ -47,6 +47,7 @@ public:
 	void InitToken(QString sToken, QString sTeacherID);
 	void RequestLesson();
 	void SetMainWindow(UIMainWindow* mainWnd);
+	void setResize(int iWidth);
 };
 
 #endif // UILESSONTABLE_H

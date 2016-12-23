@@ -85,6 +85,7 @@ private:
 	int								m_proclamationHeight;// 公告高度
 	std::vector<MyImageInfo>		m_VerReceiveImg;	// 接收的图片消息队列
 	QTimer*							m_LoadImgTimer;		// 定时器加载图片
+	int								m_drawingWidth;		// 拉动改变的宽度
 	void initEmotion();
 public:
 	QString							m_TeachterName;		// 老师名字
@@ -193,6 +194,7 @@ public slots:
 private:
 	QToolButton* pPreMonthButton1;
 	QToolButton* pPreMonthButton;
+	bool		 m_bZoom;	// 当垂直滚动条出现后，是否缩放过 
 };
 
 #endif // UICHATROOM_H

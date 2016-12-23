@@ -63,7 +63,7 @@ static void CallbackQueryMsg(int res_code
 		pRes->msglogs_ = res.msglogs_;
 		pRes->count_   = res.count_;
 
-		HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+		HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
 		PostMessage(hWnd, MSG_CLIENT_RECORD, (WPARAM)pRes, 0);
 		delete callback;
 	}

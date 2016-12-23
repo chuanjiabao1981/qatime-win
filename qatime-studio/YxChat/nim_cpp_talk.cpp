@@ -33,7 +33,7 @@ static void CallbackSendMsgAck(const char *result, const void *callback)
 	arcNew->rescode_ = arc.rescode_;
 	arcNew->talk_id_ = arc.talk_id_;
 
-	HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+	HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
 	PostMessage(hWnd, MSG_SEND_MSG_STATUS, (WPARAM)arcNew, 0);
 }
 
@@ -68,7 +68,7 @@ static void CallbackReceiveMsg(const char *content, const char *json_extension, 
 			pMsg->status_ = msg.status_;
 			pMsg->sub_status_ = msg.sub_status_;
 			
-			HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+			HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
 			PostMessage(hWnd, MSG_CLIENT_RECEIVE, (WPARAM)pMsg, 0);
 		}
 	}
@@ -107,7 +107,7 @@ static void CallbackFileUploadProcess(__int64 uploaded_size, __int64 file_size, 
 // 		Talk::FileUpPrgCallback* cb_pointer = (Talk::FileUpPrgCallback*)callback;
 // 		if (cb_pointer)
 // 		{
-			HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+			HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
 			PostMessage(hWnd, MSG_PICTURE_PROCESS, (WPARAM)uploaded_size, (LPARAM)file_size);
 
 // 			if (uploaded_size == file_size)

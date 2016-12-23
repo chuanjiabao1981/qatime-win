@@ -69,6 +69,7 @@ public:
 	void StartHeartBeat();														// 开始心跳
 	void StopTimer();															// 停止所有计时器
 	void SendCameraSwitchMsg(int iBoard, int iCamera);							// 发送摄像头切换状态消息
+	void RequestError(QJsonObject& error, bool bTrue=true);						// 出现错误
 };
 
 #endif // LIVESTATUSMANAGER_H

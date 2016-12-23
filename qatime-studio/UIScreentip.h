@@ -24,6 +24,7 @@ private slots :
 
 public:
 	bool IsTip();
+	void setErrorTip(QString error);
 };
 
 #endif // UISCREENTIP_H

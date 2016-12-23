@@ -52,12 +52,12 @@ void UISetParam::InitUI()
 	connect(ui.Video_comboBox, SIGNAL(activated(int)), this, SLOT(VideoChanged(int)));
 }
 
-void UISetParam::setAudioParam(int iCount,QString name, QString path)
+void UISetParam::setAudioParam(QString name, QString path)
 {
 	ui.Audio_comboBox->addItem(name, path);
 }
 
-void UISetParam::setVideoParam(int iCount, QString name, QString path)
+void UISetParam::setVideoParam(QString name, QString path)
 {
 	ui.Video_comboBox->addItem(name,path);
 }
@@ -138,20 +138,14 @@ bool UISetParam::nativeEvent(const QByteArray &eventType, void *message, long *r
 
 void UISetParam::AudioChanged(int index)
 {
-	QVariant data = ui.Audio_comboBox->currentData(0);
-	QString path = data.toString();
-
 	if (m_Parent)
-		m_Parent->setAudioChangeIndex(path);
+		m_Parent->setAudioChangeIndex(index);
 }
 
 void UISetParam::VideoChanged(int index)
 {
-	QVariant data = ui.Video_comboBox->currentData();
-	QString path = data.toString();
-
 	if (m_Parent)
-		m_Parent->setVideoChangeIndex(path);
+		m_Parent->setVideoChangeIndex(index);
 }
 
 void UISetParam::setParent(UIMainWindow* parent)

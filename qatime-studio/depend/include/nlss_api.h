@@ -55,7 +55,7 @@ EXPORTS_API  NLSS_RET  Nlss_Create(const char *paLogpath, NLSS_OUT _HNLSSERVICE 
 *
 *  @return 无
 */
-EXPORTS_API   void     Nlss_GetVersionNo(NLSS_OUT char **ppaVersion);
+EXPORTS_API   void     Nlss_GetSDKVersion(NLSS_OUT char **ppaVersion);
 
 /**
 *  销毁直播推流实例，可以程序退出再销毁
@@ -240,11 +240,10 @@ EXPORTS_API  void       Nlss_ResumeAudioLiveStream(_HNLSSERVICE hNLSService);
 *  @param  hNLSService: 直播推流实例，入参
 *  @param  pcVideoData: 用户指定视频流数据，入参
 *  @param  iLen:        视频流数据长度，入参
-*  @param  penErrCode:  视频流发送错误码，当返回值为NLSS_ERR，该值有效 ，出参
 *
 *  @return NLSS_RET NLSS_OK成功，NLSS_ERR失败
 */
-EXPORTS_API NLSS_RET    Nlss_SendCustomVideoData(_HNLSSERVICE hNLSService, char *pcVideoData, int iLen, NLSS_OUT EN_NLSS_ERRCODE *penErrCode);
+EXPORTS_API NLSS_RET    Nlss_SendCustomVideoData(_HNLSSERVICE hNLSService, char *pcVideoData, int iLen);
 
 /**
 *  用户指定音频流推流发送接口，支持直播过程中音频数据重采样
@@ -253,11 +252,10 @@ EXPORTS_API NLSS_RET    Nlss_SendCustomVideoData(_HNLSSERVICE hNLSService, char 
 *  @param  pcAudioData: 用户指定音频流数据，入参
 *  @param  iLen:        音频流数据长度，入参
 *  @param  iSampleRate: 音频流采样率，我们支持中间变化入参
-*  @param  penErrCode:  音频流发送错误码，当返回值为NLSS_ERR，该值有效 ，出参
 *
 *  @return NLSS_RET     NLSS_OK成功，NLSS_ERR失败
 */
-EXPORTS_API  NLSS_RET   Nlss_SendCustomAudioData(_HNLSSERVICE hNLSService, char *pcAudioData, int iLen, int iSampleRate, NLSS_OUT EN_NLSS_ERRCODE *penErrCode);
+EXPORTS_API  NLSS_RET   Nlss_SendCustomAudioData(_HNLSSERVICE hNLSService, char *pcAudioData, int iLen, int iSampleRate);
 
 /**
 *  获取直播推流状态信息
@@ -269,18 +267,6 @@ EXPORTS_API  NLSS_RET   Nlss_SendCustomAudioData(_HNLSSERVICE hNLSService, char 
 */
 EXPORTS_API  NLSS_RET   Nlss_GetStaticInfo(_HNLSSERVICE hNLSService, NLSS_OUT ST_NLSS_STATS *pstStats);
 
-/**
-*  获取可抓取windows应用数目
-*
-*  @param  iAppWindNum: 应用数量 出参
-*/
-EXPORTS_API void GetAvailableAppWindNum(int *iAppWindNum);
-/**
-*  获取可抓取windows应用信息
-*
-*  @param  pLSAppWindTitles: 应用信息
-*/
-EXPORTS_API void GetAvailableAppWind(ST_NLSS_INDEVICE_INF *pLSAppWindTitles);
 
 #ifdef __cplusplus
 }

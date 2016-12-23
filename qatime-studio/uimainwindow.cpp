@@ -28,9 +28,11 @@
 
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6
-#define MAINWINDOW_TITLE_HEIGHT 130
+#define MAINWINDOW_TITLE_HEIGHT 65
 #define MAINWINDOW_MAXHEIGHT	900		//屏幕高度
 #define MAINWINDOW_MAXWIDTH		528		//程序最大宽度
+#define MAINWINDOW_MINWIDTH		342		//程序最小宽度
+#define MAINWINDOW_MINHEIGHT	528		//程序最小高度
 
 #ifdef TEST
 	#define _DEBUG
@@ -67,11 +69,16 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, m_EnumStatus(CameraStatusTeaching)
 	, m_HelpWord(NULL)
 	, m_icount(0)
+	, m_iSucCount(0)
+	, m_HelpBtnPos(290)
+	, m_BulletScreen(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
 	setMaximumWidth(MAINWINDOW_MAXWIDTH);
-	
+	setMinimumWidth(MAINWINDOW_MINWIDTH);
+	setMinimumHeight(MAINWINDOW_MINHEIGHT);
+
 	QDesktopWidget *dsk = QApplication::desktop();
 	int iHeight = dsk->height();
 	//除去任务栏的高度
@@ -90,6 +97,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	connect(ui.switchScreen_checkBox, SIGNAL(stateChanged(int)), this, SLOT(SwitchScreenStatus(int)));
 	connect(ui.set_checkBox, SIGNAL(clicked()), this, SLOT(SetParamWindow()));
  	connect(ui.lesson_pushButton, SIGNAL(clicked()), this, SLOT(clickLessonList()));
+	connect(ui.time_label, SIGNAL(clicked()), this, SLOT(slot_startOrStopLiveStream()));
 	ui.time_label->hide();
 	
 	m_SeeLiveWnd = new UISeeLiveWnd();
@@ -97,9 +105,16 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_SeeLiveWnd->SetMainWnd(this);
 	m_SeeLiveWnd->hide();
 
-	m_VideoInfo = new UIVideo(ui.video_widget);
+	m_SetParam = new UISetParam();
+	m_SetParam->setWindowFlags(Qt::FramelessWindowHint);
+	m_SetParam->setParent(this);
+	m_SetParam->hide();
+	SetWindowPos((HWND)m_SetParam->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
+	m_VideoInfo = new UIVideo(ui.childVideo_widget);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
 	m_VideoInfo->SetMainWnd(this);
+	m_VideoInfo->InitDeviceParam();
 	m_VideoInfo->resize(316, 179);
 	m_VideoInfo->show();
 
@@ -133,6 +148,12 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_RangeCapture->setMainWindow(this);
 	m_RangeCapture->move(0, 0);
 	m_RangeCapture->hide();
+
+	m_BulletScreen = new UIBulletScreen();
+	m_BulletScreen->setWindowFlags(Qt::FramelessWindowHint);//| Qt::Tool
+	m_BulletScreen->setMainWindow(this);
+	m_BulletScreen->show();
+	SetWindowPos((HWND)m_BulletScreen->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
 	m_HoverWnd = new UIHoverWindow();
 	m_HoverWnd->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
@@ -240,6 +261,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	// 暂时屏蔽全屏
 	ui.groupBox->setVisible(false);
+	ui.video_widget->setVisible(false);
 }
 
 UIMainWindow::~UIMainWindow()
@@ -337,6 +359,9 @@ void UIMainWindow::setMainTitle(QString Version)
 }
 void UIMainWindow::setAdaptHeight(int iHeight)
 {
+	if (iHeight < 560)
+		iHeight = MAINWINDOW_MINHEIGHT;
+
 	setMaximumSize(QSize(342, iHeight));
 	ui.tabWidget->setMaximumHeight(iHeight - 71);
 	ui.chat_widget->setMaximumHeight(iHeight - 382);
@@ -392,6 +417,8 @@ void UIMainWindow::CloseDialog()
 
 		if (m_HelpWord)
 			m_HelpWord->setVisible(false);
+
+		m_LoginWindow->CloseTray();
 		
 		exit(0);
 	}
@@ -489,44 +516,30 @@ void UIMainWindow::AuxiliaryRequestFinished()
 
 void UIMainWindow::resizeEvent(QResizeEvent *e)
 {
-	m_mutex.lock();
-	int w, h;
-	if (m_icount > 0 && e != NULL)
-	{
-		w = e->size().width() - e->oldSize().width();
-		h = e->size().height() - e->oldSize().height();
-		chat_X += w;
-		video_Width += w;
-		video_Heigth += h;
-		chat_Heigth += h;
-	}
+//	m_mutex.lock();
+ 	int w, h;
+	w = e->size().width() - e->oldSize().width();
+	h = e->size().height() - e->oldSize().height();
 	if (m_icount > 0 || e == NULL)
 	{
 		// tab界面改变
-		ui.title_widget->resize(ui.title_widget->width() + w, ui.title_widget->height());
-		ui.help_widget->resize(ui.help_widget->width() + w, ui.help_widget->height());
-		ui.welcome_widget->resize(ui.welcome_widget->width() + w, ui.welcome_widget->height());
-		ui.btn_widget->resize(ui.btn_widget->width() + w, ui.btn_widget->height());
-		ui.videoCamera_widget->resize(ui.videoCamera_widget->width() + w, ui.videoCamera_widget->height());
-		ui.right_label->move(ui.right_label->geometry().left() + w, ui.right_label->geometry().top());
+		if (w != 0)
+		{
+			ui.title_widget->resize(ui.title_widget->width() + w, ui.title_widget->height());
+			ui.help_widget->resize(ui.help_widget->width() + w, ui.help_widget->height());
+			ui.welcome_widget->resize(ui.welcome_widget->width() + w, ui.welcome_widget->height());
+			ui.btn_widget->resize(ui.btn_widget->width() + w, ui.btn_widget->height());
+			ui.videoCamera_widget->resize(ui.videoCamera_widget->width() + w, ui.videoCamera_widget->height());
+			ui.right_label->move(ui.right_label->geometry().left() + w, ui.right_label->geometry().top());
+		}
 		// tab2界面改变
 		m_AuxiliaryPanel->resize(m_AuxiliaryPanel->width() + w, m_AuxiliaryPanel->height() + h);
 		ui.Auxiliary_widget->resize(ui.Auxiliary_widget->width() + w, ui.Auxiliary_widget->height() + h);
-		
-
-		if (m_CameraInfo)
-		{
-			int iWidth = m_CameraInfo->width()+w;
-			m_CameraInfo->resize(iWidth, m_CameraInfo->height());
-			m_VideoInfo->resize(iWidth, m_CameraInfo->height());
-			PostMessage(m_VideoWnd, MSG_VIDEO_CHANGE_SIZE, (WPARAM)iWidth, (LPARAM)m_CameraInfo->height());
-			PostMessage(m_CameraWnd, MSG_VIDEO_CHANGE_SIZE, (WPARAM)iWidth, (LPARAM)m_CameraInfo->height());
-		}
 
 		if (m_charRoom)
 		{
 			int iWidth = ui.tabWidget->width() + w;
-			ui.tabWidget->setFixedSize(iWidth, ui.tabWidget->height() + h);
+			ui.tabWidget->resize(iWidth, ui.tabWidget->height() + h);
 			// TabBar背景图片
 			QString sheet;
 			sheet = QString().sprintf("QTabBar::tab { height: 25px; width: %dpx; } QTabBar::tab:!selected {color:rgb(204,204,204);background: transparent;} QTabBar::tab:selected {color:rgb(5, 158, 213);}", iWidth / 2);
@@ -534,19 +547,25 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 			// 计时器位置
 			ui.time_label->move((iWidth - 50) / 2, ui.time_label->geometry().top());
 
-			ui.chat_widget->setFixedSize(ui.chat_widget->width()+w, ui.chat_widget->height() + h);
-			m_charRoom->setFixedSize(m_charRoom->width()+w,m_charRoom->height() + h);
+			ui.chat_widget->resize(ui.chat_widget->width() + w, ui.chat_widget->height() + h);
+			m_charRoom->resize(m_charRoom->width() + w, m_charRoom->height() + h);
 			m_charRoom->setResize(w,h);
 		}
 
-		if (m_AuxiliaryPanel && m_AuxiliaryPanel->m_teacher_treewidget)
+		if (m_AuxiliaryPanel && m_AuxiliaryPanel->m_teacher_treewidget && w != 0)
 		{
 			int iWidth = m_AuxiliaryPanel->m_teacher_treewidget->columnWidth(0);
 			m_AuxiliaryPanel->m_teacher_treewidget->setColumnWidth(0, iWidth+w);
 		}
+
+		if (m_LessonTable)
+			m_LessonTable->setResize(w);
+
+		// 帮助按钮位置改变
+		m_HelpBtnPos += w;
 	}
 	m_icount++;
-	m_mutex.unlock();
+//	m_mutex.unlock();
 }
 
 void UIMainWindow::slot_startOrStopLiveStream()
@@ -564,13 +583,13 @@ void UIMainWindow::slot_startOrStopLiveStream()
 				QString("取消"));
 			if (iStatus == 1)
 			{
+				m_iSucCount = 0;
 				ui.Live_pushBtn->setText("开始直播");
 				ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
 				
 				m_VideoInfo->StopLiveVideo();
-				SendVideoMsg((UINT)MSG_VIDEO_STOP_LIVE);
 				if (IsHasCamera() && m_EnumStatus != CameraStatusClose)
-					SendCameraMsg((UINT)MSG_VIDEO_STOP_LIVE);
+					m_CameraInfo->StopLiveVideo();
 				m_LiveStatusManager->SendStopLiveHttpMsg();
 
 				if (m_CountTimer->isActive())
@@ -584,7 +603,6 @@ void UIMainWindow::slot_startOrStopLiveStream()
 						m_HoverWnd->SetLiveTimer("00:00:00");
 				}
 
-				ui.close_radioButton->setEnabled(true);
 				m_AuxiliaryPanel->setPreview(false);
 			}
 			else
@@ -623,36 +641,42 @@ void UIMainWindow::slot_startOrStopLiveStream()
 			if (!IsHasCamera())
 				m_EnumStatus = CameraStatusClose;
 			
-			startLiveStream();
+			// 初始化直播状态次数，返回两次推流成功，才算开启直播
+			m_iSucCount = 0;
+			// 推白板
+			QString url = m_AuxiliaryPanel->getURL();
+			qDebug() << "白板推流地址："+ url;
+			m_VideoInfo->setPlugFlowUrl(url);
+			m_VideoInfo->StartLiveVideo();
+			// 推摄像头
+			QString CameraUrl = m_AuxiliaryPanel->getCameraURL();
+			qDebug() << "摄像头推流地址：" + CameraUrl;
+			m_CameraInfo->setPlugFlowUrl(CameraUrl);
+			if (IsHasCamera() && m_EnumStatus != CameraStatusClose)
+			{
+				qDebug() << "直播摄像头";
+				m_CameraInfo->StartLiveVideo();
+			}
 		}
 	}
 }
 
 // 更新开始直播按钮、计时器等状态
 void UIMainWindow::startLiveStream()
-{
-	m_VideoInfo->StartLiveVideo();
-	SendVideoMsg((UINT)MSG_VIDEO_START_LIVE);
-
-	if (IsHasCamera() && m_EnumStatus != CameraStatusClose)
-		SendCameraMsg((UINT)MSG_VIDEO_START_LIVE);
-
+{	
+	m_CountTimer->start(1000);
 	ui.time_label->setVisible(true);
 	ui.Live_pushBtn->setText("结束直播");
 	ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: red;border-radius: 5px; border: 2px solid red;}");
-
-	ui.close_radioButton->setEnabled(false);
 	m_AuxiliaryPanel->setPreview(true);
 }
 
 void UIMainWindow::VideoStatus(int iStatus)
 {
-	if (m_CameraWnd == NULL)
-		return;
-	
 	if (iStatus)
 	{
-		ShowWindow(m_CameraWnd, SW_HIDE);
+		//隐藏
+		m_CameraInfo->setVisible(false);
 		if (m_VideoInfo)
 		{
 			m_EnumStatus = CameraStatusClose;
@@ -663,13 +687,14 @@ void UIMainWindow::VideoStatus(int iStatus)
 			if (!m_VideoInfo->IsCurrentLiving())
 				return;
 
-			SendCameraMsg((UINT)MSG_VIDEO_STOP_LIVE);
+			m_CameraInfo->StopLiveVideo();
 			m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
 		}
 	}
 	else
 	{
-		ShowWindow(m_CameraWnd, SW_SHOW);
+		//显示
+		m_CameraInfo->setVisible(true);
 		if (m_VideoInfo)
 		{
 			m_EnumStatus = CameraStatusTeaching;
@@ -680,7 +705,8 @@ void UIMainWindow::VideoStatus(int iStatus)
 			if (!m_VideoInfo->IsCurrentLiving())
 				return;
 
-			SendCameraMsg((UINT)MSG_VIDEO_START_LIVE);
+			m_iSucCount++;
+			m_CameraInfo->StartLiveVideo();
 			m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
 		}
 	}
@@ -730,11 +756,11 @@ void UIMainWindow::slot_onTempTimeout()
 {
 	m_tempTimers->stop();
 
-	m_CameraInfo = new UICamera(ui.camera_widget);
+	m_CameraInfo = new UICamera(ui.childCamera_widget);
 	m_CameraInfo->setWindowFlags(Qt::FramelessWindowHint);
-	m_CameraInfo->SetMainWindow(this);
+	m_CameraInfo->SetMainWnd(this);
 	m_CameraInfo->show();
-	m_CameraInfo->resize(316, 179);
+	m_CameraInfo->resize(316, 210);
 }
 
 void UIMainWindow::slot_ScreenTipTimeout()
@@ -761,6 +787,7 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 		{
 		case MSG_CLIENT_RECEIVE:  // 接收聊天消息
 		{
+			qDebug() << "接收到消息";
 			MSG* Msg = pMsg;
 			nim::IMMessage* pIMsg = (nim::IMMessage*)Msg->wParam;
 
@@ -770,6 +797,7 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 					m_HoverWnd->UpdateChatNumber();
 			}
 				
+			qDebug() << "接收完毕";
 			delete pIMsg;
 		}
 		break;
@@ -832,49 +860,12 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 			return true;
 		}
 		break;
-		case WM_COPYDATA:
-		{
-			COPYDATASTRUCT* pCopyDataStruct = (COPYDATASTRUCT*)pMsg->lParam;
-			struct MEDIA_DEVICE_DRIVE_INFO1
-			{
-				char device_path_[260];
-				char friendly_name_[260];
-			};
-
-			MEDIA_DEVICE_DRIVE_INFO1 m_result;
-			memcpy(&m_result, pCopyDataStruct->lpData, sizeof(m_result));
-			int iCount = (int)pCopyDataStruct->dwData;
-			
-			// 0：摄像头 1：麦克风
-			if (pMsg->wParam == 0)
-			{
-				bHasCamera = true;
-				m_SetParam->setVideoParam(iCount, QString(QLatin1String(m_result.friendly_name_)), QString(QLatin1String(m_result.device_path_)));
-			}
-			else if (pMsg->wParam == 1)
-			{
-				m_SetParam->setAudioParam(iCount, QString::fromStdString(m_result.friendly_name_), QString::fromStdString(m_result.device_path_));
-			}
-			return true;
-		}
-		break;
 		case MSG_CAMERA_HWND:
 		{
 			HWND hwnd = (HWND)pMsg->wParam;
 			m_CameraWnd = hwnd;
 			m_ShowCameraTimer->start(50);
 			return true;
-		}
-		break;
-		case  MSG_VIDEO_LIVE_SUC:
-		{
-			int iSuc = pMsg->wParam;
-			if (iSuc == 1)
-			{
-				m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_AuxiliaryPanel->getLessonID(), mRemeberToken);
-
-				m_CountTimer->start(1000);
-			}
 		}
 		break;
 		case MSG_PICTURE_PROCESS:
@@ -949,7 +940,7 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 			}
 			if (0 == xflag && y > MAINWINDOW_Y_MARGIN && y <= MAINWINDOW_TITLE_HEIGHT)
 			{
-				if (ui.mainclose_pushBtn && ui.mainmin_pushBtn)
+				if (ui.mainclose_pushBtn && ui.mainmin_pushBtn && ui.help_pushButton && ui.return_pushButton)
 				{
 					QRect Rect = ui.mainclose_pushBtn->geometry();
 					if (x > Rect.left() && x < Rect.right() && y > Rect.top() && y < Rect.bottom())
@@ -958,6 +949,18 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 					}
 
 					Rect = ui.mainmin_pushBtn->geometry();
+					if (x > Rect.left() && x < Rect.right() && y > Rect.top() && y < Rect.bottom())
+					{
+						return false;
+					}
+
+					Rect = ui.return_pushButton->geometry();
+					if (x > Rect.left() && x < Rect.right() && y > Rect.top() && y < Rect.bottom())
+					{
+						return false;
+					}
+
+					Rect = QRect(m_HelpBtnPos, 40, ui.help_pushButton->width(), ui.help_pushButton->height());
 					if (x > Rect.left() && x < Rect.right() && y > Rect.top() && y < Rect.bottom())
 					{
 						return false;
@@ -1080,19 +1083,24 @@ void UIMainWindow::HideOtherUI(QWidget* self)
 		m_SetParam->setVisible(false);
 }
 
-void UIMainWindow::setAudioChangeIndex(QString path)
+void UIMainWindow::setAudioChangeIndex(int index)
 {
 	if (m_VideoInfo)
 	{
-		m_VideoInfo->SetChangeVideoAudio(m_VideoWnd, path,false);
+		m_VideoInfo->SetChangeAudio(index);
 	}
 }
 
-void UIMainWindow::setVideoChangeIndex(QString path)
+// void UIMainWindow::setRadioIndex()
+// {
+// 
+// }
+
+void UIMainWindow::setVideoChangeIndex(int index)
 {
-	if (m_VideoInfo)
+	if (m_CameraInfo)
 	{
-		m_VideoInfo->SetChangeVideoAudio(m_CameraWnd, path);
+		m_CameraInfo->SetChangeVideo(index);
 	}
 }
 
@@ -1281,23 +1289,6 @@ void UIMainWindow::setVideoLesson(QString strLessonName)
 	CMessageBox::showMessage(QString("答疑时间"), QString("您已成功进入直播教室！"), QString("确定"), QString(""), NULL, true);
 }
 
-// 显示聊天窗口
-void UIMainWindow::showChatRoomWnd()
-{
-	if (m_charRoom && !m_charRoom->isVisible())
-	{
-		resize(this->size().width() + chat_Width, this->height());
-		m_charRoom->move(chat_X, 50+195);
-		m_charRoom->show();		
-
-		QPoint closeQt = ui.mainclose_pushBtn->pos();
-		ui.mainclose_pushBtn->move(QPoint(closeQt.x() + 295, closeQt.y()));
-
-		QPoint minQt = ui.mainmin_pushBtn->pos();
-		ui.mainmin_pushBtn->move(QPoint(minQt.x() + 295, minQt.y()));
-	}
-}
-
 void UIMainWindow::clickLessonList()
 {
 	if (m_LessonTable)
@@ -1328,21 +1319,6 @@ void UIMainWindow::setVideoPos()
 			m_ShowVideoTimer->stop();
 		MoveWindow(m_VideoWnd, 0, 0, 316, 179, true);
 		ui.video_widget->setVisible(false);
-		
-// 		if (m_RangeCapture)
-// 			m_RangeCapture->setVideoWnd(m_VideoWnd);
-
-		if (m_SetParam == NULL)
-		{
-			m_SetParam = new UISetParam();
-			m_SetParam->setWindowFlags(Qt::FramelessWindowHint);
-			m_SetParam->setParent(this);
-			m_SetParam->hide();
-			SetWindowPos((HWND)m_SetParam->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-
-			PostMessage(m_VideoWnd, MSG_DEVICE_AUDIO, 0, 0);
-			PostMessage(m_VideoWnd, MSG_DEVICE_VIDEO, 0, 0);
-		}
 	}
 }
 
@@ -1353,13 +1329,6 @@ void UIMainWindow::setCameraPos()
 		if (m_ShowCameraTimer->isActive())
 			m_ShowCameraTimer->stop();
 		MoveWindow(m_CameraWnd, 0, 0, 317, 178, true);
-
-// 		if (m_RangeCapture)
-// 		{
-// 			m_RangeCapture->setShowOrHide(true);
-// 			m_RangeCapture->ToRectDialog();
-// 			SetWindowPos((HWND)m_RangeCapture->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-// 		}
 	}
 }
 
@@ -1490,20 +1459,7 @@ void UIMainWindow::returnChangeStatus()
 
 void UIMainWindow::HideSideScreen()
 {
-// 	if (m_CameraOrVideo->isHidden())
-// 	{
-// 		m_CameraOrVideo->setHidden(false);
-// 
-// 		m_charRoom->move(chat_X, 50 + 195);
-// 		m_charRoom->resize(m_charRoom->width(), this->size().height() - 90 + 30 - 195);
-// 	}
-// 	else
-// 	{
-// 		m_CameraOrVideo->setHidden(true);
-// 
-// 		m_charRoom->move(chat_X, 50 + 20);
-// 		m_charRoom->resize(m_charRoom->width(), m_charRoom->height() + 170);
-// 	}
+
 }
 
 void UIMainWindow::timerEvent(QTimerEvent *event)
@@ -1752,5 +1708,119 @@ void UIMainWindow::ShowMain()
 	{
 		this->setVisible(true);
 		m_HoverWnd->setVisible(false);
+	}
+}
+
+void UIMainWindow::UpatateLiveStatus(QWidget* widget, bool bSuc)
+{	
+	// 每次推流都会重置m_iSucCount=0；
+	if (bSuc)
+		m_iSucCount++;
+	else
+	{
+		// 防止推流一方失败，另一方也要结束
+		if (m_VideoInfo == widget)
+		{
+			if (IsHasCamera() && m_EnumStatus != CameraStatusClose)
+				m_CameraInfo->StopLiveVideo();
+		}
+		else
+		{
+			m_VideoInfo->StopLiveVideo();
+		}
+	}
+
+	int iAllSucCount = 2;
+	// 如果摄像头关闭，或者没有摄像头，成功一次就够了
+	if (!IsHasCamera() || m_EnumStatus == CameraStatusClose)
+		iAllSucCount = 1;
+
+	if (m_iSucCount == iAllSucCount)
+	{
+		m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_AuxiliaryPanel->getLessonID(), mRemeberToken);
+	}
+}
+
+// 设置开始直播按钮状态
+void UIMainWindow::setLiveBtnEnable(bool bEnable)
+{
+	ui.Live_pushBtn->setEnabled(bEnable);
+}
+
+// 添加视频源
+void UIMainWindow::addVideoDevices(QString path)
+{
+	bHasCamera = true;
+	m_SetParam->setVideoParam(path, path);
+}
+
+// 添加麦克风
+void UIMainWindow::addAudioDevices(QString path)
+{
+	m_SetParam->setAudioParam(path, path);
+}
+
+// 直播过程中出错，停止直播
+void UIMainWindow::ErrorStopLive(QWidget* pWidget)
+{
+	if (m_CameraInfo && m_VideoInfo && pWidget)
+	{
+		if (!m_VideoInfo->IsCurrentLiving() && !m_CameraInfo->IsCurrentLiving())
+		{
+			return;
+		}
+
+		m_VideoInfo->StopLiveVideo();
+		if (IsHasCamera() && m_EnumStatus != CameraStatusClose)
+			m_CameraInfo->StopLiveVideo();
+
+		m_iSucCount = 0;
+		ui.Live_pushBtn->setText("开始直播");
+		ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
+		if (m_CountTimer->isActive())
+		{
+			m_CountTimer->stop();					// 停止计时
+			m_iTimerCount = 0;						// 重置秒数
+			ui.time_label->setVisible(false);		// 隐藏
+			ui.time_label->setText("00:00:00");		// 重置时间
+
+			if (m_HoverWnd)
+				m_HoverWnd->SetLiveTimer("00:00:00");
+		}
+
+		m_AuxiliaryPanel->setPreview(false);
+
+		m_ScreenTip->setErrorTip("直播过程中网络出现错误，请重新\n开启直播！");
+		m_LiveStatusManager->SendStopLiveHttpMsg();
+	}
+	else
+	{
+		qDebug() << "m_CameraInfo && m_VideoInfo && pWidget == NULL";
+	}
+}
+
+LoginWindow* UIMainWindow::GetLoginWnd()
+{
+	if (m_LoginWindow)
+	{
+		return m_LoginWindow;
+	}
+	else
+		return NULL;
+}
+
+void UIMainWindow::SendStudentBullet(QString name, QString content)
+{
+	if (m_BulletScreen)
+	{
+		m_BulletScreen->ReciverStudent(name, content);
+	}
+}
+
+void UIMainWindow::SendTeacherBullet(QString name, QString content)
+{
+	if (m_BulletScreen)
+	{
+		m_BulletScreen->ReciverTeacher(name, content);
 	}
 }

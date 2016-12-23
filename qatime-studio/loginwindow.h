@@ -82,6 +82,7 @@ public:
 	void Checking();			// 验证当前token是否可用
 	void CheckingFinished();
 	void CreateTray();			// 创建托盘
+	void CloseTray();
 };
 
 #endif // LOGINWINDOW_H

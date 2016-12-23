@@ -29,13 +29,14 @@ public:
     QMap<QListWidgetItem*,bool> isHideMap;//用来判断该组是否隐藏了
     QLineEdit *groupNameEdit;//组的名字，重命名的时候需要用到
     QListWidgetItem *currentItem;//当前的项
-	void addStrdent(QString imagePath, QString stuName, QString ID);
+	void addStrdent(QString imagePath, QString stuName, QString ID, int iWidth);
 	void setStrdentNumbers(int num);
 	void initFronUi();
-	void initSecUi();
+	void initSecUi(int iWidth);
 	void setOlineNum(int olineNum, int allNum);//设置在线人数的接口
-	void cleanStudents();		//清空列表中的数据
+	void cleanStudents(int iWidth);		//清空列表中的数据
 	void setAllWidth(int iWidth);
+	void setZoomWidth(int iWidth);
 signals:
 	void signalChickChage(int,QString, QString);
 public slots:

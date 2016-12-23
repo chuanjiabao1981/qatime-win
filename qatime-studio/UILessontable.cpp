@@ -284,3 +284,12 @@ void UILessonTable::SetMainWindow(UIMainWindow* mainWnd)
 {
 	m_MainWindow = mainWnd;
 }
+
+void UILessonTable::setResize(int iWidth)
+{
+	resize(width() + iWidth, height());
+	ui.cancel_pushButton->move(ui.cancel_pushButton->pos().x() + iWidth, ui.cancel_pushButton->pos().y());
+	ui.ok_pushButton->move(ui.ok_pushButton->pos().x() + iWidth, ui.ok_pushButton->pos().y());
+	ui.lessonTable_tableWidget->setFixedWidth(ui.lessonTable_tableWidget->width()+iWidth);
+	ui.label_2->setFixedWidth(ui.label_2->width() + iWidth);
+}

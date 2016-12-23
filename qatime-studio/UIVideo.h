@@ -5,6 +5,7 @@
 #include "ui_UIVideo.h"
 #include "nlss_type.h"
 #include "nlss_api.h"
+#include "nlss_define.h"
 #include <QTimer>
 #include <QMutex>
 #include "UIWorkThread.h"
@@ -14,67 +15,6 @@
 
 #define STARTLS_ASYNC
 #pragma execution_character_set("utf-8")
-
-struct PicRegion //一块颜色数据区的描述，便于参数传递
-{
-	PicRegion()
-	{
-		pdata_ = NULL;
-		//subtype_ = nim::kNIMVideoSubTypeARGB;
-		size_max_ = 0;
-		size_ = 0;
-	}
-
-	~PicRegion()
-	{
-		Clear();
-	}
-	void Clear()
-	{
-		if (pdata_)
-		{
-			delete[] pdata_;
-			pdata_ = NULL;
-		}
-		size_max_ = 0;
-		size_ = 0;
-	}
-	int ResetData(uint64_t time, const char* data, int size, unsigned int width, unsigned int height/*, nim::NIMVideoSubType subtype*/)
-	{
-		if (size > size_max_)
-		{
-			if (pdata_)
-			{
-				delete[] pdata_;
-				pdata_ = NULL;
-			}
-			pdata_ = new char[size];
-			size_max_ = size;
-		}
-		width_ = width;
-		height_ = height;
-		timestamp_ = time;
-		//subtype_ = subtype;
-		size_ = size;
-		memcpy(pdata_, data, size);
-		return size;
-	}
-
-	//nim::NIMVideoSubType subtype_;
-	char*		pdata_;         //颜色数据首地址
-	int			size_max_;
-	int			size_;
-	long        width_;         //像素宽度
-	long        height_;        //像素高度
-	uint64_t	timestamp_;     //时间戳（毫秒）
-};
-
-enum FrameType
-{
-	Ft_I420 = 0,
-	Ft_ARGB,
-	Ft_ARGB_r,
-};
 
 class UIMainWindow;
 class UIVideo : public QWidget
@@ -99,7 +39,6 @@ private:
 	int								m_iAppChangeIndex;	// 应用路径
 	HWND							m_VideoWnd;			// 视频窗口句柄
 	QTimer*							m_StartLiveTimer;	// 延迟1秒推流
-	BoardWindow*					m_BoadWnd;			// 白板
 	QPixmap*						m_pBkImage;			// 背景
 
 public:
@@ -117,7 +56,8 @@ public:
 	bool							m_bStopLiveFinish;	// 停止直播流
 
 	UIMainWindow*					m_Parent;			// 主窗口
-	static PicRegion				capture_video_pic_;
+	QTimer*							m_refreshTimer;		// 刷新窗口
+	static UIVideo*					m_pThis;
 #ifdef STARTLS_ASYNC
 	Worker* m_pWorker;
 #endif
@@ -128,6 +68,7 @@ protected:
 
 Q_SIGNALS:
 	void sig_changeLiveStatus(bool bTrue);
+	void sig_livestreamErrorHappened();
 #ifdef STARTLS_ASYNC
 	void sig_StartLiveStream();
 	void sig_StopLiveStream();
@@ -136,6 +77,7 @@ Q_SIGNALS:
 private slots:
 	void slot_onRefreshTimeout();						// 刷新界面
 	void slot_onStartLiveTimeout();						// 开始直播
+	void slot_livestreamErrorHappened();				// 出现错误
 
 #ifdef STARTLS_ASYNC
 	void slot_FinishStartLiveStream(int);
@@ -165,11 +107,9 @@ public:
 	void sendCoutom(ST_NLSS_VIDEO_SAMPLER	m_SvideoSampler);
 	void SetMainWnd(UIMainWindow* wnd);
 	void SetVideoWnd(HWND hWnd);
-	void SetChangeVideoAudio(HWND hwnd, QString path, bool bVideo=true);
-	void SetWhiteBoard();
-	void SetWhiteBoardHidden(bool bHide);
-	bool IsWhiteBoardVisible();
+	void SetChangeAudio(int index);
 	void setBkImage(QString qsImage);
+	void InitDeviceParam();								// 初始化设备参数
 };
 
 #endif // UIVideo_H

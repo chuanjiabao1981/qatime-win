@@ -149,10 +149,12 @@ void personList::initFronUi()
 	this->setItemWidget(newItem, buddyFirst);
 	newItem->setHidden(false);	
 }
-void personList::initSecUi()
+void personList::initSecUi(int iWidth)
 {
+	int SecWidth = 287;
+	SecWidth += iWidth;
 	buddySec = new personListBuddy();	
-	buddySec->initFindPeople();
+	buddySec->initFindPeople(SecWidth);
 	connect(buddySec, SIGNAL(signalFindName(const QString)), this, SLOT(findName(const QString)));
 	connect(buddySec, SIGNAL(signalFindNameNULL(const QString)), this, SLOT(findName(const QString)));	
 	QListWidgetItem *newItem = new QListWidgetItem();
@@ -162,24 +164,29 @@ void personList::initSecUi()
 	newItem->setHidden(false);
 	buddySec->secLinEdit->raise();
 	newItem->setBackgroundColor(QColor(153,153,153));
+	buddySec->resize(buddySec->width() + iWidth, buddySec->height());
 
+	int LastWidth = SecWidth - 15;
 	buddyLast = new personListBuddy();
-	buddyLast->initNotFind();	
+	buddyLast->initNotFind(LastWidth);
 	connect(buddyLast, SIGNAL(signalStopAllTalk(bool, QString)), this, SLOT(stopAllTalk(bool, QString)));
 	QListWidgetItem *newItemLast = new QListWidgetItem();
 	newItemLast->setSizeHint(QSize(30, 30));
 	this->insertItem(2, newItemLast);
 	this->setItemWidget(newItemLast, buddyLast);
 	newItemLast->setHidden(false);
+	buddyLast->resize(buddyLast->width() + iWidth, buddyLast->height());
 }
 void personList::setStrdentNumbers(int num)
 {
 //	buddyFirst->setOlineNum(num, 0);
 }
-void personList::addStrdent(QString imagesUrl,QString stuName,QString ID)
+void personList::addStrdent(QString imagesUrl,QString stuName,QString ID, int iWidth)
 {
+	int buddyBtnWidth = 272;
+	buddyBtnWidth += iWidth;
 	personListBuddy *buddy = new personListBuddy();
-	buddy->initUi(imagesUrl, stuName, ID);
+	buddy->initUi(imagesUrl, stuName, ID, buddyBtnWidth);
 	connect(buddy, SIGNAL(emitRadioChange(int, QString, QString)), this, SLOT(chickChage(int, QString, QString)));
 	QList<QListWidgetItem*> tem = groupMap.keys(buddy);
 	QListWidgetItem *newItem = new QListWidgetItem();       
@@ -191,6 +198,7 @@ void personList::addStrdent(QString imagesUrl,QString stuName,QString ID)
 	allStudents.insert(stuName, newItem);
 	IdStudents.insert(ID, newItem);
 	newItem->setHidden(false);
+	buddy->resize(buddy->width() + iWidth, buddy->height());
 }
 void personList::slotAddBuddy()
 {  
@@ -289,7 +297,7 @@ void personList::setOlineNum(int olineNum, int allNum)
 	buddyFirst->setOlineNum(olineNum, allNum);
 }
 
-void personList::cleanStudents()
+void personList::cleanStudents(int iWidth)
 {
 	for (int i = 0; i < groupMap.size(); i++)
 	{
@@ -303,8 +311,7 @@ void personList::cleanStudents()
 	allStudents.clear();
 	IdStudents.clear();
 	this->clear();
-//	initFronUi();
-	initSecUi();
+	initSecUi(iWidth);
 }
 
 personListBuddy* personList::findID(const QString id)
@@ -375,5 +382,62 @@ void  personList::setAllWidth(int iWidth)
 		rc = buddyLast->firstButton->geometry();
 		buddyLast->firstButton->move(rc.left() + iWidth, rc.top());
 		buddyLast->setFixedWidth(buddyLast->width() + iWidth);
+	}
+}
+
+// 有滚动条后，缩小宽度
+void  personList::setZoomWidth(int iWidth)
+{
+	int iCount = this->count();
+	if (iCount == 0)
+		return;
+
+	personListBuddy* Buddy = NULL;
+	for (int i = 2; i < iCount; i++)
+	{
+		QListWidgetItem* pItem = this->item(i);
+		if (pItem)
+		{
+			Buddy = *groupMap.find(pItem);
+			if (Buddy)
+			{
+				QRect rc;
+				if (Buddy->button)
+				{
+					if (!Buddy->IsZoom())
+					{
+						rc = Buddy->button->geometry();
+						Buddy->button->move(rc.left() + iWidth, rc.top());
+						Buddy->setFixedWidth(Buddy->width() + iWidth);
+						Buddy->SetZoom(true);
+					}
+				}
+			}
+		}
+	}
+
+	if (buddySec)
+	{
+		if (!buddySec->IsZoom())
+		{
+			buddySec->secLinEdit->setFixedWidth(buddySec->secLinEdit->width() + iWidth);
+			QRect rc;
+			rc = buddySec->secFindButton->geometry();
+			buddySec->secFindButton->move(rc.left() + iWidth, rc.top());
+			buddySec->setFixedWidth(buddySec->width() + iWidth);
+			buddySec->SetZoom(true);
+		}
+	}
+
+	if (buddyLast)
+	{
+		if (!buddyLast->IsZoom())
+		{
+			QRect rc;
+			rc = buddyLast->firstButton->geometry();
+			buddyLast->firstButton->move(rc.left() + iWidth, rc.top());
+			buddyLast->setFixedWidth(buddyLast->width() + iWidth);
+			buddyLast->SetZoom(true);
+		}
 	}
 }

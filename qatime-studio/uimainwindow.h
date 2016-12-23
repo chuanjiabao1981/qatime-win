@@ -29,6 +29,7 @@
 #include "UIPersonNum.h"
 #include "Livestatusmanager.h"
 #include "UIHelpword.h"
+#include "UIBulletscreen.h"
 #pragma execution_character_set("utf-8")
 #define STARTLS_ASYNC
 
@@ -48,6 +49,7 @@ class UIScreenTip;
 class UIPersonNum;
 class UIChatRoom;
 class LiveStatusManager;
+class UIBulletScreen;
 
 struct StructVideo
 {
@@ -95,6 +97,7 @@ private:
 	UIPersonNum*					m_PersonNum;		// 观看人数
 	LiveStatusManager*				m_LiveStatusManager;// 直播状态更新类
 	UIHelpWord*						m_HelpWord;			// 帮助文档
+	UIBulletScreen*					m_BulletScreen;		// 弹幕
 
 	QString							m_teacherID;		// 老师ID
 	QTimer*							m_CountTimer;		// 计时器
@@ -143,6 +146,8 @@ private:
 	
 	bool							bHasCamera;				// 有无摄像头
 	CameraStatus					m_EnumStatus;			// 摄像头直播状态
+	int								m_iSucCount;			// 成功两次才能正式直播
+	int								m_HelpBtnPos;			// 帮助按钮的位置
 private slots :
 	void MinDialog();									// 最小化对话框
 	void CloseDialog();									// 关闭对话框
@@ -186,8 +191,8 @@ public:
 	void EnumAvailableMediaDevices();						// 枚举设备
 	void SendStopLiveHttpMsg(bool bConnect=true);			// 往服务器发送直播停止消息
 	void ShowAuxiliary();									// 显示辅导班
-	void setAudioChangeIndex(QString path);					//  改变麦克风
-	void setVideoChangeIndex(QString path);					//  改变视频头
+	void setAudioChangeIndex(int index);					//  改变麦克风
+	void setVideoChangeIndex(int index);					//  改变视频头
 	void setRatioChangeIndex(int index);					//  改变分辨率
 
 
@@ -199,7 +204,6 @@ public:
 	void RequestMember();									// 请求群成员
 	void returnMember();									// 返回群成员
 	void setVideoLesson(QString lessonName);				// 设置视频上显示的课程
-	void showChatRoomWnd();									// 显示聊天会话
 	void LessonTable_Auxiliary(QString sLessonID, QString sCourseID); //程表中选择课程——关联到辅导班
 	void SendVideoMsg(UINT iMsg);							// 往win_video发送消息
 	void SendCameraMsg(UINT iMsg);							// 往camera_video发送消息
@@ -224,6 +228,14 @@ public:
 	void setAdaptHeight(int iHeight);						// 设置自适应高度
 	void setMainTitle(QString sVersion);					// 设置版本号
 	void ShowMain();										// 显示主窗口
+	void UpatateLiveStatus(QWidget* widget, bool bSuc);		// 直播成功
+	void setLiveBtnEnable(bool bEnable);					// 设置直播按钮禁用状态
+	void addVideoDevices(QString path);						// 设置视频源
+	void addAudioDevices(QString path);						// 设置麦克风
+	void ErrorStopLive(QWidget* pWidget);					// 直播过程出现错误，停止直播
+	LoginWindow* UIMainWindow::GetLoginWnd();				// 获取登录窗口
+	void SendTeacherBullet(QString name, QString content);	// 老师消息
+	void SendStudentBullet(QString name, QString content);	// 学生消息
 };
 
 #endif // UIMAINWINDOW_H

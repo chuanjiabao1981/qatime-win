@@ -9,9 +9,10 @@ personListBuddy::personListBuddy(QWidget *parent) :
 	, head(NULL)
 	, secLinEdit(NULL)
 	, secFindButton(NULL)
+	, m_bZoom(false)
 {
  //   initUi();
-	this->setFixedSize(QSize(320, 30));
+	this->resize(QSize(320, 30));
 }
 
 personListBuddy::~personListBuddy()
@@ -24,7 +25,7 @@ void personListBuddy::initFirst()
 	peopleNum->move(95, 5);
 	peopleNum->setText("当前观看人数 0");
 }
-void personListBuddy::initFindPeople()
+void personListBuddy::initFindPeople(int iWidth)
 {
 	secLinEdit = new QLineEdit(this);
 	connect(secLinEdit, SIGNAL(textChanged(const QString)), this, SLOT(findName(const QString)));
@@ -32,18 +33,17 @@ void personListBuddy::initFindPeople()
 	connect(secFindButton, SIGNAL(clicked()), this, SLOT(findName()));
 
 	secLinEdit->move(1, 1);
-	secLinEdit->setFixedWidth(287);
+	secLinEdit->setFixedWidth(iWidth);
 	secLinEdit->setFixedHeight(28);
 	secLinEdit->setPlaceholderText("请输入要查的姓名");
 	secLinEdit->setAlignment(Qt::AlignLeft);//居左对齐	
 	secLinEdit->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
 	secFindButton->setStyleSheet("border-image: url(:/LoginWindow/images/find.png)");
 	secFindButton->resize(33, 28);
-	secFindButton->move(287, 1);
+	secFindButton->move(iWidth, 1);
 	secFindButton->setCursor(Qt::PointingHandCursor);
-//	secFindButton->setText("查找");
 }
-void personListBuddy::initNotFind()
+void personListBuddy::initNotFind(int iWidth)
 {
 	notFind = new QLabel(this);
 	notFind->setBaseSize(QSize(200, 25));
@@ -54,12 +54,12 @@ void personListBuddy::initNotFind()
 	notFind->hide();
 	firstButton = new QCheckBox(this);
 	connect(firstButton, SIGNAL(clicked(bool)), this, SLOT(stopAllTalk(bool)));
-	firstButton->move(272, 7);
+	firstButton->move(iWidth, 7);
 	firstButton->setText("全禁");
 }
 
 //初始化Ui
-void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID)
+void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID, int iWidth)
 {
     //初始化
 //    head=new QWidget(this);
@@ -78,7 +78,7 @@ void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID)
     //布局
     head->move(0,0);
     name->move(7+16+10,8);
-	button->move(272, 7);
+	button->move(iWidth, 7);
 	button->setText("禁言");
 	setNetworkPic(szUrl);
 	name->setText(strName);
@@ -169,4 +169,14 @@ void personListBuddy::setNetworkPic(const QString &szUrl)
 		head->setPixmap(scaledPixmap);
 		head->setAccessibleDescription(sUrl);
 	}
+}
+
+void  personListBuddy::SetZoom(bool bZoom)
+{
+	m_bZoom = bZoom;
+}
+
+bool personListBuddy::IsZoom()
+{
+	return m_bZoom;
 }

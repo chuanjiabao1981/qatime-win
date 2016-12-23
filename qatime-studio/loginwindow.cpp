@@ -487,3 +487,12 @@ void LoginWindow::trayiconActivated(QSystemTrayIcon::ActivationReason reason)
 		break;
 	}
 }
+
+void LoginWindow::CloseTray()
+{
+	if (trayIcon)
+	{
+		delete trayIcon;
+		trayIcon = NULL;
+	}
+}

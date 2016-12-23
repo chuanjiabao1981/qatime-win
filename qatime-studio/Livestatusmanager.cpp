@@ -1,5 +1,6 @@
 #include "Livestatusmanager.h"
 #include "define.h"
+#include "UIMessageBox.h"
 
 #define GET_RTMP_FAIL_COUNT		5	// 获取推流地址失败重试次数
 #define HEARTBEAT_FAIL_COUNT	5	// 直播心跳失败重试次数
@@ -216,6 +217,10 @@ void LiveStatusManager::ReturnHeartBeat()
 	}
 	else if (obj["status"].toInt() == 0)
 	{
+		RequestError(error);
+	}
+	else
+	{
 		// 重试5次后放弃
 		m_iHeartCount--;
 		if (m_iHeartCount < 0)
@@ -296,6 +301,7 @@ void LiveStatusManager::FinishStartLive()
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1 && data.contains("live_token"))
 	{
 		QString status = data["status"].toString();
@@ -306,6 +312,7 @@ void LiveStatusManager::FinishStartLive()
 			if (m_parent)
 			{
 				// 更新课程状态
+				m_parent->startLiveStream();
 				m_parent->SendRequestStatus();
 
 				StartHeartBeat();
@@ -318,6 +325,10 @@ void LiveStatusManager::FinishStartLive()
 		}
 	}
 	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);	
+	}
+	else
 	{
 		if (m_parent)
 			m_parent->showErrorTip(TIP_START_LIVE_ERROR);
@@ -365,6 +376,10 @@ void LiveStatusManager::FinishStopLive()
 		}
 	}
 	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
+	}
+	else
 	{
 		// 重试5次后放弃
 		m_iStopLiveCount--;
@@ -432,6 +447,7 @@ void LiveStatusManager::FinishCameraSwitch()
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1 && obj.contains("data"))
 	{
 		QString statusOK = obj["data"].toString();
@@ -446,6 +462,10 @@ void LiveStatusManager::FinishCameraSwitch()
 	}
 	else if (obj["status"].toInt() == 0)
 	{
+		RequestError(error);
+	}
+	else
+	{
 		m_SwitchFailTimer->start(1000);
 	}
 }
@@ -455,4 +475,36 @@ void LiveStatusManager::SwitchFailTimer()
 	m_SwitchFailTimer->stop();
 
 	SendCameraSwitchMsg(m_iBoardStatus,m_iCameraStatus);
+}
+
+void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
+{
+	QString strError;
+	if (error["code"].toInt() == 1002)
+		strError = QString("授权过期,请重新登录！");
+	else if (error["code"].toInt() == 1003)
+		strError = QString("没有权限访问！");
+	else if (error["code"].toInt() == 1004)
+		strError = QString("授权失败,请重新登录！");
+	else if (error["code"].toInt() == 3001)
+		strError = QString("参数错误,请重新登录！");
+	else if (error["code"].toInt() == 3002)
+		strError = QString("数据不合法,请重新登录！");
+	else if (error["code"].toInt() == 4001)
+		strError = QString("找不到资源,请重新登录！");
+	else if (error["code"].toInt() == 9999)
+		strError = QString("服务器错误,请重新登录！");
+	else
+		return;
+
+	int iStatus = CMessageBox::showMessage(
+		QString("答疑时间"),
+		QString(strError),
+		QString("确定"),
+		QString());
+	if (iStatus == 1 || iStatus == 0)
+	{
+		if (m_parent && bTrue)
+			m_parent->GetLoginWnd()->ReturnLogin();
+	}
 }

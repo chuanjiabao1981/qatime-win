@@ -55,7 +55,6 @@ UIMenuTool::UIMenuTool(QWidget *parent)
 	connect(ui.ratio_pushBtn, SIGNAL(clicked()), this, SLOT(clickChangeRatio()));
 	connect(ui.lesson_pushButton, SIGNAL(clicked()), this, SLOT(clickLessonList()));
 	connect(ui.Whiteboard_pushButton, SIGNAL(clicked()), this, SLOT(WhiteBoardStatus()));
-//	ui.time_label->hide();
 
 	m_timers = new UITimers(this);
 	m_timers->setWindowFlags(Qt::FramelessWindowHint);
@@ -79,12 +78,10 @@ void UIMenuTool::setRatioText(QString text)
 }
 void UIMenuTool::setTimeLabelVisible(bool b)
 {
-//	ui.time_label->setVisible(b);
 	m_timers->setTimeLabelVisible(b);
 }
 void UIMenuTool::setTimeLabelText(QString text)
 {
-//	ui.time_label->setText(text);
 	m_timers->setTimeLabelText(text);
 }
 void UIMenuTool::setLessonEnabled(bool bEnable)

@@ -31,8 +31,8 @@ private:
 	void InitUI();										// 初始化样式
 
 public:
-	void setAudioParam(int iCount, QString name, QString path);		// 麦克风参数
-	void setVideoParam(int iCount, QString name, QString path);		// 摄像头参数
+	void setAudioParam(QString name, QString path);		// 麦克风参数
+	void setVideoParam(QString name, QString path);		// 摄像头参数
 	void setParent(UIMainWindow* parent);
 };
 

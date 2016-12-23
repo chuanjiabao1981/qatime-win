@@ -99,7 +99,7 @@ static void CallbackQueryTeamMembers(const char *tid, int member_count, bool inc
 			pTeamList->push_back(member);
 		}
 
-		HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+		HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
 		PostMessage(hWnd, MSG_MEMBERS_INFO, (WPARAM)pTeamList, 0);
 		
 		delete user_data;
@@ -118,7 +118,7 @@ static void CallbackQueryTeamMember(const char *tid, const char *id, const char 
 		pTeamMember->SetNick(prop.GetNick());
 		pTeamMember->SetAccountID(prop.GetAccountID());
 		
-		HWND hWnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+		HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
 		PostMessage(hWnd, MSG_MEMBER_INFO, (WPARAM)pTeamMember, 0);
 
 		delete user_data;

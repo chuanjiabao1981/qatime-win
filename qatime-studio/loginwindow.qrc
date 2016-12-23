@@ -52,5 +52,12 @@
     <file>images/expansion.png</file>
     <file>images/close.png</file>
     <file>images/minsize.png</file>
+	<file>images/Bullet.png</file>
+	<file>images/bulletClose.png</file>
+	<file>images/bulletSet.png</file>
+	<file>images/bulletTalk.png</file>
+	<file>images/bulletClose_b.png</file>
+	<file>images/bulletSet_b.png</file>
+	<file>images/bulletTalk_b.png</file>
   </qresource>
 </RCC>
