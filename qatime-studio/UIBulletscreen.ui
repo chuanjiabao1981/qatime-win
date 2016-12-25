@@ -139,6 +139,12 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="bullet_horizontalLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QTextBrowser" name="textBrowser">
        <property name="font">
@@ -148,7 +154,29 @@
         </font>
        </property>
        <property name="cursor" stdset="0">
-        <cursorShape>OpenHandCursor</cursorShape>
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="minimumSize">
+        <size>
+         <width>2</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>2</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>

@@ -150,9 +150,9 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_RangeCapture->hide();
 
 	m_BulletScreen = new UIBulletScreen();
-	m_BulletScreen->setWindowFlags(Qt::FramelessWindowHint);//| Qt::Tool
+	m_BulletScreen->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 	m_BulletScreen->setMainWindow(this);
-	m_BulletScreen->show();
+	m_BulletScreen->hide();
 	SetWindowPos((HWND)m_BulletScreen->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
 	m_HoverWnd = new UIHoverWindow();
@@ -417,6 +417,9 @@ void UIMainWindow::CloseDialog()
 
 		if (m_HelpWord)
 			m_HelpWord->setVisible(false);
+
+		if (m_BulletScreen)
+			m_BulletScreen->setVisible(false);
 
 		m_LoginWindow->CloseTray();
 		
@@ -687,6 +690,7 @@ void UIMainWindow::VideoStatus(int iStatus)
 			if (!m_VideoInfo->IsCurrentLiving())
 				return;
 
+			ui.video_checkBox->setEnabled(false);
 			m_CameraInfo->StopLiveVideo();
 			m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
 		}
@@ -706,6 +710,7 @@ void UIMainWindow::VideoStatus(int iStatus)
 				return;
 
 			m_iSucCount++;
+			ui.video_checkBox->setEnabled(false);
 			m_CameraInfo->StartLiveVideo();
 			m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
 		}
@@ -760,7 +765,7 @@ void UIMainWindow::slot_onTempTimeout()
 	m_CameraInfo->setWindowFlags(Qt::FramelessWindowHint);
 	m_CameraInfo->SetMainWnd(this);
 	m_CameraInfo->show();
-	m_CameraInfo->resize(316, 210);
+	m_CameraInfo->resize(317, 210);
 }
 
 void UIMainWindow::slot_ScreenTipTimeout()
@@ -793,7 +798,7 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 
 			if (m_charRoom)
 			{
-				if (m_charRoom->ReceiverMsg(pIMsg))
+				if (m_charRoom->ReceiverMsg(pIMsg) && !m_BulletScreen->isVisible())
 					m_HoverWnd->UpdateChatNumber();
 			}
 				
@@ -1048,25 +1053,6 @@ void UIMainWindow::paintEvent(QPaintEvent *event)
 		painter.setPen(color);
 		painter.drawPath(path);
 	}
-
-// 	QPainterPath path;
-// 	path.setFillRule(Qt::WindingFill);
-// 	path.addRect(10, 10, this->width() - 20, this->height() - 20);
-// 
-// 	QPainter painter(this);
-// 	painter.setRenderHint(QPainter::Antialiasing, true);
-// 	painter.fillPath(path, QBrush(Qt::white));
-// 
-// 	QColor color(0, 0, 0, 50);
-// 	for (int i = 0; i < 10; i++)
-// 	{
-// 		QPainterPath path;
-// 		path.setFillRule(Qt::WindingFill);
-// 		path.addRect(10 - i, 10 - i, this->width() - (10 - i) * 2, this->height() - (10 - i) * 2);
-// 		color.setAlpha(150 - qSqrt(i) * 50);
-// 		painter.setPen(color);
-// 		painter.drawPath(path);
-// 	}
 }
 
 void UIMainWindow::focusInEvent(QFocusEvent *e)
@@ -1140,6 +1126,9 @@ void UIMainWindow::returnClick()
 		QString("取消"));
 	if (iStatus == 1)
 	{
+		if (m_BulletScreen)
+			m_BulletScreen->setVisible(false);
+
 		// 发送结束直播消息再关闭
 		m_LiveStatusManager->SendStopLiveHttpMsg(false);
 
@@ -1823,4 +1812,33 @@ void UIMainWindow::SendTeacherBullet(QString name, QString content)
 	{
 		m_BulletScreen->ReciverTeacher(name, content);
 	}
+}
+
+void UIMainWindow::SetBullet(int iStatus)
+{
+	if (m_BulletScreen)
+	{
+		if (iStatus)
+		{
+			m_BulletScreen->showDialog();
+			if (m_HoverWnd)
+			{
+				m_HoverWnd->SetNumber();
+				m_HoverWnd->SetLiveTimer("00:00:00");
+			}
+		}
+		else
+			m_BulletScreen->hide();
+	}
+}
+
+void UIMainWindow::CloseBullet()
+{
+	if (m_SetParam)
+		m_SetParam->CloseBulletSet();
+}
+
+void UIMainWindow::setCameraEnable()
+{
+	ui.video_checkBox->setEnabled(true);
 }

@@ -1150,7 +1150,7 @@ void UIChatRoom::ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMs
 	ui.student_list->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
 
 	for (auto it : *pMemberMsg)
-	{
+	{	
 		if (it.IsMute())
 		{
 			QString accid = QString::fromStdString(it.GetAccountID());
@@ -1162,6 +1162,8 @@ void UIChatRoom::ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMs
 			}
 		}
 	}
+
+	ui.student_list->setBuddyWidth(width());
 }
 
 bool UIChatRoom::IsLogin()
@@ -1204,8 +1206,9 @@ bool UIChatRoom::AddStudent(QString iconUrl, QString name, QString accid)
 		ui.student_list->addStrdent(iconUrl, name, accid, m_drawingWidth);
 		m_StudentInfo.insert(accid, name);
 
+		int iHeight = ui.student_list->parentWidget()->height() - 40;
 		int iCount = ui.student_list->count();
-		if (ui.student_list->height() < iCount * 30)
+		if (iHeight < iCount * 30)
 		{
 			ui.student_list->setZoomWidth(-12);
 		}
@@ -1378,11 +1381,12 @@ void UIChatRoom::returnMember()
 				ui.student_list->addStrdent(pMember->url(), pMember->name(), pMember->accid(), m_drawingWidth);
 				m_StudentInfo.insert(pMember->accid(), pMember->name());
 
+				int iHeight = ui.student_list->parentWidget()->height()-40;
 				// 加入后如果出现滚动条，这缩放
 				int iCount = ui.student_list->count();
-				if (ui.student_list->height() < iCount * 30)
+				if (iHeight < iCount * 30)
 				{
-					ui.student_list->setZoomWidth(-10);
+					ui.student_list->setZoomWidth(-12);
 				}
 
 				QString sName;

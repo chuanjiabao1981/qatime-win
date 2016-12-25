@@ -37,6 +37,7 @@ public:
 	void cleanStudents(int iWidth);		//清空列表中的数据
 	void setAllWidth(int iWidth);
 	void setZoomWidth(int iWidth);
+	void setBuddyWidth(int iWidth);
 signals:
 	void signalChickChage(int,QString, QString);
 public slots:

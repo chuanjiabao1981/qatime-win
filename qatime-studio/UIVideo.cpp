@@ -261,7 +261,7 @@ bool UIVideo::InitMediaCapture()
 
 	stParam.stAudioParam.enInType = m_audioSourceType;
 
- 	if (have_audio_source)
+	if (have_audio_source && m_pVideoDevices!=NULL)
  		stParam.enOutContent = EN_NLSS_OUTCONTENT_AV;//默认音视频设备都存在则推流音视频，当然，也可以设置成音频/视频，
  	else 
 		stParam.enOutContent = EN_NLSS_OUTCONTENT_VIDEO;

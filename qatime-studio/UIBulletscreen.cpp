@@ -3,15 +3,18 @@
 #include <wtypes.h>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QScrollBar>
 
-#define MAINWINDOW_X_MARGIN 6
-#define MAINWINDOW_Y_MARGIN 6
-#define MAINWINDOW_TITLE_HEIGHT 24
+#define MAINWINDOW_X_MARGIN 3
+#define MAINWINDOW_Y_MARGIN 3
+#define MAINWINDOW_TITLE_HEIGHT 290
 #pragma execution_character_set("utf-8")
 UIBulletScreen::UIBulletScreen(QWidget *parent)
 	: QWidget(parent)
 	, m_BulletSet(NULL)
 	, m_parent(NULL)
+	, m_Timer(NULL)
+	, m_delayTimer(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
@@ -32,11 +35,109 @@ UIBulletScreen::UIBulletScreen(QWidget *parent)
 	m_TeacherColor = QColor(190, 11, 11);
 	m_StudentColor = QColor(153, 153, 153);
 	m_ContentColor = QColor(0,0,0);
+
+	m_Timer = new QTimer(this);
+	connect(m_Timer, SIGNAL(timeout()), this, SLOT(slot_onCountTimeout())); 
+	m_Timer->start(500);
+
+	m_delayTimer = new QTimer(this);
+	connect(m_delayTimer, SIGNAL(timeout()), this, SLOT(slot_onDelayTimeout()));
+		// 设置滚动条样式
+	ui.textBrowser->verticalScrollBar()->setStyleSheet("QScrollBar:vertical"
+		"{"
+		"width:8px;"
+		"background:rgba(0,0,0,0%);"
+		"margin:0px,0px,0px,0px;"
+		"padding-top:9px;"
+		"padding-bottom:9px;"
+		"}"
+		"QScrollBar::handle:vertical"
+		"{"
+		"width:8px;"
+		"background:rgba(255,255,255,50%);"
+		" border-radius:4px;"
+		"min-height:20;"
+		"}"
+		"QScrollBar::handle:vertical:hover"
+		"{"
+		"width:8px;"
+		"background:rgba(0,0,0,50%);"
+		" border-radius:4px;"
+		"min-height:20;"
+		"}"
+		"QScrollBar::add-line:vertical"
+		"{"
+		"height:9px;width:8px;"
+		"border-image:url(:/images/a/3.png);"
+		"subcontrol-position:bottom;"
+		"}"
+		"QScrollBar::sub-line:vertical"
+		"{"
+		"height:9px;width:8px;"
+		"border-image:url(:/images/a/1.png);"
+		"subcontrol-position:top;"
+		"}"
+		"QScrollBar::add-line:vertical:hover"
+		"{"
+		"height:9px;width:8px;"
+		"border-image:url(:/images/a/4.png);"
+		"subcontrol-position:bottom;"
+		"}"
+		"QScrollBar::sub-line:vertical:hover"
+		"{"
+		"height:9px;width:8px;"
+		"border-image:url(:/images/a/2.png);"
+		"subcontrol-position:top;"
+		"}"
+		"QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical"
+		"{"
+		"background:rgba(0,0,0,10%);"
+		"border-radius:4px;"
+		"}"
+		);
 }
 
 UIBulletScreen::~UIBulletScreen()
 {
+	if (m_Timer)
+	{
+		m_Timer->stop();
+		delete m_Timer;
+		m_Timer = NULL;
+	}
+}
 
+void UIBulletScreen::slot_onCountTimeout()
+{
+	QRect rc = this->geometry();
+	if (rc.contains(QCursor::pos()))
+	{
+		if (m_delayTimer)
+		{
+			if (!m_delayTimer->isActive())
+				m_delayTimer->start(2 * 1000);
+		}
+	}
+	else
+	{
+		if (m_delayTimer && m_delayTimer->isActive())
+			m_delayTimer->stop();
+		this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/alpha.png);"));
+		ui.close_pushButton->setVisible(false);
+		ui.set_pushButton->setVisible(false);
+	}
+}
+
+void UIBulletScreen::slot_onDelayTimeout()
+{
+	m_delayTimer->stop();
+	QRect rc = this->geometry();
+	if (rc.contains(QCursor::pos()))
+	{
+		this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/Bullet.png);"));
+		ui.close_pushButton->setVisible(true);
+		ui.set_pushButton->setVisible(true);
+	}
 }
 
 void UIBulletScreen::setMainWindow(UIMainWindow* parent)
@@ -162,6 +263,9 @@ void UIBulletScreen::CloseDialog()
 	hide();
 	if (m_BulletSet)
 		m_BulletSet->hide();
+
+	if (m_parent)
+		m_parent->CloseBullet();
 }
 
 void UIBulletScreen::DeleteTalkData()
@@ -227,6 +331,7 @@ void UIBulletScreen::ReciverStudent(QString name, QString content)
 	stringToHtml(content, m_ContentColor);
 	ui.textBrowser->insertHtml(name + ": " + content);
 	ui.textBrowser->append("");
+	ui.textBrowser->moveCursor(QTextCursor::End);
 }
 
 void UIBulletScreen::ReciverTeacher(QString name, QString content)
@@ -235,4 +340,12 @@ void UIBulletScreen::ReciverTeacher(QString name, QString content)
 	stringToHtml(content, m_ContentColor);
 	ui.textBrowser->insertHtml(name + ": "+content);
 	ui.textBrowser->append("");
+	ui.textBrowser->moveCursor(QTextCursor::End);
+}
+
+void UIBulletScreen::showDialog()
+{
+	show();
+	// 删除聊天数据
+	ui.textBrowser->clear();
 }

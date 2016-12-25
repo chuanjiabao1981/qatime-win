@@ -435,7 +435,6 @@ void UICamera::slot_FinishStartLiveStream(int iRet)
 	if ((NLSS_RET)iRet != NLSS_OK)
 	{
 		m_Parent->UpatateLiveStatus(this,false);
-		MessageBox(NULL, L"打开直播出错，具体错误信息请看返回值", L"答疑时间", MB_OK);
 	}
 	else
 	{
@@ -444,12 +443,15 @@ void UICamera::slot_FinishStartLiveStream(int iRet)
 			m_Parent->UpatateLiveStatus(this,true);
 		}
 	}
+
+	m_Parent->setCameraEnable();
 }
 
 void UICamera::slot_FinishStopLiveStream(int iRet)
 {
 	m_bStopLiveFinish = true;
 	emit sig_changeLiveStatus(false);
+	m_Parent->setCameraEnable();
 	return;
 }
 #endif

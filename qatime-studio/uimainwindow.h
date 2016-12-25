@@ -236,6 +236,9 @@ public:
 	LoginWindow* UIMainWindow::GetLoginWnd();				// 获取登录窗口
 	void SendTeacherBullet(QString name, QString content);	// 老师消息
 	void SendStudentBullet(QString name, QString content);	// 学生消息
+	void SetBullet(int iStatus);							// 开启弹幕设置
+	void CloseBullet();		
+	void setCameraEnable();									// 设置摄像头禁用
 };
 
 #endif // UIMAINWINDOW_H

@@ -25,7 +25,8 @@ protected:
 private slots :
 	void CloseDialog();									// 关闭对话框
 	void AudioChanged(int);
-	void VideoChanged(int);								
+	void VideoChanged(int);			
+	void BulletStatus(int);								// 改变弹幕状态
 
 private:
 	void InitUI();										// 初始化样式
@@ -34,6 +35,7 @@ public:
 	void setAudioParam(QString name, QString path);		// 麦克风参数
 	void setVideoParam(QString name, QString path);		// 摄像头参数
 	void setParent(UIMainWindow* parent);
+	void CloseBulletSet();
 };
 
 #endif // UISETPARAM_H

@@ -23,6 +23,8 @@ private:
 	QColor				m_TeacherColor;		//老师本人颜色
 	QColor				m_StudentColor;		//学生颜色
 	QColor				m_ContentColor;		//内容颜色
+	QTimer*				m_Timer;
+	QTimer*				m_delayTimer;		//延迟显示
 
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result); // 添加caption
@@ -32,6 +34,8 @@ protected:
 private slots:
 	void CloseDialog();
 	void SetDialog();
+	void slot_onCountTimeout();
+	void slot_onDelayTimeout();
 
 private:
 	void DeleteTalkData();
@@ -44,6 +48,7 @@ public:
 	void SetFontSize(int iSize);
 	void ReciverStudent(QString name, QString content);
 	void ReciverTeacher(QString name, QString content);
+	void showDialog();
 };
 
 #endif // UIBULLETSCREEN_H

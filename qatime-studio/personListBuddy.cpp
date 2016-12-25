@@ -113,6 +113,8 @@ bool personListBuddy::eventFilter(QObject *obj, QEvent *event)
 
 void personListBuddy::radioChange(int b)
 {
+	int test = width();
+	this->setFixedWidth(320);
 	emit emitRadioChange(b, m_ID, name->text());
 }
 

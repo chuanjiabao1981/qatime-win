@@ -198,6 +198,7 @@ void personList::addStrdent(QString imagesUrl,QString stuName,QString ID, int iW
 	allStudents.insert(stuName, newItem);
 	IdStudents.insert(ID, newItem);
 	newItem->setHidden(false);
+	int test = buddy->width();
 	buddy->resize(buddy->width() + iWidth, buddy->height());
 }
 void personList::slotAddBuddy()
@@ -383,6 +384,34 @@ void  personList::setAllWidth(int iWidth)
 		buddyLast->firstButton->move(rc.left() + iWidth, rc.top());
 		buddyLast->setFixedWidth(buddyLast->width() + iWidth);
 	}
+}
+
+// 重新设置Buddy宽度
+void  personList::setBuddyWidth(int iWidth)
+{
+	int iCount = this->count();
+	if (iCount == 0)
+		return;
+
+	personListBuddy* Buddy = NULL;
+	for (int i = 2; i < iCount; i++)
+	{
+		QListWidgetItem* pItem = this->item(i);
+		if (pItem)
+		{
+			Buddy = *groupMap.find(pItem);
+			if (Buddy)
+			{
+				Buddy->setFixedWidth(iWidth);
+			}
+		}
+	}
+
+	if (buddySec)
+		buddySec->setFixedWidth(iWidth);
+
+	if (buddyLast)
+		buddyLast->setFixedWidth(iWidth);
 }
 
 // 有滚动条后，缩小宽度

@@ -16,7 +16,13 @@ UISetParam::UISetParam(QWidget *parent)
 
 	ui.ratio_groupBox->setStyleSheet("border: 1px solid white;");
 
+	// 设置麦克风样式
+	ui.bullet_checkBox->setStyleSheet("QCheckBox::indicator{width: 70px;height: 13px;}"
+		"QCheckBox::indicator:unchecked{image: url(./images/closeBullet.png);}"
+		"QCheckBox::indicator:checked{image: url(./images/openBullet.png);}");
+
 	connect(ui.close_toolButton, SIGNAL(clicked()), this, SLOT(CloseDialog()));
+	connect(ui.bullet_checkBox, SIGNAL(stateChanged(int)), this, SLOT(BulletStatus(int)));
 
 	ui.HD_radio->setChecked(true);
 }
@@ -151,4 +157,15 @@ void UISetParam::VideoChanged(int index)
 void UISetParam::setParent(UIMainWindow* parent)
 {
 	m_Parent = parent;
+}
+
+void UISetParam::BulletStatus(int iStatus)
+{
+	if (m_Parent)
+		m_Parent->SetBullet(iStatus);
+}
+
+void UISetParam::CloseBulletSet()
+{
+	ui.bullet_checkBox->setCheckState(Qt::CheckState::Unchecked);
 }
