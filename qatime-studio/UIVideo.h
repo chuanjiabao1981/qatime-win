@@ -110,6 +110,9 @@ public:
 	void SetChangeAudio(int index);
 	void setBkImage(QString qsImage);
 	void InitDeviceParam();								// 初始化设备参数
+	int  getOutBitrate(int iWidth, int iHeight, int iFps);
+	bool initDeviceLiveStream(_HNLSSERVICE hNLSService, char *pVideoPath, char *pAudioPath);
+	void testSimpleCamera();
 };
 
 #endif // UIVideo_H

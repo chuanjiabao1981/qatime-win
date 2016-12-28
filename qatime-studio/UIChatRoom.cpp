@@ -178,8 +178,8 @@ bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
 		if (event->type() == QEvent::FocusOut)
 		{
 			// 失去焦点（鼠标不在窗体内，则隐藏窗体）
-			int i = 0;
-			i++;
+			if (m_parent)
+				m_parent->PosInWindow();
 		}
 	}
 	return QWidget::eventFilter(target, event);
@@ -204,15 +204,15 @@ void UIChatRoom::clickTalk()
  	ui.button_studentList->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
  	ui.button_proclamation->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
 
-	ui.button_brow->setVisible(true);
-	ui.button_cleanText->setVisible(true);
-	ui.button_notes->setVisible(true);
-	ui.label->setVisible(true);
-	ui.pic_pushButton->setVisible(true);
-	ui.button_sendMseeage->setVisible(true);
-	ui.textEdit->setVisible(true);
-	ui.horizontalLayout->invalidate();
-	ui.horizontalLayout_2->invalidate();
+	ui.btn_widget->setVisible(true);
+	ui.send_widget->setVisible(true);
+// 	ui.button_brow->setVisible(true);
+// 	ui.button_cleanText->setVisible(true);
+// 	ui.button_notes->setVisible(true);
+// 	ui.label->setVisible(true);
+// 	ui.pic_pushButton->setVisible(true);
+// 	ui.button_sendMseeage->setVisible(true);
+// 	ui.textEdit->setVisible(true);
 
 	ui.proclamationWidget->setVisible(false);
 	ui.text_talk->setVisible(true);
@@ -233,12 +233,14 @@ void UIChatRoom::clickStudentList()
 	ui.button_talk->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);color:rgb(153,153,153)");
 	ui.button_proclamation->setStyleSheet("border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);");
 
-	ui.button_brow->setVisible(false);
-	ui.button_cleanText->setVisible(false);
-	ui.button_notes->setVisible(false);
-	ui.pic_pushButton->setVisible(false);
-	ui.button_sendMseeage->setVisible(false);
-	ui.textEdit->setVisible(false);
+	ui.btn_widget->setVisible(false);
+	ui.send_widget->setVisible(false);
+// 	ui.button_brow->setVisible(false);
+// 	ui.button_cleanText->setVisible(false);
+// 	ui.button_notes->setVisible(false);
+// 	ui.pic_pushButton->setVisible(false);
+// 	ui.button_sendMseeage->setVisible(false);
+// 	ui.textEdit->setVisible(false);
 
 	ui.proclamationWidget->setVisible(false);
 	ui.text_talk->setVisible(false);
@@ -264,16 +266,18 @@ void UIChatRoom::clickProclamation()
 	ui.text_talk->setVisible(false);
 	ui.student_list->setVisible(false);
 	ui.msgRecord->setVisible(false);
-	ui.button_brow->setVisible(false);
-	ui.button_cleanText->setVisible(false);
-	ui.button_notes->setVisible(false);
-	ui.label->setVisible(false);
-	ui.pic_pushButton->setVisible(false);
-	ui.button_sendMseeage->setVisible(false);
-	ui.textEdit->setVisible(false);
+
+	ui.btn_widget->setVisible(false);
+	ui.send_widget->setVisible(false);
+// 	ui.button_brow->setVisible(false);
+// 	ui.button_cleanText->setVisible(false);
+// 	ui.button_notes->setVisible(false);
+// 	ui.label->setVisible(false);
+// 	ui.pic_pushButton->setVisible(false);
+// 	ui.button_sendMseeage->setVisible(false);
+// 	ui.textEdit->setVisible(false);
  	
 	ui.proclamationWidget->setVisible(true);
-
 	ui.text_proclamation->show();
 	ui.text_proclamation->setGeometry(QRect(0, 40, 280, m_proclamationHeight));
 
@@ -321,17 +325,19 @@ void UIChatRoom::clickNotes()
 	ui.timeWidget->setSelectedDate(cdate);
 	ui.timeShow->setText(dtstr);
 
+	ui.btn_widget->setVisible(false);
+	ui.send_widget->setVisible(false);
+// 	ui.button_brow->setVisible(false);
+// 	ui.button_cleanText->setVisible(false);
+// 	ui.button_notes->setVisible(false);
+// 	ui.pic_pushButton->setVisible(false);
+// 	ui.label->setVisible(false);
+// 	ui.button_sendMseeage->setVisible(false);
+// 	ui.textEdit->setVisible(false);
 	ui.proclamationWidget->setVisible(false);
-	ui.text_talk->setHidden(true);	
-	ui.student_list->setHidden(true);
-	ui.button_brow->setHidden(true);
-	ui.button_cleanText->setHidden(true);
-	ui.button_notes->setHidden(true);
-	ui.pic_pushButton->setVisible(false);
-	ui.button_sendMseeage->setHidden(true);
-	ui.textEdit->setHidden(true);
-	ui.label->setHidden(true);
-	ui.msgRecord->setHidden(false);	
+	ui.text_talk->setVisible(false);
+	ui.student_list->setVisible(false);
+	ui.msgRecord->setVisible(true);
 	ui.timeWidget->hide();
 	ui.talkRecord->clear();		// 清除消息记录
 
@@ -475,8 +481,9 @@ void UIChatRoom::clickSendMseeage()
 				}						
 			}
 			m_isBorw = false;
+			m_parent->SendTeacherBullet("(我)", contect);
+			stringToHtmlFilter(sendText);
 			m_ChatHtml->sendMsg(image, name, timeStr, contect);
-			m_parent->SendTeacherBullet(name, sendText);
 		}
 		else
 		{
@@ -485,8 +492,9 @@ void UIChatRoom::clickSendMseeage()
 
 			// 本人头像
  			QString image = m_parent->TeacherPhotoPixmap();
-			m_ChatHtml->sendMsg(image,qName, timeStr, sendText);
-			m_parent->SendTeacherBullet(qName,sendText);
+			m_parent->SendTeacherBullet("(我)", sendText);
+			stringToHtmlFilter(sendText);
+			m_ChatHtml->sendMsg(image, qName, timeStr, sendText);
 		}
 		ui.textEdit->clear();
 	}
@@ -602,33 +610,15 @@ void UIChatRoom::announce()
 // 点击【发布】按钮
 void UIChatRoom::putTalk()
 {
+	QString announcement = ui.textEdit_2->toPlainText();//增加新公告
+	OnSendAnnouncements(announcement);
+
 	ui.text_proclamation->setGeometry(QRect(0, 40, 299, m_proclamationHeight));
 	ui.button_sendMseeage_cancel->setVisible(false);
 	ui.button_sendMseeage_3->setVisible(false);
 	ui.textEdit_2->setVisible(false);
 	ui.button_sendMseeage_2->setVisible(true);
 	ui.text_proclamation->setVisible(true);
-
-	QDateTime current_date_time = QDateTime::currentDateTime();
-	QString current_date = current_date_time.toString("yyyy-MM-dd hh:mm:ss");
-	stringToHtml(current_date, timeColor);
-
-	QString announcement = ui.textEdit_2->toPlainText();//增加新公告
-	OnSendAnnouncements(announcement);
-
-	stringToHtml(announcement, contentColor);
-
-	QTextCursor textCursor = ui.text_proclamation->textCursor();
-	textCursor.movePosition(QTextCursor::Start);
-	textCursor.insertImage("./images/announcement.png");
-	textCursor.insertText("  ");
-	textCursor.insertHtml(current_date);
-	textCursor.insertText("\n");
-	textCursor.insertHtml(announcement);
-	textCursor.insertText("\n\r");
-
-	ui.textEdit_2->clear();
-		
 }
 
 // 点击【取消】按钮
@@ -749,9 +739,10 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		if (Buddy)
 			img= Buddy->head->accessibleDescription();
 
-		m_ChatHtml->receiverMsg(img,qName, qTime, qContent);
 		if (m_parent)
 			m_parent->SendStudentBullet(qName, qContent);
+		stringToHtmlFilter(qContent);
+		m_ChatHtml->receiverMsg(img,qName, qTime, qContent);
 		bValid = true;
 	}
 	else if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0 && pMsg->type_ == nim::kNIMMessageTypeImage)
@@ -1195,6 +1186,17 @@ void UIChatRoom::chickChage(int b, QString qAccid, QString name)
 	std::string accid = qAccid.toStdString();
 	auto cb = std::bind(OnTeamEventCallback, std::placeholders::_1);
 	nim::Team::MuteMemberAsync(m_CurChatID, accid, b, cb);	
+
+	if (b)
+	{
+		name += "已被禁言";
+		m_ChatHtml->CenterMsg(name);
+	}
+	else
+	{
+		name += "已被解除禁言";
+		m_ChatHtml->CenterMsg(name);
+	}
 }
 
 // 添加成员
@@ -1333,7 +1335,84 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 	QNetworkRequest request(url);
 	request.setRawHeader("Remember-Token", mRemeberToken.toUtf8());	
 	reply = manager.post(request, append);
+	connect(reply, &QNetworkReply::finished, this, &UIChatRoom::ReturnAnnouncements);
 }
+void UIChatRoom::ReturnAnnouncements()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	if (obj["status"].toInt() == 1)
+	{
+		QString announcement = ui.textEdit_2->toPlainText();//增加新公告
+		QDateTime current_date_time = QDateTime::currentDateTime();
+		QString current_date = current_date_time.toString("yyyy-MM-dd hh:mm:ss");
+		stringToHtml(current_date, timeColor);
+		stringToHtml(announcement, contentColor);
+		QTextCursor textCursor = ui.text_proclamation->textCursor();
+		textCursor.movePosition(QTextCursor::Start);
+		textCursor.insertImage("./images/announcement.png");
+		textCursor.insertText("  ");
+		textCursor.insertHtml(current_date);
+		textCursor.insertText("\n");
+		textCursor.insertHtml(announcement);
+		textCursor.insertText("\n\r");
+		ui.textEdit_2->clear();
+		return;
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
+	}
+	else
+	{
+		// 重试5次后放弃
+		
+	}
+}
+
+void UIChatRoom::RequestError(QJsonObject& error)
+{
+	QString strError;
+	if (error["code"].toInt() == 1002)
+		strError = QString("授权过期,请重新登录！");
+	else if (error["code"].toInt() == 1003)
+		strError = QString("没有权限访问！");
+	else if (error["code"].toInt() == 1004)
+		strError = QString("授权失败,请重新登录！");
+	else if (error["code"].toInt() == 3001)
+	{
+		strError = QString("输入内容格式有误，请重新输入！");
+		CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString(strError),
+			QString("确定"),
+			QString());
+		return;
+	}
+	else if (error["code"].toInt() == 3002)
+		strError = QString("数据不合法,请重新登录！");
+	else if (error["code"].toInt() == 4001)
+		strError = QString("找不到资源,请重新登录！");
+	else if (error["code"].toInt() == 9999)
+		strError = QString("服务器错误,请重新登录！");
+	else
+		return;
+
+	int iStatus = CMessageBox::showMessage(
+		QString("答疑时间"),
+		QString(strError),
+		QString("确定"),
+		QString());
+	if (iStatus == 1 || iStatus == 0)
+	{
+		if (m_parent)
+			m_parent->GetLoginWnd()->ReturnLogin();
+	}
+}
+
 void UIChatRoom ::colseBrow()
 {
 	m_smallEmotionWidget->setHidden(true);
@@ -1638,7 +1717,7 @@ void UIChatRoom::clickPic()
 		name += "(我) ";
 		m_ChatHtml->sendImageMsg(image, name, timeStr, path,sMsgID);
 		if (m_parent)
-			m_parent->SendStudentBullet(name, "[图片消息]");
+			m_parent->SendTeacherBullet("(我)", "[图片消息]");
 	}
 }
 

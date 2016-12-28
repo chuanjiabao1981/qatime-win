@@ -31,6 +31,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 	: QMainWindow(parent)
 	, mainWin(NULL)
 	, trayIcon(NULL)
+	, m_TrayMenu(NULL)
 {
 	ui.setupUi(this);
 	setAutoFillBackground(true);;
@@ -73,6 +74,11 @@ LoginWindow::LoginWindow(QWidget *parent)
 
 	ui.back_label->setStyleSheet("border: 1px solid #059ed5;");
 	CreateTray();
+
+	m_TrayMenu = new UITrayMenu();
+	m_TrayMenu->setWindowFlags(Qt::FramelessWindowHint);
+	m_TrayMenu->SetMainWindow(this);
+	m_TrayMenu->hide();
 }
 
 LoginWindow::~LoginWindow()
@@ -436,8 +442,22 @@ bool LoginWindow::eventFilter(QObject *target, QEvent *event)
 
 void LoginWindow::CreateTray()
 {
+	QAction* showAction = new QAction(tr("ÏÔÊ¾Ö÷´°¿Ú"), this);
+	connect(showAction, SIGNAL(triggered()), this, SLOT(ShowMain()));
+	QAction* returnAction = new QAction(tr("ÇĞ»»ÕËºÅ"), this);
+	connect(returnAction, SIGNAL(triggered()), this, SLOT(ReturnAccount()));
+	QAction* closeAction = new QAction(tr("¹Ø±Õ"), this);
+	connect(closeAction, SIGNAL(triggered()), this, SLOT(CloseWindow()));
+
+
+	menu = new QMenu;
+	menu->addAction(showAction);
+	menu->addAction(returnAction);
+	menu->addAction(closeAction);
+
 	QIcon icon = QIcon("./images/favicon.png");
 	trayIcon = new QSystemTrayIcon(this);
+	trayIcon->setContextMenu(menu);
 	trayIcon->setIcon(icon);
 	trayIcon->setToolTip("´ğÒÉÊ±¼ä");
 	trayIcon->show();
@@ -459,8 +479,20 @@ void LoginWindow::trayiconActivated(QSystemTrayIcon::ActivationReason reason)
 		break;
 	case QSystemTrayIcon::Context:
 		{
-			int i = 0;
-			i++;
+// 			QPoint pt;
+// 			pt = mapToGlobal(menu->pos());
+// 			int i = 0;
+// 			i++; 
+			
+// 			if (mainWin == NULL)
+// 				return;
+// 			
+// 			QPoint pt;
+// 			pt = mapToGlobal(QCursor::pos());
+// 			m_TrayMenu->move(pt.x() - 92, pt.y() - 100);
+// 			m_TrayMenu->show();
+// 			SetWindowPos((HWND)m_TrayMenu->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+// 			m_TrayMenu->setFocus();
 		}
 		break;
 	case QSystemTrayIcon::DoubleClick:
@@ -471,10 +503,6 @@ void LoginWindow::trayiconActivated(QSystemTrayIcon::ActivationReason reason)
 		break;
 	case QSystemTrayIcon::Trigger:
 		{
-			if ( mainWin)
-			{
-				mainWin->ShowMain();
-			}
 		}
 		break;
 	case QSystemTrayIcon::MiddleClick:
@@ -495,4 +523,22 @@ void LoginWindow::CloseTray()
 		delete trayIcon;
 		trayIcon = NULL;
 	}
+}
+
+void LoginWindow::ShowMain()
+{
+	if (mainWin)
+		mainWin->ShowMain();
+}
+
+void LoginWindow::CloseWindow()
+{
+	if (mainWin)
+		mainWin->MenuClose();
+}
+
+void LoginWindow::ReturnAccount()
+{
+	if (mainWin)
+		mainWin->MenuRetrun();
 }

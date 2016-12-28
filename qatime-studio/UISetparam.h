@@ -27,6 +27,9 @@ private slots :
 	void AudioChanged(int);
 	void VideoChanged(int);			
 	void BulletStatus(int);								// 改变弹幕状态
+	void DelayChanged(int);
+	void AllRidio(bool b);
+	void BtnRidio(bool b);
 
 private:
 	void InitUI();										// 初始化样式

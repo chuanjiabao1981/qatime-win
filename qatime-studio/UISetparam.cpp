@@ -15,16 +15,36 @@ UISetParam::UISetParam(QWidget *parent)
 	InitUI();
 
 	ui.ratio_groupBox->setStyleSheet("border: 1px solid white;");
+	ui.tirgger_groupBox->setStyleSheet("border: 1px solid white;");
 
 	// 设置麦克风样式
 	ui.bullet_checkBox->setStyleSheet("QCheckBox::indicator{width: 70px;height: 13px;}"
 		"QCheckBox::indicator:unchecked{image: url(./images/closeBullet.png);}"
 		"QCheckBox::indicator:checked{image: url(./images/openBullet.png);}");
 
+	// 整体触发
+	ui.all_radioButton->setStyleSheet("QRadioButton::indicator{width: 70px;height: 13px;}"
+		"QRadioButton::indicator:unchecked{image: url(./images/allTirgger_nor.png);}"
+		"QRadioButton::indicator:checked{image: url(./images/allTirgger_sel.png);}");
+	connect(ui.all_radioButton, SIGNAL(clicked(bool)), this, SLOT(AllRidio(bool)));
+
+	// 按钮触发
+	ui.btn_radioButton->setStyleSheet("QRadioButton::indicator{width: 70px;height: 13px;}"
+		"QRadioButton::indicator:unchecked{image: url(./images/btnTirgger_nor.png);}"
+		"QRadioButton::indicator:checked{image: url(./images/btnTirgger_sel.png);}");
+	connect(ui.btn_radioButton, SIGNAL(clicked(bool)), this, SLOT(BtnRidio(bool)));
+
 	connect(ui.close_toolButton, SIGNAL(clicked()), this, SLOT(CloseDialog()));
 	connect(ui.bullet_checkBox, SIGNAL(stateChanged(int)), this, SLOT(BulletStatus(int)));
 
 	ui.HD_radio->setChecked(true);
+	ui.all_radioButton->setChecked(true);
+
+	ui.delay_comboBox->addItem("0秒", "0");
+	ui.delay_comboBox->addItem("1秒", "1");
+	ui.delay_comboBox->addItem("2秒", "2");
+	ui.delay_comboBox->addItem("3秒", "3");
+	ui.delay_comboBox->setCurrentIndex(0);
 }
 
 UISetParam::~UISetParam()
@@ -56,6 +76,11 @@ void UISetParam::InitUI()
 	ui.Video_comboBox->setMinimumHeight(22);
 	ui.Video_comboBox->setFont(font);
 	connect(ui.Video_comboBox, SIGNAL(activated(int)), this, SLOT(VideoChanged(int)));
+
+	ui.delay_comboBox->setStyleSheet(styleSheet);
+	ui.delay_comboBox->setMinimumHeight(22);
+	ui.delay_comboBox->setFont(font);
+	connect(ui.delay_comboBox, SIGNAL(activated(int)), this, SLOT(DelayChanged(int)));
 }
 
 void UISetParam::setAudioParam(QString name, QString path)
@@ -152,6 +177,30 @@ void UISetParam::VideoChanged(int index)
 {
 	if (m_Parent)
 		m_Parent->setVideoChangeIndex(index);
+}
+
+void UISetParam::AllRidio(bool b)
+{
+	if (b && m_Parent)
+	{
+		m_Parent->setTriggerType(true);
+	}
+}
+
+void UISetParam::BtnRidio(bool b)
+{
+	if (b && m_Parent)
+	{
+		m_Parent->setTriggerType(false);
+	}
+}
+
+void UISetParam::DelayChanged(int index)
+{
+	if (m_Parent)
+	{
+		m_Parent->BulletDelay(index);
+	}
 }
 
 void UISetParam::setParent(UIMainWindow* parent)

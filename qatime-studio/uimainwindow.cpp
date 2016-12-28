@@ -28,7 +28,7 @@
 
 #define MAINWINDOW_X_MARGIN 6
 #define MAINWINDOW_Y_MARGIN 6
-#define MAINWINDOW_TITLE_HEIGHT 65
+#define MAINWINDOW_TITLE_HEIGHT 0
 #define MAINWINDOW_MAXHEIGHT	900		//屏幕高度
 #define MAINWINDOW_MAXWIDTH		528		//程序最大宽度
 #define MAINWINDOW_MINWIDTH		342		//程序最小宽度
@@ -672,6 +672,13 @@ void UIMainWindow::startLiveStream()
 	ui.Live_pushBtn->setText("结束直播");
 	ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: red;border-radius: 5px; border: 2px solid red;}");
 	m_AuxiliaryPanel->setPreview(true);
+
+	this->hide();
+	QDesktopWidget* dsk = QApplication::desktop();
+	SetWindowPos((HWND)m_HoverWnd->winId(), HWND_TOPMOST, dsk->width() - 45, dsk->height()*0.6, 0, 0, SWP_NOSIZE);
+	m_HoverWnd->resize(44, m_HoverWnd->size().height());
+	m_HoverWnd->SetNumber();
+	m_HoverWnd->show();
 }
 
 void UIMainWindow::VideoStatus(int iStatus)
@@ -1119,6 +1126,15 @@ void UIMainWindow::setLoginWindow(LoginWindow* parent)
 
 void UIMainWindow::returnClick()
 {
+	if (m_VideoInfo->IsCurrentLiving())
+	{
+		CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString("请先结束直播，再关闭当前程序！"),
+			QString("确定"));
+		return;
+	}
+
 	int iStatus = CMessageBox::showMessage(
 		QString("答疑时间"),
 		QString("是否退出当前账号？"),
@@ -1559,15 +1575,6 @@ bool UIMainWindow::eventFilter(QObject *target, QEvent *event)
 				ui.close_radioButton->setCheckable(Qt::CheckState::Checked);
 				ShowWindow(m_VideoWnd, SW_HIDE);
 			}
-// 			if (!ui.close_radioButton->isEnabled())
-// 				return false;
-// 			
-// 			if (ui.rect_radioButton->isChecked())
-// 				m_RangeCapture->SetCurRect();
-// 			
-// 			m_RangeCapture->setShowOrHide(false);
-
-//			ShowWindow(m_VideoWnd, SW_HIDE);
 		}
 	}
 	return false;
@@ -1583,19 +1590,24 @@ void UIMainWindow::enterEvent(QEvent *)
 	{
 		rect.setX(rc.x());
 		rect.setY(0);
-		move(rc.x(), -2);
+		move(rc.x(), 0);
 	}
 }
 
 void UIMainWindow::leaveEvent(QEvent *)
 {
-// 	QRect rc;
-// 	QRect rect;
-// 	rect = this->geometry();
-// 	if (rect.contains(QCursor::pos()))
-// 		return;
-// 
-// 	rc.setRect(rect.x(), rect.y(), rect.width(), rect.height());
+	QRect rc;
+ 	QRect rect;
+ 	rect = this->geometry();
+	int iRight = rect.right();
+	int i = QCursor::pos().x();
+	if (rect.right() - 10 <= QCursor::pos().x() && rect.right() + 10 >= QCursor::pos().x())
+	{
+		return;
+	}
+
+	QDesktopWidget *dsk = QApplication::desktop();
+	rc.setRect(rect.x(), rect.y(), rect.width(), rect.height());
 // 	if (rect.top() <= 0)
 // 	{
 // 		if (m_charRoom->IsFous())
@@ -1604,10 +1616,24 @@ void UIMainWindow::leaveEvent(QEvent *)
 // 		}
 // 		this->hide();
 // 
-// 		QDesktopWidget *dsk = QApplication::desktop();
-// 		m_HoverWnd->move(dsk->width()-44,150);
+// 		SetWindowPos((HWND)m_HoverWnd->winId(), HWND_TOPMOST, dsk->width() - 45, dsk->height()*0.6, 0, 0, SWP_NOSIZE);
+// 		m_HoverWnd->resize(44, m_HoverWnd->size().height());
+// 		m_HoverWnd->SetNumber();
 // 		m_HoverWnd->show();
 // 	}
+	if (rect.right() >= dsk->width()-1)
+	{
+		if (m_charRoom->IsFous())
+		{
+			return;
+		}
+		this->hide();
+
+		SetWindowPos((HWND)m_HoverWnd->winId(), HWND_TOPMOST, dsk->width() - 45, dsk->height()*0.6, 0, 0, SWP_NOSIZE);
+		m_HoverWnd->resize(44, m_HoverWnd->size().height());
+		m_HoverWnd->SetNumber();
+		m_HoverWnd->show();
+	}
 }
 
 void UIMainWindow::setNetworkPic(const QString &szUrl)
@@ -1625,7 +1651,7 @@ void UIMainWindow::setNetworkPic(const QString &szUrl)
 	QByteArray jpegData = reply->readAll();
 	QPixmap pixmap;
 	pixmap.loadFromData(jpegData);
-	QPixmap scaledPixmap = pixmap.scaled(QSize(70, 70), Qt::KeepAspectRatio);
+	QPixmap scaledPixmap = pixmap.scaled(QSize(30, 30), Qt::KeepAspectRatio);
 	ui.teacherPhoto_Label->setPixmap(scaledPixmap);
 	m_teacherImg = szUrl;
 }
@@ -1841,4 +1867,41 @@ void UIMainWindow::CloseBullet()
 void UIMainWindow::setCameraEnable()
 {
 	ui.video_checkBox->setEnabled(true);
+}
+
+void UIMainWindow::MenuClose()
+{
+	emit ui.mainclose_pushBtn->clicked();
+}
+
+void UIMainWindow::MenuRetrun()
+{
+	emit ui.return_pushButton->clicked();
+}
+
+void UIMainWindow::PosInWindow()
+{
+	QRect rc = this->geometry();
+	if (rc.contains(QCursor::pos()))
+		return;
+	
+	this->hide();
+
+	QDesktopWidget* dsk = QApplication::desktop();
+	SetWindowPos((HWND)m_HoverWnd->winId(), HWND_TOPMOST, dsk->width() - 45, dsk->height()*0.6, 0, 0, SWP_NOSIZE);
+	m_HoverWnd->resize(44, m_HoverWnd->size().height());
+	m_HoverWnd->SetNumber();
+	m_HoverWnd->show();
+}
+
+void UIMainWindow::BulletDelay(int iDelay)
+{
+	if (m_BulletScreen)
+		m_BulletScreen->setTriggerDelay(iDelay);
+}
+
+void UIMainWindow::setTriggerType(bool bType)
+{
+	if (m_BulletScreen)
+		m_BulletScreen->setBulletTriggerType(bType);
 }

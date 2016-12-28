@@ -283,7 +283,7 @@ void personList::stopAllTalk(bool b, QString ID)
 {
 	for (int i = 0; i < groupMap.size();i++)
 	{
-		groupMap.values().at(i)->button->setChecked(b);
+		groupMap.values().at(i)->setMute(b);
 	}
 }
 

@@ -17,6 +17,7 @@ UIBulletSet::UIBulletSet(QWidget *parent)
 	connect(ui.color3_pushButton, SIGNAL(clicked()), this, SLOT(Color3()));
 	connect(ui.color4_pushButton, SIGNAL(clicked()), this, SLOT(Color4()));
 	connect(ui.close_pushButton, SIGNAL(clicked()), this, SLOT(closeDialog()));
+	connect(ui.horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(valueChange(int)));
 
 	ui.font1_pushButton->setStyleSheet("QPushButton{border-image:url(./images/font1_nor.png);background-color: rgb(255,255,255);}");
 	ui.font2_pushButton->setStyleSheet("QPushButton{border-image:url(./images/font2_sel.png);background-color: rgb(255,255,255);}");
@@ -29,6 +30,8 @@ UIBulletSet::UIBulletSet(QWidget *parent)
 	ui.color4_pushButton->setStyleSheet("QPushButton{border-image:url(./images/color4_nor.png);background-color: rgb(255,255,255);}");
 
 	ui.label->setStyleSheet("border-image:url(./images/AuxiliaryPanelBack.png);");
+	ui.horizontalSlider->setRange(60,95);
+	ui.horizontalSlider->setValue(95);
 }
 
 UIBulletSet::~UIBulletSet()
@@ -49,6 +52,20 @@ void UIBulletSet::focusOutEvent(QFocusEvent* e)
 void UIBulletSet::closeDialog()
 {
 	this->hide();
+}
+
+void UIBulletSet::valueChange(int i)
+{
+	double dAll = 100;
+	double dOpacity = (double)i / dAll;
+	if (m_parent)
+	{
+		m_parent->setWindowOpacity(dOpacity);
+	}
+
+	QString str;
+	str.append(QString::number((i - 50) * 2) + "%");
+	ui.label_5->setText(str);
 }
 
 void UIBulletSet::Font1()

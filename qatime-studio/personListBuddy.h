@@ -40,6 +40,9 @@ public:
 	void setCheckBox(bool bCheck);
 	bool IsZoom();
 	void SetZoom(bool bZoom);
+	void setMute(bool bMute);
+protected:
+	virtual bool eventFilter(QObject *target, QEvent *event);
 signals:  
 	void emitRadioChange(int,QString,QString);
 	void signalRadioChange(bool);
@@ -55,6 +58,6 @@ public slots :
 	void findName(const QString);		//当查找学生编辑框为NULL时候，显示所有学生名字
 private:
 	void setNetworkPic(const QString &szUrl);
-	bool eventFilter(QObject *obj, QEvent *event);//事件过滤器 
+//	bool eventFilter(QObject *obj, QEvent *event);//事件过滤器 
 };  
 #endif // PERSONLISTBUDDY_H  

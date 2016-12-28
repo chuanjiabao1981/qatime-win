@@ -30,6 +30,7 @@ private slots :
 	void Color3();
 	void Color4();
 	void closeDialog();
+	void valueChange(int i);
 
 public:
 	void setMainWindow(UIBulletScreen* parent);

@@ -25,17 +25,24 @@ private:
 	QColor				m_ContentColor;		//内容颜色
 	QTimer*				m_Timer;
 	QTimer*				m_delayTimer;		//延迟显示
+	int					m_iFontHeight;		//字体高度
+	bool				m_bTalk;
+	int					m_iDelay;			//延迟时间
+	bool				m_bBtnTrigger;		//是否按钮触发背景
 
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result); // 添加caption
 	virtual void paintEvent(QPaintEvent *event);
 	virtual void focusInEvent(QFocusEvent *);
+	virtual bool eventFilter(QObject *target, QEvent *event);
+	virtual void resizeEvent(QResizeEvent *);						// 设置窗口圆角
 
 private slots:
 	void CloseDialog();
 	void SetDialog();
 	void slot_onCountTimeout();
 	void slot_onDelayTimeout();
+	void ClickTalk();
 
 private:
 	void DeleteTalkData();
@@ -49,6 +56,10 @@ public:
 	void ReciverStudent(QString name, QString content);
 	void ReciverTeacher(QString name, QString content);
 	void showDialog();
+	void WidgetHide(bool b);
+	bool windowChanged();
+	void setBulletTriggerType(bool bType);				//设置弹幕触发类型
+	void setTriggerDelay(int iDelay);					//设置弹幕触发延时时间
 };
 
 #endif // UIBULLETSCREEN_H

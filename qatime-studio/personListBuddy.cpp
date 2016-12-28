@@ -68,6 +68,7 @@ void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID, in
 	m_ID = ID;
 	button = new QCheckBox(this);
 	connect(button, SIGNAL(stateChanged(int)), this, SLOT(radioChange(int)));
+	button->installEventFilter(this);
 //    sign=new QLabel(this);
     //设置头像大小
     head->setFixedSize(32,32);
@@ -84,6 +85,27 @@ void personListBuddy::initUi(const QString &szUrl,QString strName,QString ID, in
 	name->setText(strName);
 }
 
+bool personListBuddy::eventFilter(QObject *target, QEvent *event)
+{
+	if (target == button) {
+		if (event->type() == QEvent::MouseButtonRelease)
+		{
+			bool b = button->isChecked();
+			emit emitRadioChange(!b, m_ID, name->text());
+		}
+	}
+	return QWidget::eventFilter(target, event);
+}
+
+void personListBuddy::setMute(bool bMute)
+{
+	if (button->isChecked() == bMute)
+		return;
+
+	button->setChecked(bMute);
+	emit emitRadioChange(bMute, m_ID, name->text());
+}
+
 void personListBuddy::setOlineNum(int olineNum,int allNum)
 {
 	peopleNum->setText("当前观看人数 "+QString::number(olineNum));
@@ -92,30 +114,28 @@ void personListBuddy::setOlineNum(int olineNum,int allNum)
 void personListBuddy::setCheckBox(bool bCheck)
 {
 	if (bCheck)
-		button->setCheckState(Qt::CheckState::Checked);
+		button->setChecked(true);
 	else
 		button->setCheckState(Qt::CheckState::Unchecked);
 }
 
-//事件过滤器，主要是为了让图片能够全部填充在head里面
-bool personListBuddy::eventFilter(QObject *obj, QEvent *event)
-{
-    if(obj == head)
-    {
-        if(event->type() == QEvent::Paint)
-        {
-            QPainter painter(head);			
-			painter.drawPixmap(head->rect(), headPath);
-        }
-    }
-    return QWidget::eventFilter(obj, event);
-}
+// 事件过滤器，主要是为了让图片能够全部填充在head里面
+// bool personListBuddy::eventFilter(QObject *obj, QEvent *event)
+// {
+//     if(obj == head)
+//     {
+//         if(event->type() == QEvent::Paint)
+//         {
+//             QPainter painter(head);			
+// 			painter.drawPixmap(head->rect(), headPath);
+//         }
+//     }
+//     return QWidget::eventFilter(obj, event);
+// }
 
 void personListBuddy::radioChange(int b)
 {
-	int test = width();
-	this->setFixedWidth(320);
-	emit emitRadioChange(b, m_ID, name->text());
+//	emit emitRadioChange(b, m_ID, name->text());
 }
 
 void personListBuddy::stopAllTalk(bool b)

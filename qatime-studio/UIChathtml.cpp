@@ -13,7 +13,6 @@ UIChatHtml::UIChatHtml(QWidget *parent)
 	, m_parent(NULL)
 {
 	ui.setupUi(this);
-
 	initHtml();
 }
 
@@ -121,7 +120,8 @@ bool UIChatHtml::eventFilter(QObject *target, QEvent *event)
 void UIChatHtml::ClearHtml()
 {
 	QString html = "document.body.innerHTML=''";
-	m_TalkView->page()->runJavaScript(html);
+	if (m_TalkView)
+		m_TalkView->page()->runJavaScript(html);
 }
 
 void UIChatHtml::mousePressEvent(QMouseEvent *e)

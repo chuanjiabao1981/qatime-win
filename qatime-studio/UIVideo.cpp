@@ -8,6 +8,7 @@
 QMutex UIVideo::m_mutex;
 ST_NLSS_VIDEO_SAMPLER UIVideo::m_SvideoSampler;
 UIVideo* UIVideo::m_pThis = NULL;
+#define  NLSS_720P_BITRATE 800000
 #ifdef TEST
 	#define _DEBUG
 #else
@@ -198,8 +199,12 @@ bool UIVideo::InitMediaCapture()
 	switch (m_videoSourceType)
 	{
 	case EN_NLSS_VIDEOIN_FULLSCREEN:
-		stParam.stVideoParam.iOutBitrate = 1500000;
+	{
 		stParam.stVideoParam.iOutFps = 10;
+		int  iFullWidth = GetSystemMetrics(SM_CXSCREEN);
+		int  iFullHeight = GetSystemMetrics(SM_CYSCREEN);
+		stParam.stVideoParam.iOutBitrate = getOutBitrate(iFullWidth, iFullHeight, stParam.stVideoParam.iOutFps);
+	}
 		break;
 	case EN_NLSS_VIDEOIN_CAMERA:
 		//获取视频参数
@@ -281,6 +286,24 @@ bool UIVideo::InitMediaCapture()
 
 	delete[]stParam.paOutUrl;
 	return true;
+}
+
+//获取建议的输出目标码率供开发者使用，请关注
+int UIVideo::getOutBitrate(int iWidth, int iHeight, int iFps)
+{
+	if (iWidth == 0 || iHeight == 0 || iFps == 0)
+	{
+		return  NLSS_720P_BITRATE; //1280*720 15fps ，设置的码率
+	}
+
+	int iOutBitrate = NLSS_720P_BITRATE / 1280 * iWidth;
+	iOutBitrate = iOutBitrate / 720 * iHeight;
+	if (iFps >= 15)
+	{
+		iOutBitrate = iOutBitrate / 15 * iFps;
+	}
+
+	return iOutBitrate;
 }
 
 void UIVideo::EnumAvailableMediaDevices()
@@ -382,7 +405,7 @@ void UIVideo::StartLiveVideo()
 	stFilterParam.uiStarty = 10;
 	Nlss_SetVideoWaterMark(m_hNlssService, &stFilterParam);
  	Nlss_SetVideoDisplayRatio(m_hNlssService, 0, 0);
- 
+
  	if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
  	{
  		MessageBox(NULL, L"打开视频采集出错", L"答疑时间", MB_OK);
@@ -551,4 +574,106 @@ void UIVideo::setBkImage(QString qsImage)
 void UIVideo::slot_livestreamErrorHappened()
 {
 	m_Parent->ErrorStopLive(this);
+}
+
+bool UIVideo::initDeviceLiveStream(_HNLSSERVICE hNLSService, char *pVideoPath, char *pAudioPath)
+{
+	bool have_video_source = true;
+	bool have_audio_source = true;
+	ST_NLSS_PARAM stParam;
+
+	Nlss_GetDefaultParam(hNLSService, &stParam);
+	stParam.stVideoParam.iOutFps = 15;
+	stParam.stVideoParam.enInType = EN_NLSS_VIDEOIN_FULLSCREEN;
+	stParam.stVideoParam.u.stInCamera.paDevicePath = pVideoPath;
+	stParam.stVideoParam.u.stInCamera.enLvl = EN_NLSS_VIDEOQUALITY_MIDDLE;
+
+	stParam.stAudioParam.iInSamplerate = 44100;
+	stParam.stAudioParam.enInType = EN_NLSS_AUDIOIN_MIC;
+	stParam.stAudioParam.paaudioDeviceName = pAudioPath;
+
+
+	if (have_audio_source && have_video_source)
+		stParam.enOutContent = EN_NLSS_OUTCONTENT_AV;//默认音视频设备都存在则推流音视频，当然，也可以设置成音频/视频，
+	else if (have_audio_source && !have_video_source)
+		stParam.enOutContent = EN_NLSS_OUTCONTENT_AUDIO;
+	else if (have_video_source && !have_audio_source)
+		stParam.enOutContent = EN_NLSS_OUTCONTENT_VIDEO;
+	else if (!have_audio_source && !have_video_source)
+	{
+		return false;
+	}
+
+	stParam.paOutUrl = new char[1024];
+	memset(stParam.paOutUrl, 0, 1024);
+	strcpy(stParam.paOutUrl, "rtmp://pa0a19f55.live.126.net/live/1ecf069a7627422d81d44f949984d051?wsSecret=48f0892626db5036eb034b03f65a79a0&wsTime=1482897970");
+
+	if (NLSS_OK != Nlss_InitParam(hNLSService, &stParam))
+	{
+		delete[]stParam.paOutUrl;
+		return false;
+	}
+	return true;
+}
+
+void UIVideo::testSimpleCamera()
+{
+	int  m_iVideoDeviceNum = 0;
+	int  m_iAudioDeviceNum = 0;
+	ST_NLSS_INDEVICE_INF *m_pVideoDevices;
+	ST_NLSS_INDEVICE_INF *m_pAudioDevices;
+	Nlss_GetFreeDevicesNum(&m_iVideoDeviceNum, &m_iAudioDeviceNum);
+
+	if (m_iVideoDeviceNum <= 0)
+	{
+		return;
+	}
+	else
+	{
+		m_pVideoDevices = new ST_NLSS_INDEVICE_INF[m_iVideoDeviceNum];
+		for (int i = 0; i < m_iVideoDeviceNum; i++)
+		{
+			m_pVideoDevices[i].paPath = new char[1024];
+			m_pVideoDevices[i].paFriendlyName = new char[1024];
+		}
+	}
+
+	if (m_iAudioDeviceNum <= 0)
+	{
+		return;
+	}
+	else
+	{
+		m_pAudioDevices = new ST_NLSS_INDEVICE_INF[m_iAudioDeviceNum];
+
+		for (int i = 0; i < m_iAudioDeviceNum; i++)
+		{
+			m_pAudioDevices[i].paPath = new char[1024];
+			m_pAudioDevices[i].paFriendlyName = new char[1024];
+		}
+	}
+
+
+	Nlss_GetFreeDeviceInf(m_pVideoDevices, m_pAudioDevices);
+
+	_HNLSSERVICE hNLSService = NULL;
+	Nlss_Create(NULL, &hNLSService);
+
+// 	Nlss_SetVideoSamplerCB(hNLSService, previewCB);
+// 	Nlss_SetStatusCB(hNLSService, statusCB);
+
+	initDeviceLiveStream(hNLSService, (char *)m_pVideoDevices[0].paPath, (char *)m_pAudioDevices[0].paPath);
+
+	Nlss_StartVideoCapture(hNLSService);
+	Nlss_StartVideoPreview(hNLSService);
+	Nlss_StartLiveStream(hNLSService);
+
+// 	Sleep(2000);
+// 	Nlss_StopLiveStream(hNLSService);
+// 	Nlss_StopVideoPreview(hNLSService);
+// 	Nlss_StopVideoCapture(hNLSService);
+// 
+// 	Nlss_UninitParam(hNLSService);
+// 	Nlss_Destroy(hNLSService);
+
 }

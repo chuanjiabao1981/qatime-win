@@ -239,6 +239,11 @@ public:
 	void SetBullet(int iStatus);							// 开启弹幕设置
 	void CloseBullet();		
 	void setCameraEnable();									// 设置摄像头禁用
+	void MenuClose();										// 托盘菜单发送过来的关闭消息
+	void MenuRetrun();										// 托盘菜单发送过来的切换账号消息
+	void PosInWindow();										
+	void BulletDelay(int iDelay);							// 浮层延迟显示
+	void setTriggerType(bool b = true);						// true为整体触发 false为按钮触发		
 };
 
 #endif // UIMAINWINDOW_H

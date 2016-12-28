@@ -189,6 +189,8 @@ public slots:
 	void stepMsgDays(QDateTime dateTime);								//聊天记录跨天
 	void clearAll();													//清除聊天记录、公告、群成员
 	void OnSendAnnouncements(QString Announcements);					//发送群公告
+	void ReturnAnnouncements();											//返回公告状态
+	void RequestError(QJsonObject& error);					//错误
 	void QueryMember();
 	void returnMember();
 private:

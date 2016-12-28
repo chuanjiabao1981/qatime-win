@@ -15,17 +15,24 @@ UIBulletScreen::UIBulletScreen(QWidget *parent)
 	, m_parent(NULL)
 	, m_Timer(NULL)
 	, m_delayTimer(NULL)
+	, m_iFontHeight(19)
+	, m_bTalk(true)
+	, m_iDelay(1)
+	, m_bBtnTrigger(false)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
 	setAttribute(Qt::WA_TranslucentBackground);
 	this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/Bullet.png);"));
 	ui.talk_pushButton->setStyleSheet("QPushButton{border-image:url(:/LoginWindow/images/bulletTalk_b.png);}");
-	ui.set_pushButton->setStyleSheet("QPushButton{border-image:url(:/LoginWindow/images/bulletSet_b.png);}");
-	ui.close_pushButton->setStyleSheet("QPushButton{border-image:url(:/LoginWindow/images/bulletClose_b.png);}");
+	ui.set_pushButton->setStyleSheet("QPushButton{border-image:url(:/LoginWindow/images/bulletSet.png);}");
+	ui.close_pushButton->setStyleSheet("QPushButton{border-image:url(:/LoginWindow/images/bulletClose.png);}");
+	ui.textBrowser->setStyleSheet("border-image:url(:/LoginWindow/images/alpha.png);");
+	ui.label->setStyleSheet("border-image:url(:/LoginWindow/images/alpha.png);");
 
 	connect(ui.close_pushButton, SIGNAL(clicked()), this, SLOT(CloseDialog()));
 	connect(ui.set_pushButton, SIGNAL(clicked()), this, SLOT(SetDialog()));
+	connect(ui.talk_pushButton, SIGNAL(clicked()), this, SLOT(ClickTalk()));
 
 	m_BulletSet = new UIBulletSet();
 	m_BulletSet->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
@@ -42,7 +49,9 @@ UIBulletScreen::UIBulletScreen(QWidget *parent)
 
 	m_delayTimer = new QTimer(this);
 	connect(m_delayTimer, SIGNAL(timeout()), this, SLOT(slot_onDelayTimeout()));
-		// 设置滚动条样式
+
+	ui.talk_pushButton->installEventFilter(this);
+	// 设置滚动条样式
 	ui.textBrowser->verticalScrollBar()->setStyleSheet("QScrollBar:vertical"
 		"{"
 		"width:8px;"
@@ -107,36 +116,95 @@ UIBulletScreen::~UIBulletScreen()
 	}
 }
 
+bool UIBulletScreen::eventFilter(QObject *target, QEvent *event)
+{
+	if (target == ui.talk_pushButton) {
+		if (event->type() == QEvent::Enter) 
+		{
+			m_bTalk = true;
+		}
+	}
+	return QWidget::eventFilter(target, event);
+}
+
+
 void UIBulletScreen::slot_onCountTimeout()
 {
+	if (!isVisible())
+		return;
+	
 	QRect rc = this->geometry();
 	if (rc.contains(QCursor::pos()))
 	{
-		if (m_delayTimer)
+		if (!m_bBtnTrigger)
 		{
+			// 显示背景开启延时
 			if (!m_delayTimer->isActive())
-				m_delayTimer->start(2 * 1000);
+				m_delayTimer->start(m_iDelay * 1000);
 		}
+		else
+		{
+			rc = QRect(pos().x(), pos().y(), ui.talk_pushButton->width(), ui.talk_pushButton->height());
+			if (rc.contains(QCursor::pos()))
+				m_bTalk = true;
+
+			if (m_bTalk)
+				m_delayTimer->start(m_iDelay * 1000);
+		}
+		
 	}
 	else
 	{
-		if (m_delayTimer && m_delayTimer->isActive())
+		if (m_delayTimer->isActive())
 			m_delayTimer->stop();
-		this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/alpha.png);"));
-		ui.close_pushButton->setVisible(false);
-		ui.set_pushButton->setVisible(false);
+
+		QString str = this->styleSheet();
+		if (str.indexOf("alpha") >= 0)
+			return;
+
+		if (m_BulletSet->isVisible())
+			return;
+		if (ui.textBrowser->toPlainText() == "")
+		{
+			this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/alpha.png);"));
+			ui.close_pushButton->setVisible(false);
+			ui.set_pushButton->setVisible(false);
+			ui.bullet_widget->setVisible(false);
+			resize(24, 24);
+		}
+		else
+		{
+			this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/alpha.png);"));
+			ui.close_pushButton->setVisible(false);
+			ui.set_pushButton->setVisible(false);
+			ui.textBrowser->verticalScrollBar()->setVisible(false);
+		}
+
+		m_bTalk = false;
 	}
 }
 
 void UIBulletScreen::slot_onDelayTimeout()
 {
 	m_delayTimer->stop();
-	QRect rc = this->geometry();
-	if (rc.contains(QCursor::pos()))
+	QString str = this->styleSheet();
+	if (str.indexOf("Bullet") >= 0)
+		return;
+
+	if (ui.textBrowser->toPlainText() != "")
 	{
 		this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/Bullet.png);"));
 		ui.close_pushButton->setVisible(true);
 		ui.set_pushButton->setVisible(true);
+		ui.textBrowser->verticalScrollBar()->setVisible(true);
+	}
+	else
+	{
+		this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/Bullet.png);"));
+		ui.close_pushButton->setVisible(true);
+		ui.set_pushButton->setVisible(true);
+		ui.bullet_widget->setVisible(true);
+		resize(280, 80);
 	}
 }
 
@@ -228,7 +296,7 @@ bool UIBulletScreen::nativeEvent(const QByteArray &eventType, void *message, lon
 			}
 			if (0 == xflag && y > MAINWINDOW_Y_MARGIN && y <= MAINWINDOW_TITLE_HEIGHT)
 			{
-				if (ui.set_pushButton && ui.close_pushButton)
+				if (ui.set_pushButton && ui.close_pushButton && ui.textBrowser->verticalScrollBar())
 				{
 					QRect Rect = ui.set_pushButton->geometry();
 					if (x > Rect.left() && x < Rect.right() && y > Rect.top() && y < Rect.bottom())
@@ -237,6 +305,15 @@ bool UIBulletScreen::nativeEvent(const QByteArray &eventType, void *message, lon
 					}
 
 					Rect = ui.close_pushButton->geometry();
+					if (x > Rect.left() && x < Rect.right() && y > Rect.top() && y < Rect.bottom())
+					{
+						return false;
+					}
+
+					QPoint pt = ui.textBrowser->pos();
+					int xVer = pt.x() + ui.textBrowser->width() - 8;
+					int yVer = pt.y();
+					Rect = QRect(xVer, yVer, ui.textBrowser->verticalScrollBar()->width(), ui.textBrowser->verticalScrollBar()->height());
 					if (x > Rect.left() && x < Rect.right() && y > Rect.top() && y < Rect.bottom())
 					{
 						return false;
@@ -290,6 +367,11 @@ void UIBulletScreen::SetDialog()
 	}
 }
 
+void UIBulletScreen::ClickTalk()
+{
+
+}
+
 void UIBulletScreen::stringToHtmlFilter(QString &str)
 {
 	//注意这几行代码的顺序不能乱，否则会造成多次替换
@@ -324,28 +406,131 @@ void UIBulletScreen::SetFontSize(int iSize)
 	font.setFamily(QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221"));
 	font.setPointSize(iSize);
 	ui.textBrowser->setFont(font);
+
+	if (iSize == 9)
+		m_iFontHeight = 17;
+	else if (iSize == 10)
+		m_iFontHeight = 19;
+	else if (iSize == 12)
+		m_iFontHeight = 22;
+	else if (iSize == 14)
+		m_iFontHeight = 27;
 }
 void UIBulletScreen::ReciverStudent(QString name, QString content)
 {
+	for (int i = 1; i < 75; i++)
+	{
+		QString face = "";
+		face.append(QString("[em_%1]").arg(QString::number(i)));
+		QString path = "[表情]";
+		content.replace(face, path);
+	}
+
 	stringToHtml(name, m_StudentColor);
 	stringToHtml(content, m_ContentColor);
 	ui.textBrowser->insertHtml(name + ": " + content);
 	ui.textBrowser->append("");
 	ui.textBrowser->moveCursor(QTextCursor::End);
+
+	int iLine = ui.textBrowser->document()->lineCount();
+	// 重新设置高度
+	int iHeight = 65 + (iLine - 1) * m_iFontHeight;
+	if (width() == 24 || width() == 74)
+		resize(280, iHeight);
+	else if (windowChanged())
+		resize(width(), height());
+	else if (height() >= 300)
+		resize(width(), height());
+	else
+		resize(width(), iHeight);
+
+	WidgetHide(true);
+	m_bTalk = false;
+}
+
+bool UIBulletScreen::windowChanged()
+{
+	if (width() != 24 && width() != 74 && width() != 280)
+		return true;
+	else
+		return false;
 }
 
 void UIBulletScreen::ReciverTeacher(QString name, QString content)
 {
+	for (int i = 1; i < 75; i++)
+	{
+		QString face = "";
+		face.append(QString("[em_%1]").arg(QString::number(i)));
+		QString path = "[表情]";
+		content.replace(face, path);
+	}
+
 	stringToHtml(name, m_TeacherColor);
 	stringToHtml(content, m_ContentColor);
 	ui.textBrowser->insertHtml(name + ": "+content);
 	ui.textBrowser->append("");
 	ui.textBrowser->moveCursor(QTextCursor::End);
+
+	int iLine = ui.textBrowser->document()->lineCount();
+	// 重新设置高度
+	int iHeight = 65 + (iLine - 1) * m_iFontHeight;
+	if (width() == 24 || width() == 74)
+		resize(280, iHeight);
+	else if (windowChanged())
+		resize(width(), height());
+	else if (height() >= 300)
+		resize(width(), height());
+	else
+		resize(width(), iHeight);
+
+	WidgetHide(true);
+
+	m_bTalk = false;
 }
 
 void UIBulletScreen::showDialog()
 {
 	show();
+	WidgetHide(false);
+	resize(24, 24);
 	// 删除聊天数据
 	ui.textBrowser->clear();
+}
+
+void UIBulletScreen::WidgetHide(bool b)
+{
+	ui.bullet_widget->setVisible(b);
+	ui.textBrowser->setVisible(b);
+	ui.label->setVisible(b);
+
+	QRect rc = this->geometry();
+	if (rc.contains(QCursor::pos()) && b)
+	{
+		ui.set_pushButton->setVisible(b);
+		ui.close_pushButton->setVisible(b);
+	}
+}
+
+void UIBulletScreen::resizeEvent(QResizeEvent *)
+{
+	if (m_bTalk)
+	{
+		this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/Bullet.png);"));
+		ui.close_pushButton->setVisible(true);
+		ui.set_pushButton->setVisible(true);
+		ui.bullet_widget->setVisible(true);
+	}
+	m_bTalk = true;
+	ui.textBrowser->moveCursor(QTextCursor::End);
+}
+
+void UIBulletScreen::setBulletTriggerType(bool bType)
+{
+	m_bBtnTrigger = !bType;
+}
+
+void UIBulletScreen::setTriggerDelay(int iDelay)
+{
+	m_iDelay = iDelay;
 }

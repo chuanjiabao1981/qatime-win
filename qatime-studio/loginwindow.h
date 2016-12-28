@@ -11,10 +11,12 @@
 #include <wtypes.h>
 #include "UIMainwindow.h"
 #include <QSystemTrayIcon>
+#include "UITraymenu.h"
 
 #pragma execution_character_set("utf-8")
 
 class UIMainWindow;
+class UITrayMenu;
 
 class LoginWindow : public QMainWindow
 {
@@ -44,6 +46,9 @@ private slots :
 	void CloseDialog();			// 关闭对话框
 	void changedRemeber(int i);	// 记住账号
 	void trayiconActivated(QSystemTrayIcon::ActivationReason);
+	void ShowMain();
+	void CloseWindow();
+	void ReturnAccount();
 
 private:
 	void loginFinished();		// 登陆完成的返回事件
@@ -64,6 +69,7 @@ private:
 	QNetworkAccessManager manager;
 	QNetworkReply *reply;
 	UIMainWindow* mainWin;
+	UITrayMenu*	  m_TrayMenu;
 
 	// 自动登录时需要
 	QString m_teacherID;
@@ -74,6 +80,7 @@ private:
 	QString m_accidToken;
 	QString m_version;
 	QSystemTrayIcon *trayIcon;
+	QMenu * menu;
 
 public:
 	void ReturnLogin();			// 重新登陆
@@ -83,6 +90,9 @@ public:
 	void CheckingFinished();
 	void CreateTray();			// 创建托盘
 	void CloseTray();
+// 	void ShowMain();
+// 	void CloseWindow();
+// 	void ReturnAccount();
 };
 
 #endif // LOGINWINDOW_H

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>305</width>
-    <height>247</height>
+    <height>297</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>1</x>
      <y>1</y>
      <width>303</width>
-     <height>245</height>
+     <height>295</height>
     </rect>
    </property>
    <property name="font">
@@ -80,7 +80,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>124</y>
+     <y>115</y>
      <width>41</width>
      <height>16</height>
     </rect>
@@ -102,7 +102,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>174</y>
+     <y>152</y>
      <width>41</width>
      <height>16</height>
     </rect>
@@ -176,7 +176,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>120</y>
+     <y>112</y>
      <width>141</width>
      <height>22</height>
     </rect>
@@ -186,7 +186,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>170</y>
+     <y>150</y>
      <width>141</width>
      <height>22</height>
     </rect>
@@ -218,7 +218,7 @@ border-image: url(:/LoginWindow/images/close.png);</string>
      <x>0</x>
      <y>0</y>
      <width>305</width>
-     <height>247</height>
+     <height>297</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -248,7 +248,7 @@ border-image: url(:/LoginWindow/images/close.png);</string>
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>215</y>
+     <y>190</y>
      <width>41</width>
      <height>16</height>
     </rect>
@@ -269,14 +269,107 @@ border-image: url(:/LoginWindow/images/close.png);</string>
   <widget class="QCheckBox" name="bullet_checkBox">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>218</y>
+     <x>122</x>
+     <y>192</y>
      <width>70</width>
      <height>13</height>
     </rect>
    </property>
    <property name="text">
     <string>CheckBox</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>225</y>
+     <width>54</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>微软雅黑</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(113, 113, 113);</string>
+   </property>
+   <property name="text">
+    <string>触发区域</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>260</y>
+     <width>54</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>微软雅黑</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(113, 113, 113);</string>
+   </property>
+   <property name="text">
+    <string>触发延时</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="tirgger_groupBox">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>215</y>
+     <width>181</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <widget class="QRadioButton" name="btn_radioButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>15</y>
+      <width>70</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>RadioButton</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="all_radioButton">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>15</y>
+      <width>70</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>RadioButton</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QComboBox" name="delay_comboBox">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>260</y>
+     <width>69</width>
+     <height>22</height>
+    </rect>
    </property>
   </widget>
   <zorder>label</zorder>
@@ -292,6 +385,10 @@ border-image: url(:/LoginWindow/images/close.png);</string>
   <zorder>label_6</zorder>
   <zorder>label_7</zorder>
   <zorder>bullet_checkBox</zorder>
+  <zorder>label_8</zorder>
+  <zorder>label_9</zorder>
+  <zorder>tirgger_groupBox</zorder>
+  <zorder>delay_comboBox</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>

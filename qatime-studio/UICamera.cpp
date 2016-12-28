@@ -376,7 +376,7 @@ void UICamera::StartLiveVideo()
 
  	Nlss_SetVideoWaterMark(m_hNlssService, NULL);
  	Nlss_SetVideoDisplayRatio(m_hNlssService, 0, 0);
- 
+
  	if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
  	{
 		qDebug() << "打开视频采集出错";
