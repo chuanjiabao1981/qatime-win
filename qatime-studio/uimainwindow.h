@@ -139,7 +139,7 @@ private:
 	QPoint							m_clickPos;
 	QPoint							m_WndCurPos;
 
-	QString							m_teacherImg;
+	QPixmap							m_teacherPix;
 	// 直播需要的参数
 	QString							m_sBoardRtmp;			// 白板推流地址
 	QString							m_sCemeraRtmp;			// 摄像头推流地址
@@ -148,6 +148,7 @@ private:
 	CameraStatus					m_EnumStatus;			// 摄像头直播状态
 	int								m_iSucCount;			// 成功两次才能正式直播
 	int								m_HelpBtnPos;			// 帮助按钮的位置
+	QTimer*							m_RefreshTimer;			// 刷新界面
 private slots :
 	void MinDialog();									// 最小化对话框
 	void CloseDialog();									// 关闭对话框
@@ -166,6 +167,7 @@ private slots :
 	void WhiteBoard();									// 切换白板
 	void returnClick();									// 切换账号
 	void HelpDialog();									// 帮助文档
+	void onTimerResize();								// 改变大小后，定时器重新设置位置
 
 private:
 	void setNetworkPic(const QString &szUrl);			// 显示网络图片
@@ -215,7 +217,7 @@ public:
 	void setPausedBtn();									// 改变直播按钮图片
 	void LivePage();										// 切换到直播页
 	void setComeBack();										// 从放大的窗口返回到小窗口
-	QString TeacherPhotoPixmap();							// 老师头像的pixmap
+	QPixmap TeacherPhotoPixmap();							// 老师头像的pixmap
 	void showErrorTip(QString sError);						// 显示错误信息
 	void setBoradCamera(QString sBoard, QString sCamera);	// 设置推流信息
 
@@ -243,7 +245,9 @@ public:
 	void MenuRetrun();										// 托盘菜单发送过来的切换账号消息
 	void PosInWindow();										
 	void BulletDelay(int iDelay);							// 浮层延迟显示
-	void setTriggerType(bool b = true);						// true为整体触发 false为按钮触发		
+	void setTriggerType(bool b = true);						// true为整体触发 false为按钮触发	
+	void ChatRoomDown();									// 聊天置底
+	void ErrorStop();										// 出现错误，停止直播
 };
 
 #endif // UIMAINWINDOW_H

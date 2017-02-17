@@ -30,6 +30,7 @@ void UIHoverWindow::enterEvent(QEvent *)
 		QDesktopWidget *dsk = QApplication::desktop();
 		m_Parent->move(dsk->width() - m_Parent->width(), m_Parent->pos().y());
 		m_Parent->show();
+		m_Parent->ChatRoomDown();
 	}
 
 	ui.timer_label->setText("00:00:00");

@@ -29,6 +29,7 @@ private:
 	bool				m_bTalk;
 	int					m_iDelay;			//延迟时间
 	bool				m_bBtnTrigger;		//是否按钮触发背景
+	int					m_iTitle;			//可拖动高度
 
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result); // 添加caption

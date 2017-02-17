@@ -90,9 +90,7 @@ public:
 	void CheckingFinished();
 	void CreateTray();			// ´´½¨ÍĞÅÌ
 	void CloseTray();
-// 	void ShowMain();
-// 	void CloseWindow();
-// 	void ReturnAccount();
+	QString parse(QString str);	// ½âÎöÃÜÂë
 };
 
 #endif // LOGINWINDOW_H

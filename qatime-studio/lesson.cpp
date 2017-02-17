@@ -16,8 +16,8 @@ void Lesson::readJson(const QJsonObject &json)
 
 	// ¿Î³Ì×´Ì¬
 	mStatus = json["status"].toString();
-// 	if (mStatus == "missed")
-// 		mStatus = "ready";
+//  if (mStatus == "finished")
+//  	mStatus = "ready";
 // 	if (mStatus=="completed")
 // 		mStatus = "ready";
 // 	if (mStatus == "closed")

@@ -17,12 +17,14 @@ UIBulletScreen::UIBulletScreen(QWidget *parent)
 	, m_delayTimer(NULL)
 	, m_iFontHeight(19)
 	, m_bTalk(true)
-	, m_iDelay(1)
+	, m_iDelay(0)
 	, m_bBtnTrigger(false)
+	, m_iTitle(20)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
 	setAttribute(Qt::WA_TranslucentBackground);
+	setMinimumSize(240, 160);
 	this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/Bullet.png);"));
 	ui.talk_pushButton->setStyleSheet("QPushButton{border-image:url(:/LoginWindow/images/bulletTalk_b.png);}");
 	ui.set_pushButton->setStyleSheet("QPushButton{border-image:url(:/LoginWindow/images/bulletSet.png);}");
@@ -127,7 +129,6 @@ bool UIBulletScreen::eventFilter(QObject *target, QEvent *event)
 	return QWidget::eventFilter(target, event);
 }
 
-
 void UIBulletScreen::slot_onCountTimeout()
 {
 	if (!isVisible())
@@ -149,9 +150,11 @@ void UIBulletScreen::slot_onCountTimeout()
 				m_bTalk = true;
 
 			if (m_bTalk)
-				m_delayTimer->start(m_iDelay * 1000);
+			{
+				if (!m_delayTimer->isActive())
+					m_delayTimer->start(m_iDelay * 1000);
+			}	
 		}
-		
 	}
 	else
 	{
@@ -169,8 +172,8 @@ void UIBulletScreen::slot_onCountTimeout()
 			this->setStyleSheet(QStringLiteral("border-image: url(:/LoginWindow/images/alpha.png);"));
 			ui.close_pushButton->setVisible(false);
 			ui.set_pushButton->setVisible(false);
-			ui.bullet_widget->setVisible(false);
-			resize(24, 24);
+// 			ui.bullet_widget->setVisible(false);
+// 			resize(24, 24);
 		}
 		else
 		{
@@ -182,6 +185,8 @@ void UIBulletScreen::slot_onCountTimeout()
 
 		m_bTalk = false;
 	}
+
+	m_iTitle = height() - 5;
 }
 
 void UIBulletScreen::slot_onDelayTimeout()
@@ -294,7 +299,7 @@ bool UIBulletScreen::nativeEvent(const QByteArray &eventType, void *message, lon
 			{
 				*result = HTBOTTOMRIGHT;
 			}
-			if (0 == xflag && y > MAINWINDOW_Y_MARGIN && y <= MAINWINDOW_TITLE_HEIGHT)
+			if (0 == xflag && y > MAINWINDOW_Y_MARGIN && y <= m_iTitle)
 			{
 				if (ui.set_pushButton && ui.close_pushButton && ui.textBrowser->verticalScrollBar())
 				{
@@ -434,15 +439,15 @@ void UIBulletScreen::ReciverStudent(QString name, QString content)
 
 	int iLine = ui.textBrowser->document()->lineCount();
 	// 重新设置高度
-	int iHeight = 65 + (iLine - 1) * m_iFontHeight;
-	if (width() == 24 || width() == 74)
-		resize(280, iHeight);
-	else if (windowChanged())
-		resize(width(), height());
-	else if (height() >= 300)
-		resize(width(), height());
-	else
-		resize(width(), iHeight);
+// 	int iHeight = 65 + (iLine - 1) * m_iFontHeight;
+// 	if (width() == 24 || width() == 74)
+// 		resize(280, iHeight);
+// 	else if (windowChanged())
+// 		resize(width(), height());
+// 	else if (height() >= 300)
+// 		resize(width(), height());
+// 	else
+// 		resize(width(), iHeight);
 
 	WidgetHide(true);
 	m_bTalk = false;
@@ -474,15 +479,15 @@ void UIBulletScreen::ReciverTeacher(QString name, QString content)
 
 	int iLine = ui.textBrowser->document()->lineCount();
 	// 重新设置高度
-	int iHeight = 65 + (iLine - 1) * m_iFontHeight;
-	if (width() == 24 || width() == 74)
-		resize(280, iHeight);
-	else if (windowChanged())
-		resize(width(), height());
-	else if (height() >= 300)
-		resize(width(), height());
-	else
-		resize(width(), iHeight);
+// 	int iHeight = 65 + (iLine - 1) * m_iFontHeight;
+// 	if (width() == 24 || width() == 74)
+// 		resize(280, iHeight);
+// 	else if (windowChanged())
+// 		resize(width(), height());
+// 	else if (height() >= 300)
+// 		resize(width(), height());
+// 	else
+// 		resize(width(), iHeight);
 
 	WidgetHide(true);
 

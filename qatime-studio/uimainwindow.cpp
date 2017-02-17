@@ -26,8 +26,8 @@
 #include <QMouseEvent>
 #include "qmath.h"
 
-#define MAINWINDOW_X_MARGIN 6
-#define MAINWINDOW_Y_MARGIN 6
+#define MAINWINDOW_X_MARGIN 2
+#define MAINWINDOW_Y_MARGIN 2
 #define MAINWINDOW_TITLE_HEIGHT 0
 #define MAINWINDOW_MAXHEIGHT	900		//屏幕高度
 #define MAINWINDOW_MAXWIDTH		528		//程序最大宽度
@@ -72,6 +72,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, m_iSucCount(0)
 	, m_HelpBtnPos(290)
 	, m_BulletScreen(NULL)
+	, m_RefreshTimer(NULL)
 {
 	ui.setupUi(this);
 	setFocusPolicy(Qt::ClickFocus);
@@ -184,6 +185,9 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_ScreenTipTimer = new QTimer(this);
 	connect(m_ScreenTipTimer, SIGNAL(timeout()), this, SLOT(slot_ScreenTipTimeout()));
 	m_ScreenTipTimer->start(2000);
+
+	m_RefreshTimer = new QTimer(this);
+	connect(m_RefreshTimer, SIGNAL(timeout()), this, SLOT(onTimerResize()));
 
 	// 设置摄像头视频源样式
 	ui.video_checkBox->setStyleSheet("QCheckBox::indicator{width: 62px;height: 20px;}"
@@ -374,6 +378,18 @@ void UIMainWindow::WhiteBoard()
 
 void UIMainWindow::MinDialog()
 {
+	QRect rc = ui.title_widget->geometry();
+	QRect rc2 = ui.help_widget->geometry();
+	QRect rc3 = ui.welcome_widget->geometry();
+	QRect rc4 = ui.videoCamera_widget->geometry();
+	QRect rc5 = ui.right_label->geometry();
+	QRect rc6 = ui.btn_widget->geometry();
+	QRect rc7 = ui.tabWidget->geometry();
+	QRect rc8 = ui.time_label->geometry();
+	QRect rc9 = ui.chat_widget->geometry();
+	QRect rc10 = m_charRoom->geometry();
+
+	QRect rc1 = this->geometry();
 	//需求更改为，点击最小化，隐藏此窗口，弹出悬浮窗
 	this->hide();
 	QDesktopWidget *dsk = QApplication::desktop();
@@ -566,6 +582,8 @@ void UIMainWindow::resizeEvent(QResizeEvent *e)
 
 		// 帮助按钮位置改变
 		m_HelpBtnPos += w;
+
+		m_RefreshTimer->start(1000);
 	}
 	m_icount++;
 //	m_mutex.unlock();
@@ -822,6 +840,14 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 				m_charRoom->ReceiverRecordMsg(pIMsg);
 
 			delete pIMsg;
+		}
+		break;
+		case MSG_SEND_AUDIO_MSG: // 语音播放结束
+		{
+			MSG* Msg = pMsg;
+			char* msgid = (char*)Msg->lParam;
+			if (m_charRoom)
+				m_charRoom->OnStopPlayAudio(msgid);
 		}
 		break;
 		case MSG_LOGIN:  // 接收登录返回结果
@@ -1567,12 +1593,12 @@ bool UIMainWindow::eventFilter(QObject *target, QEvent *event)
 
 			if (ui.close_radioButton->isChecked())
 			{
-				ui.close_radioButton->setCheckable(Qt::CheckState::Unchecked);
+				ui.close_radioButton->setCheckable(false);
 				ShowWindow(m_VideoWnd, SW_SHOW);
 			}
 			else
 			{
-				ui.close_radioButton->setCheckable(Qt::CheckState::Checked);
+				ui.close_radioButton->setCheckable(true);
 				ShowWindow(m_VideoWnd, SW_HIDE);
 			}
 		}
@@ -1623,7 +1649,7 @@ void UIMainWindow::leaveEvent(QEvent *)
 // 	}
 	if (rect.right() >= dsk->width()-1)
 	{
-		if (m_charRoom->IsFous())
+		if (m_charRoom->IsFous() || m_charRoom->IsClickPic())
 		{
 			return;
 		}
@@ -1653,7 +1679,7 @@ void UIMainWindow::setNetworkPic(const QString &szUrl)
 	pixmap.loadFromData(jpegData);
 	QPixmap scaledPixmap = pixmap.scaled(QSize(30, 30), Qt::KeepAspectRatio);
 	ui.teacherPhoto_Label->setPixmap(scaledPixmap);
-	m_teacherImg = szUrl;
+	m_teacherPix = scaledPixmap;
 }
 
 // 切换到直播页
@@ -1670,9 +1696,9 @@ void UIMainWindow::setComeBack()
 	m_CameraInfo->move(0, 0);
 }
 
-QString UIMainWindow::TeacherPhotoPixmap()
+QPixmap UIMainWindow::TeacherPhotoPixmap()
 {
-	return m_teacherImg;
+	return m_teacherPix;
 }
 
 void UIMainWindow::clickRectRadio()
@@ -1885,9 +1911,12 @@ void UIMainWindow::PosInWindow()
 	if (rc.contains(QCursor::pos()))
 		return;
 	
+	QDesktopWidget* dsk = QApplication::desktop();
+	if (rc.right()+1 != dsk->width())
+		return;
+	
 	this->hide();
 
-	QDesktopWidget* dsk = QApplication::desktop();
 	SetWindowPos((HWND)m_HoverWnd->winId(), HWND_TOPMOST, dsk->width() - 45, dsk->height()*0.6, 0, 0, SWP_NOSIZE);
 	m_HoverWnd->resize(44, m_HoverWnd->size().height());
 	m_HoverWnd->SetNumber();
@@ -1904,4 +1933,73 @@ void UIMainWindow::setTriggerType(bool bType)
 {
 	if (m_BulletScreen)
 		m_BulletScreen->setBulletTriggerType(bType);
+}
+
+void UIMainWindow::ChatRoomDown()
+{
+	if (m_charRoom)
+		m_charRoom->TalkDown();
+}
+
+void UIMainWindow::ErrorStop()
+{
+	if (m_CameraInfo)
+		m_CameraInfo->StopLiveVideo();
+
+	if (m_VideoInfo)
+		m_VideoInfo->StopLiveVideo();
+}
+
+void UIMainWindow::onTimerResize()
+{
+	m_RefreshTimer->stop();
+	int width = this->width();
+	int height = this->height();
+	int tabWidth = width - 2;
+	int tabHeight = height - 71;
+	if (tabWidth == ui.tabWidget->width() && tabHeight == ui.tabWidget->height())
+		return;
+	int w = tabWidth - ui.tabWidget->width();
+	int h = tabHeight - ui.tabWidget->height();
+	// tab界面改变
+	if (w != 0)
+	{
+		ui.title_widget->resize(ui.title_widget->width() + w, ui.title_widget->height());
+		ui.help_widget->resize(ui.help_widget->width() + w, ui.help_widget->height());
+		ui.welcome_widget->resize(ui.welcome_widget->width() + w, ui.welcome_widget->height());
+		ui.btn_widget->resize(ui.btn_widget->width() + w, ui.btn_widget->height());
+		ui.videoCamera_widget->resize(ui.videoCamera_widget->width() + w, ui.videoCamera_widget->height());
+		ui.right_label->move(ui.right_label->geometry().left() + w, ui.right_label->geometry().top());
+	}
+	// tab2界面改变
+	m_AuxiliaryPanel->resize(m_AuxiliaryPanel->width() + w, m_AuxiliaryPanel->height() + h);
+	ui.Auxiliary_widget->resize(ui.Auxiliary_widget->width() + w, ui.Auxiliary_widget->height() + h);
+
+	if (m_charRoom)
+	{
+		int iWidth = ui.tabWidget->width() + w;
+		ui.tabWidget->resize(iWidth, ui.tabWidget->height() + h);
+		// TabBar背景图片
+		QString sheet;
+		sheet = QString().sprintf("QTabBar::tab { height: 25px; width: %dpx; } QTabBar::tab:!selected {color:rgb(204,204,204);background: transparent;} QTabBar::tab:selected {color:rgb(5, 158, 213);}", iWidth / 2);
+		ui.tabWidget->setStyleSheet(sheet);
+		// 计时器位置
+		ui.time_label->move((iWidth - 50) / 2, ui.time_label->geometry().top());
+
+		ui.chat_widget->resize(ui.chat_widget->width() + w, ui.chat_widget->height() + h);
+		m_charRoom->resize(m_charRoom->width() + w, m_charRoom->height() + h);
+		m_charRoom->setResize(w, h);
+	}
+
+	if (m_AuxiliaryPanel && m_AuxiliaryPanel->m_teacher_treewidget && w != 0)
+	{
+		int iWidth = m_AuxiliaryPanel->m_teacher_treewidget->columnWidth(0);
+		m_AuxiliaryPanel->m_teacher_treewidget->setColumnWidth(0, iWidth + w);
+	}
+
+	if (m_LessonTable)
+		m_LessonTable->setResize(w);
+
+	// 帮助按钮位置改变
+	m_HelpBtnPos += w;
 }

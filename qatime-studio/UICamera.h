@@ -108,6 +108,7 @@ public:
 	void SetVideoWnd(HWND hWnd);
 	void SetChangeVideo(int index);
 	void setBkImage(QString qsImage);
+	void refurbish();
 };
 
 #endif // UICamera_H

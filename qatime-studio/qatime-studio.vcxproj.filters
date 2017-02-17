@@ -328,24 +328,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_UITimers.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_boardwindow.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_boardwindow.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_scribblearea.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_scribblearea.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="WhiteBoard\boardwindow.cpp">
-      <Filter>WhiteBoard</Filter>
-    </ClCompile>
-    <ClCompile Include="WhiteBoard\scribblearea.cpp">
-      <Filter>WhiteBoard</Filter>
-    </ClCompile>
     <ClCompile Include="Rangecapture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -418,15 +400,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_Livestatusmanager.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="UIChathtml.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UIChathtml.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UIChathtml.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="UIHelpword.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -438,15 +411,6 @@
     </ClCompile>
     <ClCompile Include="zoom_image.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="webobjectinstance.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_webobjectinstance.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_webobjectinstance.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="UIViewimage.cpp">
       <Filter>Source Files</Filter>
@@ -492,6 +456,60 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_UITraymenu.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="UIBtnPix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIBtnPix.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UIBtnPix.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="UITalk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UITalk.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UITalk.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="app_dump.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="animatedtextbrowserA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_animatedtextbrowserA.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_animatedtextbrowserA.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UITalkRecord.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UITalkRecord.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="UITalkRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_tools_audio_cpp_wrapper.cpp">
+      <Filter>YxChat</Filter>
+    </ClCompile>
+    <ClCompile Include="UIBtnAudio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIBtnAudio.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UIBtnAudio.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="YxChat\nim_cpp_nos.cpp">
+      <Filter>YxChat</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -609,15 +627,6 @@
     <CustomBuild Include="UICamera.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="WhiteBoard\boardwindow.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="WhiteBoard\scribblearea.h">
-      <Filter>WhiteBoard</Filter>
-    </CustomBuild>
-    <CustomBuild Include="WhiteBoard\boardwindow.h">
-      <Filter>WhiteBoard</Filter>
-    </CustomBuild>
     <CustomBuild Include="Rangecapture.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -663,20 +672,11 @@
     <CustomBuild Include="Livestatusmanager.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="UIChathtml.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UIChathtml.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="UIHelpword.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="UIHelpword.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="webobjectinstance.h">
-      <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="UIViewimage.h">
       <Filter>Header Files</Filter>
@@ -704,6 +704,27 @@
     </CustomBuild>
     <CustomBuild Include="UITraymenu.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIBtnPix.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UITalk.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UITalk.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="animatedtextbrowserA.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UITalkRecord.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UITalkRecord.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIBtnAudio.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -803,9 +824,6 @@
     <ClInclude Include="GeneratedFiles\ui_UICamera.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_boardwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIChatRoom.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -833,9 +851,6 @@
     <ClInclude Include="GeneratedFiles\ui_UIRangewnd.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UIChathtml.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIHelpword.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -853,6 +868,21 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UITraymenu.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UITalk.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="app_dump.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UITalkRecord.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_tools_audio_cpp_wrapper.h">
+      <Filter>YxChat</Filter>
+    </ClInclude>
+    <ClInclude Include="YxChat\nim_cpp_nos.h">
+      <Filter>YxChat</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

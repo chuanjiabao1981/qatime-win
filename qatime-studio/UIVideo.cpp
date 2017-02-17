@@ -60,8 +60,8 @@ UIVideo::UIVideo(QWidget *parent)
 		MessageBox(NULL, L"创建直播失败，请关闭程序重新启动", L"", MB_OK);
 	}
 
-// 	char* p;
-// 	Nlss_GetSDKVersion(&p);
+	char* p;
+	Nlss_GetSDKVersion(&p);
 	//默认采集音视频的麦克风以及摄像头设备，所以，先初始化ui控件时，将 音视频设备通通找出来
 	//初始化音视频控件，利用到底层库
 	EnumAvailableMediaDevices();
@@ -460,13 +460,14 @@ void UIVideo::slot_FinishStartLiveStream(int iRet)
 	{
 		m_Parent->UpatateLiveStatus(this,false);
 		m_bLiving = false;
-		MessageBox(NULL, L"打开直播出错，具体错误信息请看返回值", L"答疑时间", MB_OK);
+		qDebug() << "白板打开直播出错，具体错误信息请看返回值";
 	}
 	else
 	{
 		if (m_Parent)
 		{
 			m_Parent->UpatateLiveStatus(this,true);
+			qDebug() << "白板直播成功";
 		}
 	}
 }

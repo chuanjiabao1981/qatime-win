@@ -136,6 +136,8 @@ void LoginWindow::OnLogIn()
 		return;
 	}
 
+	QString str = ui.UserPass_Edit->text();
+	str = parse(str);
 #ifdef _DEBUG
   	url = QUrl("http://testing.qatime.cn/api/v1/sessions");
 #else
@@ -147,8 +149,9 @@ void LoginWindow::OnLogIn()
 	append += ui.UserName_Edit->text();
 	append.append("&password=");
 	qInfo(append);
-	append += ui.UserPass_Edit->text();
+	append += str;
 	append.append("&client_cate=teacher_live");
+	
 	QNetworkRequest request(url);
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
@@ -541,4 +544,105 @@ void LoginWindow::ReturnAccount()
 {
 	if (mainWin)
 		mainWin->MenuRetrun();
+}
+
+QString LoginWindow::parse(QString str)
+{
+	QString encode;
+	int iCount = str.count();
+	for (int i = 0; i < iCount;i++ )
+	{
+		QString s = str.at(i);
+		if (s == "~")
+			s = "%7E";
+		else if(s == "`")
+			s = "%60";
+		else if (s == "!")
+			s = "%EFBC81";
+		else if (s == "£¡")
+			s = "%21";
+		else if (s == "@")
+			s = "%40";
+		else if (s == "#")
+			s = "%23";
+		else if (s == "$")
+			s = "%24";
+		else if (s == "%")
+			s = "%25";
+		else if (s == "^")
+			s = "%5E";
+		else if (s == "&")
+			s = "%26";
+		else if (s == "*")
+			s = "%2A";
+		else if (s == "(")
+			s = "%28";
+		else if (s == ")")
+			s = "%29";
+		else if (s == "£¨")
+			s = "%EFBC88";
+		else if (s == "£©")
+			s = "%EFBC89";
+		else if (s == "_")
+			s = "%5F";
+		else if (s == "¡ª")
+			s = "%E28094";
+		else if (s == "+")
+			s = "%2B";
+		else if (s == "=")
+			s = "%3D";
+		else if (s == "\\")
+			s = "%5C";
+		else if (s == "|")
+			s = "%7C";
+		else if (s == "[")
+			s = "%5B";
+		else if (s == "]")
+			s = "%5D";
+		else if (s == "£»")
+			s = "%EFBC9B";
+		else if (s == "£º")
+			s = "%EFBC9A";
+		else if (s == ":")
+			s = "%3A";
+		else if (s == ";")
+			s = "%3B";
+		else if (s == "'")
+			s = "%27";
+		else if (s == "\"")
+			s = "%22";
+		else if (s == "¡®")
+			s = "%E28098";
+		else if (s == "¡°")
+			s = "%E2809C";
+		else if (s == ",")
+			s = "%2C";
+		else if (s == "£¬")
+			s = "%EFBC8C";
+		else if (s == "¡¶")
+			s = "%E3808A";
+		else if (s == "<")
+			s = "%3C";
+		else if (s == ".")
+			s = "%2E";
+		else if (s == ">")
+			s = "%3E";
+		else if (s == "¡£")
+			s = "%E38082";
+		else if (s == "¡·")
+			s = "%E3808B";
+		else if (s == "/")
+			s = "%2F";
+		else if (s == "?")
+			s = "%3F";
+		else if (s == "£¿")
+			s = "%EFBC9F";
+		else if (s == "¡¾")
+			s = "%E38090";
+		else if (s == "¡¿")
+			s = "%E38091";
+
+		encode += s;
+	}
+	return encode;
 }

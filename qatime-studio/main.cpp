@@ -1,5 +1,10 @@
 #include "loginwindow.h"
 #include <QtWidgets/QApplication>
+#include <QDateTime>
+#include <QFile>
+#include <QTextStream>
+#include <QIcon>
+#include "app_dump.h"
 #include <gdiplus.h>
 using namespace Gdiplus;
 
@@ -47,6 +52,8 @@ void outputMessage(QtMsgType type, const QMessageLogContext &context, const QStr
 
 int main(int argc, char *argv[])
 {
+	::SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
+
 	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR           gdiplusToken;
 

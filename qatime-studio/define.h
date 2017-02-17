@@ -28,6 +28,7 @@
 #define MSG_MEMBER_INFO					MSG_START_COUNT	+ 5		//单个成员信息
 #define MSG_PICTURE_PROCESS				MSG_START_COUNT	+ 6		//图片发送进度
 #define MSG_SEND_MSG_STATUS				MSG_START_COUNT	+ 7		//发送消息状态
+#define MSG_SEND_AUDIO_MSG				MSG_START_COUNT	+ 8		//发送语音消息停止
 
 // 和qatime_video交互用到的消息
 struct VideoInfo

@@ -6,7 +6,8 @@
 #include "myemotionwidget.h"
 #include <QLabel>
 #include "uimainwindow.h"
-#include "UIChatHtml.h"
+#include "UITalk.h"
+#include "UITalkRecord.h"
 #include <vector>
 
 //---云信
@@ -20,14 +21,18 @@
 #include "YxChat/nim_cpp_talk.h"
 #include "YxChat/nim_cpp_team.h"
 #include "YxChat/nim_cpp_msglog.h"
+#include "YxChat/nim_cpp_nos.h"
 #include <QNetworkAccessManager>
 
+#include "YxChat/nim_tools_audio_cpp_wrapper.h"
+
 class UIMainWindow;
-class UIChatHtml;
+class UITalk;
+class UITalkRecord;
 
 struct MyImageInfo
 {
-	QString			PhotoImg;		//聊天头像
+	QPixmap			PhotoImg;		//聊天头像
 	QString			name;			//昵称
 	QString			time;			//时间
 	QString			ReceiverImg;	//接收的图片路径
@@ -54,7 +59,8 @@ private:
 	
 	QNetworkAccessManager manager;
 	QNetworkReply *reply;
-	UIChatHtml*						m_ChatHtml;			// 聊天窗的html
+	UITalk*							m_uitalk;			// 聊天窗的自定义聊天控件
+	UITalkRecord*					m_uitalkRecord;		// 聊天记录
 
 	//表情框	
 	MyEmotionWidget*				m_smallEmotionWidget;
@@ -86,6 +92,8 @@ private:
 	std::vector<MyImageInfo>		m_VerReceiveImg;	// 接收的图片消息队列
 	QTimer*							m_LoadImgTimer;		// 定时器加载图片
 	int								m_drawingWidth;		// 拉动改变的宽度
+	bool							m_bClickPic;		// 当前是否点击图片
+	std::string						m_AudioPath;		// 语音消息路径
 	void initEmotion();
 public:
 	QString							m_TeachterName;		// 老师名字
@@ -169,7 +177,7 @@ public:
 
 	void	ShowMsgs(const std::vector<nim::IMMessage> &msg);
 	void	ShowMsg(nim::IMMessage pMsg);
-	void	ParseFace(QString qContect);						// 解析接收到的消息
+	void	ParseFace(QString qContect, QString name, QString time);						// 解析接收到的消息
 	bool	IsHasFace(QString qContect);						// 判断是否有表情
 	QString BuildFaceToUrl(QString qFace);						// 通过表情返回url路径（例如：传入[em_1]返回./images/em_1.gif）
 	void	SetStudentName(int iNum);
@@ -178,6 +186,29 @@ public:
 	bool	IsFous();
 	void	UpLoadPicProcess(double iProcess);					// 上传图片进度
 	void	SendStatus(nim::SendMessageArc* arcNew);			// 发送消息返回状态
+	bool    IsClickPic();										// 当前是否点击图片
+	void    TalkDown();											// 聊天内容置底
+	void    OnPlayAudio(std::string path, std::string sid, std::string msgid, bool isPlay);
+	void	OnStopPlayAudio(char* msgid);
+	/**
+	* 开始播放语音消息的回调（播放语音消息需要和sdk交互，并非一定播放成功）
+	* @param[in] code 返回码
+	* @param[in] file_path 语音消息文件路径
+	* @param[in] sid 会话id
+	* @param[in] cid 消息id
+	* @return void 无返回值
+	*/
+	static void	OnPlayAudioCallback(int code, const char* file_path, const char* sid, const char* cid);
+
+	/**
+	* 停止播放语音消息的回调
+	* @param[in] code 返回码
+	* @param[in] file_path 语音消息文件路径
+	* @param[in] sid 会话id
+	* @param[in] cid 消息id
+	* @return void 无返回值
+	*/
+	static void OnStopAudioCallback(int code, const char* file_path, const char* sid, const char* cid);
 public slots:
 	void chickChage(int, QString, QString);
 	bool AddStudent(QString iconUrl, QString name, QString accid);		//添加成员

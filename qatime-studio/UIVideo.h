@@ -10,8 +10,7 @@
 #include <QMutex>
 #include "UIWorkThread.h"
 #include "UIMainwindow.h"
-#include <stdint.h>
-#include "WhiteBoard/boardwindow.h"
+//#include <stdint.h>
 
 #define STARTLS_ASYNC
 #pragma execution_character_set("utf-8")

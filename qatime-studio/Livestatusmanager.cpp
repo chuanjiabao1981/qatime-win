@@ -481,7 +481,12 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 {
 	QString strError;
 	if (error["code"].toInt() == 1002)
+	{
+		if (m_parent)
+			m_parent->ErrorStop();
+		StopTimer();
 		strError = QString("授权过期,请重新登录！");
+	}
 	else if (error["code"].toInt() == 1003)
 		strError = QString("没有权限访问！");
 	else if (error["code"].toInt() == 1004)

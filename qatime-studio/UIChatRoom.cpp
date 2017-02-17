@@ -18,6 +18,7 @@
 #include <QMouseEvent>
 #include <QToolTip>
 #include <QNetworkRequest>
+#include <QFileDialog>
 
 #ifdef TEST
 	#define _DEBUG
@@ -38,6 +39,8 @@ typedef void(*nim_client_reg_sync_multiport_push_config_cb)(const char *json_ext
 typedef void(*nim_client_set_multiport_push_config)(const char *switch_content, const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
 typedef void(*nim_client_get_multiport_push_config)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
 
+typedef	const wchar_t * (*nim_tool_get_user_appdata_dir)(const char * app_account);
+typedef	void(*nim_global_free_buf)(void *data);
 
 QColor timeColor(153, 153, 153);
 QColor contentColor(102, 102, 102);
@@ -53,12 +56,13 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	, m_switchTime(false)
 	, m_RecordTime(QDateTime::currentDateTime())
 	, m_parent(NULL)
-	, m_ChatHtml(NULL)
 	, m_studentNum(0)
 	, m_proclamationHeight(0)
 	, m_LoadImgTimer(NULL)
 	, m_drawingWidth(0)
 	, m_bZoom(false)
+	, m_bClickPic(false)
+	, m_uitalkRecord(NULL)
 {
 	ui.setupUi(this);
 	setAutoFillBackground(true);
@@ -83,7 +87,6 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.button_sendMseeage_cancel, SIGNAL(clicked()), this, SLOT(putTalkCancel()));
 	connect(ui.student_list, SIGNAL(signalChickChage(int, QString, QString)), this, SLOT(chickChage(int, QString, QString)));	
 	connect(ui.textEdit_2, SIGNAL(textChanged()), this, SLOT(proclamationTextChage()));
-	connect(ui.talkRecord, SIGNAL(colseCalendar()), this, SLOT(colseCalendar()));
 	connect(ui.text_talk, SIGNAL(colseBrow()), this, SLOT(colseBrow()));
 	connect(ui.textEdit, SIGNAL(colseBrow()), this, SLOT(colseBrow()));
 	connect(ui.timeWidget, SIGNAL(currentPageChanged(int, int)), this, SLOT(calendaCurrentPageChanged(int, int)));
@@ -118,9 +121,12 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 
 	ui.student_list->setStyleSheet("border-image: url(:/LoginWindow/images/nochat.png);");
 
- 	m_ChatHtml = new UIChatHtml(ui.text_talk);
-	m_ChatHtml->setParent(this);
- 	m_ChatHtml->show();
+	m_uitalk = new UITalk(ui.text_talk);
+	m_uitalk->setMainWindow(this);
+
+  	m_uitalkRecord = new UITalkRecord(ui.talkRecord);
+  	m_uitalkRecord->setMainWindow(this);
+	connect(m_uitalkRecord, SIGNAL(colseCalendar()), this, SLOT(colseCalendar()));
 
 	m_LoadImgTimer = new QTimer(this);
 	connect(m_LoadImgTimer, SIGNAL(timeout()), this, SLOT(LoadImgTimeout()));
@@ -129,11 +135,6 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 UIChatRoom::~UIChatRoom()
 {
 	m_StudentInfo.clear();
-	if (m_ChatHtml)
-	{
-		delete m_ChatHtml;
-		m_ChatHtml = NULL;
-	}
 
 	if (m_LoadImgTimer)
 	{
@@ -291,8 +292,12 @@ void UIChatRoom::clickProclamation()
 // 清屏
 void UIChatRoom::clickCleanText()
 {
-//	ui.text_talk->clear();
-	m_ChatHtml->ClearHtml();
+	delete m_uitalk;
+	m_uitalk = NULL;
+	ui.text_talk->removeEventFilter(m_uitalk);
+	m_uitalk = new UITalk(ui.text_talk);
+	m_uitalk->setMainWindow(this);
+	m_uitalk->show();
 }
 // 表情按钮
 void UIChatRoom::clickBrow()
@@ -339,7 +344,14 @@ void UIChatRoom::clickNotes()
 	ui.student_list->setVisible(false);
 	ui.msgRecord->setVisible(true);
 	ui.timeWidget->hide();
-	ui.talkRecord->clear();		// 清除消息记录
+	// 清除消息记录
+	delete m_uitalkRecord;
+	m_uitalkRecord = NULL;
+	ui.talkRecord->removeEventFilter(m_uitalkRecord);
+	m_uitalkRecord = new UITalkRecord(ui.talkRecord);
+	m_uitalkRecord->setMainWindow(this);
+	m_uitalkRecord->show();		
+	connect(m_uitalkRecord, SIGNAL(colseCalendar()), this, SLOT(colseCalendar()));
 
 	m_farst_msg_time = 0;
 	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true);
@@ -424,7 +436,7 @@ void UIChatRoom::setBrow(QString path)
 {
 	m_smallEmotionWidget->hide();
 	m_borw.append(path);
-	ui.textEdit->insertHtml("<img src='" + path + "'/>");  //   此处的test 即 url
+	ui.textEdit->insertHtml("<img src='" + path + "' width='24' height='24' />");  //   此处的test 即 url
 	ui.textEdit->addAnimation(QUrl(path), path);  //添加一个动画.
 	m_isBorw = true;
 }
@@ -468,7 +480,7 @@ void UIChatRoom::clickSendMseeage()
 			name += "(我) ";
 			
 			// 本人头像
-			QString image = m_parent->TeacherPhotoPixmap();
+			QPixmap image = m_parent->TeacherPhotoPixmap();
 			for (int i = 0; i < textList.size(); i++)
 			{
 				QString string = textList.at(i);
@@ -483,7 +495,7 @@ void UIChatRoom::clickSendMseeage()
 			m_isBorw = false;
 			m_parent->SendTeacherBullet("(我)", contect);
 			stringToHtmlFilter(sendText);
-			m_ChatHtml->sendMsg(image, name, timeStr, contect);
+			m_uitalk->InsertEmoji(&image, name, timeStr, sendMsg);
 		}
 		else
 		{
@@ -491,10 +503,9 @@ void UIChatRoom::clickSendMseeage()
 			qName += "(我) ";
 
 			// 本人头像
- 			QString image = m_parent->TeacherPhotoPixmap();
+ 			QPixmap image = m_parent->TeacherPhotoPixmap();
 			m_parent->SendTeacherBullet("(我)", sendText);
-			stringToHtmlFilter(sendText);
-			m_ChatHtml->sendMsg(image, qName, timeStr, sendText);
+			m_uitalk->InsertChat(&image, qName, timeStr, sendText);
 		}
 		ui.textEdit->clear();
 	}
@@ -515,7 +526,7 @@ void UIChatRoom::clickSendMseeage()
 	nim::Talk::SendMsg(json_msg);
 	m_borw.clear();
 
-	
+	int width =m_uitalk->width();
 	ui.textEdit->setFocus();
 }
 
@@ -579,9 +590,16 @@ void UIChatRoom::afterTime()
 
 void UIChatRoom::QueryRecord(QString dtstr)
 {
+	delete m_uitalkRecord;
+	m_uitalkRecord = NULL;
+	ui.talkRecord->removeEventFilter(m_uitalkRecord);
+	m_uitalkRecord = new UITalkRecord(ui.talkRecord);
+	m_uitalkRecord->setMainWindow(this);
+	m_uitalkRecord->show();
+	connect(m_uitalkRecord, SIGNAL(colseCalendar()), this, SLOT(colseCalendar()));
+
 	// 获取时间
 	m_switchTime = true;
-	ui.talkRecord->clear();
 	QDateTime time;
 	dtstr += " 00:00:01";
 	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
@@ -733,16 +751,18 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		QString qContent = QString::fromStdString(strContent);		
 
 		// 聊天头像
-		QString img;
+		QPixmap* img;
 		personListBuddy* Buddy = NULL;
 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
 		if (Buddy)
-			img= Buddy->head->accessibleDescription();
-
+			img= (QPixmap*)Buddy->head->pixmap();
+		
 		if (m_parent)
 			m_parent->SendStudentBullet(qName, qContent);
-		stringToHtmlFilter(qContent);
-		m_ChatHtml->receiverMsg(img,qName, qTime, qContent);
+		if (IsHasFace(qContent))
+			m_uitalk->InsertEmoji(img, qName, qTime, qContent, false);
+		else
+			m_uitalk->InsertChat(img, qName, qTime, qContent, false);
 		bValid = true;
 	}
 	else if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0 && pMsg->type_ == nim::kNIMMessageTypeImage)
@@ -760,17 +780,17 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		qContentNew += ".png";
 		qContentNew.replace("\\", "/");
 		// 聊天头像
-		QString img;
+		QPixmap* img;
 		personListBuddy* Buddy = NULL;
 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
 		if (Buddy)
-			img = Buddy->head->accessibleDescription();
+			img = (QPixmap*)Buddy->head->pixmap();
 
 		// 如果下载失败
 		if (!QFile::copy(qContent, qContentNew))
 		{
 			MyImageInfo ImgInfo;
-			ImgInfo.PhotoImg = img;
+			ImgInfo.PhotoImg = *img;
 			ImgInfo.name = qName;
 			ImgInfo.time = qTime;
 			ImgInfo.ReceiverImg = qContent;
@@ -780,13 +800,51 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 			return false;
 		}
 
-		m_ChatHtml->receiverImageMsg(img, qName, qTime, qContentNew);
+		m_uitalk->InsertPic(img, qName, qTime, qContentNew,"",false);
 		if (m_parent)
 			m_parent->SendStudentBullet(qName, "[图片消息]");
 		bValid = true;
 	}
+	else if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0 && pMsg->type_ == nim::kNIMMessageTypeAudio)
+	{
+		std::string path;	// 路径
+		QString qduration;	// 语音时长
+		std::string sid;	// 会话窗口ID
+		std::string msgid;	// 当前消息ID
+		Json::Value values;
+		Json::Reader reader;
+		if (reader.parse(pMsg->attach_, values) && values.isObject())
+		{
+			path = values["md5"].asString();
+			path = m_AudioPath + path;
+			sid = pMsg->local_talk_id_;
+			msgid = pMsg->client_msg_id_;
+			int duration = values["dur"].asUInt();
+			qduration = QString::number(duration/1000);
+		}
 
-	qDebug() << "进入返回状态";
+		stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_));
+
+		std::string strName = pMsg->readonly_sender_nickname_;
+		std::string strContent = pMsg->content_;
+		std::string strID = pMsg->sender_accid_;
+
+		QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg->timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+		QString qName = QString::fromStdString(strName);
+		// 聊天头像
+		QPixmap* img;
+		personListBuddy* Buddy = NULL;
+		Buddy = ui.student_list->findID(QString::fromStdString(strID));
+		if (Buddy)
+			img = (QPixmap*)Buddy->head->pixmap();
+
+
+		m_uitalk->InsertAudioChat(img, qName, qTime, qduration, path, sid, msgid, false);
+		if (m_parent)
+			m_parent->SendStudentBullet(qName, "[语音消息]");
+		bValid = true;
+	}
+
 	return bValid;
 }
 
@@ -810,9 +868,13 @@ bool UIChatRoom::IsHasFace(QString qContect)
 	return false;
 }
 
-void UIChatRoom::ParseFace(QString qContect)
+void UIChatRoom::ParseFace(QString qContect, QString qName, QString qTime)
 {
-	ui.text_talk->append("");
+	QTextCursor textCursor = ui.talkRecord->textCursor();
+	textCursor.movePosition(QTextCursor::Start);
+	textCursor.insertHtml(qName + " " + qTime);
+	textCursor.insertText("\n");
+
 	QString qFace="";			// 表情
 	bool    bHas = false;		// 判断当前是否有表情
 	int iCount =qContect.size();
@@ -833,8 +895,8 @@ void UIChatRoom::ParseFace(QString qContect)
 		if (str == "]" && bHas)
 		{
 			QString strFace = BuildFaceToUrl(qFace);
-			ui.text_talk->insertHtml("<img src='" + strFace + "'/>");  //   此处的test 即 url
-			ui.text_talk->addAnimation(QUrl(strFace), strFace);  //添加一个动画.	
+			ui.talkRecord->insertHtml("<img src='" + strFace + "'/>");  //   此处的test 即 url
+			ui.talkRecord->addAnimation(QUrl(strFace), strFace);  //添加一个动画.	
 
 			qFace = "";
 			bHas = false;
@@ -843,9 +905,10 @@ void UIChatRoom::ParseFace(QString qContect)
 
 		if (!bHas)
 		{
-			ui.text_talk->insertHtml(str);
+			ui.talkRecord->insertHtml(str);
 		}
 	}
+	textCursor.insertText("\n\r");
 }
 
 QString UIChatRoom::BuildFaceToUrl(QString qFace)
@@ -973,22 +1036,25 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 					}
 
 					strName += " 加入了群聊";
-					int fontwidth = fontMetrics().width(strName);
-					int iMargin = 300 - fontwidth;
-					QTextCursor textCursor = ui.talkRecord->textCursor();
-					textCursor.movePosition(QTextCursor::Start);
-
-					QTextFrameFormat frameFormat2;
-					frameFormat2.setLeftMargin(iMargin/2);	//设置左边距
-					frameFormat2.setRightMargin(iMargin / 2);	//设置右边距
-					frameFormat2.setBottomMargin(20);	//设置下边距
-					textCursor.insertFrame(frameFormat2);		//在光标处插入框架
-
-					QTextCharFormat fmt;
-					fmt.setForeground(contentColor);
-					textCursor.setCharFormat(fmt);
-					textCursor.insertText(strName);
+					m_uitalkRecord->InsertNotice(strName);
 				}
+			}
+			else if (id == nim::kNIMNotificationIdTeamMuteMember)
+			{
+				QString name;
+				std::string obj_account = json[nim::kNIMNotificationKeyData][nim::kNIMNotificationKeyDataId].asString();
+				personListBuddy* Buddy = NULL;
+				Buddy = ui.student_list->findID(QString::fromStdString(obj_account));
+				if (Buddy)
+					name = Buddy->name->text();
+
+				bool set_mute = json[nim::kNIMNotificationKeyData]["mute"].asInt() == 1;
+				if (set_mute)
+					name += "已被禁言";
+				else
+					name += "已被解除禁言";
+
+				m_uitalkRecord->InsertNotice(name);
 			}
 		}
 		return;
@@ -997,34 +1063,143 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 	// 跨天处理
 	stepDays(QDateTime::fromMSecsSinceEpoch(pMsg.timetag_));
 
-	std::string strName = pMsg.readonly_sender_nickname_;
-	std::string strContent = pMsg.content_;
-	QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg.timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
-	QString qContent = QString::fromStdString(strContent);
-	QString qName;
-	if (pMsg.sender_accid_ == m_accid.toStdString())
+	// 判断当前过来的消息，是不是此会话窗口
+	if (pMsg.type_ == nim::kNIMMessageTypeText)
 	{
-		strName = m_TeachterName.toStdString();
-		strName += "(我) ";
-		qName = QString::fromStdString(strName);
-		stringToHtml(qName, selfColor);
-	}
-	else
-	{
-		qName = QString::fromStdString(strName);
-		stringToHtml(qName, nameColor);
-	}
-	
-	stringToHtml(qTime, timeColor);
-	stringToHtml(qContent, contentColor);
+		qDebug() << "进入此聊天";
+		std::string strName = pMsg.readonly_sender_nickname_;
+		std::string strContent = pMsg.content_;
+		std::string strID = pMsg.sender_accid_;
 
-	// 显示消息
-	QTextCursor textCursor = ui.talkRecord->textCursor();
-	textCursor.movePosition(QTextCursor::Start);
-	textCursor.insertHtml(qName + " " + qTime);
-	textCursor.insertText("\n");
-	textCursor.insertHtml(qContent);
-	textCursor.insertText("\n\r");
+		QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg.timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+		QString qName = QString::fromStdString(strName);
+		QString qContent = QString::fromStdString(strContent);
+
+		// 聊天头像
+		QPixmap* img;
+		personListBuddy* Buddy = NULL;
+		Buddy = ui.student_list->findID(QString::fromStdString(strID));
+		if (Buddy)
+			img = (QPixmap*)Buddy->head->pixmap();
+
+		if (pMsg.sender_accid_ == m_accid.toStdString())
+		{
+			strName = m_TeachterName.toStdString();
+			strName += "(我) ";
+			qName = QString::fromStdString(strName);
+			// 本人头像
+			QPixmap image = m_parent->TeacherPhotoPixmap();
+			if (IsHasFace(qContent))
+				m_uitalkRecord->InsertEmoji(&image, qName, qTime, qContent);
+			else
+				m_uitalkRecord->InsertChat(&image, qName, qTime, qContent);
+		}
+		else
+		{
+			qName = QString::fromStdString(strName);
+
+			if (IsHasFace(qContent))
+				m_uitalkRecord->InsertEmoji(img, qName, qTime, qContent, false);
+			else
+				m_uitalkRecord->InsertChat(img, qName, qTime, qContent, false);
+		}
+	}
+	else if (pMsg.type_ == nim::kNIMMessageTypeImage)
+	{
+		std::string strName = pMsg.readonly_sender_nickname_;
+		std::string strContent = pMsg.content_;
+		std::string strID = pMsg.sender_accid_;
+
+		QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg.timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+		QString qName = QString::fromStdString(strName);
+		QString qContent = QString::fromStdString(pMsg.local_res_path_);
+		QString qContentNew = qContent;
+		qContentNew += ".png";
+		qContentNew.replace("\\", "/");
+		// 聊天头像
+		QPixmap* img;
+		personListBuddy* Buddy = NULL;
+		Buddy = ui.student_list->findID(QString::fromStdString(strID));
+		if (Buddy)
+			img = (QPixmap*)Buddy->head->pixmap();
+
+		Json::Value values;
+		Json::Reader reader;
+		std::string url;
+		if (reader.parse(pMsg.attach_, values) && values.isObject())
+		{
+			url = values["url"].asString();
+		}
+	
+		if (pMsg.sender_accid_ == m_accid.toStdString())
+		{
+			strName = m_TeachterName.toStdString();
+			strName += "(我) ";
+			qName = QString::fromStdString(strName);
+			// 本人头像
+			QPixmap image = m_parent->TeacherPhotoPixmap();
+
+			m_uitalkRecord->InsertPic(&image, qName, qTime, QString::fromStdString(url));
+		}
+		else
+		{
+			m_uitalkRecord->InsertPic(img, qName, qTime, QString::fromStdString(url),"", false);
+		}
+	}
+	else if (pMsg.type_ == nim::kNIMMessageTypeAudio)
+	{
+		std::string path;	// 路径
+		QString qduration;	// 语音时长
+		std::string sid;	// 会话窗口ID
+		std::string msgid;	// 当前消息ID
+		Json::Value values;
+		Json::Reader reader;
+		if (reader.parse(pMsg.attach_, values) && values.isObject())
+		{
+			path = values["md5"].asString();
+			path = m_AudioPath + path;
+			sid = pMsg.local_talk_id_;
+			msgid = pMsg.client_msg_id_;
+			int duration = values["dur"].asUInt();
+			qduration = QString::number(duration / 1000);
+		}
+
+		stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg.timetag_));
+
+		std::string strName = pMsg.readonly_sender_nickname_;
+		std::string strContent = pMsg.content_;
+		std::string strID = pMsg.sender_accid_;
+
+		QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg.timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+		QString qName = QString::fromStdString(strName);
+		// 聊天头像
+		QPixmap* img;
+		personListBuddy* Buddy = NULL;
+		Buddy = ui.student_list->findID(QString::fromStdString(strID));
+		if (Buddy)
+			img = (QPixmap*)Buddy->head->pixmap();
+	
+		if (pMsg.sender_accid_ == m_accid.toStdString())
+		{
+			strName = m_TeachterName.toStdString();
+			strName += "(我) ";
+			qName = QString::fromStdString(strName);
+			// 本人头像
+			QPixmap image = m_parent->TeacherPhotoPixmap();
+			m_uitalkRecord->InsertAudioChat(&image, qName, qTime, qduration, path, sid, msgid,true);
+		}
+		else
+		{
+			m_uitalkRecord->InsertAudioChat(img, qName, qTime, qduration, path, sid, msgid, false);
+		}
+
+		QString audioPath = QString::fromStdString(path);
+		QFile file(audioPath);
+		if (!file.exists())
+		{
+			nim::NOS::FetchMedia(pMsg);
+		}
+	}
 	
 	m_switchTime = false;	
 }
@@ -1124,6 +1299,24 @@ void UIChatRoom::ReceiverLoginMsg(nim::LoginRes* pRes)
 		{
 			// 从云信再次获取群成员信息
 			QueryGroup();
+
+			// 语音消息初始化 audio
+			std::string acc = m_accid.toStdString();
+			const wchar_t *dir = NIM_SDK_GET_FUNC(nim_tool_get_user_appdata_dir)(acc.c_str());
+			std::wstring app_data_audio_path = (std::wstring)dir;
+			NIM_SDK_GET_FUNC(nim_global_free_buf)((void*)dir);
+			QString audio_path = QString::fromStdWString(app_data_audio_path);
+			QDir Dir(audio_path);
+			if (!Dir.exists())
+				Dir.mkdir(audio_path);
+			std::string res_audio_path = audio_path.toStdString();
+			bool ret = nim_audio::Audio::Init(res_audio_path);
+
+			nim_audio::Audio::RegStartPlayCb(&UIChatRoom::OnPlayAudioCallback);
+			nim_audio::Audio::RegStopPlayCb(&UIChatRoom::OnStopAudioCallback);
+
+			audio_path.append("audio\\");
+			m_AudioPath = audio_path.toStdString();
 		}
 	}
 	else
@@ -1133,6 +1326,19 @@ void UIChatRoom::ReceiverLoginMsg(nim::LoginRes* pRes)
 		sError += QString::number(ErrorCode);
 		CMessageBox::showMessage(QString("答疑时间"), QString(sError), QString("确定"), QString("取消"));
 	}
+}
+
+void UIChatRoom::OnPlayAudioCallback(int code, const char* file_path, const char* sid, const char* cid)
+{
+/*	Post2UI(nbase::Bind(&UIPlayAudioCallback, code, std::string(sid), std::string(cid)));*/
+}
+
+void UIChatRoom::OnStopAudioCallback(int code, const char* file_path, const char* sid, const char* cid)
+{
+	char* pData = new char[strlen(cid)];
+	memcpy(pData, cid, strlen(cid));
+	HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
+	PostMessage(hWnd, MSG_SEND_AUDIO_MSG, 0, (LPARAM)pData);
 }
 
 // 初始化获取群成员的禁言状态
@@ -1188,15 +1394,11 @@ void UIChatRoom::chickChage(int b, QString qAccid, QString name)
 	nim::Team::MuteMemberAsync(m_CurChatID, accid, b, cb);	
 
 	if (b)
-	{
 		name += "已被禁言";
-		m_ChatHtml->CenterMsg(name);
-	}
 	else
-	{
 		name += "已被解除禁言";
-		m_ChatHtml->CenterMsg(name);
-	}
+
+	m_uitalk->InsertNotice(name);
 }
 
 // 添加成员
@@ -1264,24 +1466,26 @@ void UIChatRoom::stepDays(QDateTime dateTime)
 {
 	QString newDay = dateTime.toString("MM-dd");
 	QString oldDay = m_RecordTime.toString("MM-dd");
-	if (newDay != oldDay && !ui.talkRecord->toPlainText().isEmpty())
+	if (newDay != oldDay && m_uitalkRecord->m_Ver->count() != 0)
 	{
-		QTextCursor textCursor = ui.talkRecord->textCursor();
-		textCursor.movePosition(QTextCursor::Start);
-
-		int fontwidth = fontMetrics().width(oldDay);
-		int iMargin = 300 - fontwidth;
-
-		QTextFrameFormat frameFormat2;
-		frameFormat2.setLeftMargin(iMargin/2);	//设置左边距
-		frameFormat2.setRightMargin(iMargin/2);	//设置右边距
-		frameFormat2.setBottomMargin(20);	//设置右边距
-		textCursor.insertFrame(frameFormat2);		//在光标处插入框架
-
-		QTextCharFormat fmt;
-		fmt.setForeground(contentColor);
-		textCursor.setCharFormat(fmt);
-		textCursor.insertText(oldDay);
+// 		QTextCursor textCursor = ui.talkRecord->textCursor();
+// 		textCursor.movePosition(QTextCursor::Start);
+// 
+// 		int fontwidth = fontMetrics().width(oldDay);
+// 		int iMargin = 300 - fontwidth;
+// 
+// 		QTextFrameFormat frameFormat2;
+// 		frameFormat2.setLeftMargin(iMargin/2);	//设置左边距
+// 		frameFormat2.setRightMargin(iMargin/2);	//设置右边距
+// 		frameFormat2.setBottomMargin(20);	//设置右边距
+// 		textCursor.insertFrame(frameFormat2);		//在光标处插入框架
+// 
+// 		QTextCharFormat fmt;
+// 		fmt.setForeground(contentColor);
+// 		textCursor.setCharFormat(fmt);
+// 		textCursor.insertText(oldDay);
+		if (m_uitalkRecord)
+			m_uitalkRecord->InsertNotice(oldDay);
 	}
 
 	m_RecordTime = dateTime;
@@ -1299,7 +1503,7 @@ void UIChatRoom::stepMsgDays(QDateTime dateTime)
 	QString oldDay = m_ReceiveTime.toString("MM-dd");
 	if (newDay != oldDay && !ui.text_talk->toPlainText().isEmpty())
 	{
-		m_ChatHtml->CenterMsg(newDay);
+		m_uitalk->InsertNotice(newDay);
 	}
 
 	m_ReceiveTime = dateTime;
@@ -1307,7 +1511,14 @@ void UIChatRoom::stepMsgDays(QDateTime dateTime)
 
 void UIChatRoom::clearAll()
 {
-	m_ChatHtml->ClearHtml();
+	//删除聊天内容
+	delete m_uitalk;
+	m_uitalk = NULL;
+	ui.text_talk->removeEventFilter(m_uitalk);
+	m_uitalk = new UITalk(ui.text_talk);
+	m_uitalk->setMainWindow(this);
+	m_uitalk->show();
+
 	ui.text_proclamation->clear();
 	ui.student_list->cleanStudents(m_drawingWidth);
 	m_StudentInfo.clear();
@@ -1472,7 +1683,7 @@ void UIChatRoom::returnMember()
 				sName += pMember->name();
 				sName += " 加入了群聊";
 				
-				m_ChatHtml->CenterMsg(sName);
+				m_uitalk->InsertNotice(sName);
 
 				SetStudentName(m_studentNum + 1);
 			}
@@ -1562,7 +1773,11 @@ void UIChatRoom::setMainWindow(UIMainWindow* parent)
 // 初始化自适应的高度
 void UIChatRoom::setAdaptHeight(int iHeight)
 {
-	ui.talkRecord->setFixedHeight(iHeight-90);
+	ui.talkRecord->setFixedHeight(iHeight-80);
+	if (m_uitalkRecord)
+		m_uitalkRecord->setFixedSize(ui.talkRecord->width()-5, iHeight - 80);
+	if (m_uitalk)
+		m_uitalk->setFixedHeight(iHeight - 100);
 	m_proclamationHeight = iHeight - 105;
 }
 
@@ -1574,12 +1789,9 @@ void UIChatRoom::setResize(int iWidth, int iHeight)
 	ui.talkRecord->setFixedSize(ui.talkRecord->width()+iWidth, ui.talkRecord->height() + iHeight);
 	ui.toolButton_3->move(ui.toolButton_3->geometry().left()+iWidth, ui.toolButton_3->geometry().top());
 	// 聊天
-	if (m_ChatHtml->m_TalkView)
-	{
-		int iWidthi = m_ChatHtml->m_TalkView->width();
-		m_ChatHtml->setFixedSize(m_ChatHtml->m_TalkView->width() + iWidth, m_ChatHtml->m_TalkView->height() + iHeight);
-		m_ChatHtml->m_TalkView->setFixedSize(m_ChatHtml->m_TalkView->width() + iWidth,m_ChatHtml->m_TalkView->height() + iHeight);
-	}
+	ui.text_talk->setFixedSize(ui.text_talk->width() + iWidth, ui.text_talk->height() + iHeight);
+	m_uitalk->setFixedSize(m_uitalk->width() + iWidth, m_uitalk->height() + iHeight);
+
 	// 学生信息
 	ui.student_list->setAllWidth(iWidth);
 
@@ -1693,6 +1905,7 @@ long UIChatRoom::GetFileSize(QString path)
 
 void UIChatRoom::clickPic()
 {
+	m_bClickPic = true;
 	if (strcmp(m_CurChatID.c_str(), "") == 0)
 	{
 		QToolTip::showText(QCursor::pos(), "请选择直播间！");
@@ -1708,17 +1921,19 @@ void UIChatRoom::clickPic()
 		SendImage(path.toStdWString(), sMsgID);
 
 		// 本人头像
-		QString image = m_parent->TeacherPhotoPixmap();
+		QPixmap image = m_parent->TeacherPhotoPixmap();
 		QString name = m_TeachterName;
 		QDateTime time = QDateTime::currentDateTime();//获取系统现在的时间
 		// 跨天处理
 		stepMsgDays(time);
 		QString timeStr = time.toString("hh:mm:ss");
 		name += "(我) ";
-		m_ChatHtml->sendImageMsg(image, name, timeStr, path,sMsgID);
+		m_uitalk->InsertPic(&image,name,timeStr,path,sMsgID);
 		if (m_parent)
 			m_parent->SendTeacherBullet("(我)", "[图片消息]");
 	}
+	m_bClickPic = false;
+	ui.textEdit->setFocus();
 }
 
 void UIChatRoom::LoadImgTimeout()
@@ -1741,7 +1956,7 @@ void UIChatRoom::LoadImgTimeout()
 		if (file.exists())
 		{
 			if (strcmp(VecImg.chatID.c_str(), m_CurChatID.c_str()) == 0)
-				m_ChatHtml->receiverImageMsg(VecImg.PhotoImg, VecImg.name, VecImg.time, qContentNew);
+				m_uitalk->InsertPic(&VecImg.PhotoImg, VecImg.name, VecImg.time, qContentNew, "", false);
 
 			m_VerReceiveImg.erase(it);
 
@@ -1756,7 +1971,7 @@ void UIChatRoom::LoadImgTimeout()
 		if (QFile::copy(VecImg.ReceiverImg, qContentNew))
 		{
 			if (strcmp(VecImg.chatID.c_str(), m_CurChatID.c_str()) == 0)
-				m_ChatHtml->receiverImageMsg(VecImg.PhotoImg, VecImg.name, VecImg.time, qContentNew);
+				m_uitalk->InsertPic(&VecImg.PhotoImg, VecImg.name, VecImg.time, qContentNew,"",false);
 			
 			m_VerReceiveImg.erase(it);
 
@@ -1772,12 +1987,57 @@ void UIChatRoom::LoadImgTimeout()
 
 void UIChatRoom::UpLoadPicProcess(double diff)
 {
-	if (m_ChatHtml)
-		m_ChatHtml->PicProcess(diff);
+	if (m_uitalk)
+		m_uitalk->PicProcess(diff);
 }
 
 void UIChatRoom::SendStatus(nim::SendMessageArc* arcNew)
 {
-	if (m_ChatHtml)
-		m_ChatHtml->SendStatus(QString::fromStdString(arcNew->msg_id_));
+	if (m_uitalk)
+		m_uitalk->SendStatus(QString::fromStdString(arcNew->msg_id_));
+}
+
+bool UIChatRoom::IsClickPic()
+{
+	return m_bClickPic;
+}
+
+void UIChatRoom::TalkDown()
+{
+	if (m_uitalk)
+		m_uitalk->DelaySrcoll();
+}
+
+void UIChatRoom::OnPlayAudio(std::string path, std::string sid, std::string msgid, bool isPlay)
+{
+	if (isPlay)
+	{
+		nim_audio::nim_audio_type audio_format = nim_audio::AAC;
+		{
+			std::wstring wpath = QString::fromStdString(path).toStdWString();
+			FILE* audio_file;
+			if (_wfopen_s(&audio_file, wpath.c_str(), L"rb"))
+				return;
+
+			char header[6];
+			int n = fread(header, 1, 6, audio_file);
+			if (n == 6 && !memcmp(header, "#!AMR\n", 6)) //AMR文件
+				audio_format = nim_audio::AMR;
+			fclose(audio_file);
+		}
+		nim_audio::Audio::PlayAudio(path.c_str(), sid.c_str(), msgid.c_str(), audio_format);
+	}
+	else
+	{
+		nim_audio::Audio::StopPlayAudio();
+	}
+}
+
+void UIChatRoom::OnStopPlayAudio(char* msgid)
+{
+	if (m_uitalk)
+		m_uitalk->stopAudio(msgid);
+	
+	if (m_uitalkRecord)
+		m_uitalkRecord->stopAudio(msgid);
 }

@@ -1,11 +1,12 @@
 #include "animatedtextbrowser.h"
 #include <QFile>
 #include <QMovie>
-
+#include <QScrollBar>
 AnimatedTextBrowser::AnimatedTextBrowser(QWidget *parent)
 	:QTextBrowser(parent)
 {
-
+	m_timer = new QTimer(this);
+	connect(m_timer, SIGNAL(timeout()), this, SLOT(slot_onTimeout()));
 }
 
 void AnimatedTextBrowser::addAnimation(const QUrl& url, const QString& fileName)
@@ -60,4 +61,28 @@ void AnimatedTextBrowser::mousePressEvent(QMouseEvent *e)
 		emit colseCalendar();
 		emit colseBrow();
 	}
+}
+
+void AnimatedTextBrowser::autoHeight()
+{
+	m_timer->start(200);
+}
+
+void AnimatedTextBrowser::slot_onTimeout()
+{
+	m_timer->stop();
+
+	if (this->verticalScrollBar()->isVisible())
+	{
+		this->setFixedHeight(height() + 100);
+		m_timer->start(50);
+		this->moveCursor(QTextCursor::End);
+	}
+	else
+	{
+		int h = this->document()->size().rheight();
+		this->setFixedHeight(h);
+	}
+
+	emit sig_scrollDown();
 }

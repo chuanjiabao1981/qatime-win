@@ -360,18 +360,17 @@ void UICamera::StartLiveVideo()
 		return;
 	}
 
-	if (m_bPreviewing)
-	{
-		Nlss_StopVideoPreview(m_hNlssService);
-		Nlss_StopVideoCapture(m_hNlssService);
-	}
-
 	Nlss_UninitParam(m_hNlssService);
-
 	if (!InitMediaCapture())
 	{
 		MessageBox(NULL, L"初始化参数失败", L"答疑时间", MB_OK);
 		return;
+	}
+
+	if (m_bPreviewing)
+	{
+		Nlss_StopVideoPreview(m_hNlssService);
+		Nlss_StopVideoCapture(m_hNlssService);
 	}
 
  	Nlss_SetVideoWaterMark(m_hNlssService, NULL);
@@ -607,6 +606,7 @@ void UICamera::SetVideoWnd(HWND hWnd)
 void UICamera::SetChangeVideo(int index)
 {
 	m_CurrentVideoIndex = index;
+	refurbish();
 }
 
 void UICamera::resizeEvent(QResizeEvent *e)
@@ -633,4 +633,50 @@ void UICamera::setBkImage(QString qsImage)
 void UICamera::slot_livestreamErrorHappened()
 {
 	m_Parent->ErrorStopLive(this);
+}
+
+void UICamera::refurbish()
+{
+	if (m_bLiving)
+		return;
+	
+	if (m_hNlssService == NULL)
+	{
+		MessageBox(NULL, L"直播类为空，打开、关闭 预览 / 直播失败", L"答疑时间", MB_OK);
+		return;
+	}
+
+	Nlss_UninitParam(m_hNlssService);
+	if (!InitMediaCapture())
+	{
+		MessageBox(NULL, L"初始化参数失败", L"答疑时间", MB_OK);
+		return;
+	}
+
+	if (m_bPreviewing)
+	{
+		Nlss_StopVideoPreview(m_hNlssService);
+		Nlss_StopVideoCapture(m_hNlssService);
+	}
+
+	Nlss_SetVideoWaterMark(m_hNlssService, NULL);
+	Nlss_SetVideoDisplayRatio(m_hNlssService, 0, 0);
+
+	if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
+	{
+		qDebug() << "打开视频采集出错";
+		return;
+	}
+
+	if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
+	{
+		qDebug() << "打开视频预览出错";
+		return;
+	}
+
+	if (!m_bPreviewing)
+	{
+		m_bPreviewing = true;
+		return;
+	}
 }
