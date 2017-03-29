@@ -751,7 +751,7 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		QString qContent = QString::fromStdString(strContent);		
 
 		// 聊天头像
-		QPixmap* img;
+		QPixmap* img = NULL;
 		personListBuddy* Buddy = NULL;
 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
 		if (Buddy)
@@ -780,7 +780,7 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		qContentNew += ".png";
 		qContentNew.replace("\\", "/");
 		// 聊天头像
-		QPixmap* img;
+		QPixmap* img=NULL;
 		personListBuddy* Buddy = NULL;
 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
 		if (Buddy)
@@ -789,6 +789,9 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		// 如果下载失败
 		if (!QFile::copy(qContent, qContentNew))
 		{
+			if (img == NULL)
+				img = &QPixmap("./images/teacherPhoto.png");
+			
 			MyImageInfo ImgInfo;
 			ImgInfo.PhotoImg = *img;
 			ImgInfo.name = qName;
@@ -820,7 +823,7 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 			sid = pMsg->local_talk_id_;
 			msgid = pMsg->client_msg_id_;
 			int duration = values["dur"].asUInt();
-			qduration = QString::number(duration/1000);
+			qduration = QString::number((duration+500)/1000);
 		}
 
 		stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_));
@@ -832,7 +835,7 @@ bool UIChatRoom::ReceiverMsg(nim::IMMessage* pMsg)
 		QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg->timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
 		QString qName = QString::fromStdString(strName);
 		// 聊天头像
-		QPixmap* img;
+		QPixmap* img=NULL;
 		personListBuddy* Buddy = NULL;
 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
 		if (Buddy)
@@ -1076,7 +1079,7 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 		QString qContent = QString::fromStdString(strContent);
 
 		// 聊天头像
-		QPixmap* img;
+		QPixmap* img=NULL;
 		personListBuddy* Buddy = NULL;
 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
 		if (Buddy)
@@ -1117,7 +1120,7 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 		qContentNew += ".png";
 		qContentNew.replace("\\", "/");
 		// 聊天头像
-		QPixmap* img;
+		QPixmap* img=NULL;
 		personListBuddy* Buddy = NULL;
 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
 		if (Buddy)
@@ -1173,7 +1176,7 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 		QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg.timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
 		QString qName = QString::fromStdString(strName);
 		// 聊天头像
-		QPixmap* img;
+		QPixmap* img=NULL;
 		personListBuddy* Buddy = NULL;
 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
 		if (Buddy)
@@ -1335,10 +1338,11 @@ void UIChatRoom::OnPlayAudioCallback(int code, const char* file_path, const char
 
 void UIChatRoom::OnStopAudioCallback(int code, const char* file_path, const char* sid, const char* cid)
 {
+	QString strSid = QString(QLatin1String(sid));
 	char* pData = new char[strlen(cid)];
 	memcpy(pData, cid, strlen(cid));
 	HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
-	PostMessage(hWnd, MSG_SEND_AUDIO_MSG, 0, (LPARAM)pData);
+	PostMessage(hWnd, MSG_SEND_AUDIO_MSG, (WPARAM)(int)strSid.toInt(), (LPARAM)pData);
 }
 
 // 初始化获取群成员的禁言状态

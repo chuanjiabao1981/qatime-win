@@ -846,6 +846,7 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 		{
 			MSG* Msg = pMsg;
 			char* msgid = (char*)Msg->lParam;
+			int   sid = Msg->wParam;
 			if (m_charRoom)
 				m_charRoom->OnStopPlayAudio(msgid);
 		}
@@ -865,7 +866,6 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 		{
 			MSG* Msg = pMsg;
 			std::list<nim::TeamMemberProperty>* pMemberMsg = (std::list<nim::TeamMemberProperty>*)Msg->wParam;
-
 			if (m_charRoom)
 				m_charRoom->ReceiverMemberMsg(pMemberMsg);
 

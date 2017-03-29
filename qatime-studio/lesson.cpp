@@ -16,12 +16,12 @@ void Lesson::readJson(const QJsonObject &json)
 
 	// 课程状态
 	mStatus = json["status"].toString();
-//  if (mStatus == "finished")
-//  	mStatus = "ready";
+// 	if (mStatus == "finished")
+//   	mStatus = "ready";
 // 	if (mStatus=="completed")
 // 		mStatus = "ready";
 // 	if (mStatus == "closed")
-// 		mStatus = "missed";
+// 		mStatus = "ready";
     
 	// 上课时间
 	mStartTime = json["class_date"].toString();
