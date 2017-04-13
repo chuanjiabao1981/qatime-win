@@ -137,9 +137,9 @@ void UIScreenTip::setErrorTip(QString error)
 {
 	ui.tip_checkBox->setVisible(false);
 	ui.label_2->setText(error);
-	ui.back_label->setFixedHeight(ui.back_label->height()-40);
+	ui.back_label->setFixedHeight(196);
 
-	ui.ok_pushButton->move(ui.ok_pushButton->pos().x(), ui.ok_pushButton->pos().y() - 40);
-	this->resize(260,196);
+	ui.ok_pushButton->move(ui.ok_pushButton->pos().x(), 150);
+	this->setFixedSize(260,196);
 	this->show();
 }

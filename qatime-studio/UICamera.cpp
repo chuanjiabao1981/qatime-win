@@ -69,7 +69,7 @@ UICamera::UICamera(QWidget *parent)
 	m_refreshTimer->start(1000 / 25);
 	connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(slot_onRefreshTimeout()));
 
-	StartLiveVideo();
+//	StartLiveVideo();
 }
 
 UICamera::~UICamera()
@@ -114,7 +114,7 @@ void UICamera::SetMediaCapture(_HNLSSERVICE hNlssService)
 	Nlss_SetVideoSamplerCB(m_hNlssService, frame_cb);
 
 	PFN_NLSS_STATUS_NTY notify = UICamera::OnLiveStreamStatusNty;
-	Nlss_SetStatusCB(hNlssService, notify);
+	Nlss_SetStatusCB(m_hNlssService, notify);
 }
 
 void UICamera::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
@@ -150,7 +150,7 @@ void UICamera::OnLiveStreamStatusNty(EN_NLSS_STATUS enStatus, EN_NLSS_ERRCODE en
 	}
 	else if (enStatus == EN_NLSS_STATUS_ERR)
 	{
-//		m_pThis->emit sig_livestreamErrorHappened();
+		m_pThis->emit sig_livestreamErrorHappened();
 	}
 }
 
@@ -188,7 +188,7 @@ bool UICamera::InitMediaCapture()
 	ST_NLSS_PARAM stParam;
 	Nlss_GetDefaultParam(m_hNlssService, &stParam);
 
-	m_videoSourceType = EN_NLSS_VIDEOIN_CAMERA;
+	m_videoSourceType = EN_NLSS_VIDEOIN_CAMERA;// ;
 
 	switch (m_videoSourceType)
 	{
@@ -287,7 +287,6 @@ void UICamera::EnumAvailableMediaDevices()
 	if (m_iVideoDeviceNum <= 0)
 	{
 		qDebug() << "没有摄像头设备";
-//		MessageBox(NULL, L"请连接摄像头设备", L"答疑时间", MB_OK);
 	}
 	else
 	{
@@ -327,29 +326,6 @@ void UICamera::EnumAvailableMediaDevices()
 	}
 	// 获取视频和音频设备
 	Nlss_GetFreeDeviceInf(m_pVideoDevices, m_pAudioDevices);
-
-//	GetAvailableAppWindNum(&m_iAppWindNum);
-// 	if (m_iAppWindNum <= 0)
-// 	{
-// //		ui.app_comboBox->addItem(QString("请选择其他视频源"));
-// 	}
-// 	else
-// 	{
-// 		if (m_pAppWinds)
-// 		{
-// 			delete[] m_pAppWinds;
-// 			m_pAppWinds = NULL;
-// 		}
-// 
-// 		m_pAppWinds = new ST_NLSS_INDEVICE_INF[m_iAppWindNum];
-// 		for (int i = 0; i < m_iAppWindNum; i++)
-// 		{
-// 			m_pAppWinds[i].paPath = new char[1024];
-// 			m_pAppWinds[i].paFriendlyName = new char[1024];
-// 		}
-// 	}
-
-//	GetAvailableAppWind(m_pAppWinds);
 }
 
 void UICamera::StartLiveVideo()
@@ -376,12 +352,12 @@ void UICamera::StartLiveVideo()
  	Nlss_SetVideoWaterMark(m_hNlssService, NULL);
  	Nlss_SetVideoDisplayRatio(m_hNlssService, 0, 0);
 
- 	if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
- 	{
+	if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
+	{
 		qDebug() << "打开视频采集出错";
- 		return;
- 	}
- 
+		return;
+	}
+
 	if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
 	{
 		qDebug() << "打开视频预览出错";
@@ -398,8 +374,8 @@ void UICamera::StartLiveVideo()
 		MessageBox(NULL, L"推流地址为空，推流参数初始化失败", L"答疑时间", MB_OK);
 		return;
 	}
- 	m_pWorker->SetMediaCapture(m_hNlssService);
- 	emit sig_StartLiveStream();
+	m_pWorker->SetMediaCapture(m_hNlssService);
+	emit sig_StartLiveStream();
 	m_bLiving = true;
 }
 
@@ -437,10 +413,7 @@ void UICamera::slot_FinishStartLiveStream(int iRet)
 	}
 	else
 	{
-		if (m_Parent)
-		{
-			m_Parent->UpatateLiveStatus(this,true);
-		}
+		m_Parent->UpatateLiveStatus(this,true);
 	}
 
 	m_Parent->setCameraEnable();
@@ -579,8 +552,9 @@ void UICamera::ChangeLiveVideo()
 
 void UICamera::StopCaptureVideo()
 {
-//	Nlss_StopVideoCapture(m_hNlssService);
-//	Nlss_StopVideoPreview(m_hNlssService);
+	m_bPreviewing = false;
+	Nlss_StopVideoCapture(m_hNlssService);
+	Nlss_StopVideoPreview(m_hNlssService);
 }
 
 void UICamera::setLessonName(QString strLessonName)
@@ -593,7 +567,7 @@ void UICamera::setPersonNum(int num)
 
 }
 
-void UICamera::SetMainWnd(UIMainWindow* wnd)
+void UICamera::SetMainWnd(UIWindowSet* wnd)
 {
 	m_Parent = wnd;
 }

@@ -12,13 +12,14 @@
 #endif
 LiveStatusManager::LiveStatusManager(QObject *parent)
 	: QObject(parent)
-	, m_parent(NULL)
 	, m_TGetRtmpTimer(NULL)
 	, m_HeartTimer(NULL)
 	, m_HeartFailTimer(NULL)
 	, m_StopFailTimer(NULL)
 	, m_SwitchFailTimer(NULL)
 	, m_iBeatStep(0)
+	, m_newParent(NULL)
+	, m_EnvironmentalTyle(true)
 {
 	m_iGetRtmpCount = GET_RTMP_FAIL_COUNT;
 	m_TGetRtmpTimer = new QTimer(this);
@@ -87,9 +88,9 @@ LiveStatusManager::~LiveStatusManager()
 	}
 }
 
-void LiveStatusManager::setMainWindow(UIMainWindow* parent)
+void LiveStatusManager::setMainWindow(UIWindowSet* parent)
 {
-	m_parent = parent;
+	m_newParent = parent;
 }
 
 void LiveStatusManager::GetRtmpFailTimer()
@@ -136,8 +137,8 @@ void LiveStatusManager::ReturnRtmpAddressAndHeartBeat()
 		QString sCameraRtmp = data["camera_push_stream"].toString();
 		m_iBeatStep = data["beat_step"].toInt();
 		
-		if (m_parent)
-			m_parent->setBoradCamera(sBoardRtmp, sCameraRtmp);
+// 		if (m_parent)
+// 			m_parent->setBoradCamera(sBoardRtmp, sCameraRtmp);
 
 		// 成功以后次数重置
 		m_iGetRtmpCount = GET_RTMP_FAIL_COUNT;
@@ -150,8 +151,8 @@ void LiveStatusManager::ReturnRtmpAddressAndHeartBeat()
 		{
 			m_iGetRtmpCount = GET_RTMP_FAIL_COUNT;
 
-			if (m_parent)
-				m_parent->showErrorTip(TIP_GET_RTMP_ERROR);
+// 			if (m_parent)
+// 				m_parent->showErrorTip(TIP_GET_RTMP_ERROR);
 			return;
 		}
 
@@ -169,13 +170,17 @@ void LiveStatusManager::StartHeartBeat()
 void LiveStatusManager::HeartBeatTimer()
 {
 	QString strUrl;
-#ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
-	strUrl.replace("{lessons_id}", m_lessonID);
-#else
-	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
-	strUrl.replace("{lessons_id}", m_lessonID);
-#endif
+
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -239,13 +244,16 @@ void LiveStatusManager::HeartBeatFailTimer()
 	m_HeartFailTimer->stop();
 
 	QString strUrl;
-#ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
-	strUrl.replace("{lessons_id}", m_lessonID);
-#else
-	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
-	strUrl.replace("{lessons_id}", m_lessonID);
-#endif
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -273,13 +281,16 @@ void LiveStatusManager::SendStartLiveHttpMsg(int iBoard, int iCamera, QString sL
 	m_sToken = sToken;
 	QString strUrl;
 
-#ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
-	strUrl.replace("{lessons_id}", m_lessonID);
-#else
-	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
-	strUrl.replace("{lessons_id}", m_lessonID);
-#endif
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -309,19 +320,22 @@ void LiveStatusManager::FinishStartLive()
 		m_iBeatStep = data["beat_step"].toInt();
 		if (status == "teaching")
 		{
-			if (m_parent)
+			if (m_newParent)
 			{
 				// 更新课程状态
-				m_parent->startLiveStream();
-				m_parent->SendRequestStatus();
+				m_newParent->startLiveStream();
+				m_newParent->SendRequestStatus("直播中");
 
 				StartHeartBeat();
 			}
 		}
 		else
 		{
-			if (m_parent)
-				m_parent->showErrorTip(TIP_START_LIVE_ERROR);
+			if (m_newParent)
+			{
+				m_newParent->showErrorTip(TIP_START_LIVE_ERROR);
+				m_newParent->ErrorStopLive(NULL);
+			}
 		}
 	}
 	else if (obj["status"].toInt() == 0)
@@ -330,8 +344,11 @@ void LiveStatusManager::FinishStartLive()
 	}
 	else
 	{
-		if (m_parent)
-			m_parent->showErrorTip(TIP_START_LIVE_ERROR);
+		if (m_newParent)
+		{
+			m_newParent->showErrorTip(TIP_START_LIVE_ERROR);
+			m_newParent->ErrorStopLive(NULL);
+		}
 	}
 }
 
@@ -341,13 +358,16 @@ void LiveStatusManager::SendStopLiveHttpMsg(bool bConnect)
 	StopTimer();
 	QString strUrl;
 
-#ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
-	strUrl.replace("{lessons_id}", m_lessonID);
-#else
-	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
-	strUrl.replace("{lessons_id}", m_lessonID);
-#endif
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -367,10 +387,10 @@ void LiveStatusManager::FinishStopLive()
 	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1)
 	{
-		if (m_parent)
+		if (m_newParent)
 		{
 			// 更新课程状态
-			m_parent->SendRequestStatus();
+			m_newParent->SendRequestStatus("已直播");
 
 			m_iStopLiveCount = STOP_LIVE_FAIL_COUNT;
 		}
@@ -419,13 +439,16 @@ void LiveStatusManager::SendCameraSwitchMsg(int iBoard, int iCamera)
 	m_iCameraStatus = iCamera;
 
 	QString strUrl;
-#ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_switch";
-	strUrl.replace("{lessons_id}", m_lessonID);
-#else
-	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_switch";
-	strUrl.replace("{lessons_id}", m_lessonID);
-#endif
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_switch";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_switch";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -482,8 +505,8 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 	QString strError;
 	if (error["code"].toInt() == 1002)
 	{
-		if (m_parent)
-			m_parent->ErrorStop();
+		if (m_newParent)
+			m_newParent->ErrorStop();
 		StopTimer();
 		strError = QString("授权过期,请重新登录！");
 	}
@@ -512,4 +535,9 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 		if (m_parent && bTrue)
 			m_parent->GetLoginWnd()->ReturnLogin();
 	}
+}
+
+void LiveStatusManager::SetEnvironmental(bool bTyle)
+{
+	m_EnvironmentalTyle = bTyle;
 }

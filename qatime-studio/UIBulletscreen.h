@@ -4,9 +4,9 @@
 #include <QWidget>
 #include "ui_UIBulletscreen.h"
 #include "UIBulletset.h"
-#include "UIMainwindow.h"
+#include "UIWindowset.h"
 
-class UIMainWindow;
+class UIWindowSet;
 class UIBulletSet;
 class UIBulletScreen : public QWidget
 {
@@ -18,7 +18,7 @@ public:
 
 private:
 	Ui::UIBulletScreen ui;
-	UIMainWindow*		m_parent;
+	UIWindowSet*		m_parent;
 	UIBulletSet*		m_BulletSet;
 	QColor				m_TeacherColor;		//老师本人颜色
 	QColor				m_StudentColor;		//学生颜色
@@ -30,6 +30,7 @@ private:
 	int					m_iDelay;			//延迟时间
 	bool				m_bBtnTrigger;		//是否按钮触发背景
 	int					m_iTitle;			//可拖动高度
+	QString				m_chatID;			//会话ID
 
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result); // 添加caption
@@ -51,12 +52,12 @@ private:
 	void stringToHtmlFilter(QString &str);				//html转换
 
 public:
-	void setMainWindow(UIMainWindow* parent);
+	void setMainWindow(UIWindowSet* parent);
 	void SetContentColor(QColor color);
 	void SetFontSize(int iSize);
-	void ReciverStudent(QString name, QString content);
-	void ReciverTeacher(QString name, QString content);
-	void showDialog();
+	void ReciverStudent(QString name, QString content, QString chatid);
+	void ReciverTeacher(QString name, QString content, QString chatid);
+	void showDialog(QString chatid);
 	void WidgetHide(bool b);
 	bool windowChanged();
 	void setBulletTriggerType(bool bType);				//设置弹幕触发类型

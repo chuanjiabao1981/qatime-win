@@ -717,3 +717,55 @@ void UITalkRecord::stopAudio(char* msgid)
 		}
 	}
 }
+
+void UITalkRecord::InsertBtn()
+{
+	QFont font;
+	font.setPixelSize(13);
+	font.setFamily(("微软雅黑"));
+
+	m_btnLayout = new QHBoxLayout();
+	m_btn = new QPushButton();
+	m_btn->setText("点击查看更多消息");
+	m_btn->setFont(font);
+	m_btn->setFixedHeight(30);
+	m_btn->setStyleSheet("color: rgb(153, 153, 153);");
+	connect(m_btn, SIGNAL(clicked()), this, SLOT(slot_Btnclicked()));
+
+	m_btnLayout->addWidget(m_btn);
+
+	m_Ver->insertLayout(0, m_btnLayout);
+
+	// 添加到布局里
+	if (m_spacer == NULL)
+	{
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_Ver->addSpacerItem(m_spacer);
+	}
+	else
+	{
+		m_Ver->removeItem(m_spacer);
+		m_spacer = NULL;
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_Ver->addSpacerItem(m_spacer);
+	}
+
+	RecordSleep(50);
+	ScrollDown();
+}
+
+void  UITalkRecord::slot_Btnclicked()
+{
+	if (m_btnLayout)
+	{
+		disconnect(m_btn, SIGNAL(clicked()), this, SLOT(slot_Btnclicked()));
+		delete m_btnLayout;
+		m_btnLayout = NULL;
+
+		delete m_btn;
+		m_btn = NULL;
+
+		if (m_parent)
+			m_parent->RecordMoved();
+	}
+}

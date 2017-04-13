@@ -6,28 +6,50 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>94</width>
-    <height>20</height>
+    <width>180</width>
+    <height>30</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>UIPersonNum</string>
   </property>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="pic_label">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>40</width>
-     <height>20</height>
+     <width>30</width>
+     <height>30</height>
     </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border-image: url(:/LoginWindow/images/eyes.png);
-background-color: rgb(0, 0, 0);</string>
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="name_label">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>0</y>
+     <width>71</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>0</y>
+     <width>70</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>禁言</string>
    </property>
   </widget>
  </widget>

@@ -11,11 +11,13 @@
 #include "UIWorkThread.h"
 #include "UIMainwindow.h"
 #include <stdint.h>
+#include "UIWindowset.h"
 
 #define STARTLS_ASYNC
 #pragma execution_character_set("utf-8")
 
 class UIMainWindow;
+class UIWindowSet;
 class UICamera : public QWidget
 {
 	Q_OBJECT
@@ -54,7 +56,7 @@ public:
 	int								m_CurrentVideoIndex;// 当前摄像头索引
 	bool							m_bStopLiveFinish;	// 停止直播流
 
-	UIMainWindow*					m_Parent;			// 主窗口
+	UIWindowSet*					m_Parent;			// 主窗口
 	QTimer*							m_refreshTimer;		// 刷新窗口
 	static UICamera*				m_pThis;			
 #ifdef STARTLS_ASYNC
@@ -103,8 +105,7 @@ public:
 	void setLessonName(QString strLessonName);
 	void EnumAvailableMediaDevices();					// 枚举设备
 	void setPersonNum(int num);
-	void sendCoutom(ST_NLSS_VIDEO_SAMPLER	m_SvideoSampler);
-	void SetMainWnd(UIMainWindow* wnd);
+	void SetMainWnd(UIWindowSet* wnd);
 	void SetVideoWnd(HWND hWnd);
 	void SetChangeVideo(int index);
 	void setBkImage(QString qsImage);

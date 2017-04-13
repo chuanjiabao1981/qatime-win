@@ -3,13 +3,10 @@
 
 #include <QWidget>
 #include "ui_UIRatio.h"
-#include <QButtonGroup>
-#include <QVBoxLayout>
-#include "UIMainwindow.h"
-#include <QRadioButton>
+#include "UIWindowSet.h"
 
-class UIMainWindow;
-
+#pragma execution_character_set("utf-8")
+class UIWindowSet;
 class UIRatio : public QWidget
 {
 	Q_OBJECT
@@ -20,17 +17,23 @@ public:
 
 private:
 	Ui::UIRatio ui;
-	UIMainWindow*	m_Parent;
+	UIWindowSet*	m_Parent;
 
-	QButtonGroup*		m_pGroup;
-	QVBoxLayout *		m_pVBox;
+	// 鼠标按下拖动的操作
+	QPoint								m_startPos;
+	QPoint								m_clickPos;
+	QPoint								m_WndCurPos;
+protected:
+	virtual void paintEvent(QPaintEvent *event);
+	virtual bool eventFilter(QObject *target, QEvent *event);
+	virtual void focusOutEvent(QFocusEvent *);
 
 private slots:
-	void onRadioClick(int id, bool bCheck);
+	void RatioChanged(int index);
+	void clickClose();
 
 public:
-	void SetRatioInfo();
-	void setVideoChange(UIMainWindow* Parent);
+	void setVideoChange(UIWindowSet* Parent);
 };
 
 #endif // UIRATIO_H

@@ -8,7 +8,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include "user.h"
-#include "UIOtherApp.h"
 #include "UIVideo.h"
 #include <windows.h>
 #include "UIAuxiliaryPanel.h"
@@ -18,15 +17,13 @@
 #include "UIChatRoom.h"
 #include "loginwindow.h"
 #include "UILessontable.h"
-#include "UIMenuTool.h"
 #include "UICamera.h"
 #include <QMutex>
-#include "Rangecapture.h"
 #include "UISetparam.h"
 #include "UIHoverwindow.h"
 #include "UISeelivewnd.h"
 #include "UIScreentip.h"
-#include "UIPersonNum.h"
+//#include "UIPersonNum.h"
 #include "Livestatusmanager.h"
 #include "UIHelpword.h"
 #include "UIBulletscreen.h"
@@ -41,7 +38,6 @@ class UIRatio;
 class UILessonTable;
 class UIVideo;
 class UICamera;
-class RangeCapture;
 class UISetParam;
 class UIHoverWindow;
 class UISeeLiveWnd;
@@ -86,7 +82,6 @@ private:
 	LoginWindow*					m_LoginWindow;
 
 	UIAuxiliaryPanel*				m_AuxiliaryPanel;	// 老师课程面板
-	UIOtherApp*					    m_OtherAppInfo;		// 其它应用信息窗口
 	UILessonTable*					m_LessonTable;		// 课程表窗口
 	UIVideo*						m_VideoInfo;		// 直播窗口
 	UICamera*						m_CameraInfo;		// 摄像头窗口
@@ -113,10 +108,8 @@ private:
 	HWND							m_CameraWnd;		// 摄像头窗口句柄
 	QString							m_liveToken;		// 直播心跳时需要（开始直播时返回token）
 
-	UIMenuTool*						m_MenuTool;			// 工具按钮
 	QTimer*							m_tempTimers;		// 临时的定时器，用完记得关掉
 	QTimer*							m_ScreenTipTimer;	// 启动全屏提示
-	RangeCapture*					m_RangeCapture;		// 区域抓取窗口
 	int m_icount;
 	int chat_X;	//聊天位置x
 	int chat_Y; //聊天位置y

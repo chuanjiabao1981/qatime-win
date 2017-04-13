@@ -367,6 +367,108 @@ void UITalk::InsertPic(QPixmap* pixmap, QString name, QString time, QString url,
 	ScrollDown();
 }
 
+// 插入图片聊天信息
+void UITalk::InsertPicUrl(QPixmap* pixmap, QString name, QString time, QString url_, QString sMsgID, bool bTeacher)
+{
+	if (!pixmap)
+		pixmap = &QPixmap("./images/teacherPhoto.png");
+
+	QFont font;
+	font.setPixelSize(13);
+	font.setFamily(("微软雅黑"));
+
+	QFont font1;
+	font1.setPixelSize(12);
+	font1.setFamily(("微软雅黑"));
+
+	// 第一行（头像、名字、时间）
+	QHBoxLayout* FirstRow = new QHBoxLayout();
+
+	CBtnPix* head = new CBtnPix(*pixmap, this);
+	head->setFixedSize(24, 24);
+
+	QLabel* LName = new QLabel();
+	if (name.count() > 7)
+		name = name.mid(0, 7);
+	LName->setText(name);
+	LName->setFont(font);
+	if (bTeacher)
+		LName->setStyleSheet("color: rgb(190, 11, 11);"); //老师名字颜色
+	else
+		LName->setStyleSheet("color: rgb(135, 195, 237);"); //学生名字颜色
+	LName->setFixedWidth(LName->fontMetrics().width(name));
+
+	QLabel* LTime = new QLabel();
+	LTime->setText(time);
+	LTime->setFont(font1);
+	LTime->setStyleSheet("color: rgb(153, 153, 153);");
+	FirstRow->addWidget(head);
+	FirstRow->addWidget(LName);
+	FirstRow->addWidget(LTime);
+
+	// 第二行（聊天内容）
+	QHBoxLayout* SecRow1 = new QHBoxLayout();
+	SecRow1->setContentsMargins(30, 0, 0, 0);
+
+	QVBoxLayout* SecRow = new QVBoxLayout();
+	// 读取数据
+	QUrl url(url_);
+	QNetworkAccessManager manager;
+	QEventLoop loop;
+
+	QNetworkReply *reply = manager.get(QNetworkRequest(url));
+	//请求结束并下载完成后，退出子事件循环 
+	QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+	//开启子事件循环 
+	loop.exec();
+	QByteArray jpegData = reply->readAll();
+	QPixmap pixmapload;
+
+	// 加载成功则显示
+	pixmapload.loadFromData(jpegData);
+	CBtnPix* pBtn = new CBtnPix(url_, pixmapload, this);
+	if (pBtn)
+	{
+		connect(pBtn, SIGNAL(sig_idclicked(QString, QPixmap, bool)), this, SLOT(slot_btnclicked(QString, QPixmap, bool)));
+		connect(pBtn, SIGNAL(sig_faildclicked(CBtnPix*)), this, SLOT(slot_faildclicked(CBtnPix*)));
+
+		QPushButton* pImgProcess = new QPushButton();
+		pImgProcess->setFixedSize(0, 0);
+		pImgProcess->setStyleSheet("QPushButton{border-image:url(./images/process.png);");
+		pBtn->SetImgProcess(pImgProcess);
+		pBtn->SetMsgID(sMsgID);
+
+		SecRow->addWidget(pBtn);
+		SecRow->addWidget(pImgProcess);
+
+		m_vecImgProcess.push_back(pBtn);
+	}
+
+	QSpacerItem* spacer = new QSpacerItem(5, 5, QSizePolicy::Expanding, QSizePolicy::Minimum);
+	SecRow1->addLayout(SecRow);
+	SecRow1->addItem(spacer);
+
+	m_Ver->addLayout(FirstRow);
+	m_Ver->addLayout(SecRow1);
+
+	// 添加到布局里
+	if (m_spacer == NULL)
+	{
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_Ver->addSpacerItem(m_spacer);
+	}
+	else
+	{
+		m_Ver->removeItem(m_spacer);
+		m_spacer = NULL;
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_Ver->addSpacerItem(m_spacer);
+	}
+
+	// 	sleep(50);
+	// 	ScrollDown();
+}
+
 // 点击图片获取图片本地url
 void UITalk::slot_btnclicked(QString imgPath, QPixmap pixmap, bool b)
 {

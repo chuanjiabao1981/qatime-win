@@ -56,8 +56,6 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	, m_VideoOrCamera(NULL)
 	, m_CameraOrVideo(NULL)
 	, m_ShowChatRoomTimerId(0)
-	, m_RangeCapture(NULL)
-	, m_MenuTool(NULL)
 	, m_SetParam(NULL)
 	, m_HoverWnd(NULL)
 	, m_SeeLiveWnd(NULL)
@@ -114,7 +112,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 
 	m_VideoInfo = new UIVideo(ui.childVideo_widget);
 	m_VideoInfo->setWindowFlags(Qt::FramelessWindowHint);
-	m_VideoInfo->SetMainWnd(this);
+//	m_VideoInfo->SetMainWnd(this);
 	m_VideoInfo->InitDeviceParam();
 	m_VideoInfo->resize(316, 179);
 	m_VideoInfo->show();
@@ -126,17 +124,17 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	
 	m_AudioChangeInfo = new UIAudioChange(this);
 	m_AudioChangeInfo->setWindowFlags(Qt::FramelessWindowHint);
-	m_AudioChangeInfo->setAudioChange(this);
+//	m_AudioChangeInfo->setAudioChange(this);
 	m_AudioChangeInfo->hide();
 
 	m_VideoChangeInfo = new UIVideoChange(this);
 	m_VideoChangeInfo->setWindowFlags(Qt::FramelessWindowHint);
-	m_VideoChangeInfo->setVideoChange(this);
+//	m_VideoChangeInfo->setVideoChange(this);
 	m_VideoChangeInfo->hide();
 
 	m_RatioChangeInfo = new UIRatio(this);
 	m_RatioChangeInfo->setWindowFlags(Qt::FramelessWindowHint);
-	m_RatioChangeInfo->setVideoChange(this);
+//	m_RatioChangeInfo->setVideoChange(this);
 	m_RatioChangeInfo->hide();
 
 	m_LessonTable = new UILessonTable(this);
@@ -144,15 +142,9 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_LessonTable->SetMainWindow(this);
 	m_LessonTable->hide();
 
-	m_RangeCapture = new RangeCapture();
-	m_RangeCapture->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
-	m_RangeCapture->setMainWindow(this);
-	m_RangeCapture->move(0, 0);
-	m_RangeCapture->hide();
-
 	m_BulletScreen = new UIBulletScreen();
 	m_BulletScreen->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
-	m_BulletScreen->setMainWindow(this);
+//	m_BulletScreen->setMainWindow(this);
 	m_BulletScreen->hide();
 	SetWindowPos((HWND)m_BulletScreen->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
@@ -162,7 +154,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	m_HoverWnd->hide();
 
 	m_LiveStatusManager = new LiveStatusManager(this);
-	m_LiveStatusManager->setMainWindow(this);
+//	m_LiveStatusManager->setMainWindow(this);
 
 	// 直播按钮
 	ui.Live_pushBtn->setText("开始直播");
@@ -233,7 +225,7 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	
 	m_charRoom = new UIChatRoom(ui.chat_widget);
 	m_charRoom->setWindowFlags(Qt::FramelessWindowHint);
-	m_charRoom->setMainWindow(this);
+//	m_charRoom->setMainWindow(this);
  	m_charRoom->move(10, 0);
 	m_charRoom->resize(m_charRoom->size().width(), ui.chat_widget->size().height());
 	m_charRoom->setAdaptHeight(ui.chat_widget->size().height());
@@ -318,12 +310,6 @@ UIMainWindow::~UIMainWindow()
 		m_CameraInfo = NULL;
 	}
 
-	if (m_RangeCapture)
-	{
-		delete m_RangeCapture;
-		m_RangeCapture = NULL;
-	}
-
 	if (m_SetParam)
 	{
 		delete m_SetParam;
@@ -372,8 +358,7 @@ void UIMainWindow::setAdaptHeight(int iHeight)
 }
 void UIMainWindow::WhiteBoard()
 {
-	m_RangeCapture->setShowOrHide(true);
-	SetWindowPos((HWND)m_RangeCapture->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
 }
 
 void UIMainWindow::MinDialog()
@@ -424,9 +409,6 @@ void UIMainWindow::CloseDialog()
 		//隐藏设置窗口
 		if (m_SetParam)
 			m_SetParam->setVisible(false);
-
-// 		if (m_RangeCapture)
-// 			m_RangeCapture->setShowOrHide(false);
 
 		if (m_ScreenTip)
 			m_ScreenTip->setVisible(false);
@@ -788,7 +770,7 @@ void UIMainWindow::slot_onTempTimeout()
 
 	m_CameraInfo = new UICamera(ui.childCamera_widget);
 	m_CameraInfo->setWindowFlags(Qt::FramelessWindowHint);
-	m_CameraInfo->SetMainWnd(this);
+//	m_CameraInfo->SetMainWnd(this);
 	m_CameraInfo->show();
 	m_CameraInfo->resize(317, 210);
 }
@@ -1127,21 +1109,7 @@ void UIMainWindow::setRatioChangeIndex(int index)
 {
 	if (m_VideoInfo)
 	{
-		switch (index)
-		{
-		case 0:
-		{
-			m_MenuTool->setRatioText("标清");
-			break;
-		}
-		case 1:
-		{
-			m_MenuTool->setRatioText("高清");
-			break;
-		}
-		default:
-			break;
-		}
+
 	}
 }
 
@@ -1186,7 +1154,7 @@ void UIMainWindow::setCurChatRoom(QString chatID, QString courseid)
 		// 如果是当前会话窗口，则不需要再次请求群成员
 		if (!m_charRoom->IsCurChatRoom(m_AuxiliaryPanel->getChatID()))
 		{
-			m_charRoom->setCurChatID(chatID, courseid);
+//			m_charRoom->setCurChatID(chatID, courseid);
 			m_charRoom->clearAll();
 			RequestMember();
 		}		
@@ -1554,18 +1522,6 @@ bool UIMainWindow::eventFilter(QObject *target, QEvent *event)
 	}
 	else if (target == ui.full_radioButton)
 	{
-// 		if (event->type() == QEvent::MouseButtonPress)
-// 		{
-// 			if (ui.full_radioButton->isChecked())
-// 				return false;
-// 			
-// 			bool bCheck = ui.close_radioButton->isChecked();
-// 			m_RangeCapture->setShowOrHide(true);
-// 			m_RangeCapture->ToFullDialog(bCheck);
-// 
-// 			ShowWindow(m_VideoWnd, SW_SHOW);
-// 			ui.close_radioButton->setEnabled(true);
-// 		}
 	}
 	else if (target == ui.rect_radioButton)
 	{
@@ -1573,15 +1529,6 @@ bool UIMainWindow::eventFilter(QObject *target, QEvent *event)
 		{
 			if (ui.rect_radioButton->isChecked())
 				return false;
-			
-// 			if ( m_RangeCapture)
-// 			{
-// 				m_RangeCapture->setShowOrHide(true);
-// 				m_RangeCapture->ToRectDialog();
-// 				SetWindowPos((HWND)m_RangeCapture->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-// 
-// 				ShowWindow(m_VideoWnd, SW_SHOW);
-// 			}
 		}
 	}
 	else if (target == ui.close_radioButton)
@@ -1854,7 +1801,7 @@ void UIMainWindow::SendStudentBullet(QString name, QString content)
 {
 	if (m_BulletScreen)
 	{
-		m_BulletScreen->ReciverStudent(name, content);
+//		m_BulletScreen->ReciverStudent(name, content);
 	}
 }
 
@@ -1862,7 +1809,7 @@ void UIMainWindow::SendTeacherBullet(QString name, QString content)
 {
 	if (m_BulletScreen)
 	{
-		m_BulletScreen->ReciverTeacher(name, content);
+//		m_BulletScreen->ReciverTeacher(name, content);
 	}
 }
 
@@ -1872,7 +1819,7 @@ void UIMainWindow::SetBullet(int iStatus)
 	{
 		if (iStatus)
 		{
-			m_BulletScreen->showDialog();
+//			m_BulletScreen->showDialog();
 			if (m_HoverWnd)
 			{
 				m_HoverWnd->SetNumber();

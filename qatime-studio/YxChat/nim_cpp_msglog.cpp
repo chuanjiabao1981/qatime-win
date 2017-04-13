@@ -54,19 +54,22 @@ static void CallbackQueryMsg(int res_code
 	, const char *json_extension
 	, const void *callback)
 {
+	int iTyle = 1;		// 0为插入历史聊天 1为插入正常聊天
 	if (callback)
 	{
-		QueryMsglogResult res;
-		ParseMsglogs(PCharToString(result), res);
-
-		QueryMsglogResult* pRes = new QueryMsglogResult;
-		pRes->msglogs_ = res.msglogs_;
-		pRes->count_   = res.count_;
-
-		HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
-		PostMessage(hWnd, MSG_CLIENT_RECORD, (WPARAM)pRes, 0);
+		iTyle = 0;
 		delete callback;
 	}
+
+	QueryMsglogResult res;
+	ParseMsglogs(PCharToString(result), res);
+
+	QueryMsglogResult* pRes = new QueryMsglogResult;
+	pRes->msglogs_ = res.msglogs_;
+	pRes->count_ = res.count_;
+
+	HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
+	PostMessage(hWnd, MSG_CLIENT_RECORD, (WPARAM)pRes, iTyle);
 }
 
 static void CallbackModifyMultipleMsglog(int res_code
@@ -211,10 +214,9 @@ bool MsgLog::QueryMsgOnlineAsync(const std::string &id
 		return false;
 
 	QueryMsgCallback* cb_pointer = nullptr;
-// 	if (cb)
-// 	{
+	if (strcmp(json_extension.c_str(), "") == 0)
 		cb_pointer = new QueryMsgCallback();
-//	}
+
 	NIM_SDK_GET_FUNC(nim_msglog_query_msg_online_async)(id.c_str()
 		, to_type
 		, limit_count

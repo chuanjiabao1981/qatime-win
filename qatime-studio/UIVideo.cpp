@@ -32,8 +32,10 @@ UIVideo::UIVideo(QWidget *parent)
 	, m_CurrentVideoIndex(0)
 	, m_bStopLiveFinish(true)
 	, m_Parent(NULL)
+	, m_NewParent(NULL)
 	, m_pBkImage(NULL)
 	, m_refreshTimer(NULL)
+	, m_bPaint(true)
 {
 	ui.setupUi(this);
 
@@ -60,8 +62,6 @@ UIVideo::UIVideo(QWidget *parent)
 		MessageBox(NULL, L"创建直播失败，请关闭程序重新启动", L"", MB_OK);
 	}
 
-	char* p;
-	Nlss_GetSDKVersion(&p);
 	//默认采集音视频的麦克风以及摄像头设备，所以，先初始化ui控件时，将 音视频设备通通找出来
 	//初始化音视频控件，利用到底层库
 	EnumAvailableMediaDevices();
@@ -150,7 +150,6 @@ void UIVideo::OnLiveStreamStatusNty(EN_NLSS_STATUS enStatus, EN_NLSS_ERRCODE enE
 
 	if (enStatus == EN_NLSS_STATUS_START)
 	{
-/*		m_pThis->emit sig_livestreamSucessed();*/
 	}
 	else if (enStatus == EN_NLSS_STATUS_ERR)
 	{
@@ -161,7 +160,7 @@ void UIVideo::OnLiveStreamStatusNty(EN_NLSS_STATUS enStatus, EN_NLSS_ERRCODE enE
 
 void UIVideo::paintEvent(QPaintEvent *)
 {
-	if (this->isVisible())
+	if (this->isVisible() && m_bPaint)
 	{
 		QPainter p(this);
 		p.setPen(QColor(0x8099be));
@@ -182,7 +181,6 @@ void UIVideo::paintEvent(QPaintEvent *)
 				if (NULL != m_pBkImage)
 					p.drawPixmap(QPoint(0, 0), *m_pBkImage);
 			}
-
 		}
 	}
 }
@@ -192,10 +190,9 @@ bool UIVideo::InitMediaCapture()
 	bool have_video_source = true;
 	bool have_audio_source = true;
 	ST_NLSS_PARAM stParam;
-	Nlss_GetDefaultParam(m_hNlssService, &stParam);
-
+	Nlss_GetDefaultParam(m_hNlssService, &stParam);;
 	m_videoSourceType = EN_NLSS_VIDEOIN_FULLSCREEN;
-
+	
 	switch (m_videoSourceType)
 	{
 	case EN_NLSS_VIDEOIN_FULLSCREEN:
@@ -283,7 +280,6 @@ bool UIVideo::InitMediaCapture()
 		return false;
 	}
 	m_bInited = true;
-
 	delete[]stParam.paOutUrl;
 	return true;
 }
@@ -310,6 +306,9 @@ void UIVideo::EnumAvailableMediaDevices()
 {
 	//默认设置为有桌面，以及部分桌面共享，以及不打开视频
 	Nlss_GetFreeDevicesNum(&m_iVideoDeviceNum, &m_iAudioDeviceNum);
+	qDebug() << "摄像头个数"<<QString::number(m_iVideoDeviceNum);
+	qDebug() << "麦克风个数" << QString::number(m_iAudioDeviceNum);
+	
 	if (m_iVideoDeviceNum <= 0)
 	{
 		MessageBox(NULL, L"请连接摄像头设备", L"答疑时间", MB_OK);
@@ -361,7 +360,7 @@ void UIVideo::InitDeviceParam()
 
 		for (int i = 0; i < m_iVideoDeviceNum; i++)
 		{
-			m_Parent->addVideoDevices(QString::fromUtf8(m_pVideoDevices[i].paFriendlyName));
+			m_NewParent->addVideoDevices(QString::fromUtf8(m_pVideoDevices[i].paFriendlyName));
 		}
 	}
 
@@ -371,7 +370,7 @@ void UIVideo::InitDeviceParam()
 
 		for (int i = 0; i < m_iAudioDeviceNum; i++)
 		{
-			m_Parent->addAudioDevices(QString::fromLocal8Bit(m_pAudioDevices[i].paFriendlyName));
+			m_NewParent->addAudioDevices(QString::fromLocal8Bit(m_pAudioDevices[i].paFriendlyName));
 
 		}
 	}
@@ -405,19 +404,19 @@ void UIVideo::StartLiveVideo()
 	stFilterParam.uiStarty = 10;
 	Nlss_SetVideoWaterMark(m_hNlssService, &stFilterParam);
  	Nlss_SetVideoDisplayRatio(m_hNlssService, 0, 0);
-
+	
  	if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
  	{
  		MessageBox(NULL, L"打开视频采集出错", L"答疑时间", MB_OK);
  		return;
  	}
- 
+	
 	if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
 	{
 		MessageBox(NULL, L"打开视频预览出错，具体错误信息请看返回值", L"答疑时间", MB_OK);
 		return;
 	}
-
+	
 	if (!m_bPreviewing)
 	{
 		m_bPreviewing = true;
@@ -428,6 +427,7 @@ void UIVideo::StartLiveVideo()
 		MessageBox(NULL, L"推流地址为空，推流参数初始化失败", L"答疑时间", MB_OK);
 		return;
 	}
+	m_bPaint = false;
  	m_pWorker->SetMediaCapture(m_hNlssService);
  	emit sig_StartLiveStream();
 	m_bLiving = true;
@@ -456,19 +456,17 @@ void UIVideo::slot_onStartLiveTimeout()
 // 开始直播完成
 void UIVideo::slot_FinishStartLiveStream(int iRet)
 {
+	m_bPaint = true;
 	if ((NLSS_RET)iRet != NLSS_OK)
 	{
-		m_Parent->UpatateLiveStatus(this,false);
+		m_NewParent->UpatateLiveStatus(this, false);
 		m_bLiving = false;
 		qDebug() << "白板打开直播出错，具体错误信息请看返回值";
 	}
 	else
 	{
-		if (m_Parent)
-		{
-			m_Parent->UpatateLiveStatus(this,true);
-			qDebug() << "白板直播成功";
-		}
+		m_NewParent->UpatateLiveStatus(this, true);
+		qDebug() << "白板直播成功";
 	}
 }
 
@@ -476,7 +474,7 @@ void UIVideo::slot_FinishStartLiveStream(int iRet)
 void UIVideo::slot_FinishStopLiveStream(int iRet)
 {
 	// 结束推流完成
-	m_Parent->setLiveBtnEnable(true);
+	m_NewParent->setLiveBtnEnable(true);
 	emit sig_changeLiveStatus(false);
 	return;
 }
@@ -531,14 +529,9 @@ void UIVideo::setLessonName(QString strLessonName)
 
 }
 
-void UIVideo::setPersonNum(int num)
+void UIVideo::SetMainWnd(UIWindowSet* parent)
 {
-
-}
-
-void UIVideo::SetMainWnd(UIMainWindow* wnd)
-{
-	m_Parent = wnd;
+	m_NewParent = parent;
 }
 
 void UIVideo::SetVideoWnd(HWND hWnd)
@@ -549,12 +542,6 @@ void UIVideo::SetVideoWnd(HWND hWnd)
 void UIVideo::SetChangeAudio(int index)
 {
 	m_CurrentMicIndex = index;
-}
-
-void UIVideo::resizeEvent(QResizeEvent *e)
-{
-// 	if (m_BoadWnd)
-// 		m_BoadWnd->resize(e->size().width(),e->size().height());
 }
 
 void UIVideo::setBkImage(QString qsImage)
@@ -574,107 +561,5 @@ void UIVideo::setBkImage(QString qsImage)
 
 void UIVideo::slot_livestreamErrorHappened()
 {
-	m_Parent->ErrorStopLive(this);
-}
-
-bool UIVideo::initDeviceLiveStream(_HNLSSERVICE hNLSService, char *pVideoPath, char *pAudioPath)
-{
-	bool have_video_source = true;
-	bool have_audio_source = true;
-	ST_NLSS_PARAM stParam;
-
-	Nlss_GetDefaultParam(hNLSService, &stParam);
-	stParam.stVideoParam.iOutFps = 15;
-	stParam.stVideoParam.enInType = EN_NLSS_VIDEOIN_FULLSCREEN;
-	stParam.stVideoParam.u.stInCamera.paDevicePath = pVideoPath;
-	stParam.stVideoParam.u.stInCamera.enLvl = EN_NLSS_VIDEOQUALITY_MIDDLE;
-
-	stParam.stAudioParam.iInSamplerate = 44100;
-	stParam.stAudioParam.enInType = EN_NLSS_AUDIOIN_MIC;
-	stParam.stAudioParam.paaudioDeviceName = pAudioPath;
-
-
-	if (have_audio_source && have_video_source)
-		stParam.enOutContent = EN_NLSS_OUTCONTENT_AV;//默认音视频设备都存在则推流音视频，当然，也可以设置成音频/视频，
-	else if (have_audio_source && !have_video_source)
-		stParam.enOutContent = EN_NLSS_OUTCONTENT_AUDIO;
-	else if (have_video_source && !have_audio_source)
-		stParam.enOutContent = EN_NLSS_OUTCONTENT_VIDEO;
-	else if (!have_audio_source && !have_video_source)
-	{
-		return false;
-	}
-
-	stParam.paOutUrl = new char[1024];
-	memset(stParam.paOutUrl, 0, 1024);
-	strcpy(stParam.paOutUrl, "rtmp://pa0a19f55.live.126.net/live/1ecf069a7627422d81d44f949984d051?wsSecret=48f0892626db5036eb034b03f65a79a0&wsTime=1482897970");
-
-	if (NLSS_OK != Nlss_InitParam(hNLSService, &stParam))
-	{
-		delete[]stParam.paOutUrl;
-		return false;
-	}
-	return true;
-}
-
-void UIVideo::testSimpleCamera()
-{
-	int  m_iVideoDeviceNum = 0;
-	int  m_iAudioDeviceNum = 0;
-	ST_NLSS_INDEVICE_INF *m_pVideoDevices;
-	ST_NLSS_INDEVICE_INF *m_pAudioDevices;
-	Nlss_GetFreeDevicesNum(&m_iVideoDeviceNum, &m_iAudioDeviceNum);
-
-	if (m_iVideoDeviceNum <= 0)
-	{
-		return;
-	}
-	else
-	{
-		m_pVideoDevices = new ST_NLSS_INDEVICE_INF[m_iVideoDeviceNum];
-		for (int i = 0; i < m_iVideoDeviceNum; i++)
-		{
-			m_pVideoDevices[i].paPath = new char[1024];
-			m_pVideoDevices[i].paFriendlyName = new char[1024];
-		}
-	}
-
-	if (m_iAudioDeviceNum <= 0)
-	{
-		return;
-	}
-	else
-	{
-		m_pAudioDevices = new ST_NLSS_INDEVICE_INF[m_iAudioDeviceNum];
-
-		for (int i = 0; i < m_iAudioDeviceNum; i++)
-		{
-			m_pAudioDevices[i].paPath = new char[1024];
-			m_pAudioDevices[i].paFriendlyName = new char[1024];
-		}
-	}
-
-
-	Nlss_GetFreeDeviceInf(m_pVideoDevices, m_pAudioDevices);
-
-	_HNLSSERVICE hNLSService = NULL;
-	Nlss_Create(NULL, &hNLSService);
-
-// 	Nlss_SetVideoSamplerCB(hNLSService, previewCB);
-// 	Nlss_SetStatusCB(hNLSService, statusCB);
-
-	initDeviceLiveStream(hNLSService, (char *)m_pVideoDevices[0].paPath, (char *)m_pAudioDevices[0].paPath);
-
-	Nlss_StartVideoCapture(hNLSService);
-	Nlss_StartVideoPreview(hNLSService);
-	Nlss_StartLiveStream(hNLSService);
-
-// 	Sleep(2000);
-// 	Nlss_StopLiveStream(hNLSService);
-// 	Nlss_StopVideoPreview(hNLSService);
-// 	Nlss_StopVideoCapture(hNLSService);
-// 
-// 	Nlss_UninitParam(hNLSService);
-// 	Nlss_Destroy(hNLSService);
-
+	m_NewParent->ErrorStopLive(this);
 }

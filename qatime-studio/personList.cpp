@@ -470,3 +470,29 @@ void  personList::setZoomWidth(int iWidth)
 		}
 	}
 }
+
+// 获取成员
+std::vector<personListBuddy*>  personList::GetBuddy()
+{
+	std::vector<personListBuddy*>	vecBuddy;
+
+	int iCount = this->count();
+	if (iCount == 0)
+		return vecBuddy;
+
+	personListBuddy* Buddy = NULL;
+	for (int i = 0; i < iCount; i++)
+	{
+		QListWidgetItem* pItem = this->item(i);
+		if (pItem)
+		{
+			Buddy = *groupMap.find(pItem);
+			if (Buddy)
+			{
+				vecBuddy.push_back(Buddy);
+			}
+		}
+	}
+
+	return vecBuddy;
+}

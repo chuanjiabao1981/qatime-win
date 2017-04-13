@@ -47,6 +47,7 @@ public:
 		std::string path, std::string sid, std::string msgid, bool bTeacher = true);  // 插入语音聊天
 	void InsertNotice(QString text);												// 消息通知
 	void InsertPic(QPixmap* head, QString name, QString time, QString URL, QString sMsgID="", bool bTeacher = true);	// 插入图片
+	void InsertPicUrl(QPixmap* head, QString name, QString time, QString URL, QString sMsgID = "", bool bTeacher = true);	// 插入图片
 	void InsertEmoji(QPixmap* head, QString name, QString time, QString text, bool bTeacher=true);		// 插入表情
 	void ParseFace(AnimatedTextBrowserA* Anim, QString qContect);					// 解析表情
 	QString BuildFaceToUrl(QString qFace);											// 创建表情url

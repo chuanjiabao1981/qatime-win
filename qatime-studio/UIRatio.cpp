@@ -1,13 +1,33 @@
 #include "UIRatio.h"
+#include <QPainter>
 
 UIRatio::UIRatio(QWidget *parent)
 	: QWidget(parent)
-	, m_pGroup(NULL)
-	, m_pVBox(NULL)
 	, m_Parent(NULL)
 {
 	ui.setupUi(this);
-	SetRatioInfo();
+
+	ui.close_pushButton->setStyleSheet("border-image: url(./images/btn_off.png);");
+	connect(ui.close_pushButton, SIGNAL(clicked()), this, SLOT(clickClose()));
+
+	QFont font;
+	font.setPointSize(10);
+	font.setFamily(QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221"));
+
+	QFile file("styles/ComboBox.qss");
+	file.open(QFile::ReadOnly);
+	QString styleSheet = file.readAll();
+
+	ui.Ratio_comboBox->setStyleSheet(styleSheet);
+	ui.Ratio_comboBox->setMinimumHeight(22);
+	ui.Ratio_comboBox->setFont(font);
+	connect(ui.Ratio_comboBox, SIGNAL(activated(int)), this, SLOT(RatioChanged(int)));
+
+	ui.pushButton->setStyleSheet("border-image: url(./images/set_title.png);");
+	ui.pushButton->installEventFilter(this);
+
+	ui.Ratio_comboBox->addItem("高清", "高清");
+	ui.Ratio_comboBox->addItem("标清", "标清");
 }
 
 UIRatio::~UIRatio()
@@ -18,33 +38,71 @@ UIRatio::~UIRatio()
 	}
 }
 
-void UIRatio::setVideoChange(UIMainWindow* Parent)
+void UIRatio::setVideoChange(UIWindowSet* Parent)
 {
 	m_Parent = Parent;
 }
 
-void UIRatio::SetRatioInfo()
+void UIRatio::clickClose()
 {
-	m_pVBox = new QVBoxLayout;
-	m_pGroup = new QButtonGroup;
-
-	QRadioButton* radio = new QRadioButton();
-	radio->setText("标清  适合网络一般的用户使用");
-	m_pVBox->addWidget(radio);
-	m_pGroup->addButton(radio, 0);
-		
-	QRadioButton* radio1 = new QRadioButton();
-	radio1->setText("高清  适合宽带较高的用户使用");
-	m_pVBox->addWidget(radio1);
-	m_pGroup->addButton(radio1, 1);
-	radio1->setChecked(true);
-	
-	connect(m_pGroup, SIGNAL(buttonToggled(int, bool)), this, SLOT(onRadioClick(int, bool)));
-	ui.Ratio_groupBox->setLayout(m_pVBox);
+	hide();
 }
 
-void UIRatio::onRadioClick(int id, bool bCheck)
+void UIRatio::RatioChanged(int i)
 {
-	m_Parent->setRatioChangeIndex(m_pGroup->checkedId());
-	hide();
+	if (i == 0)
+	{
+		m_Parent->setRatioChangeIndex("高清");
+	}
+	else if (i == 1)
+	{
+		m_Parent->setRatioChangeIndex("标清");
+	}
+}
+
+void UIRatio::paintEvent(QPaintEvent *event)
+{
+	QPainterPath path;
+	QPainter painter(this);
+
+	QColor color(217, 217, 217);
+
+	path.addRect(0, 0, this->width() - 1, this->height() - 1);
+	painter.setPen(color);
+	painter.drawPath(path);
+}
+
+// 拖动标题做的处理
+bool UIRatio::eventFilter(QObject *target, QEvent *event)
+{
+	if (target == ui.pushButton)
+	{
+		QMouseEvent* pMe = static_cast<QMouseEvent*>(event);
+		if (event->type() == QEvent::MouseButtonPress)
+		{
+			m_startPos = pMe->globalPos();
+			m_WndCurPos = this->pos();
+		}
+		else if (event->type() == QEvent::MouseMove)
+		{
+			m_clickPos = pMe->globalPos();
+			this->move(m_WndCurPos + (m_clickPos - m_startPos));
+		}
+	}
+	return false;
+}
+
+void UIRatio::focusOutEvent(QFocusEvent* e)
+{
+	QPoint pt = mapFromGlobal(QCursor::pos());
+	pt.setX(pt.x() + geometry().x());
+	pt.setY(pt.y() + geometry().y());
+	QRect rc = this->geometry();
+	if (rc.contains(pt))
+	{
+		setFocus();
+		return;
+	}
+
+	this->hide();
 }

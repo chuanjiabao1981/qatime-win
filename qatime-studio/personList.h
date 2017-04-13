@@ -38,6 +38,7 @@ public:
 	void setAllWidth(int iWidth);
 	void setZoomWidth(int iWidth);
 	void setBuddyWidth(int iWidth);
+	std::vector<personListBuddy*> GetBuddy();
 signals:
 	void signalChickChage(int,QString, QString);
 public slots:

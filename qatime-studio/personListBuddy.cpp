@@ -99,8 +99,8 @@ bool personListBuddy::eventFilter(QObject *target, QEvent *event)
 
 void personListBuddy::setMute(bool bMute)
 {
-	if (button->isChecked() == bMute)
-		return;
+// 	if (button->isChecked() == bMute)
+// 		return;
 
 	button->setChecked(bMute);
 	emit emitRadioChange(bMute, m_ID, name->text());

@@ -1,15 +1,34 @@
 #include "UIAudiochange.h"
+#include <QPainter>
 
 UIAudioChange::UIAudioChange(QWidget *parent)
 	: QWidget(parent)
 	, m_Parent(NULL)
-	, m_pAudioGroup(NULL)
-	, iCount(0)
 {
 	ui.setupUi(this);
-	m_pVBox = new QVBoxLayout;
-	m_pAudioGroup = new QButtonGroup;
-	connect(m_pAudioGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(onRadioClick(QAbstractButton*)));
+	setAutoFillBackground(true);
+	QPalette p = palette();
+	p.setColor(QPalette::Window, QColor(255, 255, 255));
+	setPalette(p);
+
+	ui.close_pushButton->setStyleSheet("border-image: url(./images/btn_off.png);");
+	connect(ui.close_pushButton, SIGNAL(clicked()), this, SLOT(clickClose()));
+
+	QFont font;
+	font.setPointSize(10);
+	font.setFamily(QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221"));
+
+	QFile file("styles/ComboBox.qss");
+	file.open(QFile::ReadOnly);
+	QString styleSheet = file.readAll();
+
+	ui.Audio_comboBox->setStyleSheet(styleSheet);
+	ui.Audio_comboBox->setMinimumHeight(22);
+	ui.Audio_comboBox->setFont(font);
+	connect(ui.Audio_comboBox, SIGNAL(activated(int)), this, SLOT(AudioChanged(int)));
+
+	ui.pushButton->setStyleSheet("border-image: url(./images/set_title.png);");
+	ui.pushButton->installEventFilter(this);
 }
 
 UIAudioChange::~UIAudioChange()
@@ -20,38 +39,72 @@ UIAudioChange::~UIAudioChange()
 	}
 }
 
-void UIAudioChange::setAudioChange(UIMainWindow* Parent)
+void UIAudioChange::setAudioChange(UIWindowSet* Parent)
 {
 	m_Parent = Parent;
 }
 
 
-void UIAudioChange::onRadioClick(QAbstractButton *btn)
+void UIAudioChange::setAudioParam(QString strName, QString path)
 {
-	QRadioButton* radio = (QRadioButton*)btn;
-	QString strpath = radio->accessibleDescription();
-//	m_Parent->setAudioChangeIndex(strpath);
+	ui.Audio_comboBox->addItem(strName, path);
+}
+
+void UIAudioChange::AudioChanged(int index)
+{
+	if (m_Parent)
+		m_Parent->setAudioChangeIndex(index);
+}
+
+void UIAudioChange::paintEvent(QPaintEvent *event)
+{
+	QPainterPath path;
+	QPainter painter(this);
+
+	QColor color(217, 217, 217);
+
+	path.addRect(0, 0, this->width() - 1, this->height() - 1);
+	painter.setPen(color);
+	painter.drawPath(path);
+}
+
+// 拖动标题做的处理
+bool UIAudioChange::eventFilter(QObject *target, QEvent *event)
+{
+	if (target == ui.pushButton)
+	{
+		QMouseEvent* pMe = static_cast<QMouseEvent*>(event);
+		if (event->type() == QEvent::MouseButtonPress)
+		{
+			m_startPos = pMe->globalPos();
+			m_WndCurPos = this->pos();
+		}
+		else if (event->type() == QEvent::MouseMove)
+		{
+			m_clickPos = pMe->globalPos();
+			this->move(m_WndCurPos + (m_clickPos - m_startPos));
+		}
+	}
+
+	return false;
+}
+
+void UIAudioChange::clickClose()
+{
 	hide();
 }
 
-void UIAudioChange::SetAudioInfo(int iAudioNum, QString strName, QString path)
+void UIAudioChange::focusOutEvent(QFocusEvent* e)
 {
-	if (iAudioNum == 0)
+	QPoint pt = mapFromGlobal(QCursor::pos());
+	pt.setX(pt.x() + geometry().x());
+	pt.setY(pt.y() + geometry().y());
+	QRect rc = this->geometry();
+	if (rc.contains(pt))
+	{
+		setFocus();
 		return;
+	}
 
-	int height = iAudioNum * 30;
-	ui.audio_groupBox->setMinimumHeight(height);
-
-	QRadioButton* radio = new QRadioButton();
-	radio->setText(strName);
-	radio->setAccessibleDescription(path);
-	m_pVBox->addWidget(radio);
-	m_pAudioGroup->addButton(radio, iCount);
-
-	if (iCount == 0)
-		radio->setChecked(true);
-
-	ui.audio_groupBox->setLayout(m_pVBox);
-
-	iCount++;
+	this->hide();
 }

@@ -12,9 +12,11 @@
 #include "UIMainwindow.h"
 #include <QSystemTrayIcon>
 #include "UITraymenu.h"
+#include "UIMainNewWindow.h"
 
 #pragma execution_character_set("utf-8")
 
+class UIMainNewWindow;
 class UIMainWindow;
 class UITrayMenu;
 
@@ -68,7 +70,8 @@ private:
 	QUrl url;
 	QNetworkAccessManager manager;
 	QNetworkReply *reply;
-	UIMainWindow* mainWin;
+//		UIMainWindow* mainWin;
+	UIMainNewWindow* mainWin;
 	UITrayMenu*	  m_TrayMenu;
 
 	// 自动登录时需要
@@ -81,7 +84,7 @@ private:
 	QString m_version;
 	QSystemTrayIcon *trayIcon;
 	QMenu * menu;
-
+	bool							m_EnvironmentalFormally;	// 环境类型
 public:
 	void ReturnLogin();			// 重新登陆
 	void ReadSetting();			// 读取配置文件路径信息
@@ -91,6 +94,7 @@ public:
 	void CreateTray();			// 创建托盘
 	void CloseTray();
 	QString parse(QString str);	// 解析密码
+	void SetEnvironmental();	// 设置当前环境
 };
 
 #endif // LOGINWINDOW_H

@@ -33,6 +33,7 @@ protected Q_SLOTS:
 	void slot_faildclicked(CBtnPix*);
 	void slot_scrollDown();
 	void slot_Audioclicked(std::string, std::string, std::string, bool);
+	void slot_Btnclicked();
 
 private:
 	Ui::UITalkRecord ui;
@@ -47,6 +48,8 @@ private:
 public:
 	QVBoxLayout*		m_Ver;
 
+	QHBoxLayout*		m_btnLayout;
+	QPushButton*		m_btn;
 private:
 	bool isDigitStr(QString str);
 	void style(QScrollArea *style);
@@ -66,6 +69,7 @@ public:
 	void ClearAll();																// 清空
 	void DelaySrcoll();
 	void stopAudio(char* msgid);													// 停止语音
+	void InsertBtn();																// 点击查看更多
 };
 
 #endif // UITalkRecord_H

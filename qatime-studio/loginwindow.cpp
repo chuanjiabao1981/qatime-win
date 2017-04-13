@@ -32,12 +32,16 @@ LoginWindow::LoginWindow(QWidget *parent)
 	, mainWin(NULL)
 	, trayIcon(NULL)
 	, m_TrayMenu(NULL)
+	, m_EnvironmentalFormally(true)
 {
 	ui.setupUi(this);
 	setAutoFillBackground(true);;
 	QPalette p = palette();
 	p.setColor(QPalette::Window, QColor(255,255,255));
 	setPalette(p);
+
+	// 检查环境
+	SetEnvironmental();
 
 	connect(ui.login_pushBtn, SIGNAL(clicked()), this, SLOT(OnLogIn()));
 	connect(ui.homepage_pushBtn, SIGNAL(clicked()), this, SLOT(BrowseHomePage()));
@@ -138,12 +142,12 @@ void LoginWindow::OnLogIn()
 
 	QString str = ui.UserPass_Edit->text();
 	str = parse(str);
-#ifdef _DEBUG
-  	url = QUrl("http://testing.qatime.cn/api/v1/sessions");
-#else
-	url = QUrl("https://qatime.cn/api/v1/sessions");
-#endif
-	
+
+	if (m_EnvironmentalFormally)
+		url = QUrl("https://qatime.cn/api/v1/sessions");
+	else
+		url = QUrl("http://testing.qatime.cn/api/v1/sessions");
+
 	QByteArray append("client_type=pc");
 	append.append("&login_account=");
 	append += ui.UserName_Edit->text();
@@ -167,18 +171,6 @@ void LoginWindow::loginFinished()
 	QJsonObject data = obj["data"].toObject();
 	QJsonObject error = obj["error"].toObject();
 
-	// 测试
-// 	mainWin = new UIMainWindow();
-// 	mainWin->setWindowFlags(Qt::FramelessWindowHint);
-// 	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
-// 	mainWin->setRemeberToken(m_teacherToken);
-// 	mainWin->setTeacherInfo(data["user"].toObject());
-// 	mainWin->ShowAuxiliary();
-// 	mainWin->setLoginWindow(this);
-// 	mainWin->show();
-// 	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-// 	this->hide();
-// 	return;
 	// 记住老师信息，用于自动登录
 	if (obj["status"].toInt() == 1 && data.contains("remember_token"))
 	{
@@ -191,16 +183,27 @@ void LoginWindow::loginFinished()
 		m_accid = objInfo["chat_account"].toObject()["accid"].toString();
 		m_accidToken = objInfo["chat_account"].toObject()["token"].toString();
 
-		mainWin = new UIMainWindow();
+// 		mainWin = new UIMainWindow();
+// 		mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+// 		mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
+// 		mainWin->setRemeberToken(m_teacherToken);
+// 		mainWin->setTeacherInfo(data["user"].toObject());
+// 		mainWin->ShowAuxiliary();
+// 		mainWin->setLoginWindow(this);		
+// 		mainWin->setMainTitle(m_version);
+// 		mainWin->show();
+// 		SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+		mainWin = new UIMainNewWindow();
 		mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 		mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
+		mainWin->SetEnvironmental(m_EnvironmentalFormally);
 		mainWin->setRemeberToken(m_teacherToken);
 		mainWin->setTeacherInfo(data["user"].toObject());
-		mainWin->ShowAuxiliary();
-		mainWin->setLoginWindow(this);		
-		mainWin->setMainTitle(m_version);
+		mainWin->ShowLesson();
+		mainWin->setLoginWindow(this);
+		mainWin->setVersion(m_version);
+		mainWin->resize(1, 1);
 		mainWin->show();
-		SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 		this->hide();
 	}
 	else if (error["code"].toInt() == 1001)
@@ -230,6 +233,31 @@ void LoginWindow::loginFinished()
 	ui.UserPass_Edit->setText(QString(""));
 
 	RemeberPassword();
+}
+
+void LoginWindow::AutoLogin()
+{
+// 	mainWin = new UIMainWindow();
+// 	mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+// 	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
+// 	mainWin->setRemeberToken(m_teacherToken);
+// 	mainWin->setAutoTeacherInfo(m_teacherID, m_teacherName, m_teacherUrl, m_accid, m_accidToken);
+// 	mainWin->ShowAuxiliary();
+// 	mainWin->setLoginWindow(this);
+// 	mainWin->setMainTitle(m_version);
+// 	mainWin->show();
+// 	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	mainWin = new UIMainNewWindow();
+	mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
+	mainWin->SetEnvironmental(m_EnvironmentalFormally);
+	mainWin->setRemeberToken(m_teacherToken);
+	mainWin->setAutoTeacherInfo(m_teacherID, m_teacherName, m_teacherUrl, m_accid, m_accidToken);
+	mainWin->ShowLesson();
+	mainWin->setLoginWindow(this);
+	mainWin->setVersion(m_version);
+	mainWin->resize(1, 1);
+	mainWin->show();
 }
 
 void LoginWindow::BrowseHomePage()
@@ -361,20 +389,6 @@ void LoginWindow::ReturnLogin()
 	this->show();
 }
 
-void LoginWindow::AutoLogin()
-{
-	mainWin = new UIMainWindow();
-	mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
-	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
- 	mainWin->setRemeberToken(m_teacherToken);
- 	mainWin->setAutoTeacherInfo(m_teacherID, m_teacherName,m_teacherUrl,m_accid,m_accidToken);
- 	mainWin->ShowAuxiliary();
- 	mainWin->setLoginWindow(this);
-	mainWin->setMainTitle(m_version);
-	mainWin->show();
-	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-}
-
 bool LoginWindow::IsAutoLogin()
 {
 	return (bool)m_iRemeber;
@@ -383,13 +397,16 @@ bool LoginWindow::IsAutoLogin()
 void LoginWindow::Checking()
 {
 	QString strUrl;
-#ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
-	strUrl.replace("{teacher_id}", m_teacherID);
-#else
-	strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
-	strUrl.replace("{teacher_id}", m_teacherID);
-#endif
+	if (m_EnvironmentalFormally)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
+		strUrl.replace("{teacher_id}", m_teacherID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
+		strUrl.replace("{teacher_id}", m_teacherID);
+	}
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -445,8 +462,6 @@ bool LoginWindow::eventFilter(QObject *target, QEvent *event)
 
 void LoginWindow::CreateTray()
 {
-	QAction* showAction = new QAction(tr("显示主窗口"), this);
-	connect(showAction, SIGNAL(triggered()), this, SLOT(ShowMain()));
 	QAction* returnAction = new QAction(tr("切换账号"), this);
 	connect(returnAction, SIGNAL(triggered()), this, SLOT(ReturnAccount()));
 	QAction* closeAction = new QAction(tr("关闭"), this);
@@ -454,7 +469,6 @@ void LoginWindow::CreateTray()
 
 
 	menu = new QMenu;
-	menu->addAction(showAction);
 	menu->addAction(returnAction);
 	menu->addAction(closeAction);
 
@@ -482,26 +496,12 @@ void LoginWindow::trayiconActivated(QSystemTrayIcon::ActivationReason reason)
 		break;
 	case QSystemTrayIcon::Context:
 		{
-// 			QPoint pt;
-// 			pt = mapToGlobal(menu->pos());
-// 			int i = 0;
-// 			i++; 
-			
-// 			if (mainWin == NULL)
-// 				return;
-// 			
-// 			QPoint pt;
-// 			pt = mapToGlobal(QCursor::pos());
-// 			m_TrayMenu->move(pt.x() - 92, pt.y() - 100);
-// 			m_TrayMenu->show();
-// 			SetWindowPos((HWND)m_TrayMenu->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-// 			m_TrayMenu->setFocus();
 		}
 		break;
 	case QSystemTrayIcon::DoubleClick:
 		{
-			int i = 0;
-			i++;
+			if (mainWin)
+				mainWin->ShowCourse();
 		}
 		break;
 	case QSystemTrayIcon::Trigger:
@@ -530,20 +530,22 @@ void LoginWindow::CloseTray()
 
 void LoginWindow::ShowMain()
 {
-	if (mainWin)
-		mainWin->ShowMain();
 }
 
 void LoginWindow::CloseWindow()
 {
-	if (mainWin)
-		mainWin->MenuClose();
+	if (mainWin->IsMayClose())
+	{
+		exit(0);
+	}
 }
 
 void LoginWindow::ReturnAccount()
 {
-	if (mainWin)
-		mainWin->MenuRetrun();
+	if (mainWin->IsMayClose())
+	{
+		ReturnLogin();
+	}
 }
 
 QString LoginWindow::parse(QString str)
@@ -645,4 +647,13 @@ QString LoginWindow::parse(QString str)
 		encode += s;
 	}
 	return encode;
+}
+
+void LoginWindow::SetEnvironmental()
+{
+	QFile file("./EnvironmentalTest.txt");
+	if (file.exists())
+		m_EnvironmentalFormally = false;
+	else
+		m_EnvironmentalFormally = true;
 }

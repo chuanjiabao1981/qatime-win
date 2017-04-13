@@ -11,10 +11,12 @@
 #include <QJsonArray>
 #include <QTimer>
 #include "uimainwindow.h"
+#include "UIWindowset.h"
 
 #pragma execution_character_set("utf-8")
 
 class UIMainWindow;
+class UIWindowSet;
 class LiveStatusManager : public QObject
 {
 	Q_OBJECT
@@ -28,6 +30,7 @@ private:
 	QNetworkAccessManager	manager;
 	QNetworkReply*			reply;
 	UIMainWindow*			m_parent;
+	UIWindowSet*			m_newParent;
 	QString					m_sToken;				//token
 	QString					m_sLiveToken;			//心跳token
 	QString					m_lessonID;				//课程ID
@@ -47,6 +50,7 @@ private:
 	QTimer*					m_SwitchFailTimer;		//切换状态失败定时器
 	int						m_iBoardStatus;			//白板直播状态
 	int						m_iCameraStatus;		//摄像头直播状态
+	bool					m_EnvironmentalTyle;	//当前环境
 private slots :
 	void GetRtmpFailTimer();						//获取推流地址失败重试定时器信号槽
 	void HeartBeatTimer();							//心跳定时器信号槽
@@ -61,7 +65,7 @@ private:
 	void FinishStopLive();							// 返回结束直播请求的状态
 	void FinishCameraSwitch();						// 返回摄像头切换结果
 public:
-	void setMainWindow(UIMainWindow* parent);									// 设置父窗口
+	void setMainWindow(UIWindowSet* parent);									// 设置父窗口
 	void GetRtmpAddressAndHeartBeat(QString lessonID, QString sToken);			// 获取白板、摄像头、推流地址 及 心跳间隔
 	void SendStartLiveHttpMsg(int iBoard, int iCamera,QString sLessonid,
 								QString sToken);								// 往服务器发送直播开始消息
@@ -70,6 +74,7 @@ public:
 	void StopTimer();															// 停止所有计时器
 	void SendCameraSwitchMsg(int iBoard, int iCamera);							// 发送摄像头切换状态消息
 	void RequestError(QJsonObject& error, bool bTrue=true);						// 出现错误
+	void SetEnvironmental(bool bTyle);
 };
 
 #endif // LIVESTATUSMANAGER_H

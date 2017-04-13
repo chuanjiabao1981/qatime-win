@@ -1,7 +1,6 @@
 <RCC>
   <qresource prefix="LoginWindow">
     <file>images/pic.png</file>
-    <file>images/RangeTuo.png</file>
     <file>images/fabu.png</file>
     <file>images/cancel.png</file>
     <file>images/ok1.png</file>
@@ -28,7 +27,6 @@
     <file>images/switch.png</file>
     <file>images/camera_pack.png</file>
     <file>images/msgRecord.png</file>
-    <file>images/eyes.png</file>
     <file>images/clearScreen.png</file>
     <file>images/face.png</file>
     <file>images/AuxiliaryPanelBack.png</file>
@@ -38,7 +36,6 @@
     <file>images/corner.png</file>
     <file>images/app.png</file>
     <file>images/drawback.png</file>
-    <file>images/AuxiliaryPanelBack.png</file>
     <file>images/teacherPhoto.png</file>
     <file>images/lesson.png</file>
     <file>images/AuxiliaryBtn.png</file>
@@ -49,7 +46,6 @@
     <file>images/userpass.png</file>
     <file>images/logo.png</file>
     <file>images/chat.png</file>
-    <file>images/expansion.png</file>
     <file>images/close.png</file>
     <file>images/minsize.png</file>
 	<file>images/Bullet.png</file>
@@ -59,5 +55,21 @@
 	<file>images/bulletClose_b.png</file>
 	<file>images/bulletSet_b.png</file>
 	<file>images/bulletTalk_b.png</file>
+	<file>images/tabAll_hover.png</file>
+	<file>images/tabAll_nor.png</file>
+	<file>images/tab1v1_hover.png</file>
+	<file>images/tab1v1_nor.png</file>
+	<file>images/tabToday_hover.png</file>
+	<file>images/tabToday_nor.png</file>
+	<file>images/login_min.png</file>
+	<file>images/session.png</file>
+	<file>images/todayenter_nor.png</file>
+	<file>images/todayenter_hover.png</file>
+	<file>images/todayicon.png</file>
+	<file>images/login_max.png</file>
+	<file>images/sendmessage.png</file>
+	<file>images/chatBar.png</file>
+	<file>images/noselect_close.png</file>
+	<file>images/select_close.png</file>
   </qresource>
 </RCC>

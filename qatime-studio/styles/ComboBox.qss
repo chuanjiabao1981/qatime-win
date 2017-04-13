@@ -1,7 +1,7 @@
 QComboBox {
     color:#323232;
 	background-color: #FFFFFF;
-    border: 0px solid #CCCCCC;
+    border: 1px solid #CCCCCC;
     border-radius: 0px;
     padding: 1px;
     font: 12px "Microsoft YaHei UI";	

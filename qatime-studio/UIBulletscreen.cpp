@@ -213,7 +213,7 @@ void UIBulletScreen::slot_onDelayTimeout()
 	}
 }
 
-void UIBulletScreen::setMainWindow(UIMainWindow* parent)
+void UIBulletScreen::setMainWindow(UIWindowSet* parent)
 {
 	m_parent = parent;
 }
@@ -354,9 +354,6 @@ void UIBulletScreen::DeleteTalkData()
 {
 	// 删除聊天数据
 	ui.textBrowser->clear();
-
-	// ToMainWindow发送弹幕关闭消息
-//	m_parent->closeBulletMsg();
 }
 
 void UIBulletScreen::SetDialog()
@@ -421,8 +418,11 @@ void UIBulletScreen::SetFontSize(int iSize)
 	else if (iSize == 14)
 		m_iFontHeight = 27;
 }
-void UIBulletScreen::ReciverStudent(QString name, QString content)
+void UIBulletScreen::ReciverStudent(QString name, QString content, QString chatid)
 {
+	if (chatid != m_chatID)
+		return;
+
 	for (int i = 1; i < 75; i++)
 	{
 		QString face = "";
@@ -437,18 +437,6 @@ void UIBulletScreen::ReciverStudent(QString name, QString content)
 	ui.textBrowser->append("");
 	ui.textBrowser->moveCursor(QTextCursor::End);
 
-	int iLine = ui.textBrowser->document()->lineCount();
-	// 重新设置高度
-// 	int iHeight = 65 + (iLine - 1) * m_iFontHeight;
-// 	if (width() == 24 || width() == 74)
-// 		resize(280, iHeight);
-// 	else if (windowChanged())
-// 		resize(width(), height());
-// 	else if (height() >= 300)
-// 		resize(width(), height());
-// 	else
-// 		resize(width(), iHeight);
-
 	WidgetHide(true);
 	m_bTalk = false;
 }
@@ -461,8 +449,11 @@ bool UIBulletScreen::windowChanged()
 		return false;
 }
 
-void UIBulletScreen::ReciverTeacher(QString name, QString content)
+void UIBulletScreen::ReciverTeacher(QString name, QString content, QString chatid)
 {
+	if (chatid != m_chatID)
+		return;
+
 	for (int i = 1; i < 75; i++)
 	{
 		QString face = "";
@@ -494,8 +485,9 @@ void UIBulletScreen::ReciverTeacher(QString name, QString content)
 	m_bTalk = false;
 }
 
-void UIBulletScreen::showDialog()
+void UIBulletScreen::showDialog(QString chatid)
 {
+	m_chatID = chatid;
 	show();
 	WidgetHide(false);
 	resize(24, 24);

@@ -24,9 +24,33 @@ void Lesson::readJson(const QJsonObject &json)
 // 		mStatus = "ready";
     
 	// 上课时间
-	mStartTime = json["class_date"].toString();
-	mStartTime += " ";
-	mStartTime += json["live_time"].toString();
+	mStartTime = json["live_time"].toString();
+	mStartTime = mStartTime.mid(0, 5);
+
+	// 辅导班ID
+	mCourseID = json["course_id"].toString();
+
+	// 辅导班名字
+	mCourseName = json["course_name"].toString();
+
+	// 日期
+	mDate = json["class_date"].toString();
+
+	// 白板推流地址
+	mBoardUrl = json["board_pull_stream"].toString();
+
+	// 摄像头推流地址
+	mCameraUrl = json["camera_pull_stream"].toString();
+}
+
+QString Lesson::BoardUrl()
+{
+	return mBoardUrl;
+}
+
+QString Lesson::CameraUrl()
+{
+	return mCameraUrl;
 }
 
 int Lesson::courseId()
@@ -100,4 +124,19 @@ QString Lesson::ChinaLessonStatus()
 	}
 
 	return strChinaStatus;
+}
+
+QString Lesson::Date()
+{
+	return mDate;
+}
+
+QString Lesson::CourseName()
+{
+	return mCourseName;
+}
+
+QString Lesson::CourseID()
+{
+	return mCourseID;
 }

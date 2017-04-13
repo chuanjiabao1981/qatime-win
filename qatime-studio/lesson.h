@@ -17,13 +17,24 @@ public:
 	QString LessonStatus();
 	QString ChinaLessonStatus();
 	QString LessonID();
+	QString CourseID();
+	QString CourseName();
+	QString Date();
 
+	QString BoardUrl();
+	QString CameraUrl();
 private:
     int mId;
     int mCourseId;
     QString mName;			// 课程名称
 	QString mStatus;		// 课程状态
 	QString mStartTime;		// 上课时间
+	QString mCourseID;		// 辅导班ID
+	QString mCourseName;	// 辅导班名字
+	QString	mDate;			// 日期 （2017-2-28）
+
+	QString	mBoardUrl;		// 白板URL
+	QString mCameraUrl;		// 摄像头URL
 };
 
 #endif // LESSON_H

@@ -4,6 +4,7 @@
   * @author Xds
   * @date 2016/9/19
   */
+
 //课程状态
 #define MSG_LESSON_STATUS_INIT			"未开始"
 #define MSG_LESSON_STATUS_READY			"待上课"
@@ -29,12 +30,10 @@
 #define MSG_PICTURE_PROCESS				MSG_START_COUNT	+ 6		//图片发送进度
 #define MSG_SEND_MSG_STATUS				MSG_START_COUNT	+ 7		//发送消息状态
 #define MSG_SEND_AUDIO_MSG				MSG_START_COUNT	+ 8		//发送语音消息停止
-
-// 和qatime_video交互用到的消息
-struct VideoInfo
-{
-	std::string url; //推流地址
-};
+#define MSG_SEND_AUDIO_FINISH_MSG		MSG_START_COUNT	+ 9		//发送语音录制完成消息
+#define MSG_LOAD_AUDIO_SUC_MSG			MSG_START_COUNT	+ 10	//发送下载成功消息
+#define MSG_LOAD_AUDIO_FAIL_MSG			MSG_START_COUNT	+ 11	//发送下载失败消息
+#define MSG_UPDATE_MSG					MSG_START_COUNT	+ 12	//发送更新消息
 
 #define MSG_VIDEO_CUSTOM				4000		
 #define MSG_VIDEO_HWND					MSG_VIDEO_CUSTOM + 1	//video窗口句柄
@@ -52,6 +51,7 @@ struct VideoInfo
 #define MSG_VIDEO_CONTINUE				MSG_VIDEO_CUSTOM + 13   //直播继续
 #define MSG_DEVICE_BACK					MSG_VIDEO_CUSTOM + 14	//推黑色背景流
 #define MSG_VIDEO_LIVE_SUC				MSG_VIDEO_CUSTOM + 15   //直播开始成功
+#define MSG_VIDEO_PATH					MSG_VIDEO_CUSTOM + 16	//接收播放路径
 
 // 直播摄像头
 #define MSG_CAMERA_CUSTOM				4200	

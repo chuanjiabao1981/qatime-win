@@ -10,9 +10,15 @@ void Course::readJson(const QJsonObject &json)
 {
     mId = json["id"].toInt();
     mName = json["name"].toString();
-    mStatus = json["status"].toInt();
+    mStatus = json["status"].toString();
 	mChatId = json["chat_team_id"].toString();
 
+	QString subject = json["subject"].toString();
+	mGrade = json["grade"].toString();
+	mGrade += subject;
+
+	mTeacherName = json["teacher_name"].toString();
+	mPic = json["publicize"].toString();
 	// ½ø¶È
 	int preset_lesson = json["preset_lesson_count"].toInt();
 	int completed_lesson = json["completed_lesson_count"].toInt();
@@ -55,7 +61,7 @@ QString Course::progress() const
 	return mProgress;
 }
 
-int Course::status()
+QString Course::status()
 {
     return mStatus;
 }
@@ -68,4 +74,19 @@ QJsonArray Course::JsonLesson()
 QString Course::ChatId()
 {
 	return mChatId;
+}
+
+QString Course::Grade()
+{
+	return mGrade;
+}
+
+QString Course::TeacherName()
+{
+	return mTeacherName;
+}
+
+QString Course::PicUrl()
+{
+	return mPic;
 }

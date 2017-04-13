@@ -10,6 +10,12 @@
     <height>236</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>260</width>
+    <height>236</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>UIScreenTip</string>
   </property>
@@ -87,6 +93,9 @@ color: rgb(102, 102, 102);</string>
     <string>答疑时间直播助手默认已开启全屏
 采集模式，点击开始即可直播！
 （最小化可隐藏至屏幕右边缘）</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
   <widget class="QCheckBox" name="tip_checkBox">

@@ -9,6 +9,7 @@
 #include "UITalk.h"
 #include "UITalkRecord.h"
 #include <vector>
+#include "UIWindowset.h"
 
 //---云信
 #include "nim_client_def.h"
@@ -29,7 +30,7 @@
 class UIMainWindow;
 class UITalk;
 class UITalkRecord;
-
+class UIWindowSet;
 struct MyImageInfo
 {
 	QPixmap			PhotoImg;		//聊天头像
@@ -50,10 +51,11 @@ public:
 	void stringToHtml(QString &str, QColor crl);			//QString转htlm带颜色
 	void stringToHtmlPos(QString &str, QColor crl);			//QString转html带颜色切位置上移
 	void imgPathToHtml(QString &path);						//edit 设置图片
-	void setMainWindow(UIMainWindow* parent);
+	void setMainWindow(UIWindowSet* parent);
 public slots:
 	void setBrow(QString path);
-
+signals:
+	void sig_StartLoading();
 private:
 	Ui::UIChatRoom ui;
 	
@@ -70,7 +72,6 @@ private:
 	bool							m_isBorw;//是否有表情
 	std::string						m_CurChatID;		// 当前会话窗口ID 
 	QString							m_CurCourseID;		// 当前辅导班ID
-	QString							m_accid;			// 云信用户ID
 	QString							m_token;			// 云信用户密码
 	QString							m_appKey;			// 云信key
 	bool							m_bLogin;			// 是否登录
@@ -86,7 +87,7 @@ private:
 	QMap<QString, QString>			m_StudentInfo;		// key ：accid 
 	QString							mRemeberToken;
 	std::string						m_AddMemberID;		// 新加入的成员ID
-	UIMainWindow*					m_parent;			// 主窗口对象
+	UIWindowSet*					m_parent;			// 主窗口对象
 	int								m_studentNum;		// 当前学生数量
 	int								m_proclamationHeight;// 公告高度
 	std::vector<MyImageInfo>		m_VerReceiveImg;	// 接收的图片消息队列
@@ -94,13 +95,19 @@ private:
 	int								m_drawingWidth;		// 拉动改变的宽度
 	bool							m_bClickPic;		// 当前是否点击图片
 	std::string						m_AudioPath;		// 语音消息路径
+	QString							m_CurTeacherID;		// 老师当前ID
+	QString							m_teacherName;		// 老师名字
+	QString							m_accid;			// 老师当前云信ID
+	int								m_UnreadCount;		// 消息未读数
+	bool							m_bPerson;			// 是否请求完成员
+	bool							m_EnvironmentalTyle;// 环境变量
 	void initEmotion();
 public:
 	QString							m_TeachterName;		// 老师名字
 protected:
 	virtual bool eventFilter(QObject *watched, QEvent *event);
 	void mousePressEvent(QMouseEvent *event);
-private slots:
+public slots:
 	void clickTalk();									// 弹出聊天框
 	void clickStudentList();							// 弹出学生列表
 	void clickProclamation();							// 弹出公告
@@ -113,7 +120,7 @@ private slots:
 	void choseTime(QDate);								// 点击某一时间的槽函数
 	void forwardTime();									// 点击往前一天的槽函数
 	void afterTime();									// 点击往后一天的槽函数
-	void RecordMoved(int iPos);							// 消息记录滚动条
+	void RecordMoved();									// 消息记录滚动条
 	void announce();									// 点击【发布公告】按钮
 	void putTalk();										// 点击【发布】按钮
 	void putTalkCancel();								// 点击【取消发布】按钮
@@ -164,32 +171,33 @@ private:
 	std::string GetFileMD5(QString path);
 	long		GetFileSize(QString path);
 public:
-	void	SendImage(const std::wstring src, QString &filename, QString msgid="");
-	void	setChatInfo(QJsonObject &chatInfo, QString token);	// 设置云信账户信息
-	bool	ReceiverMsg(nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
-	void	ReceiverRecordMsg(nim::QueryMsglogResult* pMsg);	// 接收历史消息记录
-	void	ReceiverLoginMsg(nim::LoginRes* pRes);				// 接收登录结果
-	void	ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg); //接收群成员信息
-	void	setCurChatID(QString chatID, QString courseid);		// 设置当前窗口会话ID,用于接收消息时比较
-	void	setKeyAndLogin(QString key);						// 设置appkey并登录（获取完Key之后，就可以直接登录）
-	bool	IsLogin();											// 是否登录
-	bool	IsCurChatRoom(QString chatID);						// 是否是当前会话ID
+	void		SendImage(const std::wstring src, QString &filename, QString msgid="");
+	void		setChatInfo(QJsonObject &chatInfo, QString token);	// 设置云信账户信息
+	bool		ReceiverMsg(nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
+	void		ReceiverRecordMsg(nim::QueryMsglogResult* pMsg);	// 接收历史消息记录
+	void		ReceiverLoginMsg(nim::LoginRes* pRes);				// 接收登录结果
+	void		ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg); //接收群成员信息
+	void		setCurChatID(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, QString accid, int UnreadCount);		// 设置当前窗口会话ID,用于接收消息时比较
+	std::string	GetCurChatID();
+	void		setKeyAndLogin(QString key);						// 设置appkey并登录（获取完Key之后，就可以直接登录）
+	bool		IsLogin();											// 是否登录
+	bool		IsCurChatRoom(QString chatID);						// 是否是当前会话ID
 
-	void	ShowMsgs(const std::vector<nim::IMMessage> &msg);
-	void	ShowMsg(nim::IMMessage pMsg);
-	void	ParseFace(QString qContect, QString name, QString time);						// 解析接收到的消息
-	bool	IsHasFace(QString qContect);						// 判断是否有表情
-	QString BuildFaceToUrl(QString qFace);						// 通过表情返回url路径（例如：传入[em_1]返回./images/em_1.gif）
-	void	SetStudentName(int iNum);
-	void	setAdaptHeight(int iHeight);						// 自适应高度
-	void	setResize(int iWidth, int iHeight);					// 宽度 高度
-	bool	IsFous();
-	void	UpLoadPicProcess(double iProcess);					// 上传图片进度
-	void	SendStatus(nim::SendMessageArc* arcNew);			// 发送消息返回状态
-	bool    IsClickPic();										// 当前是否点击图片
-	void    TalkDown();											// 聊天内容置底
-	void    OnPlayAudio(std::string path, std::string sid, std::string msgid, bool isPlay);
-	void	OnStopPlayAudio(char* msgid);
+	void		ShowMsgs(const std::vector<nim::IMMessage> &msg);
+	void		ShowMsg(nim::IMMessage pMsg);
+	void		ParseFace(QString qContect, QString name, QString time);						// 解析接收到的消息
+	bool		IsHasFace(QString qContect);						// 判断是否有表情
+	QString		BuildFaceToUrl(QString qFace);						// 通过表情返回url路径（例如：传入[em_1]返回./images/em_1.gif）
+	void		SetStudentName(int iNum);
+	void		setAdaptHeight(int iHeight);						// 自适应高度
+	void		setResize(int iWidth, int iHeight);					// 宽度 高度
+	bool		IsFous();
+	void		UpLoadPicProcess(double iProcess);					// 上传图片进度
+	void		SendStatus(nim::SendMessageArc* arcNew);			// 发送消息返回状态
+	bool		IsClickPic();										// 当前是否点击图片
+	void		TalkDown();											// 聊天内容置底
+	void		OnPlayAudio(std::string path, std::string sid, std::string msgid, bool isPlay);
+	void		OnStopPlayAudio(char* msgid);
 	/**
 	* 开始播放语音消息的回调（播放语音消息需要和sdk交互，并非一定播放成功）
 	* @param[in] code 返回码
@@ -209,21 +217,31 @@ public:
 	* @return void 无返回值
 	*/
 	static void OnStopAudioCallback(int code, const char* file_path, const char* sid, const char* cid);
+	std::vector<personListBuddy*>  GetBuddy();						// 获取成员
+	bool		IsPerson();											// 是否请求完成员
+	void		ResultMsg();										// 第一次请求
+	void		ShowChatMsg(nim::IMMessage pMsg);					// 第一次请求回来的消息
 public slots:
-	void chickChage(int, QString, QString);
-	bool AddStudent(QString iconUrl, QString name, QString accid);		//添加成员
-	void AddStudentNumbers(int num);									//添加成员数量
-	void AddAnnouncement(QString announcement, QString time);			//添加公告
-	void QueryGroup();													//查询群成员信息
-	void QueryRecord(QString dtstr);
-	void stepDays(QDateTime date);										//历史记录跨天
-	void stepMsgDays(QDateTime dateTime);								//聊天记录跨天
-	void clearAll();													//清除聊天记录、公告、群成员
-	void OnSendAnnouncements(QString Announcements);					//发送群公告
-	void ReturnAnnouncements();											//返回公告状态
-	void RequestError(QJsonObject& error);					//错误
-	void QueryMember();
-	void returnMember();
+	void		chickChage(int, QString, QString);
+	bool		AddStudent(QString iconUrl, QString name, QString accid);		//添加成员
+	void		MuteStudent(bool state, QString id);							//禁言学生
+	void		AddStudentNumbers(int num);										//添加成员数量
+	void		AddAnnouncement(QString announcement, QString time);			//添加公告
+	void		QueryGroup();													//查询群成员信息
+	void		QueryRecord(QString dtstr);
+	void		stepDays(QDateTime date);										//历史记录跨天
+	void		stepMsgDays(QDateTime dateTime);								//聊天记录跨天
+	void		clearAll();														//清除聊天记录、公告、群成员
+	void		OnSendAnnouncements(QString Announcements);						//发送群公告
+	void		ReturnAnnouncements();											//返回公告状态
+	void		RequestError(QJsonObject& error);								//错误
+	void		QueryMember();
+	void		returnMember();
+	void		RequestMember();												//请求成员
+	void		returnAllMember();												//返回成员
+	void		SetEnvironmental(bool EnvironmentalTyle);						//设置当前环境
+	void        SetCurAudioPath(std::string path);								//设置当前语音路径
+	void		InitAudioCallBack();											//初始化语音回调
 private:
 	QToolButton* pPreMonthButton1;
 	QToolButton* pPreMonthButton;

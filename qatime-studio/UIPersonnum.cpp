@@ -1,16 +1,9 @@
 #include "UIPersonnum.h"
-#include <windows.h>
-#include <windowsx.h>
-
-#define MAINWINDOW_X_MARGIN 6
-#define MAINWINDOW_Y_MARGIN 6
-#define MAINWINDOW_TITLE_HEIGHT 49
 
 UIPersonNum::UIPersonNum(QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
-	setWindowOpacity(0.4);
 }
 
 UIPersonNum::~UIPersonNum()
@@ -18,69 +11,32 @@ UIPersonNum::~UIPersonNum()
 
 }
 
-
-bool UIPersonNum::nativeEvent(const QByteArray &eventType, void *message, long *result)
+void UIPersonNum::AddPersonInfo(QPixmap pix, QString name, QString id, Qt::CheckState state)
 {
-	if ("windows_generic_MSG" == eventType)
+	m_id = id;
+
+	QFont font;
+	font.setFamily(QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221"));
+	font.setPixelSize(13);
+
+	ui.pic_label->setPixmap(pix);
+	ui.name_label->setFont(font);
+	ui.name_label->setText(name);
+
+	// 加省略号
+	int fontSize = ui.name_label->fontMetrics().width(name);//获取之前设置的字符串的像素大小
+	if (fontSize >= ui.name_label->width()) //与label自身相比较
 	{
-		PMSG pMsg = static_cast<PMSG>(message);
-		switch (pMsg->message)
-		{
-		case WM_NCHITTEST:
-		{
-			int x = GET_X_LPARAM(pMsg->lParam) - this->frameGeometry().x();
-			int y = GET_Y_LPARAM(pMsg->lParam) - this->frameGeometry().y();
-
-			int xflag = (x <= MAINWINDOW_X_MARGIN) ? -1 : ((x < this->width() - MAINWINDOW_X_MARGIN) ? 0 : 1);
-			int yflag = (y <= MAINWINDOW_Y_MARGIN) ? -1 : ((y < this->height() - MAINWINDOW_Y_MARGIN) ? 0 : 1);
-
-			if (-1 == xflag && -1 == yflag)
-			{
-				*result = HTTOPLEFT;
-			}
-			else if (-1 == xflag && 0 == yflag)
-			{
-				*result = HTLEFT;
-			}
-			else if (-1 == xflag && 1 == yflag)
-			{
-				*result = HTBOTTOMLEFT;
-			}
-			else if (0 == xflag && -1 == yflag)
-			{
-				*result = HTTOP;
-			}
-			else if (0 == xflag && 0 == yflag)
-			{
-				*result = HTCLIENT;
-			}
-			else if (0 == xflag && 1 == yflag)
-			{
-				*result = HTBOTTOM;
-			}
-			else if (1 == xflag && -1 == yflag)
-			{
-				*result = HTTOPRIGHT;
-			}
-			else if (1 == xflag && 0 == yflag)
-			{
-				*result = HTRIGHT;
-			}
-			else if (1 == xflag && 1 == yflag)
-			{
-				*result = HTBOTTOMRIGHT;
-			}
-			if (0 == xflag && y > MAINWINDOW_Y_MARGIN && y <= MAINWINDOW_TITLE_HEIGHT)
-			{
-				*result = HTCAPTION;
-			}
-			return true;
-		}
-		break;
-		default:
-			return false;
-			break;
-		}
+		QString  tmpStr = ui.name_label->fontMetrics().elidedText(name, Qt::ElideRight, ui.name_label->width());
+		ui.name_label->setText(tmpStr);
+		ui.name_label->setToolTip(name);
 	}
-	return false;
+
+	ui.checkBox->setCheckState(state);
+	connect(ui.checkBox, SIGNAL(stateChanged(int)), this, SLOT(stateChanged(int)));
+}
+
+void UIPersonNum::stateChanged(int i)
+{
+
 }

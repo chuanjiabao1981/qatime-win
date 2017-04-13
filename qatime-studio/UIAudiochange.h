@@ -4,12 +4,9 @@
 #include <QWidget>
 #include "ui_UIAudiochange.h"
 #include "nlss_type.h"
-#include <QButtonGroup>
-#include <QVBoxLayout>
-#include "UIMainwindow.h"
-#include <QRadioButton>
+#include "UIWindowSet.h"
 
-class UIMainWindow;
+class UIWindowSet;
 
 class UIAudioChange : public QWidget
 {
@@ -21,19 +18,25 @@ public:
 
 private:
 	Ui::UIAudioChange ui;
-	UIMainWindow*		m_Parent;
+	UIWindowSet*		m_Parent;
 
-public:
-	QButtonGroup*	m_pAudioGroup;
-	QVBoxLayout *   m_pVBox;
+	// 鼠标按下拖动的操作
+	QPoint								m_startPos;
+	QPoint								m_clickPos;
+	QPoint								m_WndCurPos;
+	
+protected:
+	virtual void paintEvent(QPaintEvent *event);
+	virtual bool eventFilter(QObject *target, QEvent *event);
+	virtual void focusOutEvent(QFocusEvent *);
 
-	int				iCount;
 private slots:
-	void onRadioClick(QAbstractButton *btn);
+	void AudioChanged(int index);
+	void clickClose();
 
 public:
-	void SetAudioInfo(int iAudioNum, QString strName, QString path);
-	void setAudioChange(UIMainWindow* Parent);
+	void setAudioParam(QString strName, QString path);
+	void setAudioChange(UIWindowSet* Parent);
 };
 
 #endif // UIAUDIOCHANGE_H
