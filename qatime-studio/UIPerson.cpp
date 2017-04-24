@@ -2,6 +2,7 @@
 
 UIPerson::UIPerson(QWidget *parent)
 	: QWidget(parent)
+	, m_personBuddy(NULL)
 {
 	ui.setupUi(this);
 }
@@ -46,6 +47,21 @@ void UIPerson::AddPersonInfo(personListBuddy* buddy, QString chatid)//QPixmap pi
 		ui.checkBox->setFont(font);
 		connect(ui.checkBox, SIGNAL(stateChanged(int)), this, SLOT(stateChanged(int)));
 	}
+	else
+	{
+		m_chatID = chatid;
+		ui.checkBox->setText("È«½û");
+		ui.checkBox->setFont(font);
+		connect(ui.checkBox, SIGNAL(stateChanged(int)), this, SLOT(stateAllChanged(int)));
+	}
+}
+
+void UIPerson::setMuteState(bool bAllMute)
+{
+	if (bAllMute)
+		ui.checkBox->setCheckState(Qt::Checked);
+	else
+		ui.checkBox->setCheckState(Qt::Unchecked);
 }
 
 void UIPerson::stateChanged(int i)
@@ -59,5 +75,17 @@ void UIPerson::stateChanged(int i)
 	{
 		m_personBuddy->button->setCheckable(Qt::Checked);
 		emit sig_change(true, m_id, m_chatID);
+	}
+}
+
+void UIPerson::stateAllChanged(int i)
+{
+	if (i == 0)			// È¡Ïû½ûÑÔ
+	{
+		emit sig_allChange(false, m_chatID);
+	}
+	else if (i == 2)	// ½ûÑÔ
+	{
+		emit sig_allChange(true, m_chatID);
 	}
 }

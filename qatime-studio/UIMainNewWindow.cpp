@@ -4,7 +4,6 @@
 #include "course.h"
 #include "course1v1.h"
 #include <QDir>
-#include "define.h"
 #include "UIMessageBox.h"
 
 typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
@@ -227,7 +226,7 @@ void UIMainNewWindow::AuxiliaryRequestFinished()
 
 		if (m_AuxiliaryWnd)
 			m_AuxiliaryWnd->AddAuxiliary(course->PicUrl(), course->name(), course->Grade(), course->TeacherName(), course->ChatId(), course->id(), "",
-			mRemeberToken, m_TeacherName, m_AudioPath, course->status());
+			mRemeberToken, m_TeacherName, m_AudioPath, course->status(),course->url(), course->CameraURL());
 
 		delete course;
 	}
@@ -364,6 +363,8 @@ bool UIMainNewWindow::IsMayClose()
 
 void UIMainNewWindow::CloseDialog()
 {
+	nim_http::Uninit();
+
 	if (m_LoginWindow)
 		m_LoginWindow->CloseTray();
 
@@ -384,10 +385,11 @@ void UIMainNewWindow::ShowCourse()
 	}
 }
 
-void UIMainNewWindow::CreateRoom(QString chatID, QString courseID, QString teacherID, QString token, QString studentName, std::string audioPath, QString courseName, int UnreadCount, QString status, bool b1v1Lesson)
+void UIMainNewWindow::CreateRoom(QString chatID, QString courseID, QString teacherID, QString token, QString studentName, std::string audioPath, QString courseName, 
+						int UnreadCount, QString status, QString boardurl, QString cameraUrl, bool b1v1Lesson)
 {
 	if (m_WindowSet)
-		m_WindowSet->AddChatRoom(chatID, courseID, teacherID, token, studentName, audioPath, courseName, UnreadCount, status,b1v1Lesson);
+		m_WindowSet->AddChatRoom(chatID, courseID, teacherID, token, studentName, audioPath, courseName, UnreadCount, status, boardurl, cameraUrl, b1v1Lesson);
 }
 
 QPixmap UIMainNewWindow::TeacherPhotoPixmap()

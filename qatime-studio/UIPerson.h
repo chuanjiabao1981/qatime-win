@@ -17,16 +17,20 @@ private:
 	Ui::UIPerson ui;
 	QString				m_id;
 	QString				m_chatID;
+public:
 	personListBuddy*	m_personBuddy;
 
 signals:
 	void sig_change(bool,QString,QString);
+	void sig_allChange(bool , QString);
 
 private slots:
 	void stateChanged(int);
+	void stateAllChanged(int);
 
 public:
 	void AddPersonInfo(personListBuddy* buddy, QString chatid);
+	void setMuteState(bool bAllMute);
 };
 
 #endif // UIPERSON_H

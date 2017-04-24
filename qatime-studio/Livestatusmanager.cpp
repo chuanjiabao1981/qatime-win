@@ -532,8 +532,8 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 		QString());
 	if (iStatus == 1 || iStatus == 0)
 	{
-		if (m_parent && bTrue)
-			m_parent->GetLoginWnd()->ReturnLogin();
+		if (m_newParent)
+			m_newParent->ReturnLogin();
 	}
 }
 

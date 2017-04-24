@@ -1,11 +1,13 @@
 ﻿/** @file nim_talk_def.h
   * @brief NIM SDK talk相关的定义
-  * @copyright (c) 2015-2016, NetEase Inc. All rights reserved
+  * @copyright (c) 2015-2017, NetEase Inc. All rights reserved
   * @author Oleg
   * @date 2015/02/02
   */
 #ifndef NIM_SDK_DLL_EXPORT_HEADERS_TALK_DEF_H_
 #define NIM_SDK_DLL_EXPORT_HEADERS_TALK_DEF_H_
+
+#include "../util/stdbool.h"
 
 #ifdef __cplusplus
 extern"C"
@@ -20,7 +22,7 @@ extern"C"
 typedef void (*nim_talk_ack_cb_func)(const char *result, const void *user_data);
 
 /** @typedef void (*nim_talk_receive_cb_func)(const char *content, const char *json_extension, const void *user_data)
-  * 接收消息的回调函数定义
+  * 接收消息的回调函数定义(如果是初始化时设置了自动下载图片和语音附件，开发者需要通过监听nim_nos_reg_download_cb返回的事件来保证附件已经成功缓存到本地)
   * @param[out] content			json string (Keys SEE MORE 『接收消息Json Keys』),批量接口回调时，内容为json string array
   * @param[out] json_extension	json扩展数据（备用）
   * @param[out] user_data		APP的自定义用户数据，SDK只负责传回给回调函数，不做任何处理！
@@ -55,9 +57,11 @@ static const char *kNIMRecallMsgKeyFromAccID		= "from_id";			/**< string,消息�
 static const char *kNIMRecallMsgKeyToAccID			= "to_id";				/**< string,消息接收方ID */
 static const char *kNIMRecallMsgKeyMsgId			= "msg_id";				/**< string,客户端消息ID */
 static const char *kNIMRecallMsgKeyNotify			= "notify";				/**< string,自定义通知文案,按需填 */
-static const char *kNIMRecallMsgKeyTime				= "time";				/**< long,消息时间戳(毫秒) */
+static const char *kNIMRecallMsgKeyTime				= "time";				/**< long,撤回操作的消息时间戳(毫秒) */
 static const char *kNIMRecallMsgKeyNotifyFeature	= "feature";			/**< int,撤回通知种类（NIMMessageFeature） */
 static const char *kNIMRecallMsgKeyMsgExist			= "msg_exist";			/**< bool,撤回的消息本地是否存在,比如对方离线时发一条消息又撤回,对方上线收到离线撤回通知该tag为false */
+static const char *kNIMRecallMsgKeyMsgTime			= "msg_time";			/**< long,要撤回消息的创建时间戳(毫秒) */
+static const char *kNIMRecallMsgKeyMsgFromNick		= "from_nick";			/**< string,要撤回消息的发送者昵称 */
 /** @}*/ //消息撤回通知Json Keys
 
 /** @name 接收消息Json Keys
@@ -95,9 +99,9 @@ static const char *kNIMMsgKeyAttach			= "msg_attach";			/**< string,消息多媒
 static const char *kNIMMsgKeyClientMsgid	= "client_msg_id";		/**< string,客户端消息id */
 static const char *kNIMMsgKeyServerMsgid	= "server_msg_id";		/**< long,服务器端消息id */
 static const char *kNIMMsgKeyResendFlag		= "resend_flag";		/**< int,消息重发标记位,第一次发送0,重发1 */
-static const char *kNIMMsgKeyHistorySave	= "cloud_history";		/**< int,(可选)该消息是否存储云端历史,可选,仅对kNIMMessageTypeCustom有效，0:不支持,1:支持, 默认1 */
-static const char *kNIMMsgKeyMsgRoaming		= "roam_msg";			/**< int,(可选)该消息是否支持漫游,可选,仅对kNIMMessageTypeCustom有效,0:不支持,1:支持, 默认1 */
-static const char *kNIMMsgKeyMsgSync		= "sync_msg";			/**< int,(可选)该消息是否支持发送者多端同步,可选,仅对kNIMMessageTypeCustom有效,0:不支持,1:支持, 默认1 */
+static const char *kNIMMsgKeyHistorySave	= "cloud_history";		/**< int,(可选)该消息是否存储云端历史,可选，0:不支持,1:支持, 默认1 */
+static const char *kNIMMsgKeyMsgRoaming		= "roam_msg";			/**< int,(可选)该消息是否支持漫游,可选,0:不支持,1:支持, 默认1 */
+static const char *kNIMMsgKeyMsgSync		= "sync_msg";			/**< int,(可选)该消息是否支持发送者多端同步,可选,0:不支持,1:支持, 默认1 */
 static const char *kNIMMsgKeyPushNeedBadge	= "push_need_badge";	/**< int,(可选)推送是否要做消息计数(角标)，0:不需要，1:需要，默认1 */
 static const char *kNIMMsgKeyServerExt		= "server_ext";			/**< string,(可选)自定义扩展字段,必须为可以解析为json的非格式化的字符串,长度限制1024 */
 static const char *kNIMMsgKeyPushPayload	= "push_payload";		/**< string,(可选)第三方自定义的推送属性，必须为可以解析为json的非格式化的字符串，长度2048 */
@@ -109,6 +113,8 @@ static const char *kNIMMsgKeySetMsgOffline	= "offline_msg";		/**< int,(可选)�
 static const char *kNIMMsgKeyForcePushList	= "force_push_list";			/**< string,(可选)群组消息强推列表,推送指定账号id string array json, 如果推送全员不填*/
 static const char *kNIMMsgKeyForcePushContent= "force_push_content";		/**< string,(可选)群组消息强推文本 */
 static const char *kNIMMsgKeyIsForcePush	= "is_force_push";		/**< int,(可选)群组消息是否强推,0:不强推, 1:强推，属性只针对群组消息强推列表 */
+static const char *kNIMMsgKeyAntiSpamEnable	= "anti_spam_enable";	/**< int, 是否需要过易盾反垃圾, 0:不需要,1:需要, 默认0 */
+static const char *kNIMMsgKeyAntiSpamContent= "anti_spam_content";	/**< string, (可选)开发者自定义的反垃圾字段,长度限制：5000字符 */
 //本地定义
 static const char *kNIMMsgKeyLocalFilePath			= "local_res_path";		/**< string,多媒体消息资源本地绝对路径,SDK本地维护,发送多媒体消息时必填 */
 static const char *kNIMMsgKeyLocalTalkId			= "talk_id";			/**< string,会话id,发送方选填,接收方收到的是消息发送方id */

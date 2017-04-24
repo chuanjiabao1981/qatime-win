@@ -4,6 +4,7 @@
 #include <iosfwd>
 #include <sstream>
 #include "define.h"
+#include <QImage>
 
 QMutex UICamera::m_mutex;
 ST_NLSS_VIDEO_SAMPLER UICamera::m_SvideoSampler;
@@ -77,13 +78,12 @@ UICamera::~UICamera()
 	//Ïú»ÙmediacaptureÀà
 	if (m_hNlssService != NULL)
 	{
-		if (m_bPreviewing)
+		if (!m_bLiving)
 		{
 			Nlss_StopLiveStream(m_hNlssService);
+			Nlss_Destroy(m_hNlssService);
+			m_hNlssService = NULL;
 		}
-
-		Nlss_Destroy(m_hNlssService);
-		m_hNlssService = NULL;
 	}
 
 	if (m_SvideoSampler.puaData != NULL)
@@ -133,6 +133,10 @@ void UICamera::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
 		m_SvideoSampler.iHeight = pSampler->iHeight;
 		m_SvideoSampler.iDataSize = pSampler->iDataSize;
 		memcpy(m_SvideoSampler.puaData, pSampler->puaData, pSampler->iDataSize);
+
+// 		QImage qimage;
+// 		qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_ARGB32);
+// 		bool b = qimage.save("argb.png");
 
 		m_mutex.unlock();
 	}
@@ -421,10 +425,12 @@ void UICamera::slot_FinishStartLiveStream(int iRet)
 
 void UICamera::slot_FinishStopLiveStream(int iRet)
 {
-	m_bStopLiveFinish = true;
-	emit sig_changeLiveStatus(false);
-	m_Parent->setCameraEnable();
-	return;
+	if (iRet == 0)
+	{
+		m_bStopLiveFinish = true;
+		m_Parent->setCameraEnable();
+		m_Parent->StopSuccess(this);
+	}
 }
 #endif
 

@@ -474,9 +474,11 @@ void UIVideo::slot_FinishStartLiveStream(int iRet)
 void UIVideo::slot_FinishStopLiveStream(int iRet)
 {
 	// 结束推流完成
-	m_NewParent->setLiveBtnEnable(true);
-	emit sig_changeLiveStatus(false);
-	return;
+	if (iRet == 0)
+	{
+		m_NewParent->setLiveBtnEnable(true);
+		m_NewParent->StopSuccess(this);
+	}
 }
 #endif
 

@@ -1445,6 +1445,7 @@ void UIChatRoom::MuteStudent(bool state, QString id)
 		Buddy->setMute(state);
 	}
 }
+
 void UIChatRoom::AddStudentNumbers(int num)
 {
 	ui.student_list->setStrdentNumbers(num);

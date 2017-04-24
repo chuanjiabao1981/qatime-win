@@ -25,6 +25,8 @@ private:
 	QString				m_cameraStream;		// 摄像头直播流地址
 	bool				m_bModle;			// 当前窗口模式
 	bool				m_b1v1Lesson;		// 当前窗口课程类型
+	QString				m_boardUrl;
+	QString				m_cameraUrl;
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual void mousePressEvent(QMouseEvent *e);       //--鼠标按下事件 
@@ -37,7 +39,7 @@ private slots :
 	void CloseDialog();			// 最大化
 
 public:
-	void SetCourseNameAndID(QString sName, QString id, QString chatID);
+	void SetCourseNameAndID(QString sName, QString id, QString chatID, QString board, QString camera);
 	UIChatRoom* GetRoom();			// 获取当前的聊天窗口
 	void SetRoom(UIChatRoom* room);	// 设置关联的聊天窗口
 	void setStyle(bool bSel);		// 选中标签样式

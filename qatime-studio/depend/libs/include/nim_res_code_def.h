@@ -1,6 +1,6 @@
 ﻿/** @file nim_res_code_def.h
   * @brief NIM SDK提供给外部使用的错误号定义（包含客户端自定义和服务器返回的所有错误号）
-  * @copyright (c) 2015-2016, NetEase Inc. All rights reserved
+  * @copyright (c) 2015-2017, NetEase Inc. All rights reserved
   * @author Harrison
   * @date 2015/2/1
   */
@@ -46,26 +46,25 @@ enum NIMResCode
 	kNIMResTeamAlreadyIn		= 809,		/**< 已经在群里 */
 	kNIMResTeamInviteSuccess	= 810,		/**< 邀请成功 */
 	kNIMResForcePushCountLimit	= 811,		/**< 强推列表账号数量超限 */
-
 	//数据解编错误代码
 	kNIMResInvalidProtocol		= 997,		/**< 协议已失效 */
 	kNIMResEUnpacket			= 998,		/**< 解包错误 */
 	kNIMResEPacket				= 999,		/**< 打包错误 */
-
 	//
 	kNIMResInBlack				= 7101,		/**< 被接收方加入黑名单 SDK版本大于2.5.0支持*/
-
 	//客户端自定义的错误号
 	kNIMLocalRes					= 10000,		/**< 值大于该错误号的都是客户端自定义的错误号。不能随意更改其值！ */
-	kNIMResRoomLocalNeedRequestAgain	= 10001,	/**< 客户端本地错误号，需要重新向IM服务器获取进入聊天室权限 */
+	kNIMResRoomLocalNeedRequestAgain = 10001,	/**< 客户端本地错误号，需要重新向IM服务器获取进入聊天室权限 */
+	kNIMLocalResNetworkError		 = 10010,	/**< 客户端本地错误号，本地网络错误，需要检查本地网络 */
 
 	//客户端自定义的消息错误号
-	kNIMLocalResMsgNosUploadCancel	= 10200,		/**< 发送文件消息，NOS上传暂停 */
-	kNIMLocalResMsgNosDownloadCancel = 10206,		/**< 收到文件消息，NOS下载暂停 */
+	kNIMLocalResMsgNosUploadCancel	= 10200,		/**< (发送文件消息或者stop_upload_ex)HTTP upload to NOS上传暂停 */
+	kNIMLocalResMsgNosDownloadCancel = 10206,		/**< (收到文件消息或者stop_download_ex)HTTP download from NOS下载暂停 */
 	kNIMLocalResMsgNosDownloadCheckError = 10207,	/**< 收到文件消息，NOS下载完成后本地文件检查错误，一般为下载的文件大小与文件信息不符 */
 	kNIMLocalResMsgFileNotExist		= 10404,		/**< 本地资源不存在 */
 	kNIMLocalResParameterError		= 10414,		/**< 本地错误码，参数错误，(收到消息，资源下载地址无效，无法下载) */
 	kNIMLocalResExist				= 10417,		/**< 本地错误码，对象已经存在/重复操作，(收到消息，本地资源已存在，不需要重复下载) */
+	kNIMLocalResParaError			= 10450,		/**< 调用api，传入的参数有误 */
 	kNIMLocalResMsgSendNosError		= 10502,		/**< 发送消息，上传NOS失败 */
 	kNIMLocalResExceedLimit			= 10508,		/**< 本地错误码,超过配置有效期或者所需参数不存在 */
 	kNIMLocalResCheckMsgDBFailed	= 10600,		/**< 导入消息历史时验证身份和加密密钥不通过 */
@@ -80,6 +79,8 @@ enum NIMResCode
 	kNIMResRoomLinkError			= 13001,		/**< 主链接错误 */
 	kNIMResRoomError				= 13002,		/**< 聊天室状态异常 */
 	kNIMResRoomBlackBeOut			= 13003,		/**< 黑名单用户禁止进入 */
+	kNIMResRoomBeMuted				= 13004,		/**< 被禁言 */
+	kNIMResRoomAllMuted				= 13006,		/**< 聊天室处于整体禁言状态,只有管理员能发言 */
 
 	//客户端自定义的api调用问题
 	kNIMLocalResAPIErrorInitUndone	= 20000,		/**< 还未初始化或初始化未正常完成 */

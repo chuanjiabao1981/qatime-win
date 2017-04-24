@@ -13,6 +13,7 @@
 #include <QJsonArray>
 #include "loginWindow.h"
 #include "UIWindowSet.h"
+#include "define.h"
 
 //---‘∆–≈
 #include "nim_client_def.h"
@@ -29,6 +30,9 @@
 #include "YxChat/session_callback.h"
 #include "YxChat/nim_cpp_client.h"
 
+
+
+
 class UIWindowSet;
 class UIAuxiliaryWnd;
 class LoginWindow;
@@ -37,11 +41,28 @@ class UIMainNewWindow : public QWidget
 	Q_OBJECT
 
 public:
+	struct CourseStruct
+	{
+		QString		chatID;
+		QString		courseID;
+		QString		teacherID;
+		QString		Token;
+		QString		teacherName;
+		std::string	audioPath;
+		QString		courseName;
+		int			UnreadMsgCount;
+		QString		Status;
+		bool		bIs1v1Lesson;
+		QString		boardUrl;
+		QString		cameraUrl;
+	};
+	CourseStruct*	m_structCousre;
 	UIMainNewWindow(QWidget *parent = 0);
 	~UIMainNewWindow();
 
 	QNetworkAccessManager			manager;
 	QNetworkReply*					reply;
+
 private:
 	Ui::UIMainNewWindow ui;
 	LoginWindow*					m_LoginWindow;
@@ -89,7 +110,7 @@ public:
 	static void OnLoginCallback(const nim::LoginRes& login_res, const void* user_data);
 	static void OnStopAudioCallback(int code, const char* file_path, const char* sid, const char* cid);// Õ£÷π”Ô“Ù
 	void	CreateRoom(QString chatID, QString courseID, QString teacherID, QString token, QString studentName, std::string audioPath, 
-						QString courseName, int UnreadCount, QString status, bool b1v1Lesson=false);
+						QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl,bool b1v1Lesson=false);
 	void    changeLessonStatus(QString id, QString status);
 };
 

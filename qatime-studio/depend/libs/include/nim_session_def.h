@@ -1,11 +1,12 @@
 ﻿/** @file nim_session_def.h
   * @brief session define
-  * @copyright (c) 2015-2016, NetEase Inc. All rights reserved
+  * @copyright (c) 2015-2017, NetEase Inc. All rights reserved
   * @author Oleg
   * @date 2015/2/1
   */
 #ifndef NIM_SDK_DLL_EXPORT_HEADERS_SESSION_DEF_H_
 #define NIM_SDK_DLL_EXPORT_HEADERS_SESSION_DEF_H_
+#include "../util/stdbool.h"
 
 #ifdef __cplusplus
 extern"C"
@@ -51,6 +52,8 @@ static const char *kNIMSessionMsgAttach		= "msg_attach";			/**< string, 本地�
 static const char *kNIMSessionMsgStatus		= "msg_status";			/**< int, 本地消息历史中该会话最后一条消息的状态，见NIMMsgLogStatus */
 static const char *kNIMSessionMsgSubStatus	= "msg_sub_status";		/**< int, 本地消息历史中该会话最后一条消息的子状态，见NIMMsgLogSubStatus */
 static const char *kNIMSessionLastUpdatedMsg= "last_updated_msg";	/**< bool, (批量)消息变更或增加时是否是最后一条变更的信息 */
+static const char *kNIMSessionOnTop			= "top";				/**< bool, 是否置顶 */
+static const char *kNIMSessionExtendedData	= "extend_data";		/**< string, 本地扩展字段, 限4096 */
 /** @}*/ //会话列表的Json Keys
 
 /** @enum NIMSessionType 会话类型 */

@@ -30,6 +30,7 @@ void UIPersonWnd::AddPerson(std::vector<personListBuddy*> vecBuddy, QString chat
 	font.setFamily(QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221"));
 	font.setPixelSize(13);
 
+	int iCount = 0;
 	if (vecBuddy.size() > 0 )
 	{
 		std::vector<personListBuddy*>::iterator it;
@@ -38,12 +39,13 @@ void UIPersonWnd::AddPerson(std::vector<personListBuddy*> vecBuddy, QString chat
 			personListBuddy* buddy = *it;
 			if (buddy)
 			{
-				QPixmap* pix = NULL;
-				pix = (QPixmap*)buddy->head->pixmap();
-				QPixmap pixscaled = pix->scaled(30, 30);
-				QString name = buddy->name->text();
-				QString id = buddy->m_ID;
-				Qt::CheckState state = buddy->button->checkState();
+// 				QPixmap* pix = NULL;
+// 				pix = (QPixmap*)buddy->head->pixmap();
+// 				QPixmap pixscaled = pix->scaled(30, 30);
+// 				QString name = buddy->name->text();
+// 				QString id = buddy->m_ID;
+				if (buddy->button->checkState() == Qt::Checked)
+					iCount++;
 
 				UIPerson* person = new UIPerson(this);
 				person->AddPersonInfo(buddy, chatID);
@@ -69,6 +71,11 @@ void UIPersonWnd::AddPerson(std::vector<personListBuddy*> vecBuddy, QString chat
 		}
 	}
 
+	int iAllCount = m_vecPerson.size();
+	if (iAllCount == iCount)
+		AddAllMute(chatID, true);
+	else
+		AddAllMute(chatID, false);
 	setFocus();
 }
 
@@ -198,4 +205,44 @@ void UIPersonWnd::style(QScrollArea *style)
 void UIPersonWnd::setParentBtn(UIWindowSet* parent)
 {
 	m_parent = parent;
+}
+
+void UIPersonWnd::AddAllMute(QString chatID, bool bAllMute)
+{
+	UIPerson* person = new UIPerson(this);
+	person->AddPersonInfo(NULL, chatID);
+	person->setMuteState(bAllMute);
+	connect(person, SIGNAL(sig_allChange(bool, QString)), this, SLOT(slot_allChange(bool, QString)));
+	ui.verticalLayout->insertWidget(0,person);
+
+	if (m_spacer == NULL)
+	{
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		ui.verticalLayout->addSpacerItem(m_spacer);
+	}
+	else
+	{
+		ui.verticalLayout->removeItem(m_spacer);
+		m_spacer = NULL;
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		ui.verticalLayout->addSpacerItem(m_spacer);
+	}
+
+	m_vecPerson.push_back(person);
+}
+
+void UIPersonWnd::slot_allChange(bool state, QString chatid)
+{
+	if (m_vecPerson.size() > 0)
+	{
+		std::vector<UIPerson*>::iterator it;
+		for (it = m_vecPerson.begin(); it != m_vecPerson.end(); it++)
+		{
+			UIPerson* layout = *it;
+			if (layout->m_personBuddy != NULL)
+			{
+				layout->setMuteState(state);
+			}
+		}
+	}
 }

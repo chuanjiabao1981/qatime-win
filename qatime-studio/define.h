@@ -4,6 +4,7 @@
   * @author Xds
   * @date 2016/9/19
   */
+#include <QString>
 
 //课程状态
 #define MSG_LESSON_STATUS_INIT			"未开始"

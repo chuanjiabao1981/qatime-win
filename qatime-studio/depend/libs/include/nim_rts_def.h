@@ -1,6 +1,6 @@
 ﻿/** @file nim_rts_def.h
   * @brief NIM RTS提供的实时会话（数据通道）接口定义
-  * @copyright (c) 2015-2016, NetEase Inc. All rights reserved
+  * @copyright (c) 2015-2017, NetEase Inc. All rights reserved
   * @author gq
   * @date 2015/6/30
   */
@@ -52,13 +52,14 @@ enum NIMRtsConnectStatus
 
 /** @name json extension params for nim_rts_start and nim_rts_ack
   * for example: 参数可选，例子中是不填时的默认值
-  * {"mode": 1, "custom_video":0, "custom_audio":0, "record":0 }
+  * {"mode": 1, "custom_video":0, "custom_audio":0, "data_record":0 }
   * @{
   */
 static const char *kNIMRtsVChatMode			= "mode";			/**< int NIMRtsVideoChatMode，非视频模式时不会发送视频数据 */
 static const char *kNIMRtsVChatCustomVideo	= "custom_video";	/**< int 是否用自主的视频数据 >0表示是 */
 static const char *kNIMRtsVChatCustomAudio	= "custom_audio";	/**< int 是否用自主的音频数据 >0表示是 */
-static const char *kNIMRtsDataRecord		= "record";			/**< int 是否需要录制数据 >0表示是 */
+static const char *kNIMRtsDataRecord		= "data_record";	/**< int 是否需要服务器录制白板数据 >0表示是 */
+static const char *kNIMRtsAudioRecord		= "audio_record";	/**< int 是否需要服务器录制音频数据 >0表示是 */
 static const char *kNIMRtsApnsText			= "apns";			/**< string 推送用的文本 nim_rts_ack无效 */
 static const char *kNIMRtsCreateCustomInfo	= "custom_info";	/**< string 自定义数据，透传给被邀请方 nim_rts_ack无效 */
 static const char *kNIMRtsPushEnable		= "push_enable";	/**< int 是否需要推送 >0表示是 默认是 */
@@ -66,9 +67,35 @@ static const char *kNIMRtsNeedBadge			= "need_badge";		/**< int 是否需要角�
 static const char *kNIMRtsNeedFromNick		= "need_nick";		/**< int 是否需要推送昵称 >0表示是 默认是 */
 static const char *kNIMRtsApnsPayload		= "payload";		/**< string JSON格式,推送payload */
 static const char *kNIMRtsSound				= "sound";			/**< string 推送声音 */
+static const char *kNIMRtsKeepCalling		= "keepcalling";	/**< int, 是否强制持续呼叫（对方离线也会呼叫）,1表示是，0表示否。默认是 */
 /** @}*/ //json extension params for nim_rts_start and nim_rts_ack
 
-/** @name json extension params for nim_rts_connect_notify_cb_func
+/** @name json extension params for nim_rts_start_cb_func nim_rts_connect_notify_cb_func
+  * for example: 
+  * {"channel_id": 1231 }
+  * @{
+  */
+static const char *kNIMRtsChannelId			= "channel_id";			/**< int64 通话的通道id */
+/** @}*/ //json extension params for nim_rts_start_cb_func nim_rts_connect_notify_cb_func
+
+/** @name json extension params for nim_rts_join_cb_func
+  * for example: 
+  * {"channel_id": 1231, "custom_info":"hello world" }
+  * @{
+  */
+static const char *kNIMRtsCustomInfo		= "custom_info";		/**< string 自定义数据 */
+/** @}*/ //json extension params for nim_rts_join_cb_func
+
+/** @name json extension params for nim_rts_send_data
+* for example:
+* {"uid": "abc" }
+* @{
+*/
+static const char *kNIMRtsUid				= "uid";			/**< string 用户账号uid */
+/** @}*/ //json extension params for nim_rts_send_data
+
+
+/** @name json extension params for nim_rts_connect_notify_cb_func nim_rts_connect_notify_cb_func
   * for example: 
   * {"record_addr": "", "record_file":"" }
   * @{
@@ -92,7 +119,7 @@ static const char *kNIMRtsClientType	= "client_type";	/**< int 客户端类型NI
   * @param[out] session_id 会话id
   * @param[out] channel_type 通道类型 如要tcp+音视频，则channel_type=kNIMRtsChannelTypeTcp|kNIMRtsChannelTypeVchat
   * @param[out] uid 对方帐号
-  * @param[out] json_extension 无效的扩展字段
+  * @param[out] json_extension 扩展字段，若成功见kNIMRtsChannelId， ，如{"channel_id": 123213213123 }
   * @param[out] user_data APP的自定义用户数据，SDK只负责传回给回调函数，不做任何处理！
   * @return void 无返回值
   */ 
@@ -103,11 +130,30 @@ typedef void (*nim_rts_start_cb_func)(int code, const char *session_id, int chan
   * @param[out] session_id 会话id
   * @param[out] channel_type 通道类型 如要tcp+音视频，则channel_type=kNIMRtsChannelTypeTcp|kNIMRtsChannelTypeVchat
   * @param[out] uid 对方帐号
-  * @param[out] json_extension 扩展字段，若有透传数据见kNIMRtsCreateCustomInfo，如{"custom_info": "" }
+  * @param[out] json_extension 扩展字段，若有透传数据见kNIMRtsCreateCustomInfo，通道id见kNIMRtsChannelId，如{"custom_info": "","channel_id": 123213213123 }
   * @param[out] user_data APP的自定义用户数据，SDK只负责传回给回调函数，不做任何处理！
   * @return void 无返回值
   */ 
 typedef void (*nim_rts_start_notify_cb_func)(const char *session_id, int channel_type, const char *uid, const char *json_extension, const void *user_data);
+
+/** @typedef void (*nim_rts_create_cb_func)(int code, const char *session_id, const char *json_extension, const void *user_data)
+  * NIM RTS 创建多人rts返回结果
+  * @param[out] code 调用结果
+  * @param[out] json_extension 无效的扩展字段
+  * @param[out] user_data APP的自定义用户数据，SDK只负责传回给回调函数，不做任何处理！
+  * @return void 无返回值
+  */ 
+typedef void (*nim_rts_create_cb_func)(int code, const char *json_extension, const void *user_data);
+
+/** @typedef void (*nim_rts_join_cb_func)(int code, const char *session_id, const char *json_extension, const void *user_data)
+  * NIM RTS 加入多人rts返回结果
+  * @param[out] code 调用结果
+  * @param[out] session_id 会话id
+  * @param[out] json_extension 扩展字段，若成功返回创建的kNIMRtsCustomInfo及kNIMRtsChannelId，如{"channel_id": 1231, "custom_info":"hello world" }
+  * @param[out] user_data APP的自定义用户数据，SDK只负责传回给回调函数，不做任何处理！
+  * @return void 无返回值
+  */ 
+typedef void (*nim_rts_join_cb_func)(int code, const char *session_id, const char *json_extension, const void *user_data);
 
 /** @typedef void (*nim_rts_ack_res_cb_func)(int code, const char *session_id, int channel_type, bool accept, const char *json_extension, const void *user_data)
   * NIM RTS 回复收到邀请的结果

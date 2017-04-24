@@ -34,12 +34,14 @@ signals:
 	void sig_stateChange(bool, QString, QString);
 private slots:
 	void slot_change(bool, QString, QString);
+	void slot_allChange(bool,QString);
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual void focusOutEvent(QFocusEvent *);
 
 public:
 	void AddPerson(std::vector<personListBuddy*> vecBuddy, QString chatID);
+	void AddAllMute(QString chatid, bool bAllMute);
 	void DeletePerson();
 	void style(QScrollArea *style);
 	void setParentBtn(UIWindowSet* parent);

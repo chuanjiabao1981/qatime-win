@@ -1,11 +1,12 @@
 ﻿/** @file nim_plugin_in_def.h
   * @brief plugin def
-  * @copyright (c) 2015-2016, NetEase Inc. All rights reserved
+  * @copyright (c) 2015-2017, NetEase Inc. All rights reserved
   * @author Oleg
   * @date 2015/12/24
   */
 #ifndef NIM_SDK_DLL_EXPORT_HEADERS_NIM_PLUGIN_IN_DEF_H_
 #define NIM_SDK_DLL_EXPORT_HEADERS_NIM_PLUGIN_IN_DEF_H_
+#include "../util/nim_base_types.h"
 
 #ifdef __cplusplus
 extern"C"

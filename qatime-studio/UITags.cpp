@@ -30,8 +30,10 @@ UITags::~UITags()
 }
 
 
-void UITags::SetCourseNameAndID(QString sName, QString id, QString chatID)
+void UITags::SetCourseNameAndID(QString sName, QString id, QString chatID, QString board, QString camera)
 {
+	m_boardUrl = board;
+	m_cameraUrl = camera;
 	m_name = sName;
 	m_id = id;
 	m_chatID = chatID;
@@ -161,12 +163,12 @@ void UITags::setCameraStream(QString strCamera)
 
 QString UITags::BoardStream()
 {
-	return m_boardStream;
+	return m_boardUrl;
 }
 
 QString UITags::CameraStream()
 {
-	return m_cameraStream;
+	return m_cameraUrl;
 }
 
 bool UITags::IsModle()

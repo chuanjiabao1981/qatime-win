@@ -236,10 +236,10 @@ void UIAuxiliaryWnd::AddTodayAuxiliary(QString lessonName, QString courseID, QSt
 }
 
 void UIAuxiliaryWnd::AddAuxiliary(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
-	QString studentName, std::string AudioPath, QString status)
+	QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl)
 {
 	UIAuxiliaryList* auxiliary = new UIAuxiliaryList(ui.all_widget);
-	QLabel* pic = auxiliary->AddCourse(picUrl, courseName, grade, teacherName, chatID, courseID, teacherID, token, studentName, AudioPath, status);
+	QLabel* pic = auxiliary->AddCourse(picUrl, courseName, grade, teacherName, chatID, courseID, teacherID, token, studentName, AudioPath, status,url,cameraUrl);
 	connect(auxiliary, SIGNAL(clickAuxiliary(UIAuxiliaryList*)), this, SLOT(clickAuxiliary(UIAuxiliaryList*)));
 	m_VerAll->addWidget(auxiliary);
 
@@ -271,7 +271,7 @@ void UIAuxiliaryWnd::Add1v1Auxiliary(QString picUrl, QString courseName, QString
 	QString studentName, std::string AudioPath, QString status)
 {
 	UIAuxiliaryList* auxiliary = new UIAuxiliaryList(ui.all_widget);
-	QLabel* pic = auxiliary->AddCourse(picUrl, courseName, grade, teacherName, chatID, courseID, teacherID, token, studentName, AudioPath, status,true);
+	QLabel* pic = auxiliary->AddCourse(picUrl, courseName, grade, teacherName, chatID, courseID, teacherID, token, studentName, AudioPath, status,"","",true);
 	connect(auxiliary, SIGNAL(clickAuxiliary(UIAuxiliaryList*)), this, SLOT(clickAuxiliary(UIAuxiliaryList*)));
 	m_Ver1v1->addWidget(auxiliary);
 
@@ -391,7 +391,23 @@ void UIAuxiliaryWnd::clickAuxiliary(UIAuxiliaryList* auxiliary)
 {
 	if (m_parent)
 	{
-		m_parent->CreateRoom(auxiliary->ChatID(), auxiliary->CourseID(), auxiliary->TeacherID(), auxiliary->Token(), auxiliary->StudentName(), auxiliary->AudioPath(), auxiliary->CourseName(), auxiliary->UnreadMsgCount(), auxiliary->Status(), auxiliary->Is1v1Lesson());
+// 		m_parent->m_structCousre = new UIMainNewWindow::CourseStruct;
+// 		m_parent->m_structCousre->chatID = auxiliary->ChatID();
+// 		m_parent->m_structCousre->courseID = auxiliary->CourseID();
+// 		m_parent->m_structCousre->teacherID = auxiliary->TeacherID();
+// 		m_parent->m_structCousre->Token = auxiliary->Token();
+// 		m_parent->m_structCousre->teacherName = auxiliary->StudentName();
+// 		m_parent->m_structCousre->audioPath = auxiliary->AudioPath();
+// 		m_parent->m_structCousre->courseName = auxiliary->CourseName();
+// 		m_parent->m_structCousre->UnreadMsgCount = auxiliary->UnreadMsgCount();
+// 		m_parent->m_structCousre->Status = auxiliary->Status();
+// 		m_parent->m_structCousre->bIs1v1Lesson = auxiliary->Is1v1Lesson();
+// 		m_parent->m_structCousre->boardUrl = auxiliary->BoardUrl();
+// 		m_parent->m_structCousre->cameraUrl = auxiliary->CameraUrl();
+// 
+// 		m_parent->CreateRoom(m_parent->m_structCousre);
+		m_parent->CreateRoom(auxiliary->ChatID(), auxiliary->CourseID(), auxiliary->TeacherID(), auxiliary->Token(), auxiliary->StudentName(), 
+							auxiliary->AudioPath(), auxiliary->CourseName(), auxiliary->UnreadMsgCount(), auxiliary->Status(), auxiliary->BoardUrl(), auxiliary->CameraUrl(),auxiliary->Is1v1Lesson());
 		auxiliary->ClearMsgNumber();
 	}
 }
@@ -406,7 +422,23 @@ void UIAuxiliaryWnd::clickAuxiliaryToday(UIAuxiliaryToday* auxiliaryToday)
 		auxiliary = *it;
 		if (m_parent)
 		{
-			m_parent->CreateRoom(auxiliary->ChatID(), auxiliary->CourseID(), auxiliary->TeacherID(), auxiliary->Token(), auxiliary->StudentName(), auxiliary->AudioPath(), auxiliary->CourseName(), auxiliary->UnreadMsgCount(), auxiliary->Status());
+// 			m_parent->m_structCousre = new UIMainNewWindow::CourseStruct;
+// 			m_parent->m_structCousre->chatID = auxiliary->ChatID();
+// 			m_parent->m_structCousre->courseID = auxiliary->CourseID();
+// 			m_parent->m_structCousre->teacherID = auxiliary->TeacherID();
+// 			m_parent->m_structCousre->Token = auxiliary->Token();
+// 			m_parent->m_structCousre->teacherName = auxiliary->StudentName();
+// 			m_parent->m_structCousre->audioPath = auxiliary->AudioPath();
+// 			m_parent->m_structCousre->courseName = auxiliary->CourseName();
+// 			m_parent->m_structCousre->UnreadMsgCount = auxiliary->UnreadMsgCount();
+// 			m_parent->m_structCousre->Status = auxiliary->Status();
+// 			m_parent->m_structCousre->bIs1v1Lesson = auxiliary->Is1v1Lesson();
+// 			m_parent->m_structCousre->boardUrl = auxiliary->BoardUrl();
+// 			m_parent->m_structCousre->cameraUrl = auxiliary->CameraUrl();
+//			m_parent->CreateRoom(m_parent->m_structCousre);
+			m_parent->CreateRoom(auxiliary->ChatID(), auxiliary->CourseID(), auxiliary->TeacherID(), auxiliary->Token(), auxiliary->StudentName(), auxiliary->AudioPath(),
+				auxiliary->CourseName(), auxiliary->UnreadMsgCount(), auxiliary->Status(), auxiliary->BoardUrl(), auxiliary->CameraUrl());
+			
 			auxiliary->ClearMsgNumber();
 		}
 	}

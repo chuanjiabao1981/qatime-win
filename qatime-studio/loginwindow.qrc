@@ -71,5 +71,6 @@
 	<file>images/chatBar.png</file>
 	<file>images/noselect_close.png</file>
 	<file>images/select_close.png</file>
+	<file>images/videoback.png</file>
   </qresource>
 </RCC>

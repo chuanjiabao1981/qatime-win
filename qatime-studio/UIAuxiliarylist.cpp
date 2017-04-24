@@ -41,7 +41,7 @@ UIAuxiliaryList::~UIAuxiliaryList()
 
 
 QLabel* UIAuxiliaryList::AddCourse(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, 
-	QString teacherID, QString token, QString studentName, std::string AudioPath, QString status, bool b1v1Lesson)
+	QString teacherID, QString token, QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl, bool b1v1Lesson)
 {
 	m_picUrl = picUrl;
 	m_courseName = courseName;
@@ -54,6 +54,8 @@ QLabel* UIAuxiliaryList::AddCourse(QString picUrl, QString courseName, QString g
 	m_AudioPath = AudioPath;
 	m_status = status;
 	m_b1v1Lesson = b1v1Lesson;
+	m_boardUrl = url;
+	m_cameraUrl = cameraUrl;
 
 	setNetworkPic(picUrl);
 
@@ -201,4 +203,14 @@ void UIAuxiliaryList::ClearMsgNumber()
 int UIAuxiliaryList::UnreadMsgCount()
 {
 	return m_iMsgCount;
+}
+
+QString UIAuxiliaryList::BoardUrl()
+{
+	return m_boardUrl;
+}
+
+QString UIAuxiliaryList::CameraUrl()
+{
+	return m_cameraUrl;
 }

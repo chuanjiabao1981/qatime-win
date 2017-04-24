@@ -70,6 +70,12 @@ public:
 		CameraStatusClose,		//已关闭
 	};
 
+	enum SCREEN_TYPE {
+		SCREEN_16_9,
+		SCREEN_16_10,
+		SCREEN_4_3
+	};
+
 	UIWindowSet(QWidget *parent = 0);
 	~UIWindowSet();
 
@@ -121,6 +127,7 @@ public:
 	UIRatio*						m_RatioChangeInfo;		// 分辨率选择窗口
 	UIBulletParam*					m_BulletParamInfo;		// 弹幕参数窗口
 	UIScreenTip*					m_ScreenTip;			// 全屏提示框
+	SCREEN_TYPE						m_ScreenType;			// 屏幕比例
 private:
 	Ui::UIWindowSet ui;
 
@@ -165,10 +172,10 @@ public:
 	void	setTeacherID(QString id, QString name);				// 老师ID和名字
 	void	setAccid(QString accid);							// 云信ID
 	void	AddChatRoom(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, std::string strCurAudioPath,
-				QString name, int UnreadCount, QString status, bool b1v1Lesson=false); // 创建聊天
+					QString name, int UnreadCount, QString status, QString boardurl, QString cameraUrl, bool b1v1Lesson = false); // 创建聊天
 	bool	IsHasTag(QString chatID, QString status);			// 此辅导班是否创建标签
 	UIChatRoom* IsHasRoom(QString chatID);						// 此辅导班聊天室是否创建
-	void	AddTag(QString chatID, QString name, QString ID, bool sel, UIChatRoom* room, QString status,bool b1v1Lesson);		// 添加标签窗口, 参数sel是否选中此标签
+	void	AddTag(QString chatID, QString name, QString ID, bool sel, UIChatRoom* room, QString status,bool b1v1Lesson, QString board, QString camera);// 添加标签窗口, 参数sel是否选中此标签
 	void	titleButtonWidth();
 	QPixmap TeacherPhotoPixmap();								// 老师头像	
 	void    AgainSelectTag();									// 重新选择标签
@@ -219,6 +226,11 @@ public:
 	void	BulletDelay(int iDelay);							// 间隔
 	void	setTriggerType(bool bType);							// 触发类型
 	void	CloseBullet();										// 隐藏弹幕
+	void	ReturnLogin();										// 重新登录
+	void	StopSuccess(QWidget* widget);						// 直播停止成功
+	void    MathScreenSize();									// 计算屏幕比例
+	int		mathVideoWidth(int iwidth);							// 计算video显示的宽度
+	int		mathVideoHeight(int iheight);						// 计算video显示的高度
 };
 
 #endif // UIWINDOWSET_H

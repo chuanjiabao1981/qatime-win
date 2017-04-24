@@ -27,6 +27,9 @@ protected:
 
 signals:
 	void sig_doubleclick(QString,QString,QString,QString,int,QString);// 课程id,辅导班id,白板推流,摄像头推流,位置索引,课程名称
+
+private slots:
+	void clicked();
 private:
 	Ui::UILiveLessonItem ui;
 

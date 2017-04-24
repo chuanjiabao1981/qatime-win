@@ -1,12 +1,14 @@
 ﻿/** @file nim_device_def.h
   * @brief NIM VChat提供的设备相关接口定义
-  * @copyright (c) 2015-2016, NetEase Inc. All rights reserved
+  * @copyright (c) 2015-2017, NetEase Inc. All rights reserved
   * @author gq
   * @date 2015/4/24
   */
 
 #ifndef NIM_SDK_DLL_EXPORT_HEADERS_NIM_DEVICE_DEF_H_
 #define NIM_SDK_DLL_EXPORT_HEADERS_NIM_DEVICE_DEF_H_
+
+#include "../util/nim_base_types.h"
 
 #ifdef __cplusplus
 extern"C"
@@ -15,11 +17,12 @@ extern"C"
 /** @enum NIMDeviceType 设备类型 */
 enum NIMDeviceType
 {
-	kNIMDeviceTypeAudioIn		= 0,	/**< 麦克风设备 */
-	kNIMDeviceTypeAudioOut		= 1,	/**< 听筒设备用于播放本地采集音频数据 */
-	kNIMDeviceTypeAudioOutChat	= 2,	/**< 听筒设备用于通话音频数据（nim_vchat_start_device和nim_vchat_end_device中使用） */
-	kNIMDeviceTypeVideo			= 3,	/**< 摄像头 */
-	kNIMDeviceTypeSoundcardCapturer	= 4,	/**< 声卡声音采集，并在通话结束时会主动关闭，得到的数据只混音到发送的通话声音中，customaudio模式时无效 */
+	kNIMDeviceTypeAudioIn			= 0,	/**< 麦克风设备 */
+	kNIMDeviceTypeAudioOut			= 1,	/**< 听筒设备用于播放本地采集音频数据 */
+	kNIMDeviceTypeAudioOutChat		= 2,	/**< 听筒设备用于通话音频数据（nim_vchat_start_device和nim_vchat_end_device中使用） */
+	kNIMDeviceTypeVideo				= 3,	/**< 摄像头 */
+	kNIMDeviceTypeSoundcardCapturer	= 4,	/**< 声卡声音采集，并在通话结束时会主动关闭，得到的数据只混音到发送的通话声音中，customaudio模式时无效(此模式使用条件苛刻不建议使用) */
+	kNIMDeviceTypeAudioHook			= 5,	/**< 伴音，启动第三方播放器并获取音频数据（只允许存在一个进程钩子）,只混音到发送的通话声音中 */
 };
 
 /** @enum NIMDeviceStatus 设备状态类型 */
@@ -78,7 +81,7 @@ typedef void (*nim_vchat_start_device_cb_func)(NIMDeviceType type, bool ret, con
 
 /** @typedef void (*nim_vchat_device_status_cb_func)(NIMDeviceType type, unsigned int status, const char *device_path, const char *json_extension, const void *user_data)
   * NIM Device 设备状态监听返回接口
-  * @param[out] type 设备类型NIMDeviceType，其中kNIMDeviceTypeAudioIn和kNIMDeviceTypeVideo有效
+  * @param[out] type 设备类型NIMDeviceType，其中kNIMDeviceTypeAudioIn和kNIMDeviceTypeVideo、kNIMDeviceTypeAudioHook有效
   * @param[out] status 为NIMDeviceStatus的多状态
   * @param[out] device_path 当kNIMDeviceStatusReset状态时需要关注此参数，kNIMDeviceStatusReset时有可能选用了非用户选定的设备，这里返回的是重新启动的设备地址
   * @param[out] json_extension 无效的扩展字段
@@ -87,7 +90,7 @@ typedef void (*nim_vchat_start_device_cb_func)(NIMDeviceType type, bool ret, con
   */ 
 typedef void (*nim_vchat_device_status_cb_func)(NIMDeviceType type, unsigned int status, const char *device_path, const char *json_extension, const void *user_data);
 
-/** @typedef void (*nim_vchat_audio_data_cb_func)(unsigned __int64 time, const char *data, unsigned int size, const char *json_extension, const void *user_data)
+/** @typedef void (*nim_vchat_audio_data_cb_func)(uint64_t time, const char *data, unsigned int size, const char *json_extension, const void *user_data)
   * NIM Device 音频数据监听接口
   * @param[out] time 时间毫秒级
   * @param[out] data 音频数据pcm格式
@@ -96,9 +99,9 @@ typedef void (*nim_vchat_device_status_cb_func)(NIMDeviceType type, unsigned int
   * @param[out] user_data APP的自定义用户数据，SDK只负责传回给回调函数cb，不做任何处理！
   * @return void 无返回值
   */ 
-typedef void (*nim_vchat_audio_data_cb_func)(unsigned __int64 time, const char *data, unsigned int size, const char *json_extension, const void *user_data);
+typedef void (*nim_vchat_audio_data_cb_func)(uint64_t time, const char *data, unsigned int size, const char *json_extension, const void *user_data);
 
-/** @typedef void (*nim_vchat_video_data_cb_func)(unsigned __int64 time, const char *data, unsigned int size, unsigned int width, unsigned int height, const char *json_extension, const void *user_data)
+/** @typedef void (*nim_vchat_video_data_cb_func)(uint64_t time, const char *data, unsigned int size, unsigned int width, unsigned int height, const char *json_extension, const void *user_data)
   * NIM Device 视频数据监听接口
   * @param[out] time 时间毫秒级
   * @param[out] data 视频数据，默认为ARGB格式
@@ -109,7 +112,7 @@ typedef void (*nim_vchat_audio_data_cb_func)(unsigned __int64 time, const char *
   * @param[out] user_data APP的自定义用户数据，SDK只负责传回给回调函数cb，不做任何处理！
   * @return void 无返回值
   */ 
-typedef void (*nim_vchat_video_data_cb_func)(unsigned __int64 time, const char *data, unsigned int size, unsigned int width, unsigned int height, const char *json_extension, const void *user_data);
+typedef void (*nim_vchat_video_data_cb_func)(uint64_t time, const char *data, unsigned int size, unsigned int width, unsigned int height, const char *json_extension, const void *user_data);
 
 #ifdef __cplusplus
 };

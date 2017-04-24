@@ -75,7 +75,7 @@ public:
 	void	setMainWindow(UIMainNewWindow* parent);
 	void	AddTodayAuxiliary(QString lessonName, QString courseID, QString courseName, QString time, QString status, QString lessonid);
 	void    AddAuxiliary(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
-							QString studentName, std::string AudioPath, QString status);
+							QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl);
 	void    Add1v1Auxiliary(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
 		QString studentName, std::string AudioPath, QString status);
 	void	SetToken(QString mRemeberToken);
