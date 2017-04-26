@@ -16,22 +16,22 @@
 #include "define.h"
 
 //---云信
-#include "nim_client_def.h"
+//#include "nim_client_def.h"
 #include "assert.h"
 #include <string>
-#include "YxChat/nim_tools_http_cpp_wrapper.h"
-#include "YxChat/nim_client_helper.h"
-#include "YxChat/nim_cpp_talk.h"
-#include "YxChat/nim_cpp_team.h"
-#include "YxChat/nim_cpp_msglog.h"
-#include "YxChat/nim_cpp_nos.h"
-#include "YxChat/nim_tools_audio_cpp_wrapper.h"
-#include "YxChat/nim_sdk_helper.h"
-#include "YxChat/session_callback.h"
-#include "YxChat/nim_cpp_client.h"
-
-
-
+// #include "YxChat/nim_tools_http_cpp_wrapper.h"
+// #include "YxChat/nim_client_helper.h"
+// #include "YxChat/nim_cpp_talk.h"
+// #include "YxChat/nim_cpp_team.h"
+// #include "YxChat/nim_cpp_msglog.h"
+// #include "YxChat/nim_cpp_nos.h"
+// #include "YxChat/nim_tools_audio_cpp_wrapper.h"
+// #include "YxChat/nim_sdk_helper.h"
+// #include "YxChat/session_callback.h"
+// #include "YxChat/nim_cpp_client.h"
+#include "nim_cpp_api.h"
+#include "nim_cpp_client.h"
+#include "nim_cpp_tool.h"
 
 class UIWindowSet;
 class UIAuxiliaryWnd;
@@ -82,10 +82,10 @@ protected:
 
 public:
 	/*添加云信功能*/
-	void	initSDK();										// 初始化云信
+//	void	initSDK();										// 初始化云信
 	void    InitAudio();									// 初始化语音
-	bool	LoadConfig(const std::string& app_data_dir, const std::string& app_install_dir, nim::SDKConfig &config);// 加载配置
-	std::string GetJsonStringWithNoStyled(const QJsonObject& values); // json类型转换
+//	bool	LoadConfig(const std::string& app_data_dir, const std::string& app_install_dir, nim::SDKConfig &config);// 加载配置
+//	std::string GetJsonStringWithNoStyled(const QJsonObject& values); // json类型转换
 
 	void	setLoginWindow(LoginWindow* parent);			// 登录窗口
 	void	setVersion(QString version);					// 设置版本号
@@ -112,6 +112,7 @@ public:
 	void	CreateRoom(QString chatID, QString courseID, QString teacherID, QString token, QString studentName, std::string audioPath, 
 						QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl,bool b1v1Lesson=false);
 	void    changeLessonStatus(QString id, QString status);
+	void	changeMsgNumber(QString chid);
 };
 
 #endif // UIMAINNEWWINDOW_H

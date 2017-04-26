@@ -134,10 +134,6 @@ void UICamera::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
 		m_SvideoSampler.iDataSize = pSampler->iDataSize;
 		memcpy(m_SvideoSampler.puaData, pSampler->puaData, pSampler->iDataSize);
 
-// 		QImage qimage;
-// 		qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_ARGB32);
-// 		bool b = qimage.save("argb.png");
-
 		m_mutex.unlock();
 	}
 }

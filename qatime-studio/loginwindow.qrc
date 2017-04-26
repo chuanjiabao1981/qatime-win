@@ -72,5 +72,6 @@
 	<file>images/noselect_close.png</file>
 	<file>images/select_close.png</file>
 	<file>images/videoback.png</file>
+	<file>images/pen.png</file>
   </qresource>
 </RCC>

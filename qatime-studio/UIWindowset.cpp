@@ -5,10 +5,14 @@
 #include <QToolTip>
 #include <QDesktopWidget>
 
+#include "IMInterface.h"
+
 #define MAINWINDOW_X_MARGIN 10
 #define MAINWINDOW_Y_MARGIN 10
 #define MAINWINDOW_TITLE_HEIGHT 0
 #define LIVE_BUTTON_NAME	"选课直播"
+
+UIWindowSet* m_This = NULL;
 UIWindowSet::UIWindowSet(QWidget *parent)
 	: QWidget(parent)
 	, m_parent(NULL)
@@ -26,8 +30,10 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	, m_iTimerCount(0)
 	, m_LiveLesson(NULL)
 	, m_ScreenType(SCREEN_4_3)
+	, mWhiteBoard(NULL)
 {
 	ui.setupUi(this);
+	m_This = this;
 	setAutoFillBackground(true);
 	QPalette p = palette();
 	p.setColor(QPalette::Window, QColor(255, 255, 255));
@@ -37,6 +43,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	ui.title_pushButton->installEventFilter(this);
 	ui.whiteboard_widget->installEventFilter(this);
 	ui.full_widget->installEventFilter(this);
+	ui.full1v1_widget->installEventFilter(this);
 	initFont();
 	MathScreenSize();
 
@@ -161,6 +168,9 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	m_ScreenTip->setWindowFlags(Qt::FramelessWindowHint);
 	m_ScreenTip->hide();
 	SetWindowPos((HWND)m_ScreenTip->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
+//	initSDK();
+	initWhiteBoardWidget();
 }
 
 UIWindowSet::~UIWindowSet()
@@ -441,24 +451,43 @@ bool UIWindowSet::eventFilter(QObject *target, QEvent *event)
 			int iHeight = ui.full_widget->height();
 
 			int iVideoWidth = iWidth;
-			int iVideoHeight = mathVideoWidth(iWidth);
+			int iVideoHeight = mathVideoWidth(iWidth, m_ScreenType);
 			// 如果VIDEO的高大于容器的高，这用高来决定VIDEO的大小
 			if (iVideoHeight > iHeight)
 			{
-				iVideoWidth = mathVideoHeight(iHeight);
+				iVideoWidth = mathVideoHeight(iHeight, m_ScreenType);
 				m_VideoInfo->setFixedSize(iVideoWidth, iHeight);
 			}
 			else
 				m_VideoInfo->setFixedSize(iVideoWidth, iVideoHeight);
 		}
 	}
+	else if (target == ui.full1v1_widget) // 白板4：3比例自适应
+	{
+		if (event->type() == QEvent::Resize)
+		{
+			int iWidth = ui.full1v1_widget->width();
+			int iHeight = ui.full1v1_widget->height();
+
+			int iVideoWidth = iWidth;
+			int iVideoHeight = mathVideoWidth(iWidth,SCREEN_4_3);
+			// 如果VIDEO的高大于容器的高，这用高来决定VIDEO的大小
+			if (iVideoHeight > iHeight)
+			{
+				iVideoWidth = mathVideoHeight(iHeight, SCREEN_4_3);
+				mWhiteBoard->setFixedSize(iVideoWidth, iHeight);
+			}
+			else
+				mWhiteBoard->setFixedSize(iVideoWidth, iVideoHeight);
+		}
+	}
 	return false;
 }
 
-int UIWindowSet::mathVideoWidth(int iwidth)
+int UIWindowSet::mathVideoWidth(int iwidth, SCREEN_TYPE type)
 {
 	int iVideoWidth = 0;
-	switch (m_ScreenType)
+	switch (type)
 	{
 	case SCREEN_16_10:
 		iVideoWidth = iwidth / 16 * 10;
@@ -476,10 +505,10 @@ int UIWindowSet::mathVideoWidth(int iwidth)
 	return iVideoWidth;
 }
 
-int UIWindowSet::mathVideoHeight(int iheight)
+int UIWindowSet::mathVideoHeight(int iheight, SCREEN_TYPE type)
 {
 	int iVideoHeight = 0;
-	switch (m_ScreenType)
+	switch (type)
 	{
 	case SCREEN_16_10:
 		iVideoHeight = iheight / 10 * 16;
@@ -520,6 +549,38 @@ void UIWindowSet::AddChatRoom(QString chatID, QString courseid, QString teacheri
 	if (IsHasTag(chatID, status))
 		return;
 
+	if (b1v1Lesson)
+		OpenCourse1v1(chatID, courseid, teacherid, token, studentName, strCurAudioPath, courseName, UnreadCount, status, boardurl, cameraUrl, b1v1Lesson);
+	else
+		OpenCourse(chatID, courseid, teacherid, token, studentName, strCurAudioPath, courseName, UnreadCount, status, boardurl, cameraUrl, b1v1Lesson);
+}
+
+// 打开互动直播
+void UIWindowSet::OpenCourse1v1(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, std::string strCurAudioPath,
+	QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl, bool b1v1Lesson)
+{
+	UIChatRoom* chatRoom = IsHasRoom(chatID);
+	if (chatRoom == NULL)
+	{
+		chatRoom = new UIChatRoom(ui.chat1v1_widget);
+		chatRoom->setWindowFlags(Qt::FramelessWindowHint);
+		chatRoom->setMainWindow(this);
+		chatRoom->SetEnvironmental(m_EnvironmentalTyle);
+		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount);
+		chatRoom->SetCurAudioPath(strCurAudioPath);
+		ui.horizontalLayout_18->addWidget(chatRoom);
+		m_vecChatRoom.push_back(chatRoom);
+		m_mapChatRoom.insert(chatID, chatRoom);
+		chatRoom->show();
+	}
+
+	AddTag(chatID, courseName, courseid, true, chatRoom, status, b1v1Lesson, boardurl, cameraUrl);
+}
+
+// 打开直播课
+void UIWindowSet::OpenCourse(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, std::string strCurAudioPath,
+	QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl, bool b1v1Lesson)
+{
 	UIChatRoom* chatRoom = IsHasRoom(chatID);
 	if (chatRoom == NULL)
 	{
@@ -529,14 +590,13 @@ void UIWindowSet::AddChatRoom(QString chatID, QString courseid, QString teacheri
 		chatRoom->SetEnvironmental(m_EnvironmentalTyle);
 		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount);
 		chatRoom->SetCurAudioPath(strCurAudioPath);
-		chatRoom->InitAudioCallBack();
 		ui.horizontalLayout_6->addWidget(chatRoom);
 		m_vecChatRoom.push_back(chatRoom);
 		m_mapChatRoom.insert(chatID, chatRoom);
 		chatRoom->show();
 	}
 
-	AddTag(chatID, courseName, courseid, true, chatRoom, status, b1v1Lesson, boardurl,cameraUrl);
+	AddTag(chatID, courseName, courseid, true, chatRoom, status, b1v1Lesson, boardurl, cameraUrl);
 }
 
 bool UIWindowSet::IsHasTag(QString chatID, QString status)
@@ -550,6 +610,10 @@ bool UIWindowSet::IsHasTag(QString chatID, QString status)
 			UITags* tags = *it;
 			if (tags->ChatID() == chatID)
 			{
+				// 隐藏与显示互动直播
+				ui.live_widget->setVisible(!tags->Is1v1Lesson());
+				ui.live1v1_widget->setVisible(tags->Is1v1Lesson());
+				
 				tags->setStyle(true);
 				tags->GetRoom()->setVisible(true);
 				m_curTags = tags;
@@ -612,6 +676,10 @@ void UIWindowSet::AddTag(QString chatID, QString name, QString ID, bool sel, UIC
  	m_curTags = tag;
 	m_curChatRoom = room;
 	
+	// 隐藏与显示互动直播
+	ui.live_widget->setVisible(!b1v1Lesson);
+	ui.live1v1_widget->setVisible(b1v1Lesson);
+
 	m_curTags->setModle(false);
 	emit sig_Modle(false);
 }
@@ -707,7 +775,7 @@ void UIWindowSet::AgainSelectTag()
 	}
 }
 
-bool UIWindowSet::ReceiverMsg(nim::IMMessage* pIMsg)
+void UIWindowSet::ReceiverMsg(const nim::IMMessage* pIMsg)
 {
 	QString strChatID = QString::fromStdString(pIMsg->local_talk_id_.c_str());
 	QMap<QString, UIChatRoom*>::Iterator it;
@@ -721,13 +789,9 @@ bool UIWindowSet::ReceiverMsg(nim::IMMessage* pIMsg)
 
 	QMap<QString, UITags*>::Iterator itTag;
 	itTag = m_mapTags.find(strChatID);
-	if (itTag != m_mapTags.end())
+	if (itTag == m_mapTags.end())
 	{
-		return true;
-	}
-	else
-	{
-		return false;
+		m_parent->changeMsgNumber(QString::fromStdString(pIMsg->local_talk_id_));
 	}
 }
 
@@ -763,7 +827,7 @@ void UIWindowSet::ReceiverChatMsg(nim::IMMessage* pIMsg)
 	}
 }
 
-void UIWindowSet::ReceiverLoginMsg(nim::LoginRes* pLogMsg)
+void UIWindowSet::ReceiverLoginMsg(const nim::LoginRes& pLogMsg)
 {
 	if (m_vecChatRoom.size() > 0)
 	{
@@ -840,6 +904,10 @@ void UIWindowSet::clickTag(UITags* tag)
 			UITags* tags = *it;
 			if (tags == tag)
 			{
+				// 隐藏与显示互动直播
+				ui.live_widget->setVisible(!tags->Is1v1Lesson());
+				ui.live1v1_widget->setVisible(tags->Is1v1Lesson());
+
 				tags->setStyle(true);
 				tags->GetRoom()->setVisible(true);
 				m_curTags = tags;
@@ -1002,41 +1070,84 @@ void UIWindowSet::clickChange(bool checked)
 		}
 	}
 
-	if (ui.camera_widget->isVisible())
+	if (m_curTags->Is1v1Lesson())
 	{
-		ui.white_label->setVisible(false);
-		ui.camera_widget->setVisible(false);
-		ui.whiteboard_widget->setVisible(false);
-		ui.lesson_widget->setVisible(false);
-		ui.chatcamera_widget->setMaximumWidth(3000);
+		if (ui.camera1v1_widget->isVisible())
+		{
+			ui.label_2->setVisible(false);
+			ui.line_label->setVisible(false);
+			ui.camera1v1_widget->setVisible(false);
+			ui.whiteboard1v1_widget->setVisible(false);
+			ui.lesson_widget->setVisible(false);
+			ui.chatcamera1v1_widget->setMaximumWidth(3000);
 
-		m_CameraInfo->StopCaptureVideo();
+			//结束云信的摄像头采集
+//			m_CameraInfo->StopCaptureVideo();
 
-		if (m_curTags)
-			m_curTags->setModle(false);
+			if (m_curTags)
+				m_curTags->setModle(false);
 
-		ChangeBtnStyle(false);
-		// 课程名置空
-		ui.lesson_label->setText("");
-		// 退出弹幕
-		emit ui.Bullet_checkBox->stateChanged(0);
-		CloseBullet();
+			ChangeBtnStyle(false);
+			// 课程名置空
+			ui.lesson_label->setText("");
+			// 退出弹幕
+			emit ui.Bullet_checkBox->stateChanged(0);
+			CloseBullet();
+		}
+		else
+		{
+			ui.label_2->setVisible(true);
+			ui.line_label->setVisible(true);
+			ui.camera1v1_widget->setVisible(true);
+			ui.whiteboard1v1_widget->setVisible(true);
+			ui.lesson_widget->setVisible(true);
+			ui.chatcamera1v1_widget->setMaximumWidth(300);
+
+			//开启云信的摄像头采集
+			//m_CameraInfo->StopCaptureVideo();
+
+			if (m_curTags)
+				m_curTags->setModle(true);
+
+			ChangeBtnStyle(true);
+		}
 	}
 	else
 	{
-		ui.white_label->setVisible(true);
-		ui.camera_widget->setVisible(true);
-		ui.whiteboard_widget->setVisible(true);
-		ui.chatcamera_widget->setMaximumWidth(300);
-		ui.lesson_widget->setVisible(true);
-// 		InitBoardView();
+		if (ui.camera_widget->isVisible())
+		{
+			ui.white_label->setVisible(false);
+			ui.camera_widget->setVisible(false);
+			ui.whiteboard_widget->setVisible(false);
+			ui.lesson_widget->setVisible(false);
+			ui.chatcamera_widget->setMaximumWidth(3000);
 
-		if (m_curTags)
-			m_curTags->setModle(true);
+			m_CameraInfo->StopCaptureVideo();
 
-		ChangeBtnStyle(true);
-		m_CameraInfo->StartLiveVideo();
-// 		QueryLiveInfo();
+			if (m_curTags)
+				m_curTags->setModle(false);
+
+			ChangeBtnStyle(false);
+			// 课程名置空
+			ui.lesson_label->setText("");
+			// 退出弹幕
+			emit ui.Bullet_checkBox->stateChanged(0);
+			CloseBullet();
+		}
+		else
+		{
+			ui.white_label->setVisible(true);
+			ui.camera_widget->setVisible(true);
+			ui.whiteboard_widget->setVisible(true);
+			ui.chatcamera_widget->setMaximumWidth(300);
+			ui.lesson_widget->setVisible(true);
+
+			if (m_curTags)
+				m_curTags->setModle(true);
+
+			ChangeBtnStyle(true);
+			m_CameraInfo->StartLiveVideo();
+		}
 	}
 }
 
@@ -1044,26 +1155,49 @@ void UIWindowSet::slots_Modle(bool bModle)
 {
 	if (!bModle)
 	{
-		ui.white_label->setVisible(false);
-		ui.camera_widget->setVisible(false);
-		ui.whiteboard_widget->setVisible(false);
-		ui.chatcamera_widget->setMaximumWidth(3000);
-		ui.lesson_widget->setVisible(false);
-//		关闭摄像头（直播/互动）
-//		PlayLive("", "");
+		if (m_curTags && m_curTags->Is1v1Lesson())
+		{
+			ui.whiteboard1v1_widget->setVisible(false);
+			ui.line_label->setVisible(false);
+			ui.label_2->setVisible(false);
+			ui.camera1v1_widget->setVisible(false);
+			ui.chatcamera1v1_widget->setMaximumWidth(3000);
+		}
+		else
+		{
+			ui.white_label->setVisible(false);
+			ui.camera_widget->setVisible(false);
+			ui.whiteboard_widget->setVisible(false);
+			ui.chatcamera_widget->setMaximumWidth(3000);
+			//		关闭摄像头（直播/互动）
+			//		PlayLive("", "");
+		}
 
+		ui.lesson_widget->setVisible(false);
 		ChangeBtnStyle(false);
 	}
 	else
 	{
-		ui.white_label->setVisible(true);
-		ui.camera_widget->setVisible(true);
-		ui.whiteboard_widget->setVisible(true);
-		ui.chatcamera_widget->setMaximumWidth(300);
-		ui.lesson_widget->setVisible(true);
+		if (m_curTags && m_curTags->Is1v1Lesson())
+		{
+			ui.whiteboard1v1_widget->setVisible(true);
+			ui.line_label->setVisible(true);
+			ui.label_2->setVisible(true);
+			ui.camera1v1_widget->setVisible(true);
+			ui.chatcamera1v1_widget->setMaximumWidth(300);
+		}
+		else
+		{
+			ui.white_label->setVisible(true);
+			ui.camera_widget->setVisible(true);
+			ui.whiteboard_widget->setVisible(true);
+			ui.chatcamera_widget->setMaximumWidth(300);
+		}
+		
 //		打开摄像头（直播/互动）
 // 		InitBoardView();
 // 		QueryLiveInfo();
+		ui.lesson_widget->setVisible(true);
 		ChangeBtnStyle(true);
 	}
 }
@@ -1819,4 +1953,118 @@ void UIWindowSet::MathScreenSize()
 		m_ScreenType = SCREEN_16_10;
 	else if (iWidth / 4 * 3 == iHeight)
 		m_ScreenType = SCREEN_4_3;
+}
+
+/***************************************************************************/
+/*																		   */
+/*								互动直播								   */
+/*																		   */
+/***************************************************************************/
+//初始化白板
+void UIWindowSet::initWhiteBoardWidget()
+{
+	if (mWhiteBoard)
+	{
+		delete mWhiteBoard;
+	}
+
+	mWhiteBoard = new Palette();
+	ui.horizontalLayout_21->addWidget(mWhiteBoard);
+//	mWhiteBoard->setIsDraw(ui.pushButton_pen->isChecked());
+	mWhiteBoard->setIsDraw(true);
+	connect(mWhiteBoard, SIGNAL(PicData(QString)), this, SLOT(PicData(QString)));
+}
+
+void UIWindowSet::PicData(QString str)
+{
+	std::string picData = str.toStdString();
+//	IMInterface::getInstance()->SendData("", 1, picData);
+}
+
+/***************************************************************************/
+/*																		   */
+/*						   初始化云信及回调								   */
+/*																		   */
+/***************************************************************************/
+void UIWindowSet::initCallBack()
+{
+	// 接受消息回调
+	nim::Talk::RegReceiveCb(&CallbackReceiveMsg);
+	// 发送消息状态回调
+	nim::Talk::RegSendMsgCb(&CallbackSendMsgArc);
+}
+
+// 接收消息回调
+void CallbackReceiveMsg(const nim::IMMessage& msg)
+{
+	nim::IMMessage* pMsg = new nim::IMMessage;
+	pMsg->session_type_ = msg.session_type_;
+	pMsg->receiver_accid_ = msg.receiver_accid_;
+	pMsg->sender_accid_ = msg.sender_accid_;
+	pMsg->readonly_sender_client_type_ = msg.readonly_sender_client_type_;
+	pMsg->readonly_sender_device_id_ = msg.readonly_sender_device_id_;
+	pMsg->readonly_sender_nickname_ = msg.readonly_sender_nickname_;
+	pMsg->timetag_ = msg.timetag_;
+
+	pMsg->type_ = msg.type_;
+	pMsg->content_ = msg.content_;
+	pMsg->attach_ = msg.attach_;
+	pMsg->client_msg_id_ = msg.client_msg_id_;
+	pMsg->readonly_server_id_ = msg.readonly_server_id_;
+
+	pMsg->local_res_path_ = msg.local_res_path_;
+	pMsg->local_talk_id_ = msg.local_talk_id_;
+	pMsg->local_res_id_ = msg.local_res_id_;
+	pMsg->status_ = msg.status_;
+	pMsg->sub_status_ = msg.sub_status_;
+	
+	PostMessage(m_This->GetParentWnd(), MSG_CLIENT_RECEIVE, (WPARAM)pMsg, 0);
+}
+
+// 发送消息回调
+void CallbackSendMsgArc(const nim::SendMessageArc& arc)
+{
+	nim::SendMessageArc* arcNew = new nim::SendMessageArc;
+	arcNew->msg_id_ = arc.msg_id_;
+	arcNew->msg_timetag_ = arc.msg_timetag_;
+	arcNew->rescode_ = arc.rescode_;
+	arcNew->talk_id_ = arc.talk_id_;
+
+	PostMessage(m_This->GetParentWnd(), MSG_SEND_MSG_STATUS, (WPARAM)arcNew, 0);
+}
+
+// 查询历史记录回调
+void UIWindowSet::QueryMsgOnlineCb(nim::NIMResCode code, const std::string& id, nim::NIMSessionType type, const nim::QueryMsglogResult& result)
+{
+	nim::QueryMsglogResult* pRes = new nim::QueryMsglogResult;
+	pRes->msglogs_ = result.msglogs_;
+	pRes->count_ = result.count_;
+
+	PostMessage(m_This->GetParentWnd(), MSG_CLIENT_RECORD, (WPARAM)pRes, 0);
+}
+
+// 第一次查询历史记录回调
+void UIWindowSet::QueryFirstMsgOnlineCb(nim::NIMResCode code, const std::string& id, nim::NIMSessionType type, const nim::QueryMsglogResult& result)
+{
+	nim::QueryMsglogResult* pRes = new nim::QueryMsglogResult;
+	pRes->msglogs_ = result.msglogs_;
+	pRes->count_ = result.count_;
+
+	PostMessage(m_This->GetParentWnd(), MSG_CLIENT_RECORD, (WPARAM)pRes, 1);
+}
+
+// 获取成员回调
+void UIWindowSet::OnGetTeamMemberCallback(const std::string& tid, int count, const std::list<nim::TeamMemberProperty>& team_member_info_list)
+{
+	std::list<nim::TeamMemberProperty> *pTeamList = new std::list<nim::TeamMemberProperty>;
+
+	for (const auto& member : team_member_info_list)
+		pTeamList->push_back(member);
+
+	PostMessage(m_This->GetParentWnd(), MSG_MEMBERS_INFO, (WPARAM)pTeamList, 0);
+}
+
+HWND UIWindowSet::GetParentWnd()
+{
+	return (HWND)m_parent->winId();
 }

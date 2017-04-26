@@ -20,20 +20,37 @@
 #include "UIBulletparam.h"
 #include "UIBulletscreen.h"
 
+
+#include "palette.h"
 //---云信
 #include "nim_client_def.h"
 #include "assert.h"
 #include <string>
-#include "YxChat/nim_tools_http_cpp_wrapper.h"
-#include "YxChat/nim_client_helper.h"
-#include "YxChat/nim_cpp_talk.h"
-#include "YxChat/nim_cpp_team.h"
-#include "YxChat/nim_cpp_msglog.h"
-#include "YxChat/nim_cpp_nos.h"
-#include "YxChat/nim_tools_audio_cpp_wrapper.h"
-#include "YxChat/nim_sdk_helper.h"
-#include "YxChat/session_callback.h"
-#include "YxChat/nim_cpp_client.h"
+// #include "YxChat/nim_tools_http_cpp_wrapper.h"
+// #include "YxChat/nim_client_helper.h"
+// #include "YxChat/nim_cpp_talk.h"
+// #include "YxChat/nim_cpp_team.h"
+// #include "YxChat/nim_cpp_msglog.h"
+// #include "YxChat/nim_cpp_nos.h"
+// #include "YxChat/nim_tools_audio_cpp_wrapper.h"
+// #include "YxChat/nim_sdk_helper.h"
+// #include "YxChat/session_callback.h"
+// #include "YxChat/nim_cpp_client.h"
+//IM SDK接口定义头文件
+#include "nim_cpp_api.h"
+#include "nim_cpp_client.h"
+#include "nim_tools_http_cpp.h"
+
+//前置声明，依次为收到批量离线或同步消息通知函数、收到在线消息通知函数、发送消息结果通知函数、踢他端通知函数、多端登录通知函数、断线通知函数、被踢通知函数、登录重连通知函数。
+void CallbackReceiveMsgs(const std::list<nim::IMMessage>& msgs);
+void CallbackReceiveMsg(const nim::IMMessage& msg);
+void CallbackSendMsgArc(const nim::SendMessageArc& arc);
+void CallbackKickOther(const nim::KickOtherRes& res);
+void CallbackMultiSpotLogin(const nim::MultiSpotLoginRes& res);
+void CallbackDisconnect();
+void CallbackKickout(const nim::KickoutRes& res);
+void CallbackLogin(const nim::LoginRes& res);
+
 #pragma execution_character_set("utf-8")
 
 class UITags;
@@ -52,6 +69,10 @@ class UIPersonWnd;
 class UINoticeWnd;
 class UICourseWnd;
 class UILessonList;
+
+//互动直播
+class Palette;
+//class ColorPicker;
 class UIWindowSet : public QWidget
 {
 	Q_OBJECT
@@ -128,6 +149,9 @@ public:
 	UIBulletParam*					m_BulletParamInfo;		// 弹幕参数窗口
 	UIScreenTip*					m_ScreenTip;			// 全屏提示框
 	SCREEN_TYPE						m_ScreenType;			// 屏幕比例
+
+	/***************************互动直播*****************************/
+	Palette*						mWhiteBoard;			//画板
 private:
 	Ui::UIWindowSet ui;
 
@@ -155,9 +179,12 @@ private slots :
 	void clickRatioParam();									// 分辨率参数
 	void clickBulletParam();								// 弹幕参数
 	void slot_PullStreaming(QString, QString, QString, QString, QString);	// 开始推流
-	void slot_changeLessonStatus(QString, QString);					// 改变课程状态
-	void DeleteTag(UITags* tag);								// 删除标签	
+	void slot_changeLessonStatus(QString, QString);			// 改变课程状态
+	void DeleteTag(UITags* tag);							// 删除标签	
 	void slot_onTempTimeout();								// 摄像头推流
+
+	/*互动直播*/
+	void PicData(QString);									//白板数据
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual bool eventFilter(QObject *target, QEvent *event);
@@ -196,10 +223,12 @@ public:
 	void    setLiveBtnEnable(bool bEnable);						// 设置直播按钮样式状态
 
 	/*************************云信聊天**************************/
-	bool	ReceiverMsg(nim::IMMessage* pIMsg);					// 接收消息
+	void	initCallBack();
+
+	void	ReceiverMsg(const nim::IMMessage* pIMsg);					// 接收消息
 	void	ReceiverRecordMsg(nim::QueryMsglogResult* pIMsg);	// 接收历史记录消息
 	void	ReceiverChatMsg(nim::IMMessage* pIMsg);				// 接收初始化第一次请求的消息
-	void	ReceiverLoginMsg(nim::LoginRes* pLogMsg);			// 返回登录结果
+	void	ReceiverLoginMsg(const nim::LoginRes& pLogMsg);			// 返回登录结果
 	void	ReceiverMemberMsg(std::string sid, std::list<nim::TeamMemberProperty>* pMemberMsg);	// 返回成员
 	void	SendStatus(nim::SendMessageArc* arcNew);			// 接收消息状态
 	void	OnStopPlayAudio(std::string sid, char* msgid);		// 语音播放结束消息
@@ -229,8 +258,20 @@ public:
 	void	ReturnLogin();										// 重新登录
 	void	StopSuccess(QWidget* widget);						// 直播停止成功
 	void    MathScreenSize();									// 计算屏幕比例
-	int		mathVideoWidth(int iwidth);							// 计算video显示的宽度
-	int		mathVideoHeight(int iheight);						// 计算video显示的高度
+	int		mathVideoWidth(int iwidth, SCREEN_TYPE type);		// 计算video显示的宽度
+	int		mathVideoHeight(int iheight, SCREEN_TYPE type);		// 计算video显示的高度
+	/***************************互动直播*****************************/
+	void	OpenCourse(QString chatID, QString courseid, QString teacherid, QString token, QString studentName,
+				std::string strCurAudioPath, QString courseName, int UnreadCount, QString status,
+				QString boardurl, QString cameraUrl, bool b1v1Lesson);// 打开辅导班
+	void	OpenCourse1v1(QString chatID, QString courseid, QString teacherid, QString token, QString studentName,
+				std::string strCurAudioPath, QString courseName, int UnreadCount, QString status,
+				QString boardurl, QString cameraUrl, bool b1v1Lesson);// 打开互动直播
+	void	initWhiteBoardWidget();								// 初始化白板
+	static void QueryFirstMsgOnlineCb(nim::NIMResCode code, const std::string& id, nim::NIMSessionType type, const nim::QueryMsglogResult& result);	// 第一次请求
+	static void QueryMsgOnlineCb(nim::NIMResCode code, const std::string& id, nim::NIMSessionType type, const nim::QueryMsglogResult& result);		// 正常历史记录请求
+	static void OnGetTeamMemberCallback(const std::string& tid, int count, const std::list<nim::TeamMemberProperty>& team_member_info_list);		// 获取成员回调
+	HWND	 GetParentWnd();
 };
 
 #endif // UIWINDOWSET_H

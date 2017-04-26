@@ -212,7 +212,7 @@
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">border-image: url(:/LoginWindow/images/session.png);</string>
+           <string notr="true">border-image: url(:/LoginWindow/images/.png);</string>
           </property>
           <property name="text">
            <string/>

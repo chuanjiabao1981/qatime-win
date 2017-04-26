@@ -57,9 +57,6 @@ protected:
 	virtual void enterEvent(QEvent *e);
 	virtual void leaveEvent(QEvent* e);
 
-private:
-	void setNetworkPic(const QString &szUrl);
-
 public:
 	QLabel* AddCourse(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
 		QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl, bool b1v1Lesson = false); // ÐÂ½¨¸¨µ¼°à

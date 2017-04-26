@@ -12,20 +12,24 @@
 #include "UIWindowset.h"
 
 //---云信
-#include "nim_client_def.h"
+//#include "nim_client_def.h"
 #include "assert.h"
 #include <string>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include "YxChat/nim_tools_http_cpp_wrapper.h"
-#include "YxChat/nim_client_helper.h"
-#include "YxChat/nim_cpp_talk.h"
-#include "YxChat/nim_cpp_team.h"
-#include "YxChat/nim_cpp_msglog.h"
-#include "YxChat/nim_cpp_nos.h"
 #include <QNetworkAccessManager>
+// #include "YxChat/nim_tools_http_cpp_wrapper.h"
+// #include "YxChat/nim_client_helper.h"
+// #include "YxChat/nim_cpp_talk.h"
+// #include "YxChat/nim_cpp_team.h"
+// #include "YxChat/nim_cpp_msglog.h"
+// #include "YxChat/nim_cpp_nos.h"
+// #include "YxChat/nim_tools_audio_cpp_wrapper.h"
+#include "nim_cpp_api.h"
+#include "nim_cpp_client.h"
+#include "nim_cpp_tool.h"
+#include "nim_audio_cpp.h"
 
-#include "YxChat/nim_tools_audio_cpp_wrapper.h"
 
 class UIMainWindow;
 class UITalk;
@@ -131,9 +135,9 @@ public slots:
 	void clickPic();									// 选择图片
 	void LoadImgTimeout();								// 加载图片定时器
 private:
-	void		initSDK();									// 初始化云信SDK
-	bool		LoadConfig(const std::string& app_data_dir,const std::string& app_install_dir, nim::SDKConfig &config); //加载配置
-	std::string GetJsonStringWithNoStyled(const QJsonObject& values);				   //json类型转换
+//	void		initSDK();									// 初始化云信SDK
+//	bool		LoadConfig(const std::string& app_data_dir,const std::string& app_install_dir, nim::SDKConfig &config); //加载配置
+//	std::string GetJsonStringWithNoStyled(const QJsonObject& values);				   //json类型转换
 	void		PackageMsg(nim::IMMessage &msg);
 	void        style(QTextBrowser *style);
 	/**
@@ -154,16 +158,6 @@ private:
 	*/
 	static void OnTeamEventCallback(const nim::TeamEvent& result);
 
-	/**
-	* 获取会话记录的回调函数
-	* @param[in] code	错误码(200代表无错误)
-	* @param[in] id		获取的会话记录所属的会话id
-	* @param[in] type	获取的会话记录所属的会话类型
-	* @param[in] result 消息体Json string,包含了获取的会话记录的信息
-	* @return void 无返回值
-	*/
-	static void QueryMsgOnlineCb(nim::NIMResCode code, const std::string& id, nim::NIMSessionType type, const nim::QueryMsglogResult& result);
-
 	static void OnGetTeamInfoCb(const nim::TeamEvent& team_event);
 
 	QString		UserAppdataPath();
@@ -173,9 +167,9 @@ private:
 public:
 	void		SendImage(const std::wstring src, QString &filename, QString msgid="");
 	void		setChatInfo(QJsonObject &chatInfo, QString token);	// 设置云信账户信息
-	bool		ReceiverMsg(nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
+	bool		ReceiverMsg(const nim::IMMessage* pMsg);					// 接收服务器发送过来的消息
 	void		ReceiverRecordMsg(nim::QueryMsglogResult* pMsg);	// 接收历史消息记录
-	void		ReceiverLoginMsg(nim::LoginRes* pRes);				// 接收登录结果
+	void		ReceiverLoginMsg(const nim::LoginRes& pRes);				// 接收登录结果
 	void		ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg); //接收群成员信息
 	void		setCurChatID(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, QString accid, int UnreadCount);		// 设置当前窗口会话ID,用于接收消息时比较
 	std::string	GetCurChatID();
@@ -189,7 +183,6 @@ public:
 	bool		IsHasFace(QString qContect);						// 判断是否有表情
 	QString		BuildFaceToUrl(QString qFace);						// 通过表情返回url路径（例如：传入[em_1]返回./images/em_1.gif）
 	void		SetStudentName(int iNum);
-	void		setAdaptHeight(int iHeight);						// 自适应高度
 	void		setResize(int iWidth, int iHeight);					// 宽度 高度
 	bool		IsFous();
 	void		UpLoadPicProcess(double iProcess);					// 上传图片进度
@@ -221,6 +214,7 @@ public:
 	bool		IsPerson();											// 是否请求完成员
 	void		ResultMsg();										// 第一次请求
 	void		ShowChatMsg(nim::IMMessage pMsg);					// 第一次请求回来的消息
+	
 public slots:
 	void		chickChage(int, QString, QString);
 	bool		AddStudent(QString iconUrl, QString name, QString accid);		//添加成员
@@ -241,7 +235,6 @@ public slots:
 	void		returnAllMember();												//返回成员
 	void		SetEnvironmental(bool EnvironmentalTyle);						//设置当前环境
 	void        SetCurAudioPath(std::string path);								//设置当前语音路径
-	void		InitAudioCallBack();											//初始化语音回调
 private:
 	QToolButton* pPreMonthButton1;
 	QToolButton* pPreMonthButton;

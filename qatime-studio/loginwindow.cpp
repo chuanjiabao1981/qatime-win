@@ -199,7 +199,7 @@ void LoginWindow::loginFinished()
 		mainWin->SetEnvironmental(m_EnvironmentalFormally);
 		mainWin->setRemeberToken(m_teacherToken);
 		mainWin->setTeacherInfo(data["user"].toObject());
-		mainWin->ShowLesson();
+		mainWin->RequestKey();
 		mainWin->setLoginWindow(this);
 		mainWin->setVersion(m_version);
 		mainWin->resize(1, 1);
@@ -237,23 +237,14 @@ void LoginWindow::loginFinished()
 
 void LoginWindow::AutoLogin()
 {
-// 	mainWin = new UIMainWindow();
-// 	mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
-// 	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
-// 	mainWin->setRemeberToken(m_teacherToken);
-// 	mainWin->setAutoTeacherInfo(m_teacherID, m_teacherName, m_teacherUrl, m_accid, m_accidToken);
-// 	mainWin->ShowAuxiliary();
-// 	mainWin->setLoginWindow(this);
-// 	mainWin->setMainTitle(m_version);
-// 	mainWin->show();
-// 	SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 	mainWin = new UIMainNewWindow();
 	mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
 	mainWin->SetEnvironmental(m_EnvironmentalFormally);
 	mainWin->setRemeberToken(m_teacherToken);
 	mainWin->setAutoTeacherInfo(m_teacherID, m_teacherName, m_teacherUrl, m_accid, m_accidToken);
-	mainWin->ShowLesson();
+	mainWin->RequestKey();
+	/*mainWin->ShowLesson();*/
 	mainWin->setLoginWindow(this);
 	mainWin->setVersion(m_version);
 	mainWin->resize(1, 1);

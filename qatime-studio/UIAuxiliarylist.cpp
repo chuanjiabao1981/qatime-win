@@ -16,7 +16,6 @@ UIAuxiliaryList::UIAuxiliaryList(QWidget *parent)
 	setCursor(Qt::PointingHandCursor);
 	setMouseTracking(true);
 	ui.number_label->setText("");
-	ui.pic_label->setVisible(false);
 
 	m_pWorker = new Worker();
 	connect(this, SIGNAL(sig_StartLoading()), m_pWorker, SLOT(slot_StartLoading()));
@@ -57,8 +56,6 @@ QLabel* UIAuxiliaryList::AddCourse(QString picUrl, QString courseName, QString g
 	m_boardUrl = url;
 	m_cameraUrl = cameraUrl;
 
-	setNetworkPic(picUrl);
-
 	ui.name_label->setText(courseName);
 	ui.grade_label->setText(grade + "|" + teacherName);
 
@@ -85,37 +82,6 @@ QLabel* UIAuxiliaryList::AddCourse(QString picUrl, QString courseName, QString g
 	ui.teaching_label->setVisible(false);
 
 	return ui.label;
-}
-
-void UIAuxiliaryList::setNetworkPic(const QString &szUrl)
-{
-// 	m_pWorker->SetUrl(ui.pic_label, szUrl);
-// 	emit sig_StartLoading();
-// 	QUrl url(szUrl);
-// 	QNetworkAccessManager manager;
-// 	QEventLoop loop;
-// 
-// 	QNetworkReply *reply = manager.get(QNetworkRequest(url));
-// 	//请求结束并下载完成后，退出子事件循环 
-// 	QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-// 	//开启子事件循环 
-// 	loop.exec();
-// 	QByteArray jpegData = reply->readAll();
-// 	QPixmap pixmap;
-// 	QSize pixSize(ui.label->width(), ui.label->height());
-// 	// 加载成功则显示
-// 	if (pixmap.loadFromData(jpegData))
-// 	{
-// 		QPixmap scaledPixmap = pixmap.scaled(pixSize, Qt::IgnoreAspectRatio);
-// 		ui.label->setPixmap(scaledPixmap);
-// 	}
-// 	else // 否则显示备用图片
-// 	{
-// 		QString sUrl = "./images/teacherPhoto.png";
-// 		pixmap = QPixmap(sUrl);
-// 		QPixmap scaledPixmap = pixmap.scaled(pixSize, Qt::IgnoreAspectRatio);
-// 		ui.label->setPixmap(scaledPixmap);
-// 	}
 }
 
 void UIAuxiliaryList::mousePressEvent(QMouseEvent *e)
@@ -190,14 +156,15 @@ void UIAuxiliaryList::AddMsgCount()
 	m_iMsgCount++;
 	QString strNum = QString::number(m_iMsgCount);
 	ui.number_label->setText(strNum);
-	ui.pic_label->setVisible(true);
+	ui.pic_label->setStyleSheet("border-image: url(:/LoginWindow/images/session.png);");
+//	ui.pic_label->setVisible(true);
 }
 
 void UIAuxiliaryList::ClearMsgNumber()
 {
 	m_iMsgCount = 0;
 	ui.number_label->setText("");
-	ui.pic_label->setVisible(false);
+	ui.pic_label->setStyleSheet("border-image: url(:/LoginWindow/images/.png);");
 }
 
 int UIAuxiliaryList::UnreadMsgCount()

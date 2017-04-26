@@ -38,11 +38,11 @@
       <Extensions>ts</Extensions>
       <ParseFiles>false</ParseFiles>
     </Filter>
-    <Filter Include="YxChat">
-      <UniqueIdentifier>{623320f6-5445-4cb7-b218-ded375d9fc7d}</UniqueIdentifier>
+    <Filter Include="nim_audio_cpp">
+      <UniqueIdentifier>{ea6272cf-9564-42f1-ad55-9171de1c6ac6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="WhiteBoard">
-      <UniqueIdentifier>{3d7c82af-569a-438f-a9fd-689fa75269ba}</UniqueIdentifier>
+    <Filter Include="nim_http_cpp">
+      <UniqueIdentifier>{3a4b0f07-334e-4965-bd6e-7131cee8d83c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -196,39 +196,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_UIChatRoom.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="YxChat\nim_client_helper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_common_helper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_cpp_client.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_cpp_talk.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_msg_helper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_msglog_helper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_sdk_helper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_session_helper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_talk_helper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_tools_http_cpp_wrapper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\session_callback.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
     <ClCompile Include="member.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -259,18 +226,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_personListBuddy.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="YxChat\nim_cpp_team.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_team_helper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_cpp_global.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_user_helper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
     <ClCompile Include="myLabel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -279,9 +234,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_myLabel.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_cpp_msglog.cpp">
-      <Filter>YxChat</Filter>
     </ClCompile>
     <ClCompile Include="UILessontable.cpp">
       <Filter>Source Files</Filter>
@@ -442,9 +394,6 @@
     <ClCompile Include="UITalkRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="YxChat\nim_tools_audio_cpp_wrapper.cpp">
-      <Filter>YxChat</Filter>
-    </ClCompile>
     <ClCompile Include="UIBtnAudio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -453,9 +402,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_UIBtnAudio.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="YxChat\nim_cpp_nos.cpp">
-      <Filter>YxChat</Filter>
     </ClCompile>
     <ClCompile Include="UIMainNewWindow.cpp">
       <Filter>Source Files</Filter>
@@ -612,6 +558,39 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_UIBulletparam.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="palette.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_palette.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_palette.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="shape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_shape.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_shape.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IMInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_IMInterface.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_IMInterface.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp\nim_audio_cpp.cpp">
+      <Filter>nim_audio_cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="nim_sdk\nim_tools_cpp_sdk\nim_http_cpp\nim_tools_http_cpp.cpp">
+      <Filter>nim_http_cpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -891,6 +870,18 @@
     <CustomBuild Include="UIBulletparam.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="palette.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="palette.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="shape.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="IMInterface.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_loginwindow.h">
@@ -923,59 +914,8 @@
     <ClInclude Include="GeneratedFiles\ui_UIRatio.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="YxChat\net_export.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_client_helper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_common_helper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_cpp_client.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_cpp_talk.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_msg_helper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_msglog_helper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_sdk_helper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_session_helper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_talk_helper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_tools_http_cpp_wrapper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\session_callback.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
     <ClInclude Include="member.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_cpp_team.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_team_helper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_cpp_global.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_user_helper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_cpp_msglog.h">
-      <Filter>YxChat</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UILessontable.h">
       <Filter>Generated Files</Filter>
@@ -1024,12 +964,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UITalkRecord.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_tools_audio_cpp_wrapper.h">
-      <Filter>YxChat</Filter>
-    </ClInclude>
-    <ClInclude Include="YxChat\nim_cpp_nos.h">
-      <Filter>YxChat</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIMainNewWindow.h">
       <Filter>Generated Files</Filter>
@@ -1081,6 +1015,15 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIBulletparam.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_palette.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp\nim_audio_cpp.h">
+      <Filter>nim_audio_cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="nim_sdk\nim_tools_cpp_sdk\nim_http_cpp\nim_tools_http_cpp.h">
+      <Filter>nim_http_cpp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

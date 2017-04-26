@@ -6,24 +6,25 @@
 #include <QDir>
 #include "UIMessageBox.h"
 
-typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
-typedef void(*nim_client_cleanup)(const char *json_extension);
-typedef void(*nim_client_login)(const char *app_token, const char *account, const char *password, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-typedef void(*nim_client_relogin)(const char *json_extension);
-typedef void(*nim_client_logout)(NIMLogoutType logout_type, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-typedef void(*nim_client_kick_other_client)(const char *json_extension);
-typedef void(*nim_client_reg_auto_relogin_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-typedef void(*nim_client_reg_kickout_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-typedef void(*nim_client_reg_disconnect_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-typedef void(*nim_client_reg_multispot_login_notify_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void *user_data);
-typedef void(*nim_client_reg_kickout_other_client_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void *user_data);
-typedef void(*nim_client_reg_sync_multiport_push_config_cb)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
-typedef void(*nim_client_set_multiport_push_config)(const char *switch_content, const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
-typedef void(*nim_client_get_multiport_push_config)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
+//typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
+//typedef void(*nim_client_cleanup)(const char *json_extension);
+//typedef void(*nim_client_login)(const char *app_token, const char *account, const char *password, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
+//typedef void(*nim_client_relogin)(const char *json_extension);
+// typedef void(*nim_client_logout)(NIMLogoutType logout_type, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
+// typedef void(*nim_client_kick_other_client)(const char *json_extension);
+// typedef void(*nim_client_reg_auto_relogin_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
+// typedef void(*nim_client_reg_kickout_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
+// typedef void(*nim_client_reg_disconnect_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
+// typedef void(*nim_client_reg_multispot_login_notify_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void *user_data);
+// typedef void(*nim_client_reg_kickout_other_client_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void *user_data);
+// typedef void(*nim_client_reg_sync_multiport_push_config_cb)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
+// typedef void(*nim_client_set_multiport_push_config)(const char *switch_content, const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
+// typedef void(*nim_client_get_multiport_push_config)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
 
-typedef	const wchar_t * (*nim_tool_get_user_appdata_dir)(const char * app_account);
-typedef	void(*nim_global_free_buf)(void *data);
+//typedef	const wchar_t * (*nim_tool_get_user_appdata_dir)(const char * app_account);
+//typedef	void(*nim_global_free_buf)(void *data);
 
+UIMainNewWindow* m_This = NULL;
 UIMainNewWindow::UIMainNewWindow(QWidget *parent)
 	: QWidget(parent)
 	, m_LoginWindow(NULL)
@@ -31,8 +32,8 @@ UIMainNewWindow::UIMainNewWindow(QWidget *parent)
 	, m_WindowSet(NULL)
 {
 	ui.setupUi(this);
+	m_This = this;
 	setWindowTitle(QApplication::translate("UIMainWindow", "UIMainWindow", 0));
-	initSDK();
 
 	m_WindowSet = new UIWindowSet();
 	m_WindowSet->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowMinMaxButtonsHint);
@@ -97,8 +98,6 @@ void UIMainNewWindow::setTeacherInfo(QJsonObject &data)
 	m_token = obj["token"].toString();
 
 	m_WindowSet->setAccid(m_accid);
-
-	InitAudio();
 }
 
 void UIMainNewWindow::setAutoTeacherInfo(QString studentID, QString studentName, QString studentUrl, QString accid, QString token)
@@ -116,8 +115,6 @@ void UIMainNewWindow::setAutoTeacherInfo(QString studentID, QString studentName,
 	m_token = token;
 
 	m_WindowSet->setAccid(m_accid);
-
-	InitAudio();
 }
 
 void UIMainNewWindow::ShowLesson()
@@ -280,7 +277,6 @@ void UIMainNewWindow::Return1v1AuxiliaryRequestFinished()
 
 	if (m_AuxiliaryWnd)
 		m_AuxiliaryWnd->LoadPic1v1();
-	RequestKey();
 }
 
 void UIMainNewWindow::RequestKey()
@@ -325,17 +321,37 @@ void UIMainNewWindow::returnKey()
 void UIMainNewWindow::setKeyAndLogin(QString key)
 {
 	// 登陆
+	nim::SDKConfig config;
+
+	//sdk能力参数（必填）
+	nim::Client::Init(key.toStdString(), "", "", config);
+	nim_http::Init(); // 初始化云信http
+	InitAudio();	  // 初始化语音
+	m_WindowSet->initCallBack();
+
 	auto cb = std::bind(OnLoginCallback, std::placeholders::_1, nullptr);
-	bool bFail = nim::Client::Login(key.toStdString(), m_accid.toStdString(), m_token.toStdString(), cb);
-	if (!bFail)
-	{
-		CMessageBox::showMessage(QString("答疑时间"), QString("云信登录失败！"), QString("确定"), QString("取消"));
-		return;
-	}
+	nim::Client::Login(key.toStdString(), m_accid.toStdString(), m_token.toStdString(), cb);
+
+	// 查询课程
+	ShowLesson();
 }
 
 void UIMainNewWindow::OnLoginCallback(const nim::LoginRes& login_res, const void* user_data)
 {
+	m_This->m_WindowSet->ReceiverLoginMsg(login_res);
+	if (login_res.res_code_ == nim::kNIMResSuccess) // 登录成功
+	{
+		if (login_res.login_step_ == nim::kNIMLoginStepLogin)
+		{
+		}
+	}
+	else
+	{
+		int ErrorCode = login_res.res_code_;
+		QString sError = "云信登录失败，错误码";
+		sError += QString::number(ErrorCode);
+		CMessageBox::showMessage(QString("答疑时间"), QString(sError), QString("确定"), QString("取消"));
+	}
 }
 void UIMainNewWindow::setLoginWindow(LoginWindow* parent)
 {
@@ -401,10 +417,8 @@ void UIMainNewWindow::InitAudio()
 {
 	// 语音消息初始化 audio
 	std::string acc = m_accid.toStdString();
-	const wchar_t *dir = NIM_SDK_GET_FUNC(nim_tool_get_user_appdata_dir)(acc.c_str());
-	std::wstring app_data_audio_path = (std::wstring)dir;
-	NIM_SDK_GET_FUNC(nim_global_free_buf)((void*)dir);
-	QString audio_path = QString::fromStdWString(app_data_audio_path);
+	std::string app_data_audio_path = nim::Tool::GetUserAppdataDir(acc.c_str());
+	QString audio_path = QString::fromStdString(app_data_audio_path);
 	QDir Dir(audio_path);
 	if (!Dir.exists())
 		Dir.mkdir(audio_path);
@@ -422,8 +436,8 @@ void UIMainNewWindow::OnStopAudioCallback(int code, const char* file_path, const
 	QString strSid = QString(QLatin1String(sid));
 	char* pData = new char[strlen(cid)];
 	memcpy(pData, cid, strlen(cid));
-	HWND hWnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
-	PostMessage(hWnd, MSG_SEND_AUDIO_MSG, (WPARAM)(int)strSid.toInt(), (LPARAM)pData);
+	
+	PostMessage((HWND)m_This->winId(), MSG_SEND_AUDIO_MSG, (WPARAM)(int)strSid.toInt(), (LPARAM)pData);
 }
 
 bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
@@ -445,13 +459,7 @@ bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, lo
 
 			if (m_WindowSet)
 			{
-				if (!m_WindowSet->ReceiverMsg(pIMsg))
-				{
-					if (m_AuxiliaryWnd)
-					{
-						m_AuxiliaryWnd->ReceiverNumber(QString::fromStdString(pIMsg->local_talk_id_));
-					}
-				}
+				m_WindowSet->ReceiverMsg(pIMsg);
 			}
 
 			delete pIMsg;
@@ -460,7 +468,6 @@ bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, lo
 		break;
 		case MSG_CLIENT_RECORD:  // 接收历史消息
 		{
-			qInfo("接收到历史消息");
 			MSG* Msg = pMsg;
 			nim::QueryMsglogResult* pIMsg = (nim::QueryMsglogResult*)Msg->wParam;
 			int iTyle = Msg->lParam;
@@ -503,18 +510,18 @@ bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, lo
 				m_WindowSet->OnStopPlayAudio(strSid, msgid);
 		}
 		break;
-		case MSG_LOGIN:  // 接收登录返回结果
-		{
-			MSG* Msg = pMsg;
-			nim::LoginRes* pLogMsg = (nim::LoginRes*)Msg->wParam;
-
-			if (m_WindowSet)
-				m_WindowSet->ReceiverLoginMsg(pLogMsg);
-
-			delete pLogMsg;
-			pLogMsg;
-		}
-		break;
+// 		case MSG_LOGIN:  // 接收登录返回结果
+// 		{
+// 			MSG* Msg = pMsg;
+// 			nim::LoginRes* pLogMsg = (nim::LoginRes*)Msg->wParam;
+// 
+// 			if (m_WindowSet)
+// 				m_WindowSet->ReceiverLoginMsg(pLogMsg);
+// 
+// 			delete pLogMsg;
+// 			pLogMsg;
+// 		}
+// 		break;
 		case MSG_MEMBERS_INFO:  // 接收群成员信息
 		{
 			MSG* Msg = pMsg;
@@ -597,52 +604,36 @@ bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, lo
 	return false;
 }
 //////////////////////////////添加云信功能////////////////////////////////
-void UIMainNewWindow::initSDK()
-{
-	nim::SDKConfig config;
-
-	//sdk能力参数（必填）
-	config.database_encrypt_key_ = "Netease"; //string（db key必填，目前只支持最多32个字符的加密密钥！建议使用32个字符）
-	bool ret = false;
-	ret = nim::SDKFunction::LoadSdkDll();
-	if (!ret)
-		CMessageBox::showMessage(QString("答疑时间"), QString("加载云信SDK失败！"), QString("确定"), QString("取消"));
-
-	ret = LoadConfig("Netease", "", config);
-	if (!ret)
-		CMessageBox::showMessage(QString("答疑时间"), QString("加载云信Config失败！"), QString("确定"), QString("取消"));
-
-	nim_http::Init(); // 初始化云信http
-
-	// 接受消息回调
-	nim::Talk::RegReceiveCb(&nim_comp::TalkCallback::OnReceiveMsgCallback);
-	// 发送消息状态回调
-	nim::Talk::RegSendMsgCb(&nim_comp::TalkCallback::OnSendMsgCallback);
-}
-
-bool UIMainNewWindow::LoadConfig(const std::string& app_data_dir, const std::string& app_install_dir, nim::SDKConfig &config)
-{
-	QJsonObject config_root;
-	QJsonObject config_values;
-	config_values[kNIMDataBaseEncryptKey] = config.database_encrypt_key_.c_str();//string（db key必填，目前只支持最多32个字符的加密密钥！建议使用32个字符）
-	config_values[kNIMPreloadAttach] = config.preload_attach_;        //bool （选填，是否需要预下载附件缩略图， sdk默认预下载）
-	config_values[kNIMSDKLogLevel] = config.sdk_log_level_;
-	config_root[kNIMGlobalConfig] = config_values;
-
-	return NIM_SDK_GET_FUNC(nim_client_init)(app_data_dir.c_str(), app_install_dir.c_str(), GetJsonStringWithNoStyled(config_root).c_str());
-}
-
-std::string UIMainNewWindow::GetJsonStringWithNoStyled(const QJsonObject& values)
-{
-	QJsonDocument document;
-	document.setObject(values);
-
-	QByteArray byte_array = document.toJson(QJsonDocument::Compact);
-	QString json_str(byte_array);
-	return json_str.toStdString();
-}
+// void UIMainNewWindow::initSDK()
+// {
+// 	nim::SDKConfig config;
+// 
+// 	//sdk能力参数（必填）
+// 	config.database_encrypt_key_ = "Netease"; //string（db key必填，目前只支持最多32个字符的加密密钥！建议使用32个字符）
+// 	bool ret = false;
+// 	ret = nim::SDKFunction::LoadSdkDll();
+// 	if (!ret)
+// 		CMessageBox::showMessage(QString("答疑时间"), QString("加载云信SDK失败！"), QString("确定"), QString("取消"));
+// 
+// 	ret = LoadConfig("Netease", "", config);
+// 	if (!ret)
+// 		CMessageBox::showMessage(QString("答疑时间"), QString("加载云信Config失败！"), QString("确定"), QString("取消"));
+// 
+// 	nim_http::Init(); // 初始化云信http
+// 
+// 	// 接受消息回调
+// 	nim::Talk::RegReceiveCb(&nim_comp::TalkCallback::OnReceiveMsgCallback);
+// 	// 发送消息状态回调
+// 	nim::Talk::RegSendMsgCb(&nim_comp::TalkCallback::OnSendMsgCallback);
+// }
 
 void UIMainNewWindow::changeLessonStatus(QString id, QString status)
 {
 	m_AuxiliaryWnd->ChangeAuxiliaryTodayStatus(id, status);
+}
+
+void UIMainNewWindow::changeMsgNumber(QString chid)
+{
+	if (m_AuxiliaryWnd)
+		m_AuxiliaryWnd->ReceiverNumber(chid);
 }

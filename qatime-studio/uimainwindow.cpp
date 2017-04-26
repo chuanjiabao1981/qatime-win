@@ -83,7 +83,6 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 	//除去任务栏的高度
 	if (iHeight < MAINWINDOW_MAXHEIGHT)
 	{
-		setAdaptHeight(iHeight*0.92);
 		this->move(dsk->width() - 345, 0);
 	}
 
@@ -228,7 +227,6 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 //	m_charRoom->setMainWindow(this);
  	m_charRoom->move(10, 0);
 	m_charRoom->resize(m_charRoom->size().width(), ui.chat_widget->size().height());
-	m_charRoom->setAdaptHeight(ui.chat_widget->size().height());
 	m_charRoom->show();
 
 	ui.titel_pushButton->installEventFilter(this);
@@ -835,13 +833,7 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 		break;
 		case MSG_LOGIN:  // 接收登录返回结果
 		{
-			MSG* Msg = pMsg;
-			nim::LoginRes* pLogMsg = (nim::LoginRes*)Msg->wParam;
 
-			if (m_charRoom)
-				m_charRoom->ReceiverLoginMsg(pLogMsg);
-
-			delete pLogMsg;
 		}
 		break;
 		case MSG_MEMBERS_INFO:  // 接收群成员信息
