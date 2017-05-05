@@ -20,6 +20,7 @@ LiveStatusManager::LiveStatusManager(QObject *parent)
 	, m_iBeatStep(0)
 	, m_newParent(NULL)
 	, m_EnvironmentalTyle(true)
+	, m_1v1HeartTimer(NULL)
 {
 	m_iGetRtmpCount = GET_RTMP_FAIL_COUNT;
 	m_TGetRtmpTimer = new QTimer(this);
@@ -28,9 +29,15 @@ LiveStatusManager::LiveStatusManager(QObject *parent)
 	m_HeartTimer = new QTimer(this);
 	connect(m_HeartTimer, SIGNAL(timeout()), this, SLOT(HeartBeatTimer()));
 
+	m_1v1HeartTimer = new QTimer(this);
+	connect(m_1v1HeartTimer, SIGNAL(timeout()), this, SLOT(HeartBeat1v1Timer()));
+
 	m_iHeartCount = HEARTBEAT_FAIL_COUNT;
 	m_HeartFailTimer = new QTimer(this);
 	connect(m_HeartFailTimer, SIGNAL(timeout()), this, SLOT(HeartBeatFailTimer()));
+
+	m_1v1HeartFailTimer = new QTimer(this);
+	connect(m_1v1HeartFailTimer, SIGNAL(timeout()), this, SLOT(HeartBeatFailTimer1v1()));
 
 	m_iStopLiveCount = STOP_LIVE_FAIL_COUNT;
 	m_StopFailTimer = new QTimer(this);
@@ -540,4 +547,243 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 void LiveStatusManager::SetEnvironmental(bool bTyle)
 {
 	m_EnvironmentalTyle = bTyle;
+}
+
+/***********************************************************/
+/*					互动直播							   */
+/***********************************************************/
+// 发送1v1直播开始状态
+void LiveStatusManager::SendStart1v1LiveHttpMsg(QString sLessonid,QString chatid, QString sToken)
+{
+	m_lessonID = sLessonid;
+	m_sToken = sToken;
+	QString strUrl;
+
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/live_start";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/live_start";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+
+	QByteArray append("room_id=");
+	append += chatid;
+
+	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	reply = manager.post(request, append);
+	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::Finish1v1StartLive);
+}
+
+void LiveStatusManager::Finish1v1StartLive()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	if (obj["status"].toInt() == 1 && data.contains("live_token"))
+	{
+		QString status = data["status"].toString();
+		m_sLiveToken = data["live_token"].toString();
+		m_iBeatStep = data["beat_step"].toInt();
+		if (status == "teaching")
+		{
+			if (m_newParent)
+			{
+				// 更新课程状态
+				m_newParent->start1v1LiveStream();
+				m_newParent->SendRequestStatus("直播中");
+
+				Start1v1HeartBeat();
+			}
+		}
+		else
+		{
+			if (m_newParent)
+			{
+				m_newParent->show1v1ErrorTip(TIP_START_LIVE_ERROR);
+			}
+		}
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
+	}
+	else
+	{
+		if (m_newParent)
+		{
+			m_newParent->show1v1ErrorTip(TIP_START_LIVE_ERROR);
+		}
+	}
+}
+
+// 开始启动1对1心跳
+void LiveStatusManager::Start1v1HeartBeat()
+{
+	m_1v1HeartTimer->start(m_iBeatStep * 1000);
+}
+
+// 1对1直播心跳
+void LiveStatusManager::HeartBeat1v1Timer()
+{
+	QString strUrl;
+
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+
+	qint64 date = QDateTime::currentMSecsSinceEpoch();
+	qint64 currentSec = date / 1000;
+	QString time = QString::number(currentSec);
+	m_Time = time;
+
+	QByteArray append("live_token=");
+	append += m_sLiveToken;
+	append.append("&beat_step=");
+	qInfo(append);
+	append += QString::number(m_iBeatStep);
+	append.append("&timestamp=");
+	append += time;
+
+	QString strHeartBeat = "HearBeat:";
+	strHeartBeat += append;
+	qDebug()<<strHeartBeat;
+	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	reply = manager.post(request, append);
+	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat1v1);
+}
+
+// 心跳返回的结果
+void LiveStatusManager::ReturnHeartBeat1v1()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	if (obj["status"].toInt() == 1)
+	{
+		m_sLiveToken = data["live_token"].toString();
+		// 成功以后次数重置
+		m_iHeartCount = HEARTBEAT_FAIL_COUNT;
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
+	}
+	else
+	{
+		// 重试5次后放弃
+		m_iHeartCount--;
+		if (m_iHeartCount < 0)
+		{
+			m_iHeartCount = HEARTBEAT_FAIL_COUNT;
+			return;
+		}
+
+		m_1v1HeartFailTimer->start(300);
+	}
+}
+
+// 心跳失败重试
+void LiveStatusManager::HeartBeatFailTimer1v1()
+{
+	m_1v1HeartFailTimer->stop();
+
+	QString strUrl;
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+
+	QByteArray append("live_token=");
+	append += m_sLiveToken;
+	append.append("&beat_step=");
+	qInfo(append);
+	append += QString::number(m_iBeatStep);
+	append.append("&timestamp=");
+	append += m_Time;
+
+	QString strHeartBeat = "HearBeat:";
+	strHeartBeat += append;
+	qDebug() << "失败"<<strHeartBeat;
+	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	reply = manager.post(request, append);
+	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat1v1);
+}
+
+// 停止直播推流消息
+void LiveStatusManager::SendStopLiveHttpMsg1v1(bool bConnect)
+{
+	StopTimer();
+	QString strUrl;
+
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/live_end";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/live_end";
+		strUrl.replace("{lessons_id}", m_lessonID);
+	}
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+
+	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	reply = manager.post(request, "");
+	if (bConnect)
+		connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::FinishStopLive1v1);
+}
+
+void LiveStatusManager::FinishStopLive1v1()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	if (obj["status"].toInt() == 1)
+	{
+		if (m_newParent)
+		{
+			// 更新课程状态
+			m_newParent->SendRequestStatus("已直播");
+
+			m_iStopLiveCount = STOP_LIVE_FAIL_COUNT;
+		}
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
+	}
 }

@@ -9,12 +9,20 @@
 #include "shape.h"
 #include "windows.h"
 
+#define  COLOR_VALUE_BLACK QColor(0, 0, 0)
+#define  COLOR_VALUE_RED QColor(204, 0, 0)
+#define  COLOR_VALUE_YELLOW QColor(255, 204, 0)
+#define  COLOR_VALUE_BLUE QColor(0, 153, 255)
+#define  COLOR_VALUE_GREEN QColor(0, 153, 0)
+#define  COLOR_VALUE_PURPLE QColor(255, 51, 255)
+
 Palette::Palette(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Palette)
 	, m_timer(NULL)
 {
     ui->setupUi(this);
+	setMouseTracking(true);
     mMouseIsPress = false;
 
     mPen.setColor(Qt::black);
@@ -85,6 +93,11 @@ void Palette::cleanUp()
 	}
 	mSycnShapeStack.clear();
 	update();
+
+	QString opType = QString::number(DrawOpClear);	//  消息类型
+	QString strInfo;
+	strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg("").arg("").arg(""));
+	emit PicData(strInfo);
 }
 
 void Palette::setIsDraw(bool isDraw)
@@ -105,7 +118,8 @@ void Palette::setMouseStyle(bool isDraw)
 	else
 	{
 		QCursor cursor;
-		cursor = QCursor(Qt::ArrowCursor);
+		QPixmap pixmap("./images/pensign.png");
+		cursor = QCursor(pixmap, 0, pixmap.height());
 		setCursor(cursor);
 	}
 }
@@ -158,7 +172,7 @@ void Palette::mousePressEvent(QMouseEvent *event)
 		QString ptX = QString("%1").arg(x);				//	x的相对坐标
 		QString ptY = QString("%1").arg(y);				//  y的相对坐标
 		QString opType = QString::number(DrawOpStart);	//  消息类型
-		DWORD clr = getPenColor().rgb();
+		DWORD clr = colorConvert(getPenColor());
 		QString sClr = QString::number(clr);			//  颜色类型
 		QString strInfo;
 		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
@@ -174,8 +188,25 @@ void Palette::mouseMoveEvent(QMouseEvent *event)
 {
 	if (!mIsDraw)
 	{
+		QPoint point = event->pos();
+		QSize lSize = size();
+
+		update();
+
+		float x = (float)(point.x() * 1.0 / lSize.width());
+		float y = (float)(point.y() * 1.0 / lSize.height());
+		QString ptX = QString("%1").arg(x);				//	x的相对坐标
+		QString ptY = QString("%1").arg(y);				//  y的相对坐标
+		QString opType = QString::number(kMultiBoardOpSign);//  消息类型
+		DWORD clr = colorConvert(getPenColor());
+		QString sClr = QString::number(clr);			//  颜色类型
+		QString strInfo;
+		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
+		qDebug() << strInfo;
+		emit PicData(strInfo);
 		return;
 	}
+
     if(mMouseIsPress)
     {
 		QPoint point = event->pos();
@@ -189,7 +220,7 @@ void Palette::mouseMoveEvent(QMouseEvent *event)
 		QString ptX = QString("%1").arg(x);				//	x的相对坐标
 		QString ptY = QString("%1").arg(y);				//  y的相对坐标
 		QString opType = QString::number(DrawOpMove);	//  消息类型
-		DWORD clr = getPenColor().rgb();
+		DWORD clr = colorConvert(getPenColor());
 		QString sClr = QString::number(clr);			//  颜色类型
 		QString strInfo;
 		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
@@ -216,7 +247,7 @@ void Palette::mouseReleaseEvent(QMouseEvent *event)
 		QString ptX = QString("%1").arg(x);				//	x的相对坐标
 		QString ptY = QString("%1").arg(y);				//  y的相对坐标
 		QString opType = QString::number(DrawOpEnd);	//  消息类型
-		DWORD clr = getPenColor().rgb();
+		DWORD clr = colorConvert(getPenColor());
 		QString sClr = QString::number(clr);			//  颜色类型
 		QString strInfo;
 		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
@@ -325,4 +356,23 @@ std::list<std::string> Palette::BoardStringTokenize(const char* input, const cha
 	}
 	ret_list.push_back(data);
 	return ret_list;
+}
+
+int Palette::colorConvert(QColor color)
+{
+	int clr;
+	if (color == COLOR_VALUE_BLACK)
+		clr = 0x000000;
+	else if (color == COLOR_VALUE_RED)
+		clr = 0xcc0000;
+	else if (color == COLOR_VALUE_YELLOW)
+		clr = 0xffcc00;
+	else if (color == COLOR_VALUE_BLUE)
+		clr = 0x228bf8;
+	else if (color == COLOR_VALUE_GREEN)
+		clr = 0x009900;
+	else if (color == COLOR_VALUE_PURPLE)
+		clr = 0xff33ff;
+
+	return clr;
 }

@@ -1,5 +1,6 @@
 ﻿#include "IMInterface.h"
 
+#include "windows.h"
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -85,11 +86,6 @@ void IMInterface::initRtsCallback()
 	Rts::SetSyncAckNotifyCb(&CallbackSyncAckNotify);
 }
 
-//void IMInterface::createRtsRoom(int channel_type, const QString& uid, const QString& apns, const QString& custom_info, bool data_record, bool audio_record)
-//{
-//	Rts::StartChannel(channel_type, uid.toStdString(), apns.toStdString(), custom_info.toStdString(), data_record, audio_record, &CallbackStartChannel);
-//}
-
 void IMInterface::createRtsRoom(const std::string &name, const std::string &custom_info/* = ""*/)
 {
 	mRtsRoomName = name;
@@ -104,9 +100,7 @@ void IMInterface::joinRtsRoom(const std::string &name, bool record/* = false*/)
 
 void IMInterface::SendData(const std::string& session_id, int channel_type, const std::string& data, const std::string& uid /* = "" */)
 {
-	
 	Rts::SendData(IMInterface::getInstance()->getSessionID(), kNIMRtsChannelTypeTcp, data);
-//	Rts::SendData(session_id, channel_type, data, uid);
 }
 
 void IMInterface::setSessionID(const std::string &sessionID)
@@ -164,7 +158,7 @@ void IMInterface::initVChatCallback()
 void IMInterface::createVChatRoom(const std::string &name, const std::string &custom_info /* = "" */)
 {
 	mVChatRoomName = name;
-	VChat::CreateRoom(mVChatRoomName, custom_info, "", &CallbackOpt2Call);
+	VChat::CreateRoom(mVChatRoomName, custom_info, "", &CallbackOpt2CreateCall);
 }
 
 void IMInterface::joinVChatRoom(int chatMode, const std::string &name, const std::string &json_extension /* = "" */)
@@ -189,6 +183,9 @@ void IMInterface::EnumDeviceDevpath(int deviceType)
 	case 0:
 		VChat::EnumDeviceDevpath(kNIMDeviceTypeAudioIn, &CallbackDeviceDevpath);
 		break;
+	case 2:
+		VChat::EnumDeviceDevpath(kNIMDeviceTypeAudioOutChat, &CallbackDeviceDevpath);
+		break;
 	case 3:
 		VChat::EnumDeviceDevpath(kNIMDeviceTypeVideo, &CallbackDeviceDevpath);
 		break;
@@ -203,6 +200,9 @@ void IMInterface::startDevice(int type, const std::string& device_path, unsigned
 	{
 	case 0:
 		VChat::StartDevice(kNIMDeviceTypeAudioIn, device_path, fps, width, height, &CallbackStartDevice);
+		break;
+	case 2:
+		VChat::StartDevice(kNIMDeviceTypeAudioOutChat, device_path, fps, width, height, &CallbackStartDevice);
 		break;
 	case 3:
 		VChat::StartDevice(kNIMDeviceTypeVideo, device_path, fps, width, height, &CallbackStartDevice);
@@ -219,6 +219,9 @@ void IMInterface::endDevice(int type)
 	case 0:
 		VChat::EndDevice(kNIMDeviceTypeAudioIn);
 		break;
+	case 2:
+		VChat::EndDevice(kNIMDeviceTypeAudioOutChat);
+		break;
 	case 3:
 		VChat::EndDevice(kNIMDeviceTypeVideo);
 		break;
@@ -229,7 +232,7 @@ void IMInterface::endDevice(int type)
 
 void IMInterface::addDeviceInfo(const DevInfo &dInfo)
 {
-	mDeviceInfoMap.insert(dInfo.name, dInfo);
+	mDeviceInfoMap.insert(dInfo.path, dInfo);
 }
 
 void IMInterface::addDeviceInfo(int type, const char *json_string)
@@ -243,13 +246,28 @@ void IMInterface::addDeviceInfo(int type, const char *json_string)
 		info.type = type;
 		info.name = obj["name"].toString();
 		info.path = obj["path"].toString();
-		mDeviceInfoMap.insert(info.name, info);
+		mDeviceInfoMap.insert(info.path, info);
 	}
 }
 
 const DeviceInfoMap &IMInterface::getDeviceInfos()
 {
 	return mDeviceInfoMap;
+}
+
+void IMInterface::setAudioChange(int volumn, bool captrue)
+{
+	VChat::SetAudioVolumn(volumn, captrue);
+}
+
+void IMInterface::SetCustomData(bool bVideo)
+{
+	VChat::SetCustomData(false,bVideo);
+}
+
+void IMInterface::CustomVideoData(__int64 time, const char* data, int size, int width, int height)
+{
+	VChat::CustomVideoData(time, data, size, width, height, nullptr);
 }
 
 void CallbackStartChannel(nim::NIMResCode res_code, const std::string& session_id, int channel_type, const std::string& uid)
@@ -400,12 +418,23 @@ void CallbackNetDetect(int code, nim::NetDetectCbInfo info)
 	}
 }
 
+// 音视频加入回调
 void CallbackOpt2Call(int code, __int64 channel_id, const std::string& json_extension)
 {
 	qDebug() << __FILE__ << __LINE__ << code << channel_id << json_extension.c_str();
 	if (kNIMResSuccess == code)
 	{
+		emit IMInterface::getInstance()->joinVChatSuccessfully();
+	}
+}
 
+// 音视频创建回调
+void CallbackOpt2CreateCall(int code, __int64 channel_id, const std::string& json_extension)
+{
+	qDebug() << __FILE__ << __LINE__ << code << channel_id << json_extension.c_str();
+	if (kNIMResSuccess == code || kNIMResExist == code)
+	{
+		emit IMInterface::getInstance()->createVChatRoomSuccessfully();
 	}
 }
 
@@ -413,14 +442,16 @@ void CallbackVideoCaptureData(uint64_t time, const char *data, unsigned int size
 {
 	qDebug() << "size is: " << QString::number(size) << "width is:" << QString::number(width) << "height is:" << QString::number(height) << "json is:" << QString(QLatin1String(json_extension));
 
-	char* copydata = new char[size];;
+	char* copydata = new char[size];
 	memcpy(copydata, data, size);
 	emit IMInterface::getInstance()->VideoCapture(copydata, width, height, size);
 }
 
 void CallbackVideoRecData(uint64_t time, const char *data, unsigned int size, unsigned int width, unsigned int height, const char *json_extension, const void *user_data)
 {
-
+	char* copydata = new char[size];
+	memcpy(copydata, data, size);
+	emit IMInterface::getInstance()->RecVideoCapture(copydata, width, height, size);
 }
 
 void CallbackAudioCaptureData(uint64_t time, const char *data, unsigned int size, const char *json_extension, const void *user_data)
@@ -435,7 +466,38 @@ void CallbackAudioRecData(uint64_t time, const char *data, unsigned int size, co
 
 void CallbackVChatCb(nim::NIMVideoChatSessionType type, __int64 channel_id, int code, const char *json, const void*)
 {
-
+	switch (type)
+	{
+	case nim::kNIMVideoChatSessionTypeStartRes:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeInviteNotify:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeCalleeAckRes:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeCalleeAckNotify:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeControlRes:{
+		//
+	}break;
+	case nim::kNIMVideoChatSessionTypeControlNotify:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeConnect:{
+	}break;
+	case nim::kNIMVideoChatSessionTypePeopleStatus:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeNetStatus:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeHangupRes:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeHangupNotify:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeSyncAckNotify:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeMp4Notify:{
+	}break;
+	case nim::kNIMVideoChatSessionTypeVolumeNotify:{
+	}break;
+	}
 }
 
 void CallbackDeviceDevpath(bool ret, nim::NIMDeviceType type, const char *json_extension, const void *user_data)

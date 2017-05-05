@@ -4,13 +4,19 @@
 #include "member.h"
 #include <QToolTip>
 #include <QDesktopWidget>
-
+#include <QScreen>
 #include "IMInterface.h"
 
 #define MAINWINDOW_X_MARGIN 10
 #define MAINWINDOW_Y_MARGIN 10
 #define MAINWINDOW_TITLE_HEIGHT 0
 #define LIVE_BUTTON_NAME	"选课直播"
+#define LESSON_LABEL		"暂无直播"
+
+#define Audio 0		//音频设备
+#define AudioOut 2	//扬声器
+#define Video 3		//视频设备
+#define VIDEO_FPS 50  
 
 UIWindowSet* m_This = NULL;
 UIWindowSet::UIWindowSet(QWidget *parent)
@@ -31,6 +37,13 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	, m_LiveLesson(NULL)
 	, m_ScreenType(SCREEN_4_3)
 	, mWhiteBoard(NULL)
+	, m_Camera1v1Info(NULL)
+	, m_AudioChangeInfo1v1(NULL)
+	, m_AudioOutChangeInfo1v1(NULL)
+	, m_bLiving1v1(false)
+	, m_CameraS1v1Info(NULL)
+	, m_VideoInfo1v1(NULL)
+	, m_AppWnd1v1(NULL)
 {
 	ui.setupUi(this);
 	m_This = this;
@@ -38,6 +51,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	QPalette p = palette();
 	p.setColor(QPalette::Window, QColor(255, 255, 255));
 	setPalette(p);
+	setMinimumSize(966, 665);
 
 	ui.logo_pushButton->installEventFilter(this);
 	ui.title_pushButton->installEventFilter(this);
@@ -46,6 +60,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	ui.full1v1_widget->installEventFilter(this);
 	initFont();
 	MathScreenSize();
+	InitSetParamWnds();
 
 	connect(ui.min_pushButton, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.max_pushButton, SIGNAL(clicked()), this, SLOT(MaxDialog()));
@@ -113,7 +128,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 
 	m_LiveLesson = new UILiveLessonWnd(this);
 	m_LiveLesson->setWindowFlags(Qt::FramelessWindowHint);
-	connect(m_LiveLesson, SIGNAL(sig_PullStreaming(QString, QString, QString, QString, QString)), this, SLOT(slot_PullStreaming(QString, QString, QString, QString, QString)));
+	connect(m_LiveLesson, SIGNAL(sig_PullStreaming(QString, QString, QString, QString, QString, bool)), this, SLOT(slot_PullStreaming(QString, QString, QString, QString, QString, bool)));
 	connect(m_LiveLesson, SIGNAL(sig_changeLessonStatus(QString, QString)), this, SLOT(slot_changeLessonStatus(QString, QString)));
 	m_LiveLesson->hide();
 
@@ -161,6 +176,10 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	ui.Live_pushBtn->setText(LIVE_BUTTON_NAME);
 	ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
 
+	// 1v1直播按钮
+	ui.Live1v1_pushBtn->setText(LIVE_BUTTON_NAME);
+	ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
+
 	m_LiveStatusManager = new LiveStatusManager(this);
 	m_LiveStatusManager->setMainWindow(this);
 
@@ -169,8 +188,10 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	m_ScreenTip->hide();
 	SetWindowPos((HWND)m_ScreenTip->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
-//	initSDK();
-	initWhiteBoardWidget();
+	ui.notice_pushButton->setStyleSheet("border-image: url(./images/notice_nor.png);");
+	ui.lesson_pushButton->setStyleSheet("border-image: url(./images/lessonBtn_nor.png);"); 
+	ui.course_pushButton->setStyleSheet("border-image: url(./images/courseBtn_nor.png);");
+	ui.person_pushButton->setStyleSheet("border-image: url(./images/personBtn_nor.png);");
 }
 
 UIWindowSet::~UIWindowSet()
@@ -232,7 +253,7 @@ void UIWindowSet::CloseDialog()
 	// 停止采集和互动预览
 	m_CameraInfo->StopCaptureVideo();
 	// 课程名置空
-	ui.lesson_label->setText("");
+	ui.lesson_label->setText(LESSON_LABEL);
 	// 退出弹幕
 	emit ui.Bullet_checkBox->stateChanged(0);
 	CloseBullet();
@@ -360,11 +381,11 @@ void UIWindowSet::initFont()
 	font.setPixelSize(15);
 	ui.lesson_label->setFont(font);
 
-	ui.lessonpic_label->setStyleSheet("border-image: url(./images/lessonPic.png);");
 	ui.lesson_widget->setVisible(false);
 	ui.camera_widget->setVisible(false);
 	ui.whiteboard_widget->setVisible(false);
 	ui.time_label->setVisible(false);
+	ui.time1v1_label->setVisible(false);
 
 	ui.white_label->setVisible(false);
 	ui.return_pushButton->setVisible(false);
@@ -479,6 +500,23 @@ bool UIWindowSet::eventFilter(QObject *target, QEvent *event)
 			}
 			else
 				mWhiteBoard->setFixedSize(iVideoWidth, iVideoHeight);
+
+			QRect rc = ui.full1v1_widget->geometry();
+			m_WhiteBoardTool->move(rc.x() + (iWidth - m_WhiteBoardTool->width())/2, rc.y() + iHeight - 30);
+
+
+			// 窗口抓取
+			int iScreenWidth = iWidth;
+			int iScreenHeight = ((double)iWidth / (double)m_VideoInfo1v1->ScreenWidth())*m_VideoInfo1v1->ScreenHeight();
+			if (iScreenHeight > iHeight)
+			{
+				iScreenWidth = ((double)iHeight / (double)m_VideoInfo1v1->ScreenHeight())*m_VideoInfo1v1->ScreenWidth();
+				m_VideoInfo1v1->setFixedSize(iScreenWidth, iHeight);
+			}
+			else
+				m_VideoInfo1v1->setFixedSize(iScreenWidth, iScreenHeight);
+
+			m_AppWndTool1v1->move(rc.x() + (iWidth - m_AppWndTool1v1->width()) / 2, rc.y() + iHeight - 30);
 		}
 	}
 	return false;
@@ -566,7 +604,7 @@ void UIWindowSet::OpenCourse1v1(QString chatID, QString courseid, QString teache
 		chatRoom->setWindowFlags(Qt::FramelessWindowHint);
 		chatRoom->setMainWindow(this);
 		chatRoom->SetEnvironmental(m_EnvironmentalTyle);
-		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount);
+		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount,true);
 		chatRoom->SetCurAudioPath(strCurAudioPath);
 		ui.horizontalLayout_18->addWidget(chatRoom);
 		m_vecChatRoom.push_back(chatRoom);
@@ -762,7 +800,7 @@ void UIWindowSet::AgainSelectTag()
 		if (m_CameraInfo)
 			m_CameraInfo->StopCaptureVideo();
 		// 课程名置空
-		ui.lesson_label->setText("");
+		ui.lesson_label->setText(LESSON_LABEL);
 		// 退出弹幕
 		emit ui.Bullet_checkBox->stateChanged(0);
 		CloseBullet();
@@ -923,22 +961,22 @@ void UIWindowSet::clickTag(UITags* tag)
 	}
 
 	if (m_NoticeWnd){
-		ui.notice_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/AuxiliaryPanelBack.png);");//background-color: rgb(255, 255, 255);
+		ui.notice_pushButton->setStyleSheet("border-image: url(./images/notice_nor.png);");//background-color: rgb(255, 255, 255);
 		m_NoticeWnd->hide();
 	}
 
 	if (m_CourseWnd){
-		ui.course_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/AuxiliaryPanelBack.png);");
+		ui.course_pushButton->setStyleSheet("border-image: url(./images/courseBtn_nor.png);");
 		m_CourseWnd->hide();
 	}
 
 	if (m_PersonWnd){
-		ui.person_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/AuxiliaryPanelBack.png);");
+		ui.person_pushButton->setStyleSheet("border-image: url(./images/personBtn_nor.png);");
 		m_PersonWnd->hide();
 	}
 
 	if (m_LessonWnd){
-		ui.lesson_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/AuxiliaryPanelBack.png);");
+		ui.lesson_pushButton->setStyleSheet("border-image: url(./images/lessonBtn_nor.png);");
 		m_LessonWnd->hide();
 	}
 
@@ -1005,7 +1043,7 @@ void UIWindowSet::clickLive()
 				return;
 			}
 			m_LiveLesson->DeleteItem();
-			m_LiveLesson->setCourseID(m_curTags->CourseID());
+			m_LiveLesson->setCourseID(m_curTags->CourseID(),false);
 			m_LiveLesson->move(width()/2 - m_LiveLesson->width()/2,height()/2-m_LiveLesson->height()/2);
 			m_LiveLesson->show();
 		}
@@ -1013,19 +1051,33 @@ void UIWindowSet::clickLive()
 }
 
 // 选中课程开始直播
-void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString boardurl, QString cameraurl, QString name)
+void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString boardurl, QString cameraurl, QString name, bool b1v1Lesson)
 {
-	// 推白板
-	m_CameraInfo->setVisible(false);
 	m_lessonName = name;
 	ui.lesson_label->setText(m_lessonName);
 	m_lessonid = id;
-	m_boardUrl = "rtmp://pa0a19f55.live.126.net/live/2794c854398f4d05934157e05e2fe419?wsSecret=16c5154fb843f7b7d2819554d8d3aa94&wsTime=1480648811";
-	m_cameraUrl = "rtmp://pa0a19f55.live.126.net/live/0ca7943afaa340c9a7c1a8baa5afac97?wsSecret=f49d13a6ab68601884b5b71487ff51e1&wsTime=1480648749";
-	m_boardUrl = m_curTags->BoardStream();
-	m_cameraUrl = m_curTags->CameraStream();
-	m_VideoInfo->setPlugFlowUrl(m_boardUrl);
-	m_VideoInfo->StartLiveVideo();
+
+	if (b1v1Lesson)
+	{
+		QString chatID = m_curTags->ChatID();
+		createRtsRoom(chatID);
+	}
+	else
+	{
+		m_CameraInfo->setVisible(false);
+// 		m_boardUrl = "rtmp://pa0a19f55.live.126.net/live/2794c854398f4d05934157e05e2fe419?wsSecret=16c5154fb843f7b7d2819554d8d3aa94&wsTime=1480648811";
+// 		m_cameraUrl = "rtmp://pa0a19f55.live.126.net/live/0ca7943afaa340c9a7c1a8baa5afac97?wsSecret=f49d13a6ab68601884b5b71487ff51e1&wsTime=1480648749";
+		m_boardUrl = m_curTags->BoardStream();
+		m_cameraUrl = m_curTags->CameraStream();
+		m_VideoInfo->setPlugFlowUrl(m_boardUrl);
+		m_VideoInfo->StartLiveVideo();
+	}
+}
+
+void UIWindowSet::createRtsRoom(const QString &roomName, const QString &roomInfo /* = "" */)
+{
+	// 先创建白板
+	IMInterface::getInstance()->createRtsRoom(roomName.toStdString(), roomInfo.toStdString());
 }
 
 void UIWindowSet::slot_changeLessonStatus(QString id, QString status)
@@ -1046,7 +1098,10 @@ void UIWindowSet::slot_onCountTimeout()
 {
 	m_iTimerCount++;
 	QString str = QString().sprintf("%02d:%02d:%02d", m_iTimerCount / 3600, m_iTimerCount % 3600 / 60, m_iTimerCount % 60);
-	ui.time_label->setText(str);
+	if (m_bLiving1v1)
+		ui.time1v1_label->setText(str);
+	else
+		ui.time_label->setText(str);
 }
 
 void UIWindowSet::clickChange(bool checked)
@@ -1059,7 +1114,7 @@ void UIWindowSet::clickChange(bool checked)
 			UITags* tags = *it;
 			if (tags->IsModle() && tags != m_curTags)
 			{ 
-				m_ScreenTip->setErrorTip(" 进入失败！请确保其它课程已离开\n直播室后再进入！");
+				m_ScreenTip->setErrorTip(" 进入失败！请确保其它课程已退出\n直播室后再进入！");
 				return;
 			}
 			else if (tags == m_curTags && tags->IsModle())
@@ -1079,17 +1134,20 @@ void UIWindowSet::clickChange(bool checked)
 			ui.camera1v1_widget->setVisible(false);
 			ui.whiteboard1v1_widget->setVisible(false);
 			ui.lesson_widget->setVisible(false);
+			m_WhiteBoardTool->setVisible(false);
+			m_AppWndTool1v1->setVisible(false);
 			ui.chatcamera1v1_widget->setMaximumWidth(3000);
 
 			//结束云信的摄像头采集
-//			m_CameraInfo->StopCaptureVideo();
+			IMInterface::getInstance()->endDevice(Video);
+			IMInterface::getInstance()->endDevice(Audio);
 
 			if (m_curTags)
 				m_curTags->setModle(false);
 
 			ChangeBtnStyle(false);
 			// 课程名置空
-			ui.lesson_label->setText("");
+			ui.lesson_label->setText(LESSON_LABEL);
 			// 退出弹幕
 			emit ui.Bullet_checkBox->stateChanged(0);
 			CloseBullet();
@@ -1101,10 +1159,30 @@ void UIWindowSet::clickChange(bool checked)
 			ui.camera1v1_widget->setVisible(true);
 			ui.whiteboard1v1_widget->setVisible(true);
 			ui.lesson_widget->setVisible(true);
+
+			if (mWhiteBoard->isVisible())
+				m_WhiteBoardTool->setVisible(true);
+			else
+				m_AppWndTool1v1->setVisible(true);
+
 			ui.chatcamera1v1_widget->setMaximumWidth(300);
 
 			//开启云信的摄像头采集
-			//m_CameraInfo->StopCaptureVideo();
+			if (!ui.video1v1_checkBox->isChecked())
+			{
+				QString dPath = m_VideoChangeInfo1v1->GetCurPath();
+				if (!dPath.isNull())
+					IMInterface::getInstance()->startDevice(Video, dPath.toStdString(), VIDEO_FPS, 0, 0);
+			}
+
+			//开启麦克风的采集
+			if (!ui.Audio1v1_checkBox->isChecked())
+			{
+				QString dPath = m_AudioChangeInfo1v1->GetCurPath();
+				if (!dPath.isNull())
+					IMInterface::getInstance()->startDevice(Audio, dPath.toStdString(), 0, 0, 0);
+			}
+			
 
 			if (m_curTags)
 				m_curTags->setModle(true);
@@ -1129,7 +1207,7 @@ void UIWindowSet::clickChange(bool checked)
 
 			ChangeBtnStyle(false);
 			// 课程名置空
-			ui.lesson_label->setText("");
+			ui.lesson_label->setText(LESSON_LABEL);
 			// 退出弹幕
 			emit ui.Bullet_checkBox->stateChanged(0);
 			CloseBullet();
@@ -1161,6 +1239,8 @@ void UIWindowSet::slots_Modle(bool bModle)
 			ui.line_label->setVisible(false);
 			ui.label_2->setVisible(false);
 			ui.camera1v1_widget->setVisible(false);
+			m_WhiteBoardTool->setVisible(false);
+			m_AppWndTool1v1->setVisible(false);
 			ui.chatcamera1v1_widget->setMaximumWidth(3000);
 		}
 		else
@@ -1184,6 +1264,10 @@ void UIWindowSet::slots_Modle(bool bModle)
 			ui.line_label->setVisible(true);
 			ui.label_2->setVisible(true);
 			ui.camera1v1_widget->setVisible(true);
+			if (mWhiteBoard->isVisible())
+				m_WhiteBoardTool->setVisible(true);
+			else
+				m_AppWndTool1v1->setVisible(true);
 			ui.chatcamera1v1_widget->setMaximumWidth(300);
 		}
 		else
@@ -1191,12 +1275,12 @@ void UIWindowSet::slots_Modle(bool bModle)
 			ui.white_label->setVisible(true);
 			ui.camera_widget->setVisible(true);
 			ui.whiteboard_widget->setVisible(true);
+			m_WhiteBoardTool->setVisible(false);
+			m_AppWndTool1v1->setVisible(false);
 			ui.chatcamera_widget->setMaximumWidth(300);
 		}
 		
 //		打开摄像头（直播/互动）
-// 		InitBoardView();
-// 		QueryLiveInfo();
 		ui.lesson_widget->setVisible(true);
 		ChangeBtnStyle(true);
 	}
@@ -1264,14 +1348,14 @@ void UIWindowSet::clickNotice()
 	{
 		if (m_NoticeWnd->isVisible())
 		{
-			ui.notice_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/AuxiliaryPanelBack.png);");
+			ui.notice_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/notice_nor.png);");
 			m_NoticeWnd->setVisible(false);
 			return;
 		}
 
 		m_NoticeWnd->initDate();
-		ui.notice_pushButton->setStyleSheet("color:rgb(255, 255, 255);border-image: url(./images/Bullet.png);");//background-color: rgb(5,157,213);
-		m_NoticeWnd->move(4, 74);
+		ui.notice_pushButton->setStyleSheet("color:rgb(255, 255, 255);border-image: url(./images/notice_hor.png);");//background-color: rgb(5,157,213);
+		m_NoticeWnd->move(0, 70);
 		m_NoticeWnd->DeleteNotice();
 		m_NoticeWnd->show();
 		m_NoticeWnd->setFocus();
@@ -1351,13 +1435,13 @@ void UIWindowSet::clickCourse()
 	{
 		if (m_CourseWnd->isVisible())
 		{
-			ui.course_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/AuxiliaryPanelBack.png);");
+			ui.course_pushButton->setStyleSheet("border-image: url(./images/courseBtn_nor.png);");
 			m_CourseWnd->setVisible(false);
 			return;
 		}
 
-		ui.course_pushButton->setStyleSheet("color:rgb(255, 255, 255);border-image: url(./images/Bullet.png);");
-		m_CourseWnd->move(4, 74);
+		ui.course_pushButton->setStyleSheet("border-image: url(./images/courseBtn_hor.png);");
+		m_CourseWnd->move(0, 70);
 		m_CourseWnd->show();
 		m_CourseWnd->setFocus();
 
@@ -1457,13 +1541,13 @@ void UIWindowSet::clickLesson()
 	{
 		if (m_LessonWnd->isVisible())
 		{
-			ui.lesson_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/AuxiliaryPanelBack.png);");
+			ui.lesson_pushButton->setStyleSheet("border-image: url(./images/lessonBtn_nor.png);");
 			m_LessonWnd->setVisible(false);
 			return;
 		}
 
-		ui.lesson_pushButton->setStyleSheet("color:rgb(255, 255, 255);border-image: url(./images/Bullet.png);");
-		m_LessonWnd->move(4, 74);
+		ui.lesson_pushButton->setStyleSheet("border-image: url(./images/lessonBtn_hor.png);");
+		m_LessonWnd->move(0, 70);
 		m_LessonWnd->DeleteLesson();
 		m_LessonWnd->show();
 		m_LessonWnd->setFocus();
@@ -1577,13 +1661,13 @@ void UIWindowSet::clickPerson()
 	{
 		if (m_PersonWnd->isVisible())
 		{
-			ui.person_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/AuxiliaryPanelBack.png);");
+			ui.person_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/personBtn_nor.png);");
 			m_PersonWnd->setVisible(false);
 			return;
 		}
 
-		ui.person_pushButton->setStyleSheet("color:rgb(255, 255, 255);border-image: url(./images/Bullet.png);");
-		m_PersonWnd->move(280, 74);
+		ui.person_pushButton->setStyleSheet("color:rgb(255, 255, 255);border-image: url(./images/personBtn_hor.png);");
+		m_PersonWnd->move(305, 70);
 		m_PersonWnd->DeletePerson();
 		m_PersonWnd->show();
 		m_PersonWnd->setFocus();
@@ -1600,7 +1684,7 @@ void UIWindowSet::QueryPerson()
 		{
 			QToolTip::showText(QCursor::pos(), "成员初始化中,请稍后查询！");
 			m_PersonWnd->hide();
-			ui.person_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/AuxiliaryPanelBack.png);");
+			ui.person_pushButton->setStyleSheet("color:rgb(0,0,0);border-image: url(./images/personBtn_nor.png);");
 			return;
 		}
 
@@ -1957,37 +2041,22 @@ void UIWindowSet::MathScreenSize()
 
 /***************************************************************************/
 /*																		   */
-/*								互动直播								   */
-/*																		   */
-/***************************************************************************/
-//初始化白板
-void UIWindowSet::initWhiteBoardWidget()
-{
-	if (mWhiteBoard)
-	{
-		delete mWhiteBoard;
-	}
-
-	mWhiteBoard = new Palette();
-	ui.horizontalLayout_21->addWidget(mWhiteBoard);
-//	mWhiteBoard->setIsDraw(ui.pushButton_pen->isChecked());
-	mWhiteBoard->setIsDraw(true);
-	connect(mWhiteBoard, SIGNAL(PicData(QString)), this, SLOT(PicData(QString)));
-}
-
-void UIWindowSet::PicData(QString str)
-{
-	std::string picData = str.toStdString();
-//	IMInterface::getInstance()->SendData("", 1, picData);
-}
-
-/***************************************************************************/
-/*																		   */
-/*						   初始化云信及回调								   */
+/*					  初始化云信、白板、及回调							   */
 /*																		   */
 /***************************************************************************/
 void UIWindowSet::initCallBack()
 {
+	IMInterface::getInstance()->initVChat();
+	IMInterface::getInstance()->initVChatCallback();
+	IMInterface::getInstance()->initRtsCallback();
+	// 初始化白板
+	initWhiteBoardWidget();
+	initConnection();
+
+	IMInterface::getInstance()->EnumDeviceDevpath(Audio);
+	IMInterface::getInstance()->EnumDeviceDevpath(Video);
+	IMInterface::getInstance()->EnumDeviceDevpath(AudioOut);
+
 	// 接受消息回调
 	nim::Talk::RegReceiveCb(&CallbackReceiveMsg);
 	// 发送消息状态回调
@@ -2067,4 +2136,506 @@ void UIWindowSet::OnGetTeamMemberCallback(const std::string& tid, int count, con
 HWND UIWindowSet::GetParentWnd()
 {
 	return (HWND)m_parent->winId();
+}
+
+/***************************************************************************/
+/*																		   */
+/*								互动直播								   */
+/*																		   */
+/***************************************************************************/
+//初始化白板
+void UIWindowSet::initWhiteBoardWidget()
+{
+	mWhiteBoard = new Palette();
+	ui.horizontalLayout_21->addWidget(mWhiteBoard);
+	mWhiteBoard->setIsDraw(true);
+	connect(mWhiteBoard, SIGNAL(PicData(QString)), this, SLOT(PicData(QString)));
+
+	m_WhiteBoardTool = new UIWhiteBoardTool(ui.live1v1_widget);
+	m_WhiteBoardTool->hide();
+	connect(m_WhiteBoardTool, SIGNAL(selectColor(QColor&)), this, SLOT(selectColor(QColor&)));
+	connect(m_WhiteBoardTool, SIGNAL(returnClick()), this, SLOT(returnClick()));
+	connect(m_WhiteBoardTool, SIGNAL(deleteClick()), this, SLOT(deleteClick()));
+	connect(m_WhiteBoardTool, SIGNAL(laserClick()), this, SLOT(laserClick()));
+	connect(m_WhiteBoardTool, SIGNAL(drawClick()), this, SLOT(drawClick()));
+
+	// 老师自己的摄像头
+	m_Camera1v1Info = new UICamera1v1(ui.cameraT_widget);
+	m_Camera1v1Info->setWindowFlags(Qt::FramelessWindowHint);
+	ui.horizontalLayout_22->addWidget(m_Camera1v1Info);
+	m_Camera1v1Info->show();
+
+	// 学生摄像头
+	m_CameraS1v1Info = new UICameraS1v1(ui.cameraS_widget);
+	m_CameraS1v1Info->setWindowFlags(Qt::FramelessWindowHint);
+	ui.horizontalLayout_23->addWidget(m_CameraS1v1Info);
+	m_CameraS1v1Info->show();
+
+	// 1v1全屏桌面
+	m_VideoInfo1v1 = new UIVideo1v1(ui.fullS1v1_widget);
+	m_VideoInfo1v1->setWindowFlags(Qt::FramelessWindowHint);
+	ui.horizontalLayout_21->addWidget(m_VideoInfo1v1);
+	m_VideoInfo1v1->hide();
+	connect(m_VideoInfo1v1, SIGNAL(sig_refreshWnd()), this, SLOT(slot_refreshWnd())); 
+	connect(m_VideoInfo1v1, SIGNAL(sig_CustomVideoData(__int64, const char*, int, int, int)), this, SLOT(slot_CustomVideoData(__int64, const char*, int, int, int)));
+
+	m_AppWndTool1v1 = new UIAppWndTool(ui.live1v1_widget);
+	m_AppWndTool1v1->hide();
+	connect(m_AppWndTool1v1, SIGNAL(sig_shiftWnd()), this, SLOT(slot_shiftWnd()));
+	connect(m_AppWndTool1v1, SIGNAL(sig_CloseWnd()), this, SLOT(slot_CloseWnd()));
+
+	// 1v1选择窗口界面
+	m_AppWnd1v1 = new UIAppWnd();
+	m_AppWnd1v1->setWindowFlags(Qt::FramelessWindowHint);
+	m_AppWnd1v1->hide();
+	connect(m_AppWnd1v1, SIGNAL(sig_selectWnd(HWND)), this, SLOT(slot_selectWnd(HWND)));
+}
+
+void UIWindowSet::slot_shiftWnd()
+{
+	if (m_AppWnd1v1)
+	{
+		m_AppWnd1v1->deleteWnd();
+		m_AppWnd1v1->show();
+		m_AppWnd1v1->move(QApplication::desktop()->width() / 2 - m_AppWnd1v1->width() / 2, QApplication::desktop()->height() / 2 - m_AppWnd1v1->height() / 2);
+
+		CaptureWindowInfoList wnd_list;
+		m_VideoInfo1v1->GetCaptureWindowList(&wnd_list);
+		CaptureWindowInfo dest_info;
+		dest_info.id = GetDesktopWindow();
+		dest_info.title = L"全屏桌面";
+		wnd_list.insert(wnd_list.begin(), dest_info);
+		for (auto& it : wnd_list)
+		{
+			m_AppWnd1v1->AddAppWnd(QString::fromStdWString(it.title), it.id);
+		}
+	}
+}
+
+void UIWindowSet::slot_CloseWnd()
+{
+	// 打开白板及工具条
+	mWhiteBoard->setVisible(true);
+	m_WhiteBoardTool->setVisible(true);
+
+	// 设置抓取的窗口句柄为空及隐藏
+	m_VideoInfo1v1->setCaptureWnd(NULL);
+	m_VideoInfo1v1->setVisible(false);
+	m_AppWndTool1v1->setVisible(false);
+
+	// 设置发送数据模式为自定义发送
+	IMInterface::getInstance()->SetCustomData(false);
+}
+
+void UIWindowSet::slot_refreshWnd()
+{
+	int iWidth = ui.full1v1_widget->width();
+	int iHeight = ui.full1v1_widget->height();
+
+	// 窗口抓取
+	int iScreenWidth = iWidth;
+	int iScreenHeight = ((double)iWidth / (double)m_VideoInfo1v1->ScreenWidth())*m_VideoInfo1v1->ScreenHeight();
+	if (iScreenHeight > iHeight)
+	{
+		iScreenWidth = ((double)iHeight / (double)m_VideoInfo1v1->ScreenHeight())*m_VideoInfo1v1->ScreenWidth();
+		m_VideoInfo1v1->setFixedSize(iScreenWidth, iHeight);
+	}
+	else
+		m_VideoInfo1v1->setFixedSize(iScreenWidth, iScreenHeight);
+}
+
+void UIWindowSet::slot_CustomVideoData(__int64 time, const char* data, int size, int iwidth, int iheight)
+{
+	IMInterface::getInstance()->CustomVideoData(time, data, size, iwidth, iheight);
+}
+
+void UIWindowSet::slot_selectWnd(HWND hwnd)
+{
+	// 隐藏白板及工具条
+	mWhiteBoard->setVisible(false);
+	m_WhiteBoardTool->setVisible(false);
+
+	// 设置抓取的窗口句柄及显示
+	m_VideoInfo1v1->setCaptureWnd(hwnd);
+	m_VideoInfo1v1->setVisible(true);
+	m_AppWndTool1v1->setVisible(true);
+
+	// 设置发送数据模式为自定义发送
+	IMInterface::getInstance()->SetCustomData(true);
+}
+
+void UIWindowSet::PicData(QString str)
+{
+	std::string picData = str.toStdString();
+	IMInterface::getInstance()->SendData("", 1, picData);
+}
+
+void UIWindowSet::initConnection()
+{
+	IMInterface *instance = IMInterface::getInstance();
+	if (NULL == instance)
+	{
+		return;
+	}
+
+	connect(instance, SIGNAL(createRtsRoomSuccessfully(const std::string&)), this, SLOT(joinRtsRoom(const std::string&)));
+	connect(instance, SIGNAL(joinRtsRoomSuccessfully(const std::string&, __int64, const std::string&)),
+ 		this, SLOT(joinRoomSuccessfully(const std::string&, __int64, const std::string&)));
+	connect(instance, SIGNAL(createVChatRoomSuccessfully()), this, SLOT(joinVChatRoom()));
+	connect(instance, SIGNAL(joinVChatSuccessfully()),this, SLOT(joinVChatSuccessfully()));
+ 	connect(instance, SIGNAL(hasError(const QString &)), this, SLOT(errorInfo(const QString &)));
+	connect(instance, SIGNAL(deviceInfos(int)), this, SLOT(setDeviceInfos(int)));
+	connect(instance, SIGNAL(startDeviceSuccessfully(int)), this, SLOT(startDeviceSuccessfully(int)));
+	connect(instance, SIGNAL(VideoCapture(const char*, unsigned int, unsigned int, unsigned int)), m_Camera1v1Info, SLOT(VideoCapture(const char*, unsigned int, unsigned int, unsigned int)));
+	connect(instance, SIGNAL(RecVideoCapture(const char*, unsigned int, unsigned int, unsigned int)), m_CameraS1v1Info, SLOT(VideoCapture(const char*, unsigned int, unsigned int, unsigned int)));
+
+	connect(instance, SIGNAL(rtsDataReceived(const std::string&)), this, SLOT(rtsDataReceived(const std::string&)));
+}
+
+void UIWindowSet::joinRtsRoom(const std::string &roomName)
+{
+	IMInterface::getInstance()->joinRtsRoom(roomName, false);
+}
+
+void UIWindowSet::joinRoomSuccessfully(const std::string &session_id, __int64 channel_id, const std::string &custom_info)
+{
+	IMInterface::getInstance()->createVChatRoom(m_curTags->ChatID().toStdString());
+}
+
+void UIWindowSet::joinVChatRoom()
+{
+	IMInterface::getInstance()->joinVChatRoom(2,m_curTags->ChatID().toStdString());
+}
+
+// 创建音视频成功后，开始直播流程
+void UIWindowSet::joinVChatSuccessfully()
+{
+	m_bLiving1v1 = true;
+	m_LiveStatusManager->SendStart1v1LiveHttpMsg(m_lessonid, m_curTags->ChatID(), m_Token);
+}
+
+void UIWindowSet::errorInfo(const QString & error)
+{
+	m_bLiving1v1 = false;
+	CMessageBox::showMessage(
+		QString("答疑时间"),
+		QString("加入房间出现错误！代码：") + error,
+		QString("确定"),
+		QString("取消"));
+}
+
+void UIWindowSet::setDeviceInfos(int type)
+{
+	switch (type)
+	{
+	case Audio:
+	{
+		foreach(const DevInfo &info, IMInterface::getInstance()->getDeviceInfos())
+		{
+			if (info.type == type)
+			{
+				m_AudioChangeInfo1v1->setAudioParam(info.name, info.path);
+			}
+		}
+	}
+	break;
+	case AudioOut:
+	{
+		foreach(const DevInfo &info, IMInterface::getInstance()->getDeviceInfos())
+		{
+			if (info.type == type)
+			{
+				m_AudioOutChangeInfo1v1->setAudioParam(info.name, info.path);
+			}
+		}
+	}
+	break;
+	case Video:
+		foreach(const DevInfo &info, IMInterface::getInstance()->getDeviceInfos())
+		{
+			if (info.type == type)
+			{
+				m_VideoChangeInfo1v1->setVideoParam(info.name,info.path);
+			}
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void UIWindowSet::InitSetParamWnds()
+{
+	m_AudioChangeInfo1v1 = new UIAudioChange1v1(this);
+	m_AudioChangeInfo1v1->setWindowFlags(Qt::FramelessWindowHint);
+	m_AudioChangeInfo1v1->setAudioChange(this);
+	m_AudioChangeInfo1v1->hide();
+
+	m_AudioOutChangeInfo1v1 = new UIAudioOutChange1v1(this);
+	m_AudioOutChangeInfo1v1->setWindowFlags(Qt::FramelessWindowHint);
+	m_AudioOutChangeInfo1v1->setAudioChange(this);
+	m_AudioOutChangeInfo1v1->hide();
+
+	m_VideoChangeInfo1v1 = new UIVideoChange1v1(this);
+	m_VideoChangeInfo1v1->setWindowFlags(Qt::FramelessWindowHint);
+	m_VideoChangeInfo1v1->setVideoChange(this);
+	m_VideoChangeInfo1v1->hide();
+
+	// 设置麦克风样式
+	ui.Audio1v1_checkBox->setStyleSheet("QCheckBox::indicator{width: 24px;height: 19px;}"
+		"QCheckBox::indicator:unchecked{image: url(./images/mic_open.png);}"
+		"QCheckBox::indicator:checked{image: url(./images/mic_close.png);}");
+	ui.Audio1v1_pushButton->setStyleSheet("QPushButton{border-image:url(./images/Arrow.png);}");
+
+	// 设置摄像头视频源样式
+	ui.video1v1_checkBox->setStyleSheet("QCheckBox::indicator{width: 29px;height: 19px;}"
+		"QCheckBox::indicator:unchecked{image: url(./images/camera_open.png);}"
+		"QCheckBox::indicator:checked{image: url(./images/camera_close.png);}");
+	ui.video1v1_pushButton->setStyleSheet("QPushButton{border-image:url(./images/Arrow.png);}");
+
+	// 设置弹幕样式
+	ui.Bullet1v1_checkBox->setStyleSheet("QCheckBox::indicator{width: 26px;height: 19px;}"
+		"QCheckBox::indicator:unchecked{image: url(./images/bullet_close.png);}"
+		"QCheckBox::indicator:checked{image: url(./images/bullet_open.png);}");
+	ui.Bullet1v1_pushButton->setStyleSheet("QPushButton{border-image:url(./images/Arrow.png);}");
+
+	// 设置设置扬声器样式
+	ui.AudioOut_checkBox->setStyleSheet("QCheckBox::indicator{width: 29px;height: 19px;}"
+		"QCheckBox::indicator:unchecked{image: url(./images/audioout_open.png);}"
+		"QCheckBox::indicator:checked{image: url(./images/audioout_close.png);}");
+	ui.AudioOut_pushButton->setStyleSheet("QPushButton{border-image:url(./images/Arrow.png);}");
+
+	ui.shapeScreen_pushButton->setStyleSheet("QPushButton{border-image:url(./images/shapeScreen.png);}");
+	ui.doc_pushButton->setStyleSheet("QPushButton{border-image:url(./images/docBtn.png);}");
+
+	connect(ui.Audio1v1_checkBox, SIGNAL(stateChanged(int)), this, SLOT(Audio1v1Status(int)));
+	connect(ui.Audio1v1_pushButton, SIGNAL(clicked()), this, SLOT(clickAudio1v1Param()));
+	connect(ui.video1v1_checkBox, SIGNAL(stateChanged(int)), this, SLOT(Video1v1Status(int)));
+	connect(ui.video1v1_pushButton, SIGNAL(clicked()), this, SLOT(clickVideo1v1Param()));
+	connect(ui.Bullet1v1_checkBox, SIGNAL(stateChanged(int)), this, SLOT(BulletStatus(int)));
+	connect(ui.Bullet1v1_pushButton, SIGNAL(clicked()), this, SLOT(clickBulletParam()));
+	connect(ui.AudioOut_checkBox, SIGNAL(stateChanged(int)), this, SLOT(AudioOut1v1Status(int)));
+	connect(ui.AudioOut_pushButton, SIGNAL(clicked()), this, SLOT(clickAudioOut1v1Param()));
+	connect(ui.Live1v1_pushBtn, SIGNAL(clicked()), this, SLOT(clickLive1v1()));
+	connect(ui.time1v1_label, SIGNAL(clicked()), this, SLOT(clickLive1v1()));
+	connect(ui.shapeScreen_pushButton, SIGNAL(clicked()), this, SLOT(clickShapeScreen1v1()));
+}
+
+void UIWindowSet::Audio1v1Status(int iStatus)
+{
+	if (iStatus)
+	{
+		IMInterface::getInstance()->endDevice(Audio);
+	}
+	else
+	{
+		//开启云信的摄像头采集
+		QString dPath = m_AudioChangeInfo1v1->GetCurPath();
+		if (!dPath.isNull())
+			IMInterface::getInstance()->startDevice(Audio, dPath.toStdString(), 0, 0, 0);
+	}
+}
+
+void UIWindowSet::Video1v1Status(int iStatus)
+{
+	if (iStatus)
+	{
+		//关闭云信的摄像头采集
+		IMInterface::getInstance()->endDevice(Video);
+		m_Camera1v1Info->StartEndVideo(true);
+	}
+	else
+	{
+		//开启云信的摄像头采集
+		QString dPath = m_VideoChangeInfo1v1->GetCurPath();
+		if (!dPath.isNull())
+			IMInterface::getInstance()->startDevice(Video, dPath.toStdString(), VIDEO_FPS, 0, 0);
+		m_Camera1v1Info->StartEndVideo(false);
+	}
+}
+
+void UIWindowSet::AudioOut1v1Status(int iSatus)
+{
+	if (iSatus)
+	{
+		IMInterface::getInstance()->endDevice(AudioOut);
+	}
+	else
+	{
+		//开启云信的摄像头采集
+		QString dPath = m_AudioOutChangeInfo1v1->GetCurPath();
+		if (!dPath.isNull())
+			IMInterface::getInstance()->startDevice(AudioOut, dPath.toStdString(), 0, 0, 0);
+	}
+}
+
+void UIWindowSet::clickVideo1v1Param()
+{
+	m_VideoChangeInfo1v1->show();
+	m_VideoChangeInfo1v1->move(width() / 2 - m_VideoChangeInfo1v1->width() / 2, height() / 2 - m_VideoChangeInfo1v1->height() / 2);
+	m_VideoChangeInfo1v1->setFocus();
+}
+
+void UIWindowSet::clickAudio1v1Param()
+{
+	m_AudioChangeInfo1v1->show();
+	m_AudioChangeInfo1v1->move(width() / 2 - m_AudioChangeInfo1v1->width() / 2, height() / 2 - m_AudioChangeInfo1v1->height() / 2);
+	m_AudioChangeInfo1v1->setFocus();
+}
+
+void UIWindowSet::clickAudioOut1v1Param()
+{
+	m_AudioOutChangeInfo1v1->show();
+	m_AudioOutChangeInfo1v1->move(width() / 2 - m_AudioOutChangeInfo1v1->width() / 2, height() / 2 - m_AudioOutChangeInfo1v1->height() / 2);
+	m_AudioOutChangeInfo1v1->setFocus();
+}
+
+void UIWindowSet::setAudioChange1v1(QString path)
+{
+	if (!ui.Audio1v1_checkBox->isChecked())
+	{
+		if (!path.isNull())
+		{
+			IMInterface::getInstance()->endDevice(Audio);
+			IMInterface::getInstance()->startDevice(Audio, path.toStdString(), 0, 0, 0);
+		}
+	}
+}
+
+void UIWindowSet::setValueChange1v1(int iVolumn, bool capturn)
+{
+	IMInterface::getInstance()->setAudioChange(iVolumn, capturn);
+}
+
+void UIWindowSet::setVideoChange1v1(QString path)
+{
+	if (!ui.video1v1_checkBox->isChecked())
+	{
+		if (!path.isNull())
+		{
+			IMInterface::getInstance()->endDevice(Video);
+			IMInterface::getInstance()->startDevice(Video, path.toStdString(), VIDEO_FPS, 0, 0);
+		}
+	}
+}
+
+void UIWindowSet::clickLive1v1()
+{
+	if (m_bLiving1v1)
+	{
+		int iStatus = CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString("是否关闭当前直播！"),
+			QString("确定"),
+			QString("取消"));
+		if (iStatus == 1)
+		{
+			ui.Live1v1_pushBtn->setText(LIVE_BUTTON_NAME);
+			ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
+
+			// 结束白板和音视频
+			// 实现结束白板和音视频功能......待写
+
+			m_LiveStatusManager->SendStopLiveHttpMsg1v1();
+
+			if (m_CountTimer->isActive())
+			{
+				m_CountTimer->stop();					// 停止计时
+				m_iTimerCount = 0;						// 重置秒数
+				ui.time1v1_label->setVisible(false);	// 隐藏
+				ui.time1v1_label->setText("00:00:00");	// 重置时间
+			}
+
+			m_bLiving1v1 = false;
+		}
+		else
+			return;
+	}
+	else
+	{
+		if (m_curTags == NULL)
+			return;
+
+		m_LiveLesson->DeleteItem();
+		m_LiveLesson->setCourseID(m_curTags->CourseID(),true);
+		m_LiveLesson->move(width() / 2 - m_LiveLesson->width() / 2, height() / 2 - m_LiveLesson->height() / 2);
+		m_LiveLesson->show();
+	}
+}
+
+// 更新开始1对1直播按钮、计时器等状态
+void UIWindowSet::start1v1LiveStream()
+{
+	m_CountTimer->start(1000);
+	ui.time1v1_label->setVisible(true);
+	ui.Live1v1_pushBtn->setText("结束直播");
+	ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: red;border-radius: 5px; border: 2px solid red;}");
+}
+
+void UIWindowSet::show1v1ErrorTip(QString sError)
+{
+	m_bLiving1v1 = false;
+	CMessageBox::showMessage(
+		QString("答疑时间"),
+		QString(sError),
+		QString("确定"));
+}
+
+void UIWindowSet::selectColor(QColor& color)
+{
+	if (mWhiteBoard)
+	{
+		mWhiteBoard->setPenColor(color);
+	}
+}
+
+void UIWindowSet::rtsDataReceived(const std::string& data)
+{
+	if (mWhiteBoard)
+		mWhiteBoard->RecData(data);
+}
+
+void UIWindowSet::returnClick()
+{
+	if (mWhiteBoard)
+		mWhiteBoard->revocation();
+}
+
+void UIWindowSet::deleteClick()
+{
+	if (mWhiteBoard)
+		mWhiteBoard->cleanUp();
+}
+
+void UIWindowSet::laserClick()
+{
+	if (mWhiteBoard)
+		mWhiteBoard->setIsDraw(false);
+}
+
+void UIWindowSet::drawClick()
+{
+	if (mWhiteBoard)
+		mWhiteBoard->setIsDraw(true);
+}
+
+void UIWindowSet::clickShapeScreen1v1()
+{
+	if (m_AppWnd1v1)
+	{
+		m_AppWnd1v1->deleteWnd();
+		m_AppWnd1v1->show();
+		m_AppWnd1v1->move(QApplication::desktop()->width() / 2 - m_AppWnd1v1->width() / 2, QApplication::desktop()->height() / 2 - m_AppWnd1v1->height() / 2);
+
+		CaptureWindowInfoList wnd_list;
+		m_VideoInfo1v1->GetCaptureWindowList(&wnd_list);
+		CaptureWindowInfo dest_info;
+		dest_info.id = GetDesktopWindow();
+		dest_info.title = L"全屏桌面";
+		wnd_list.insert(wnd_list.begin(), dest_info);
+		for (auto& it : wnd_list)
+		{
+			m_AppWnd1v1->AddAppWnd(QString::fromStdWString(it.title),it.id);
+		}
+	}
 }

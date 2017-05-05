@@ -36,8 +36,11 @@ public:
 	QPoint								m_clickPos;
 	QPoint								m_WndCurPos;
 
+	// ÊÇ·ñÊÇ1v1¿Î³Ì
+	bool								m_b1v1Lesson;
+
 signals:
-	void sig_PullStreaming(QString, QString, QString, QString, QString);
+	void sig_PullStreaming(QString, QString, QString, QString, QString,bool);
 	void sig_changeLessonStatus(QString,QString);
 protected:
 	virtual void paintEvent(QPaintEvent *event);
@@ -54,7 +57,7 @@ public:
 	void style(QScrollArea *style);
 	void changeStatus(QString id);
 	void DeleteItem();
-	void setCourseID(QString courseid);
+	void setCourseID(QString courseid, bool b1v1Lesson);
 	void addLesson(QString  id, QString courseid, QString boardUrl, QString cameraUrl, QString time, QString status, QString name);
 };
 

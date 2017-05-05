@@ -7,6 +7,7 @@
 UILiveLessonWnd::UILiveLessonWnd(QWidget *parent)
 	: QWidget(parent)
 	, m_vecLessonItem(NULL)
+	, m_b1v1Lesson(false)
 {
 	ui.setupUi(this);
 
@@ -52,8 +53,9 @@ bool UILiveLessonWnd::eventFilter(QObject *target, QEvent *event)
 	return false;
 }
 
-void UILiveLessonWnd::setCourseID(QString courseid)
+void UILiveLessonWnd::setCourseID(QString courseid, bool b1v1Lesson)
 {
+	m_b1v1Lesson = b1v1Lesson;
 	int i = 0;
 	if (m_vecLessonInfo.size() > 0)
 	{
@@ -203,7 +205,7 @@ void UILiveLessonWnd::slot_dbClick(QString id, QString courseid, QString boardur
 {
 	if (index == 0)
 	{
-		emit sig_PullStreaming(id, courseid, boardurl, cameraurl,name);
+		emit sig_PullStreaming(id, courseid, boardurl, cameraurl,name,m_b1v1Lesson);
 		hide();
 	}
 	else
@@ -227,7 +229,7 @@ void UILiveLessonWnd::slot_dbClick(QString id, QString courseid, QString boardur
 						changeStatus(item->m_id);
 
 						// ¿ªÊ¼Ö±²¥
-						emit sig_PullStreaming(id, courseid, boardurl, cameraurl,name);
+						emit sig_PullStreaming(id, courseid, boardurl, cameraurl, name, m_b1v1Lesson);
 
 						hide();
 					}

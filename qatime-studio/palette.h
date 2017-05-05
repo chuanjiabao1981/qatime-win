@@ -30,6 +30,7 @@ public:
 	std::list<std::string> BoardStringTokenize(const char* input, const char* delimitor);	//解析数据
 
 	void DrawUndo();							//对方撤销
+	int  colorConvert(QColor color);			//解析数据
 
 	enum DrawOpType
 	{

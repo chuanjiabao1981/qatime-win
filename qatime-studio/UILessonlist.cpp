@@ -30,13 +30,11 @@ void UILessonList::paintEvent(QPaintEvent *event)
 	painter.setRenderHint(QPainter::Antialiasing, true);
 
 	QColor color(5, 157, 210);
-	for (int i = 0; i < 4; i++)
-	{
-		path.addRect(0, 0, this->width(), this->height());
+
+		path.addRect(0, 0, this->width()-1, this->height()-1);
 
 		painter.setPen(color);
 		painter.drawPath(path);
-	}
 }
 
 void UILessonList::focusOutEvent(QFocusEvent* e)
@@ -54,7 +52,7 @@ void UILessonList::focusOutEvent(QFocusEvent* e)
 	if (m_parent->IsHasFoucs(UIWindowSet::LessonWnd))
 		return;
 
-	m_parent->GetLessonBtn()->setStyleSheet("color:rgb(0,0,0);background-color: rgb(255, 255, 255);");
+	m_parent->GetLessonBtn()->setStyleSheet("border-image: url(./images/lessonBtn_nor.png);");
 
 	this->hide();
 }

@@ -10,26 +10,12 @@
 #include <QScrollBar>
 #include <QProcessEnvironment>
 #include "zoom_image.h"
-// 
-// #include "YxChat/nim_sdk_helper.h"
-// #include "YxChat/session_callback.h"
-// #include "YxChat/nim_cpp_client.h"
+
 #include "define.h"
 #include <QMouseEvent>
 #include <QToolTip>
 #include <QNetworkRequest>
 #include <QFileDialog>
-
-#ifdef TEST
-	#define _DEBUG
-#else
-#endif
-// typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
-// typedef void(*nim_client_cleanup)(const char *json_extension);
-// typedef void(*nim_client_login)(const char *app_token, const char *account, const char *password, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-
-// typedef	const wchar_t * (*nim_tool_get_user_appdata_dir)(const char * app_account);
-// typedef	void(*nim_global_free_buf)(void *data);
 
 QColor timeColor(153, 153, 153);
 QColor contentColor(102, 102, 102);
@@ -1205,7 +1191,7 @@ void UIChatRoom::OnLoginCallback(const nim::LoginRes& login_res, const void* use
 // 	return json_str.toStdString();
 // }
 
-void UIChatRoom::setCurChatID(QString chatID, QString courseid, QString teacherid, QString token, QString teacherName, QString accid, int UnreadCount)
+void UIChatRoom::setCurChatID(QString chatID, QString courseid, QString teacherid, QString token, QString teacherName, QString accid, int UnreadCount, bool b1v1)
 {
 	m_CurChatID = chatID.toStdString();
 	m_CurCourseID = courseid;
@@ -1214,7 +1200,10 @@ void UIChatRoom::setCurChatID(QString chatID, QString courseid, QString teacheri
 	mRemeberToken = token;
 	m_teacherName = teacherName;
 	m_UnreadCount = UnreadCount;
-	RequestMember();
+	if (b1v1)
+		Request1v1Member();
+	else
+		RequestMember();
 }
 
 std::string UIChatRoom::GetCurChatID()
@@ -1524,6 +1513,7 @@ void UIChatRoom::ReturnAnnouncements()
 
 void UIChatRoom::RequestError(QJsonObject& error)
 {
+	return;
 	QString strError;
 	if (error["code"].toInt() == 1002)
 		strError = QString("授权过期,请重新登录！");
@@ -1964,6 +1954,29 @@ void UIChatRoom::OnStopPlayAudio(char* msgid)
 	
 	if (m_uitalkRecord)
 		m_uitalkRecord->stopAudio(msgid);
+}
+
+void UIChatRoom::Request1v1Member()
+{
+	QString strUrl;
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_courses/{id}/realtime";
+		strUrl.replace("{id}", m_CurCourseID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_courses/{id}/realtime";
+		strUrl.replace("{id}", m_CurCourseID);
+	}
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+	QString str = this->mRemeberToken;
+
+	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIChatRoom::returnAllMember);
 }
 
 void UIChatRoom::RequestMember()

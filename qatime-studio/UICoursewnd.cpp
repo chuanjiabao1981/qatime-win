@@ -125,7 +125,7 @@ void UICourseWnd::focusOutEvent(QFocusEvent* e)
 	if (m_parent->IsHasFoucs(UIWindowSet::CourseWnd))
 		return;
 
-	m_parent->GetCourseBtn()->setStyleSheet("color:rgb(0,0,0);background-color: rgb(255, 255, 255);");
+	m_parent->GetCourseBtn()->setStyleSheet("border-image: url(./images/courseBtn_nor.png);");
 	this->hide();
 }
 

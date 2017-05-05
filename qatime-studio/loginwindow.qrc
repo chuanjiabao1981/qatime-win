@@ -73,5 +73,9 @@
 	<file>images/select_close.png</file>
 	<file>images/videoback.png</file>
 	<file>images/pen.png</file>
+	<file>images/laser_nor.png</file>
+	<file>images/laser_hor.png</file>
+	<file>images/pen_nor.png</file>
+	<file>images/pen_hor.png</file>
   </qresource>
 </RCC>

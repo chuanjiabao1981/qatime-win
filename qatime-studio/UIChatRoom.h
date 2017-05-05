@@ -18,13 +18,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
-// #include "YxChat/nim_tools_http_cpp_wrapper.h"
-// #include "YxChat/nim_client_helper.h"
-// #include "YxChat/nim_cpp_talk.h"
-// #include "YxChat/nim_cpp_team.h"
-// #include "YxChat/nim_cpp_msglog.h"
-// #include "YxChat/nim_cpp_nos.h"
-// #include "YxChat/nim_tools_audio_cpp_wrapper.h"
+
 #include "nim_cpp_api.h"
 #include "nim_cpp_client.h"
 #include "nim_cpp_tool.h"
@@ -171,7 +165,7 @@ public:
 	void		ReceiverRecordMsg(nim::QueryMsglogResult* pMsg);	// 接收历史消息记录
 	void		ReceiverLoginMsg(const nim::LoginRes& pRes);				// 接收登录结果
 	void		ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg); //接收群成员信息
-	void		setCurChatID(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, QString accid, int UnreadCount);		// 设置当前窗口会话ID,用于接收消息时比较
+	void		setCurChatID(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, QString accid, int UnreadCount,bool b1v1=false);		// 设置当前窗口会话ID,用于接收消息时比较
 	std::string	GetCurChatID();
 	void		setKeyAndLogin(QString key);						// 设置appkey并登录（获取完Key之后，就可以直接登录）
 	bool		IsLogin();											// 是否登录
@@ -233,6 +227,7 @@ public slots:
 	void		returnMember();
 	void		RequestMember();												//请求成员
 	void		returnAllMember();												//返回成员
+	void		Request1v1Member();												//请求1v1成员
 	void		SetEnvironmental(bool EnvironmentalTyle);						//设置当前环境
 	void        SetCurAudioPath(std::string path);								//设置当前语音路径
 private:

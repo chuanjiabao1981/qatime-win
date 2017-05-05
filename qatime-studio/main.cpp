@@ -8,6 +8,14 @@
 #include <gdiplus.h>
 using namespace Gdiplus;
 
+void registerMetaType()
+{
+	//注册该类型   用于非Qt类类型和非基本数据类型参数实现信号槽连接
+	qRegisterMetaType<std::string>("std::string");
+	qRegisterMetaType<__int64>("__int64");
+	qRegisterMetaType<int64_t>("int64_t");
+}
+
 void outputMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
 	static QMutex mutex;
@@ -69,6 +77,7 @@ int main(int argc, char *argv[])
 	//注册MessageHandler
 	qInstallMessageHandler(outputMessage);
 
+	registerMetaType();
 	//打印日志到文件中
 	qDebug("start exe");
 

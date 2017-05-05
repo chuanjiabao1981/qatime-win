@@ -28,7 +28,8 @@ void CallbackNetDetect(int code, nim::NetDetectCbInfo info);								/**< 网络�
 void CallbackMp4Opt(bool ret, int code, const std::string& file, __int64 time);	   			/**< MP4录制事件通知回调模板 */
 void CallbackAudioRecord(bool ret, int code, const std::string& file, __int64 time);		/**< 音频录制事件通知回调模板 */
 void CallbackOptCall(bool ret, int code, const std::string& json_extension);				/**< 操作回调模板 */
-void CallbackOpt2Call(int code, __int64 channel_id, const std::string& json_extension);	    /**< 操作回调模板 */
+void CallbackOpt2Call( int code, __int64 channel_id, const std::string& json_extension);	    /**< 音视频加入模板 */
+void CallbackOpt2CreateCall(int code, __int64 channel_id, const std::string& json_extension);	    /**< 音视频创建 */
 
 //采集的视频数据
 void CallbackVideoCaptureData(uint64_t time, const char *data, unsigned int size, unsigned int width, unsigned int height, const char *json_extension, const void *user_data);
@@ -98,13 +99,16 @@ public:
 	void joinVChatRoom(int chatMode, const std::string &name, const std::string &json_extension = "");				//加入多人音视频房间  chatMode 通话模式：1为语音，2为视频
 
 	/****************************************************************音视频设备相关***********************************************************************************/
-	void EnumDeviceDevpath(int deviceType);				//遍历设备	deviceType  设备类型   0 麦克风  3 摄像头
+	void EnumDeviceDevpath(int deviceType);				//遍历设备	deviceType  设备类型   0 麦克风 2 扬声器 3 摄像头
 	void startDevice(int type, const std::string& device_path, unsigned fps, int width, int height);		//启动设备
 	void endDevice(int type);																				//关闭设备
 
 	void addDeviceInfo(const DevInfo &dInfo);					//添加一个设备信息
 	void addDeviceInfo(int type, const char *json_string);		//根据json字符串解析设备信息并添加至设备列表
 	const DeviceInfoMap &getDeviceInfos();						//获取设备列表
+	void setAudioChange(int volumn, bool captrue);				//设置声音大小， capture true 标识设置麦克风音量，false 标识设置播放音量
+	void SetCustomData(bool bVideo);							//设置发送数据模式
+	void CustomVideoData(__int64 time, const char* data, int size, int width, int height);	//自定义数据发送
 
 signals:
 	/****************************************************************白板相关***********************************************************************************/
@@ -114,7 +118,8 @@ signals:
 	void rtsDataReceived(const std::string &);
 
 	/****************************************************************音视频相关***********************************************************************************/
-	void createVChatRoomSuccessfully(const std::string&);
+	void createVChatRoomSuccessfully();
+	void joinVChatSuccessfully();
 	void vChatRoomExistence();
 	void joinVChatRoomSuccessfully(const std::string&, __int64, const std::string&);
 
@@ -122,7 +127,8 @@ signals:
 	void deviceInfos(int);											//设备已遍历完成   参数为设备类型
 	void startDeviceSuccessfully(int);								//设备启动成功     参数为设备类型
 
-	void VideoCapture(const char*, unsigned int, unsigned int, unsigned int);	//vido采集的数据
+	void VideoCapture(const char*, unsigned int, unsigned int, unsigned int);	//video采集的数据
+	void RecVideoCapture(const char*, unsigned int, unsigned int, unsigned int);	//接收的video数据
 	void hasError(const QString &);
 
 private:
