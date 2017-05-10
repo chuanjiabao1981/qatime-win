@@ -35,10 +35,6 @@ void CallbackOpt2CreateCall(int code, __int64 channel_id, const std::string& jso
 void CallbackVideoCaptureData(uint64_t time, const char *data, unsigned int size, unsigned int width, unsigned int height, const char *json_extension, const void *user_data);
 //接收的视频数据
 void CallbackVideoRecData(uint64_t time, const char *data, unsigned int size, unsigned int width, unsigned int height, const char *json_extension, const void *user_data);
-//采集的音频数据
-void CallbackAudioCaptureData(uint64_t time, const char *data, unsigned int size, const char *json_extension, const void *user_data);
-//接收的音频数据
-void CallbackAudioRecData(uint64_t time, const char *data, unsigned int size, const char *json_extension, const void *user_data);
 //音视频通话中状态返回的回调
 void CallbackVChatCb(nim::NIMVideoChatSessionType type, __int64 channel_id, int code, const char *json, const void*);
 
@@ -109,6 +105,7 @@ public:
 	void setAudioChange(int volumn, bool captrue);				//设置声音大小， capture true 标识设置麦克风音量，false 标识设置播放音量
 	void SetCustomData(bool bVideo);							//设置发送数据模式
 	void CustomVideoData(__int64 time, const char* data, int size, int width, int height);	//自定义数据发送
+	void EndLive(const std::string& sessionID);					//结束本次白板及音视频通话
 
 signals:
 	/****************************************************************白板相关***********************************************************************************/
@@ -116,13 +113,13 @@ signals:
 	void rtsRoomExistence();
 	void joinRtsRoomSuccessfully(const std::string&, __int64, const std::string&);
 	void rtsDataReceived(const std::string &);
-
+	void requstError(QString);
 	/****************************************************************音视频相关***********************************************************************************/
 	void createVChatRoomSuccessfully();
 	void joinVChatSuccessfully();
 	void vChatRoomExistence();
 	void joinVChatRoomSuccessfully(const std::string&, __int64, const std::string&);
-
+	void PeopleStatus(bool); // 成员变化
 	/****************************************************************音视频设备相关***********************************************************************************/
 	void deviceInfos(int);											//设备已遍历完成   参数为设备类型
 	void startDeviceSuccessfully(int);								//设备启动成功     参数为设备类型

@@ -31,6 +31,7 @@ public:
 
 	void DrawUndo();							//对方撤销
 	int  colorConvert(QColor color);			//解析数据
+	void SendSyncDraw();						//发送同步数据
 
 	enum DrawOpType
 	{

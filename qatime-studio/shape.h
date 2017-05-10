@@ -19,6 +19,9 @@ public:
 
 	void paint(QPainter &painter, const QSize &size);
 
+	QColor penColor();
+
+	QVector< QPointF > PointVec();
 signals:
 
 public slots:

@@ -429,12 +429,15 @@ void LiveStatusManager::StopLiveFailTimer()
 void LiveStatusManager::StopTimer()
 {
 	if (m_TGetRtmpTimer && m_HeartTimer &&
-		m_HeartFailTimer && m_SwitchFailTimer)
+		m_HeartFailTimer && m_SwitchFailTimer&&
+		m_1v1HeartTimer && m_1v1HeartFailTimer)
 	{
 		m_TGetRtmpTimer->stop();
 		m_HeartTimer->stop();
 		m_HeartFailTimer->stop();
 		m_SwitchFailTimer->stop();
+		m_1v1HeartTimer->stop();
+		m_1v1HeartFailTimer->stop();
 	}
 }
 
@@ -761,6 +764,14 @@ void LiveStatusManager::SendStopLiveHttpMsg1v1(bool bConnect)
 
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
 	reply = manager.post(request, "");
+// 	if (bConnect)
+// 	{
+// 		if (m_newParent)
+// 		{
+// 			// 更新课程状态
+// 			m_newParent->SendRequestStatus("已直播");
+// 		}
+// 	}
 	if (bConnect)
 		connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::FinishStopLive1v1);
 }

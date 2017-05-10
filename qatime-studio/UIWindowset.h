@@ -228,6 +228,7 @@ private slots :
 
 	void slot_shiftWnd();									// 切换窗口
 	void slot_CloseWnd();									// 关闭屏幕共享
+	void requstError(QString);								// 白板及音视频错误提示
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual bool eventFilter(QObject *target, QEvent *event);

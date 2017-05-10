@@ -2057,14 +2057,6 @@ bool UIChatRoom::IsPerson()
 	return m_bPerson;
 }
 
-void QueryMsgOnlineCb(nim::NIMResCode code, const std::string& id, nim::NIMSessionType type, const nim::QueryMsglogResult& result)
-{
-}
-
-void QueryFirstMsgOnlineCb(nim::NIMResCode code, const std::string& id, nim::NIMSessionType type, const nim::QueryMsglogResult& result)
-{
-
-}
 // 第一次点击请求之前的消息
 void UIChatRoom::ResultMsg()
 {

@@ -1141,6 +1141,7 @@ void UIWindowSet::clickChange(bool checked)
 			//结束云信的摄像头采集
 			IMInterface::getInstance()->endDevice(Video);
 			IMInterface::getInstance()->endDevice(Audio);
+			IMInterface::getInstance()->endDevice(AudioOut);
 
 			if (m_curTags)
 				m_curTags->setModle(false);
@@ -1181,6 +1182,14 @@ void UIWindowSet::clickChange(bool checked)
 				QString dPath = m_AudioChangeInfo1v1->GetCurPath();
 				if (!dPath.isNull())
 					IMInterface::getInstance()->startDevice(Audio, dPath.toStdString(), 0, 0, 0);
+			}
+
+			//开启扬声器的采集
+			if (!ui.Audio1v1_checkBox->isChecked())
+			{
+				QString dPath = m_AudioOutChangeInfo1v1->GetCurPath();
+				if (!dPath.isNull())
+					IMInterface::getInstance()->startDevice(AudioOut, dPath.toStdString(), 0, 0, 0);
 			}
 			
 
@@ -2169,6 +2178,7 @@ void UIWindowSet::initWhiteBoardWidget()
 	m_CameraS1v1Info = new UICameraS1v1(ui.cameraS_widget);
 	m_CameraS1v1Info->setWindowFlags(Qt::FramelessWindowHint);
 	ui.horizontalLayout_23->addWidget(m_CameraS1v1Info);
+	m_CameraS1v1Info->setParentWnd(ui.cameraS_widget);
 	m_CameraS1v1Info->show();
 
 	// 1v1全屏桌面
@@ -2225,6 +2235,9 @@ void UIWindowSet::slot_CloseWnd()
 
 	// 设置发送数据模式为自定义发送
 	IMInterface::getInstance()->SetCustomData(false);
+
+	// 开启摄像头
+	m_Camera1v1Info->StartEndVideo(false);
 }
 
 void UIWindowSet::slot_refreshWnd()
@@ -2262,6 +2275,9 @@ void UIWindowSet::slot_selectWnd(HWND hwnd)
 
 	// 设置发送数据模式为自定义发送
 	IMInterface::getInstance()->SetCustomData(true);
+
+	// 关闭摄像头
+	m_Camera1v1Info->StartEndVideo(true);
 }
 
 void UIWindowSet::PicData(QString str)
@@ -2288,8 +2304,10 @@ void UIWindowSet::initConnection()
 	connect(instance, SIGNAL(startDeviceSuccessfully(int)), this, SLOT(startDeviceSuccessfully(int)));
 	connect(instance, SIGNAL(VideoCapture(const char*, unsigned int, unsigned int, unsigned int)), m_Camera1v1Info, SLOT(VideoCapture(const char*, unsigned int, unsigned int, unsigned int)));
 	connect(instance, SIGNAL(RecVideoCapture(const char*, unsigned int, unsigned int, unsigned int)), m_CameraS1v1Info, SLOT(VideoCapture(const char*, unsigned int, unsigned int, unsigned int)));
+	connect(instance, SIGNAL(PeopleStatus(bool)), m_CameraS1v1Info, SLOT(StartEndVideo(bool)));
 
 	connect(instance, SIGNAL(rtsDataReceived(const std::string&)), this, SLOT(rtsDataReceived(const std::string&)));
+	connect(instance, SIGNAL(requstError(int)), this, SLOT(requstError(int)));
 }
 
 void UIWindowSet::joinRtsRoom(const std::string &roomName)
@@ -2312,6 +2330,16 @@ void UIWindowSet::joinVChatSuccessfully()
 {
 	m_bLiving1v1 = true;
 	m_LiveStatusManager->SendStart1v1LiveHttpMsg(m_lessonid, m_curTags->ChatID(), m_Token);
+}
+
+void UIWindowSet::requstError(QString error)
+{
+	m_bLiving1v1 = false;
+	CMessageBox::showMessage(
+		QString("答疑时间"),
+		QString(error),
+		QString("确定"),
+		QString("取消"));
 }
 
 void UIWindowSet::errorInfo(const QString & error)
@@ -2535,6 +2563,7 @@ void UIWindowSet::clickLive1v1()
 
 			// 结束白板和音视频
 			// 实现结束白板和音视频功能......待写
+			IMInterface::getInstance()->EndLive(m_curTags->ChatID().toStdString());
 
 			m_LiveStatusManager->SendStopLiveHttpMsg1v1();
 
@@ -2579,6 +2608,8 @@ void UIWindowSet::show1v1ErrorTip(QString sError)
 		QString("答疑时间"),
 		QString(sError),
 		QString("确定"));
+
+	IMInterface::getInstance()->EndLive(m_curTags->ChatID().toStdString());
 }
 
 void UIWindowSet::selectColor(QColor& color)

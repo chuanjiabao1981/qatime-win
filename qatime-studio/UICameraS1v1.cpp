@@ -9,6 +9,9 @@ UICameraS1v1::UICameraS1v1(QWidget *parent)
 	: QWidget(parent)
 	, m_pBkImage(NULL)
 	, m_bEndVideo(false)
+	, m_parentWnd(NULL)
+	, m_iWidth(0)
+	, m_iHeight(0)
 {
 	ui.setupUi(this);
 
@@ -76,6 +79,8 @@ void UICameraS1v1::VideoCapture(const char* data, unsigned int iwidth, unsigned 
 	m_SvideoSampler.iDataSize = iSize;
 	memcpy(m_SvideoSampler.puaData, data, iSize);
 
+	ScaleZoom(iwidth,iheight);
+
 	m_mutex.unlock();
 	delete data;
 }
@@ -98,4 +103,36 @@ void UICameraS1v1::setBkImage(QString qsImage)
 void UICameraS1v1::StartEndVideo(bool bEndVideo)
 {
 	m_bEndVideo = bEndVideo;
+}
+
+void UICameraS1v1::setParentWnd(QWidget* parent)
+{
+	m_parentWnd = parent;
+}
+
+void UICameraS1v1::ScaleZoom(int iWidth, int iHeight)
+{
+	if (iWidth == m_iWidth && iHeight == m_iHeight)
+	{
+		return;
+	}
+	else
+	{
+		// ¸¸´°¿Ú¿í¸ß
+		int iParentWidth = m_parentWnd->width();
+		int iParentHeight = m_parentWnd->height();
+
+		int iScreenWidth = iParentWidth;
+		int iScreenHeight = ((double)iParentWidth / (double)iWidth)*iHeight;
+		if (iScreenHeight > iParentHeight)
+		{
+			iScreenWidth = ((double)iParentHeight / (double)iHeight)*iWidth;
+			setFixedSize(iScreenWidth, iParentHeight);
+		}
+		else
+			setFixedSize(iScreenWidth, iScreenHeight);
+
+		m_iWidth = iWidth;
+		m_iHeight = iHeight;
+	}
 }

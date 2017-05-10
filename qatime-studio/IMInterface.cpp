@@ -40,7 +40,7 @@ IMInterface::IMInterface(QObject *parent)
 }
 
 IMInterface::~IMInterface()
-{
+ {
 	destroyRts();
 
 	destroyVChat();
@@ -150,8 +150,6 @@ void IMInterface::initVChatCallback()
 	//注册音视频回调
 	VChat::SetVideoDataCb(true, &CallbackVideoCaptureData);
 	VChat::SetVideoDataCb(false, &CallbackVideoRecData);
-	VChat::SetAudioDataCb(true, &CallbackAudioCaptureData);
-	VChat::SetAudioDataCb(false, &CallbackAudioRecData);
 	VChat::SetCbFunc(&CallbackVChatCb);
 }
 
@@ -270,6 +268,12 @@ void IMInterface::CustomVideoData(__int64 time, const char* data, int size, int 
 	VChat::CustomVideoData(time, data, size, width, height, nullptr);
 }
 
+void IMInterface::EndLive(const std::string& sessionID)
+{
+	Rts::Hangup(IMInterface::getInstance()->getSessionID(), &CallbackHangup);
+	VChat::End("");
+}
+
 void CallbackStartChannel(nim::NIMResCode res_code, const std::string& session_id, int channel_type, const std::string& uid)
 {
 	if (nim::kNIMResSuccess == res_code)
@@ -309,6 +313,7 @@ void CallbackHangup(nim::NIMResCode res_code, const std::string& session_id)
 
 void CallbackCreateConf(nim::NIMResCode res_code)
 {
+	qDebug() << __FILE__ << __LINE__ << "白板创建回调code：" << res_code;
 	IMInterface *instance = IMInterface::getInstance();
 	if (NULL == instance)
 	{
@@ -330,10 +335,15 @@ void CallbackCreateConf(nim::NIMResCode res_code)
 			emit IMInterface::getInstance()->createRtsRoomSuccessfully(roomid);
 		}
 		break;
-	case nim::kNIMResForbidden://没有权限，禁止操作
-		instance->setLastError(ERROR_INFO(res_code, "没有权限，禁止操作"));
-		break;
+// 	case nim::kNIMResForbidden://没有权限，禁止操作
+// 		instance->setLastError(ERROR_INFO(res_code, "没有权限，禁止操作"));
+// 		break;
 	default:
+		{
+			QString strError;
+			strError = QString("创建白板出现错误，错误代码：%1").arg(QString::number(res_code));
+			emit IMInterface::getInstance()->requstError(strError);
+		}
 		break;
 	}
 	instance = NULL;
@@ -341,10 +351,19 @@ void CallbackCreateConf(nim::NIMResCode res_code)
 
 void CallbackJoinConf(nim::NIMResCode res_code, const std::string& session_id, __int64 channel_id, const std::string& custom_info)
 {
+	qDebug() << __FILE__ << __LINE__ << "白板加入回调code：" << res_code << channel_id << custom_info.c_str();
 	if (nim::kNIMResSuccess == res_code)
 	{
 		IMInterface::getInstance()->setSessionID(session_id);
 		emit IMInterface::getInstance()->joinRtsRoomSuccessfully(session_id, channel_id, custom_info);
+	}
+	else
+	{
+		{
+			QString strError;
+			strError = QString("加入白板出现错误，错误代码：%1").arg(QString::number(res_code));
+			emit IMInterface::getInstance()->requstError(strError);
+		}
 	}
 }
 
@@ -421,27 +440,37 @@ void CallbackNetDetect(int code, nim::NetDetectCbInfo info)
 // 音视频加入回调
 void CallbackOpt2Call(int code, __int64 channel_id, const std::string& json_extension)
 {
-	qDebug() << __FILE__ << __LINE__ << code << channel_id << json_extension.c_str();
+	qDebug() << __FILE__ << __LINE__ << "音视频加入回调code：" << code << channel_id << json_extension.c_str();
 	if (kNIMResSuccess == code)
 	{
 		emit IMInterface::getInstance()->joinVChatSuccessfully();
+	}
+	else
+	{
+		QString strError;
+		strError = QString("加入音视频出现错误，错误代码：%1").arg(QString::number(code));
+		emit IMInterface::getInstance()->requstError(strError);
 	}
 }
 
 // 音视频创建回调
 void CallbackOpt2CreateCall(int code, __int64 channel_id, const std::string& json_extension)
 {
-	qDebug() << __FILE__ << __LINE__ << code << channel_id << json_extension.c_str();
+	qDebug() << __FILE__ << __LINE__ << "音视频创建回调code：" << code << "音视频创建回调channelid：" << channel_id << json_extension.c_str();
 	if (kNIMResSuccess == code || kNIMResExist == code)
 	{
 		emit IMInterface::getInstance()->createVChatRoomSuccessfully();
 	}
+	else
+	{
+		QString strError;
+		strError = QString("创建音视频出现错误，错误代码：%1").arg(QString::number(code));
+		emit IMInterface::getInstance()->requstError(strError);
+	}	
 }
 
 void CallbackVideoCaptureData(uint64_t time, const char *data, unsigned int size, unsigned int width, unsigned int height, const char *json_extension, const void *user_data)
 {
-	qDebug() << "size is: " << QString::number(size) << "width is:" << QString::number(width) << "height is:" << QString::number(height) << "json is:" << QString(QLatin1String(json_extension));
-
 	char* copydata = new char[size];
 	memcpy(copydata, data, size);
 	emit IMInterface::getInstance()->VideoCapture(copydata, width, height, size);
@@ -452,16 +481,6 @@ void CallbackVideoRecData(uint64_t time, const char *data, unsigned int size, un
 	char* copydata = new char[size];
 	memcpy(copydata, data, size);
 	emit IMInterface::getInstance()->RecVideoCapture(copydata, width, height, size);
-}
-
-void CallbackAudioCaptureData(uint64_t time, const char *data, unsigned int size, const char *json_extension, const void *user_data)
-{
-
-}
-
-void CallbackAudioRecData(uint64_t time, const char *data, unsigned int size, const char *json_extension, const void *user_data)
-{
-
 }
 
 void CallbackVChatCb(nim::NIMVideoChatSessionType type, __int64 channel_id, int code, const char *json, const void*)
@@ -484,6 +503,16 @@ void CallbackVChatCb(nim::NIMVideoChatSessionType type, __int64 channel_id, int 
 	case nim::kNIMVideoChatSessionTypeConnect:{
 	}break;
 	case nim::kNIMVideoChatSessionTypePeopleStatus:{
+		if (code == nim::kNIMVideoChatSessionStatusJoined)
+		{
+			emit IMInterface::getInstance()->PeopleStatus(false);
+			return;
+		}
+		else if (code == nim::kNIMVideoChatSessionStatusLeaved)
+		{
+			emit IMInterface::getInstance()->PeopleStatus(true);
+			return;
+		}
 	}break;
 	case nim::kNIMVideoChatSessionTypeNetStatus:{
 	}break;
@@ -511,14 +540,12 @@ void CallbackDeviceDevpath(bool ret, nim::NIMDeviceType type, const char *json_e
 	switch (type)
 	{
 	case nim::kNIMDeviceTypeAudioIn:
-		qDebug() << __FILE__ << __LINE__ << json_extension;
 		break;
 	case nim::kNIMDeviceTypeAudioOut:
 		break;
 	case nim::kNIMDeviceTypeAudioOutChat:
 		break;
 	case nim::kNIMDeviceTypeVideo:
-		qDebug() << __FILE__ << __LINE__ << json_extension;
 		break;
 	case nim::kNIMDeviceTypeSoundcardCapturer:
 		break;

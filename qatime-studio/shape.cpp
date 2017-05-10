@@ -18,6 +18,11 @@ void Shape::setPen(const QPen &pen)
     mPen = pen;
 }
 
+QColor Shape::penColor()
+{
+	return mPen.color();
+}
+
 void Shape::paint(QPainter &painter, const QSize &size)
 {
     painter.setPen(mPen);
@@ -41,4 +46,9 @@ void Shape::paint(QPainter &painter, const QSize &size)
 			painter.drawLine(pointf1.x() * width, pointf1.y() * height, pointf2.x() * width, pointf2.y() * height);
         }
     }
+}
+
+QVector< QPointF > Shape::PointVec()
+{
+	return mPointVec;
 }

@@ -110,6 +110,12 @@ void Palette::setMouseStyle(bool isDraw)
 {
 	if (isDraw)
 	{
+
+		QString opType = QString::number(kMultiBoardOpSignEnd);//  消息类型
+		QString strInfo;
+		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg("").arg("").arg(""));
+		emit PicData(strInfo);
+
 		QCursor cursor;
 		QPixmap pixmap(":/LoginWindow/images/pen.png");
 		cursor = QCursor(pixmap, 0, pixmap.height());
@@ -269,6 +275,12 @@ void Palette::RecData(const std::string& data)
 		draw_op_type_ = atoi(data.substr(0, pos_type).c_str());
 		cur_data = data.substr(pos_type + 1);
 
+		if (draw_op_type_ == kMultiBoardOpSyncQuery)//同步消息
+		{
+			SendSyncDraw();
+			return;
+		}
+					 
 		std::list<std::string> param_list = BoardStringTokenize(cur_data.c_str(), ",");
 		if (param_list.size() > 0)
 		{
@@ -290,18 +302,6 @@ void Palette::RecData(const std::string& data)
 				break;
 			case kMultiBoardOpClear:
 			case kMultiBoardOpSignEnd:
-				break;
-			case kMultiBoardOpDocInfo:
-// 				if (param_list.size() >= 4)
-// 				{
-// 					info.doc_id_ = *it;
-// 					++it;
-// 					info.doc_cur_page_ = atoi(it->c_str());
-// 					++it;
-// 					info.doc_page_ = atoi(it->c_str());
-// 					++it;
-// 					info.doc_opt_ = atoi(it->c_str()) > 0;
-// 				}
 				break;
 			case  kMultiBoardOpUndo:
 				{
@@ -375,4 +375,93 @@ int Palette::colorConvert(QColor color)
 		clr = 0xff33ff;
 
 	return clr;
+}
+
+void Palette::SendSyncDraw()
+{
+	foreach(Shape *shape, mShapeStack)
+	{
+		QString strMoveInfo;
+		foreach(QPointF pt, shape->PointVec())
+		{
+			QString ptX, ptY, opType, sClr, strInfo;
+			DWORD clr;
+			if (pt == shape->PointVec().first())
+			{
+				ptX = QString("%1").arg(pt.x());				//	x的相对坐标
+				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
+				opType = QString::number(DrawOpStart);			//  消息类型
+				clr = colorConvert(shape->penColor());
+				sClr = QString::number(clr);			//  颜色类型
+				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
+				emit PicData(strInfo);
+			}
+			else if (pt == shape->PointVec().last())
+			{
+				emit PicData(strMoveInfo);
+				ptX = QString("%1").arg(pt.x());				//	x的相对坐标
+				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
+				opType = QString::number(DrawOpEnd);			//  消息类型
+				clr = colorConvert(shape->penColor());
+				sClr = QString::number(clr);			//  颜色类型
+				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
+				emit PicData(strInfo);
+			}
+			else
+			{
+				ptX = QString("%1").arg(pt.x());				//	x的相对坐标
+				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
+				opType = QString::number(DrawOpMove);			//  消息类型
+				clr = colorConvert(shape->penColor());
+				sClr = QString::number(clr);			//  颜色类型
+				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
+
+				// 把移动点存起来，再结束之前一起发送
+				strMoveInfo += strInfo;
+			}
+		}
+	}
+
+	foreach(Shape *shape, mSycnShapeStack)
+	{
+		QString strMoveInfo;
+		foreach(QPointF pt, shape->PointVec())
+		{
+			QString ptX, ptY, opType, sClr, strInfo;
+			DWORD clr;
+			if (pt == shape->PointVec().first())
+			{
+				ptX = QString("%1").arg(pt.x());				//	x的相对坐标
+				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
+				opType = QString::number(DrawOpStart);			//  消息类型
+				clr = colorConvert(shape->penColor());
+				sClr = QString::number(clr);			//  颜色类型
+				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
+				emit PicData(strInfo);
+			}
+			else if (pt == shape->PointVec().last())
+			{
+				emit PicData(strMoveInfo);
+				ptX = QString("%1").arg(pt.x());				//	x的相对坐标
+				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
+				opType = QString::number(DrawOpEnd);			//  消息类型
+				clr = colorConvert(shape->penColor());
+				sClr = QString::number(clr);			//  颜色类型
+				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
+				emit PicData(strInfo);
+			}
+			else
+			{
+				ptX = QString("%1").arg(pt.x());				//	x的相对坐标
+				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
+				opType = QString::number(DrawOpMove);			//  消息类型
+				clr = colorConvert(shape->penColor());
+				sClr = QString::number(clr);			//  颜色类型
+				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
+
+				// 把移动点存起来，再结束之前一起发送
+				strMoveInfo += strInfo;
+			}
+		}
+	}
 }

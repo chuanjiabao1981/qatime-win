@@ -42,7 +42,7 @@ void UITags::SetCourseNameAndID(QString sName, QString id, QString chatID, QStri
 
 QString UITags::ChatID()
 {
-	return m_chatID;
+	return m_chatID; ////QString::number(36309071);
 }
 
 QString UITags::CourseID()

@@ -6,24 +6,6 @@
 #include <QDir>
 #include "UIMessageBox.h"
 
-//typedef bool(*nim_client_init)(const char *app_data_dir, const char *app_install_dir, const char *json_extension);
-//typedef void(*nim_client_cleanup)(const char *json_extension);
-//typedef void(*nim_client_login)(const char *app_token, const char *account, const char *password, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-//typedef void(*nim_client_relogin)(const char *json_extension);
-// typedef void(*nim_client_logout)(NIMLogoutType logout_type, const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-// typedef void(*nim_client_kick_other_client)(const char *json_extension);
-// typedef void(*nim_client_reg_auto_relogin_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-// typedef void(*nim_client_reg_kickout_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-// typedef void(*nim_client_reg_disconnect_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void* user_data);
-// typedef void(*nim_client_reg_multispot_login_notify_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void *user_data);
-// typedef void(*nim_client_reg_kickout_other_client_cb)(const char *json_extension, nim_json_transport_cb_func cb, const void *user_data);
-// typedef void(*nim_client_reg_sync_multiport_push_config_cb)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
-// typedef void(*nim_client_set_multiport_push_config)(const char *switch_content, const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
-// typedef void(*nim_client_get_multiport_push_config)(const char *json_extension, nim_client_multiport_push_config_cb_func cb, const void *user_data);
-
-//typedef	const wchar_t * (*nim_tool_get_user_appdata_dir)(const char * app_account);
-//typedef	void(*nim_global_free_buf)(void *data);
-
 UIMainNewWindow* m_This = NULL;
 UIMainNewWindow::UIMainNewWindow(QWidget *parent)
 	: QWidget(parent)
@@ -322,9 +304,9 @@ void UIMainNewWindow::setKeyAndLogin(QString key)
 {
 	// 登陆
 	nim::SDKConfig config;
-
+	config.database_encrypt_key_ = "Netease";
 	//sdk能力参数（必填）
-	nim::Client::Init(key.toStdString(), "", "", config);
+	nim::Client::Init(key.toStdString(), "Netease", "", config);
 	nim_http::Init(); // 初始化云信http
 	InitAudio();	  // 初始化语音
 	m_WindowSet->initCallBack();
