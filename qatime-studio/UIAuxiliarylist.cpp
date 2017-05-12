@@ -157,7 +157,6 @@ void UIAuxiliaryList::AddMsgCount()
 	QString strNum = QString::number(m_iMsgCount);
 	ui.number_label->setText(strNum);
 	ui.pic_label->setStyleSheet("border-image: url(:/LoginWindow/images/session.png);");
-//	ui.pic_label->setVisible(true);
 }
 
 void UIAuxiliaryList::ClearMsgNumber()

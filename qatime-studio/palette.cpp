@@ -263,6 +263,7 @@ void Palette::mouseReleaseEvent(QMouseEvent *event)
 
 void Palette::RecData(const std::string& data)
 {
+	qDebug() << data.c_str();
 	float x;
 	float y;
 	DWORD clr_;
@@ -373,6 +374,16 @@ int Palette::colorConvert(QColor color)
 		clr = 0x009900;
 	else if (color == COLOR_VALUE_PURPLE)
 		clr = 0xff33ff;
+	else if (color == 0x7dd21f)
+		clr = 0x7dd21f;
+	else if (color == 0x228bf7)
+		clr = 0x228bf7;
+	else if (color == 0xd1021c)
+		clr = 0xd1021c;
+	else if (color == 0xfddc01)
+		clr = 0xfddc01;
+	else if (color == 0x9b0df5)
+		clr = 0x9b0df5;
 
 	return clr;
 }
@@ -456,7 +467,7 @@ void Palette::SendSyncDraw()
 				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
 				opType = QString::number(DrawOpMove);			//  消息类型
 				clr = colorConvert(shape->penColor());
-				sClr = QString::number(clr);			//  颜色类型
+				sClr = QString::number(clr);
 				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
 
 				// 把移动点存起来，再结束之前一起发送
