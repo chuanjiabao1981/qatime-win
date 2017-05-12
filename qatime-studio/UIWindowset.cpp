@@ -235,6 +235,12 @@ void UIWindowSet::CloseDialog()
 		return;
 	}
 
+	if (m_bLiving1v1)
+	{
+		m_ScreenTip->setErrorTip("请先结束直播，再关闭窗口！");
+		return;
+	}
+
 	if (m_vecTags.size() > 0)
 	{
 		std::vector<UITags*>::iterator it;
@@ -257,6 +263,11 @@ void UIWindowSet::CloseDialog()
 	// 退出弹幕
 	emit ui.Bullet_checkBox->stateChanged(0);
 	CloseBullet();
+
+	//结束云信的摄像头采集
+	IMInterface::getInstance()->endDevice(Video);
+	IMInterface::getInstance()->endDevice(Audio);
+	IMInterface::getInstance()->endDevice(AudioOut);
 	hide();
 }
 
