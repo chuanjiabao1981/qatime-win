@@ -8,7 +8,7 @@
 #ifndef _NLSS_API_H_
 #define _NLSS_API_H_
 
-#include "nlss_type.h"
+#include "nlss_childvideo_api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,7 +16,26 @@ extern "C" {
 
 /*! \file */
 
-/*******************************设备管理API：获取可供采集音视频设备列表*************************************/
+/*******************************设备管理API：获取可供采集资源列表*************************************/
+/**
+*  获取可采集应用图像的app个数
+*
+*  @param  piAppWindNum: 可采集图像的app数量 出参
+*
+*  @return NLSS_RET NLSS_OK成功，NLSS_ERR失败
+*/
+EXPORTS_API   NLSS_RET Nlss_GetAvailableAppWindNum(int *piAppWindNum);
+
+/**
+*  获取可采集图像的app列表信息
+*
+*  @param  pLSAppWindTitles: 可采集图像的app信息 出参
+*  @param  iMaxNum：pLSAppWindTitles最大容量 入参
+*
+*  @return NLSS_RET NLSS_OK成功，NLSS_ERR失败
+*/
+EXPORTS_API   NLSS_RET Nlss_GetAvailableAppWind(NLSS_OUT ST_NLSS_INDEVICE_INF *pLSAppWindTitles, int iMaxNum);
+
 /**
 *  获取可用多媒体设备列表个数
 *
@@ -30,23 +49,28 @@ EXPORTS_API   NLSS_RET  Nlss_GetFreeDevicesNum(NLSS_OUT int *iVideoDeviceNum, NL
 *  获取可用多媒体设备列表名称，暂时只支持DShow采集音视频
 *
 *  @param  pLSVideoDevices: 视频设备信息 出参
+*  @param  iMaxVideoDevicesNum：pstVideoDevices最大容量 入参
 *  @param  pLSAudioDevices：音频设备信息 出参
+*  @param  iMaxAudioDevicesNum：pstAudioDevices最大容量 入参
 *
 *  @return NLSS_RET NLSS_OK成功，NLSS_ERR失败
 */
-EXPORTS_API   NLSS_RET  Nlss_GetFreeDeviceInf(NLSS_OUT ST_NLSS_INDEVICE_INF *pstVideoDevices, NLSS_OUT ST_NLSS_INDEVICE_INF* pstAudioDevices);
+EXPORTS_API   NLSS_RET  Nlss_GetFreeDeviceInf(NLSS_OUT ST_NLSS_INDEVICE_INF *pstVideoDevices, int iMaxVideoDevicesNum, NLSS_OUT ST_NLSS_INDEVICE_INF* pstAudioDevices, int iMaxAudioDevicesNum);
 
 
 /*******************************初始化和参数设置API*************************************************************/
 /**
 *  创建直播推流实例，推流对象只允许存在一个，多次直播可以只调用一次
 *
-*  @param  paLogpath:    日志生成路径，如果设置为空，则在当前所在目录下面 ，入参
+*  @param  paWorkPath:    NLSS work目录(要求UTF-8编码)，会从work目录下面动态加载所需要的dll。
+*                         如果设置为空，则在当前所在目录下面 ，操作上述事情。
+*  @param  paCachePath:   NLSS cache目录，会在该目录下面生成日志,需要有文件创建和写入权限
+*                         如果设置为空，则在当前所在目录下面 ，操作上述事情。
 *  @param  phNLSService: 直播推流实例 ，出参
 *
 *  @return NLSS_RET NLSS_OK成功，NLSS_ERR失败
 */
-EXPORTS_API  NLSS_RET  Nlss_Create(const char *paLogpath, NLSS_OUT _HNLSSERVICE *phNLSService);
+EXPORTS_API  NLSS_RET  Nlss_Create(const char *paWorkPath, const char *paCachePath, NLSS_OUT _HNLSSERVICE *phNLSService);
 
 /**
 *  获取sdk版本号
@@ -84,14 +108,6 @@ EXPORTS_API  NLSS_RET   Nlss_GetDefaultParam(_HNLSSERVICE hNLSService, NLSS_OUT 
 EXPORTS_API  NLSS_RET   Nlss_InitParam(_HNLSSERVICE hNLSService, ST_NLSS_PARAM *pstParam);
 
 /**
-*  设置视频推流显示比例，如设为宽屏，则写16,9.默认情况下保持原屏尺寸
-*
-*  @param  hNLSService: 直播推流实例，入参
-*  @param  iWideUnit iHeightUnit: 分别为宽高比例单位，如设为宽屏，则写16,9.
-*/
-EXPORTS_API   void     Nlss_SetVideoDisplayRatio(_HNLSSERVICE hNLSService, int iWideUnit, int iHeightUnit);
-
-/**
 *  设置视频水印，默认是无水印
 *
 *  @param  hNLSService: 直播推流实例，入参
@@ -122,26 +138,26 @@ EXPORTS_API   void     Nlss_SetStatusCB(_HNLSSERVICE hNLSService, PFN_NLSS_STATU
 *  @return 无
 */
 EXPORTS_API   void    Nlss_UninitParam(_HNLSSERVICE hNLSService);
-
-/*******************************视频预览API*************************************************************/
+/*******************************启动|停止处理API*************************************************************/
 /**
-*  打开视频采集，需要在视频预览前调用，当需要改变采集设备时的时候需要先停止再重新打开
+*  启动处理，在各类初始化之后，在预览和直播启动之前
 *
 *  @param  hNLSService: 直播推流实例，入参
 *
 *  @return NLSS_RET NLSS_OK成功，NLSS_ERR失败
 */
-EXPORTS_API  NLSS_RET  Nlss_StartVideoCapture(_HNLSSERVICE hNLSService);
+EXPORTS_API  NLSS_RET  Nlss_Start(_HNLSSERVICE hNLSService);
 
 /**
-*  关闭视频采集
+*  停止处理，在预览和直播停止之后，在Nlss_UninitParam之前
 *
 *  @param  hNLSService: 直播推流实例，入参
 *
 *  @return 无
 */
-EXPORTS_API   void     Nlss_StopVideoCapture(_HNLSSERVICE hNLSService);
+EXPORTS_API   void     Nlss_Stop(_HNLSSERVICE hNLSService);
 
+/*******************************视频预览API*************************************************************/
 /**
 *  打开视频预览
 *
@@ -233,18 +249,27 @@ EXPORTS_API  void       Nlss_PauseAudioLiveStream(_HNLSSERVICE hNLSService);
 */
 EXPORTS_API  void       Nlss_ResumeAudioLiveStream(_HNLSSERVICE hNLSService);
 
-/*******************************直播推流方式2 API: 裸流直播接口*************************************************************/
+
 /**
-*  用户指定视频流推流发送接口
+*  开始直播录制
 *
 *  @param  hNLSService: 直播推流实例，入参
-*  @param  pcVideoData: 用户指定视频流数据，入参
-*  @param  iLen:        视频流数据长度，入参
+*  @param  pcRecordPath: 录制文件存放位置及文件名，入参
 *
-*  @return NLSS_RET NLSS_OK成功，NLSS_ERR失败
+*  @return 无
 */
-EXPORTS_API NLSS_RET    Nlss_SendCustomVideoData(_HNLSSERVICE hNLSService, char *pcVideoData, int iLen);
+EXPORTS_API  NLSS_RET   Nlss_StartRecord(_HNLSSERVICE hNLSService, char *pcRecordPath);
 
+/**
+*  停止直播录制
+*
+*  @param  hNLSService: 直播推流实例，入参
+*
+*  @return 无
+*/
+EXPORTS_API  void       Nlss_StopRecord(_HNLSSERVICE hNLSService);
+
+/*******************************直播推流方式2 API: 裸流直播接口*************************************************************/
 /**
 *  用户指定音频流推流发送接口，支持直播过程中音频数据重采样
 *

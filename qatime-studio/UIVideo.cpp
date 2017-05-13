@@ -57,7 +57,8 @@ UIVideo::UIVideo(QWidget *parent)
 #endif
 
 	//创建mediacapture类，失败抛出错	
-	if (NLSS_OK != Nlss_Create(NULL, &m_hNlssService))
+	
+	if (NLSS_OK != Nlss_Create(NULL,NULL, &m_hNlssService))
 	{
 		MessageBox(NULL, L"创建直播失败，请关闭程序重新启动", L"", MB_OK);
 	}
@@ -72,7 +73,7 @@ UIVideo::UIVideo(QWidget *parent)
 	m_refreshTimer->start(1000 / 25);
 	connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(slot_onRefreshTimeout()));
 
-	StartLiveVideo();
+//	StartLiveVideo();
 }
 
 UIVideo::~UIVideo()
@@ -120,7 +121,7 @@ void UIVideo::SetMediaCapture(_HNLSSERVICE hNlssService)
 	Nlss_SetStatusCB(m_hNlssService, notify);
 }
 
-void UIVideo::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
+void UIVideo::SetVideoSampler(void *pNlssChildID, ST_NLSS_VIDEO_SAMPLER *pSampler)
 {
 	if (pSampler != NULL)
 	{
@@ -187,7 +188,7 @@ void UIVideo::paintEvent(QPaintEvent *)
 
 bool UIVideo::InitMediaCapture()
 {
-	bool have_video_source = true;
+/*	bool have_video_source = true;
 	bool have_audio_source = true;
 	ST_NLSS_PARAM stParam;
 	Nlss_GetDefaultParam(m_hNlssService, &stParam);;
@@ -280,7 +281,7 @@ bool UIVideo::InitMediaCapture()
 		return false;
 	}
 	m_bInited = true;
-	delete[]stParam.paOutUrl;
+	delete[]stParam.paOutUrl;*/
 	return true;
 }
 
@@ -350,7 +351,7 @@ void UIVideo::EnumAvailableMediaDevices()
 		}
 	}
 	// 获取视频和音频设备
-	Nlss_GetFreeDeviceInf(m_pVideoDevices, m_pAudioDevices);
+	Nlss_GetFreeDeviceInf(m_pVideoDevices,10, m_pAudioDevices,10);
 }
 
 void UIVideo::InitDeviceParam()
@@ -387,7 +388,7 @@ void UIVideo::StartLiveVideo()
 	if (m_bPreviewing)
 	{
 		Nlss_StopVideoPreview(m_hNlssService);
-		Nlss_StopVideoCapture(m_hNlssService);
+		Nlss_Stop(m_hNlssService);
 	}
 
 	Nlss_UninitParam(m_hNlssService);
@@ -403,9 +404,8 @@ void UIVideo::StartLiveVideo()
 	stFilterParam.uiStartx = 10;
 	stFilterParam.uiStarty = 10;
 	Nlss_SetVideoWaterMark(m_hNlssService, &stFilterParam);
- 	Nlss_SetVideoDisplayRatio(m_hNlssService, 0, 0);
 	
- 	if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
+ 	if (NLSS_OK != Nlss_Start(m_hNlssService))
  	{
  		MessageBox(NULL, L"打开视频采集出错", L"答疑时间", MB_OK);
  		return;

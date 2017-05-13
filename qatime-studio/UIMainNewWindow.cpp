@@ -178,7 +178,7 @@ void UIMainNewWindow::ShowAuxiliary()
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 
-	QByteArray append("?status=teaching&per_page=");
+	QByteArray append("?&per_page=");//status=teaching
 	append += "100";
 
 	strUrl += append;

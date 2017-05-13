@@ -99,6 +99,7 @@ private:
 	int								m_UnreadCount;		// 消息未读数
 	bool							m_bPerson;			// 是否请求完成员
 	bool							m_EnvironmentalTyle;// 环境变量
+	bool							m_b1v1Lesson;
 	void initEmotion();
 public:
 	QString							m_TeachterName;		// 老师名字

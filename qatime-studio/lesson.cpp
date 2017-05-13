@@ -1,6 +1,6 @@
 #include "lesson.h"
 #include "define.h"
-
+#include <QJsonArray>
 Lesson::Lesson()
 {
 
@@ -41,6 +41,9 @@ void Lesson::readJson(const QJsonObject &json)
 
 	// 摄像头推流地址
 	mCameraUrl = json["camera_pull_stream"].toString();
+
+	QJsonObject lessons1v1 = json["product_interactive_course"].toObject();
+	mStatus = lessons1v1["status"].toString();
 }
 
 QString Lesson::BoardUrl()

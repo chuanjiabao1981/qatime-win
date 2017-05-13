@@ -11,6 +11,8 @@ extern "C" {
 
 typedef  NLSS_MASK_HANDLE_TYPE(_HNLSSERVICE)  _HNLSSERVICE;
 
+typedef  NLSS_MASK_HANDLE_TYPE(_HNLSSCHILDSERVICE)  _HNLSSCHILDSERVICE;
+
 /**
 *  直播推流状态
 */
@@ -30,6 +32,7 @@ typedef enum enum_NLSS_VIDEOIN_TYPE{
     EN_NLSS_VIDEOIN_FULLSCREEN,			       //!< 全屏模式
     EN_NLSS_VIDEOIN_RECTSCREEN,			       //!< 任意区域截屏
     EN_NLSS_VIDEOIN_APP,					   //!< 应用程序窗口截屏
+    EN_NLSS_VIDEOIN_PNG,					   //!< PNG图片源，可以作为背景
     EN_NLSS_VIDEOIN_RAWDATA,                   //!< 视频裸数据模式
 }EN_NLSS_VIDEOIN_TYPE;
 
@@ -64,7 +67,8 @@ typedef enum enum_NLSS_OUTCONTENT{
 *  直播视频编码格式
 */
 typedef enum enum_NLSS_VIDEOOUT_CODEC{
-    EN_NLSS_VIDEOOUT_CODEC_H264,
+    EN_NLSS_VIDEOOUT_CODEC_OPENH264,
+    EN_NLSS_VIDEOOUT_CODEC_X264,
     EN_NLSS_VIDEOOUT_CODEC_VP9,
     EN_NLSS_VIDEOOUT_CODEC_HEVC
 }EN_NLSS_VIDEOOUT_CODEC;
@@ -149,6 +153,11 @@ typedef struct struct_NLSS_APPVIDEO_PARAM
     char    *paAppPath;    //!< App对象.
 } ST_NLSS_APPVIDEO_PARAM;
 
+typedef struct struct_NLSS_PNG_PARAM
+{
+    char    *paPngPath;    //!< png path目录.
+} ST_NLSS_PNG_PARAM;
+
 /**
 *  直播视频源为视频裸数据模式时，即：EN_NLSS_VIDEOIN_RAWDATA，输入参数
 */
@@ -156,8 +165,6 @@ typedef struct struct_NLSS_CUSTOMVIDEO_PARAM
 {
     int                 iInWidth;            //!<输入源的宽
     int                 iInHeight;           //!<输入源的高
-    int                 iYStride;            //!<当输入源为yuv数据时，iYtride信息
-    int                 iUVStride;           //!<当输入源为yuv数据时，iUVstride信息
     EN_NLSS_VIDEOIN_FMT enVideoInFmt;        //!<当输入源为yuv数据时，视频格式
 } ST_NLSS_CUSTOMVIDEO_PARAM;
 
@@ -171,39 +178,66 @@ typedef struct stru_NLSS_VIDEO_WATER_PARAM{
 } ST_NLSS_VIDEO_WATER_PARAM;
 
 /**
-*  直播推流视频参数
+*  直播推流视频输出参数
 */
-typedef struct struct_NLSS_VIDEO_PARAM
+typedef struct struct_NLSS_VIDEOOUT_PARAM
 {
+    int                           iOutWidth;         //!< 视频的输出宽.要求是4的倍数
+    int                           iOutHeight;        //!< 视频的输出高.要求是4的倍数
     int                           iOutFps;           //!< 视频的帧率.
     int                           iOutBitrate;       //!< 码率.
-    EN_NLSS_VIDEOOUT_CODEC        enOutCodec;        //!< 视频编码器.
-    EN_NLSS_VIDEOIN_TYPE          enInType;          //!< 视频源类型
+    EN_NLSS_VIDEOOUT_CODEC        enOutCodec;        //!< 视频编码器.可以选择X264，Openh264
     bool                          bHardEncode;       //!< 是否使用视频硬件编码
+} ST_NLSS_VIDEOOUT_PARAM;
+
+/**
+*  直播推流视频输入参数
+*/
+typedef struct struct_NLSS_VIDEOIN_PARAM
+{
+    EN_NLSS_VIDEOIN_TYPE          enInType;          //!< 视频源类型
+    int                           iCaptureFps;       //!< 采集fps
     union
     {
         ST_NLSS_CAMERA_PARAM      stInCamera;
         ST_NLSS_RECTSCREEN_PARAM  stInRectScreen;
         ST_NLSS_APPVIDEO_PARAM    stInApp;
         ST_NLSS_CUSTOMVIDEO_PARAM stInCustomVideo;
+        ST_NLSS_PNG_PARAM         stInPng;
     }u;
-} ST_NLSS_VIDEO_PARAM;
+} ST_NLSS_VIDEOIN_PARAM;
+
+/**
+*  直播推流音频输出参数
+*/
+typedef struct struct_NLSS_AUDIOOUT_PARAM
+{
+    EN_NLSS_AUDIOOUT_CODEC enOutcodec;            //!< 音频编码器.
+    int                    iOutBitrate;           //!< 音频编码码率. 参考值：64000
+    bool                   bHardEncode;           //!< 是否使用视频硬件编码 
+} ST_NLSS_AUDIOOUT_PARAM;
+
+/**
+*  直播推流音频输入参数
+*/
+typedef struct struct_NLSS_AUDIOIN_PARAM
+{
+    EN_NLSS_AUDIOIN_TYPE   enInType;              //!< 音频推流采集源
+    const char            *paaudioDeviceName;     //!< 当音频推流采集源麦克风时，EN_NLSS_AUDIOIN_MIC，需设置，即为麦克风设备名称，通过
+    int                    iInSamplerate;         //!< 音频的样本采集率. 参考值：44100
+    int                    iInNumOfChannels;      //!< 音频采集的通道数：单声道，双声道. 参考值：1
+    int                    iInFrameSize;          //!< 音频采集的每帧大小. 参考值：2048
+    int                    iInBitsPerSample;      //!< 音频单样本位数  
+    EN_NLSS_AUDIOIN_FMT    enInFmt;               //!< 音频输入格式，参考值：EN_NLSS_AUDIOIN_FMT_S16
+} ST_NLSS_AUDIOIN_PARAM;
 
 /**
 *  直播推流音频参数
 */
 typedef struct struct_NLSS_AUDIO_PARAM
 {
-    EN_NLSS_AUDIOIN_TYPE   enInType;              //!< 音频推流采集源
-    const char            *paaudioDeviceName;     //!< 当音频推流采集源麦克风时，EN_NLSS_AUDIOIN_MIC，需设置，即为麦克风设备名称，通过
-    EN_NLSS_AUDIOOUT_CODEC enOutcodec;            //!< 音频编码器.
-    int                    iInSamplerate;         //!< 音频的样本采集率. 参考值：44100
-    int                    iInNumOfChannels;      //!< 音频采集的通道数：单声道，双声道. 参考值：1
-    int                    iInFrameSize;          //!< 音频采集的每帧大小. 参考值：2048
-    int                    iOutBitrate;           //!< 音频编码码率. 参考值：64000
-    int                    iInBitsPerSample;      //!< 音频单样本位数  
-    EN_NLSS_AUDIOIN_FMT    enInFmt;               //!< 音频输入格式，参考值：EN_NLSS_AUDIOIN_FMT_S16
-    bool                   bHardEncode;           //!< 是否使用视频硬件编码 
+    ST_NLSS_AUDIOIN_PARAM  stIn;
+    ST_NLSS_AUDIOOUT_PARAM stOut;
 } ST_NLSS_AUDIO_PARAM;
 
 /**
@@ -214,7 +248,7 @@ typedef struct struct_NLSS_PARAM
     EN_NLSS_OUTCONTENT        enOutContent;       //!< 推流流内容：音视频，视频，音频.
     EN_NLSS_OUTFORMAT         enOutFormat;        //!< 推流流的格式：FLV，RTMP.
     char                      *paOutUrl;          //!< 直播地址对象
-    ST_NLSS_VIDEO_PARAM       stVideoParam;       //!< 推流视频相关参数.
+    ST_NLSS_VIDEOOUT_PARAM    stVideoParam;       //!< 推流视频输出相关参数.
     ST_NLSS_AUDIO_PARAM       stAudioParam;       //!< 推流音频相关参数.
 } ST_NLSS_PARAM;
 
@@ -277,7 +311,10 @@ typedef void(*PFN_NLSS_STATUS_NTY)(EN_NLSS_STATUS enStatus, EN_NLSS_ERRCODE enEr
 *
 *  @param pstSampler 最新一帧视频截图的结构体参数指针
 */
-typedef void(*PFN_NLSS_VIDEOSAMPLER_CB)(ST_NLSS_VIDEO_SAMPLER *pstSampler);
+typedef void(*PFN_NLSS_VIDEOSAMPLER_CB)(void *pNlssChildID, ST_NLSS_VIDEO_SAMPLER *pstSampler);
+
+
+_HNLSSCHILDSERVICE Nlss_GetChildVideo(_HNLSSERVICE hNlssService, void *pNlssChildID);
 
 #ifdef __cplusplus
 }

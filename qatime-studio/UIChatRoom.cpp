@@ -1200,6 +1200,7 @@ void UIChatRoom::setCurChatID(QString chatID, QString courseid, QString teacheri
 	mRemeberToken = token;
 	m_teacherName = teacherName;
 	m_UnreadCount = UnreadCount;
+	m_b1v1Lesson = b1v1;
 	if (b1v1)
 		Request1v1Member();
 	else
@@ -1456,15 +1457,31 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 		return;
 	
 	QString strUrl;
-	if (m_EnvironmentalTyle)
+	if (m_b1v1Lesson)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/announcements";
-		strUrl.replace("{id}", m_CurCourseID);
+		if (m_EnvironmentalTyle)
+		{
+			strUrl = "https://qatime.cn/api/v1/live_studio/interactive_courses/{id}/announcements";
+			strUrl.replace("{id}", m_CurCourseID);
+		}
+		else
+		{
+			strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_courses/{id}/announcements";
+			strUrl.replace("{id}", m_CurCourseID);
+		}
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/announcements";
-		strUrl.replace("{id}", m_CurCourseID);
+		if (m_EnvironmentalTyle)
+		{
+			strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/announcements";
+			strUrl.replace("{id}", m_CurCourseID);
+		}
+		else
+		{
+			strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/announcements";
+			strUrl.replace("{id}", m_CurCourseID);
+		}
 	}
 
 	QUrl url = QUrl(strUrl);
@@ -1513,7 +1530,6 @@ void UIChatRoom::ReturnAnnouncements()
 
 void UIChatRoom::RequestError(QJsonObject& error)
 {
-	return;
 	QString strError;
 	if (error["code"].toInt() == 1002)
 		strError = QString("授权过期,请重新登录！");

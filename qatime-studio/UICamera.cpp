@@ -6,13 +6,153 @@
 #include "define.h"
 #include <QImage>
 
+_HNLSSCHILDSERVICE hChildVideoService1 = NULL;
 QMutex UICamera::m_mutex;
 ST_NLSS_VIDEO_SAMPLER UICamera::m_SvideoSampler;
 UICamera*	UICamera::m_pThis=NULL;
-#ifdef TEST
-	#define _DEBUG
-#else
-#endif
+#define  NLSS_720P_BITRATE 800000
+
+ST_NLSS_INDEVICE_INF *m_pVideoDevices; 
+ST_NLSS_INDEVICE_INF *m_pAudioDevices;
+
+int GetOutBitrate(int iWidth, int iHeight, int iFps)
+{
+	if (iWidth == 0 || iHeight == 0 || iFps == 0)
+	{
+		return  NLSS_720P_BITRATE; //1280*720 20fps,设置的码率
+	}
+
+	int iOutBitrate = NLSS_720P_BITRATE * iWidth / 1280;
+	iOutBitrate = iOutBitrate * iHeight / 720;
+	if (iFps >= 15)
+	{
+		iOutBitrate = iOutBitrate * iFps / 20;
+	}
+	else if (iFps < 15)
+	{
+		iOutBitrate = iOutBitrate * 15 / 20;
+	}
+
+	return iOutBitrate;
+}
+
+bool SetVideoOutParam(ST_NLSS_VIDEOOUT_PARAM *pstVideoParam, EN_NLSS_VIDEOQUALITY_LVL enVideoQ, bool bWideScreen)
+{
+	pstVideoParam->enOutCodec = EN_NLSS_VIDEOOUT_CODEC_X264;
+	pstVideoParam->bHardEncode = false;
+	pstVideoParam->iOutFps = 20;
+
+	switch (enVideoQ)
+	{
+	case EN_NLSS_VIDEOQUALITY_SUPER:
+		pstVideoParam->iOutWidth = 1920;
+		pstVideoParam->iOutHeight = 1080;
+		break;
+	case EN_NLSS_VIDEOQUALITY_HIGH:
+		pstVideoParam->iOutWidth = 1280;
+		pstVideoParam->iOutHeight = 720;
+		break;
+	case EN_NLSS_VIDEOQUALITY_MIDDLE:
+		pstVideoParam->iOutWidth = 640;
+		pstVideoParam->iOutHeight = 480;
+		break;
+	case EN_NLSS_VIDEOQUALITY_LOW:
+		pstVideoParam->iOutWidth = 320;
+		pstVideoParam->iOutHeight = 240;
+		break;
+	default:
+		return false;
+		break;
+	}
+
+	if (bWideScreen)
+	{
+		pstVideoParam->iOutWidth = pstVideoParam->iOutWidth / 4 * 4;
+		pstVideoParam->iOutHeight = pstVideoParam->iOutWidth * 9 / 16;
+		pstVideoParam->iOutHeight = pstVideoParam->iOutHeight / 4 * 4;
+	}
+	pstVideoParam->iOutBitrate = GetOutBitrate(pstVideoParam->iOutWidth, pstVideoParam->iOutHeight, pstVideoParam->iOutFps);
+	return true;
+}
+
+bool SetVideoInParam(ST_NLSS_VIDEOIN_PARAM *pstVideoParam, EN_NLSS_VIDEOIN_TYPE mVideoSourceType, char *pVideoPath, EN_NLSS_VIDEOQUALITY_LVL  enLvl)
+{
+	pstVideoParam->enInType = mVideoSourceType;
+	switch (mVideoSourceType)
+	{
+	case EN_NLSS_VIDEOIN_FULLSCREEN:
+	{
+		pstVideoParam->iCaptureFps = 10;
+	}
+	break;
+	case EN_NLSS_VIDEOIN_CAMERA:
+		//获取视频参数
+		pstVideoParam->iCaptureFps = 20;
+		if (m_pVideoDevices != NULL)
+		{
+			pstVideoParam->u.stInCamera.paDevicePath = (char *)pVideoPath;
+		}
+		else
+		{
+			return false;
+		}
+		pstVideoParam->u.stInCamera.enLvl = enLvl;
+		break;
+	case EN_NLSS_VIDEOIN_RECTSCREEN:
+		pstVideoParam->u.stInRectScreen.iRectLeft = 100;
+		pstVideoParam->u.stInRectScreen.iRectRight = 500;
+		pstVideoParam->u.stInRectScreen.iRectTop = 100;
+		pstVideoParam->u.stInRectScreen.iRectBottom = 500;
+		pstVideoParam->iCaptureFps = 20;
+
+		break;
+	case EN_NLSS_VIDEOIN_APP:
+	{
+		pstVideoParam->iCaptureFps = 20;
+		pstVideoParam->u.stInApp.paAppPath = (char *)pVideoPath;
+
+	}
+
+	break;
+	case EN_NLSS_VIDEOIN_PNG:
+		pstVideoParam->u.stInPng.paPngPath = "logo.png";
+		pstVideoParam->iCaptureFps = 20;
+		break;
+	case EN_NLSS_VIDEOIN_NONE:
+		return false;
+		break;
+	default:
+		return false;
+		break;
+	}
+
+	return true;
+}
+
+void SetAudioParam(ST_NLSS_AUDIO_PARAM *pstAudioParam, char *pAudioPath, EN_NLSS_AUDIOIN_TYPE enAudioType)
+{
+	pstAudioParam->stIn.iInSamplerate = 44100;
+	pstAudioParam->stIn.enInType = enAudioType;
+	pstAudioParam->stIn.paaudioDeviceName = pAudioPath;
+}
+
+bool initLiveStream(_HNLSSERVICE hNLSService, ST_NLSS_PARAM *pstParam, char *paOutUrl)
+{
+	pstParam->enOutContent = EN_NLSS_OUTCONTENT_VIDEO;
+
+	pstParam->paOutUrl = new char[1024];
+	memset(pstParam->paOutUrl, 0, 1024);
+	strcpy(pstParam->paOutUrl, paOutUrl);
+
+	if (NLSS_OK != Nlss_InitParam(hNLSService, pstParam))
+	{
+		delete[]pstParam->paOutUrl;
+		return false;
+	}
+	delete[]pstParam->paOutUrl;
+	return true;
+}
+
 UICamera::UICamera(QWidget *parent)
 	: QWidget(parent)
 	, m_videoSourceType(EN_NLSS_VIDEOIN_NONE)
@@ -24,8 +164,6 @@ UICamera::UICamera(QWidget *parent)
 	, m_iAudioDeviceNum(0)
 	, m_iVideoDeviceNum(0)
 	, m_iAppChangeIndex(0)
-	, m_pVideoDevices(NULL)
-	, m_pAudioDevices(NULL)
 	, m_pAppWinds(NULL)
 	, m_bLiving(false)
 	, m_CurrentMicIndex(0)
@@ -55,7 +193,7 @@ UICamera::UICamera(QWidget *parent)
 #endif
 
 	//创建mediacapture类，失败抛出错	
-	if (NLSS_OK != Nlss_Create(NULL, &m_hNlssService))
+	if (NLSS_OK != Nlss_Create(NULL,NULL, &m_hNlssService))
 	{
 		MessageBox(NULL, L"创建直播失败，请关闭程序重新启动", L"", MB_OK);
 	}
@@ -117,7 +255,7 @@ void UICamera::SetMediaCapture(_HNLSSERVICE hNlssService)
 	Nlss_SetStatusCB(m_hNlssService, notify);
 }
 
-void UICamera::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
+void UICamera::SetVideoSampler(void *pNlssChildID, ST_NLSS_VIDEO_SAMPLER *pSampler)
 {
 	if (pSampler != NULL)
 	{
@@ -136,6 +274,10 @@ void UICamera::SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler)
 
 		m_mutex.unlock();
 	}
+
+	QImage qimage;
+	qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_RGB32);
+	qimage.save("123456.png");
 }
 
 void UICamera::OnLiveStreamStatusNty(EN_NLSS_STATUS enStatus, EN_NLSS_ERRCODE enErrCode)
@@ -188,95 +330,25 @@ bool UICamera::InitMediaCapture()
 	ST_NLSS_PARAM stParam;
 	Nlss_GetDefaultParam(m_hNlssService, &stParam);
 
-	m_videoSourceType = EN_NLSS_VIDEOIN_CAMERA;// ;
-
-	switch (m_videoSourceType)
-	{
-	case EN_NLSS_VIDEOIN_FULLSCREEN:
-		stParam.stVideoParam.iOutBitrate = 1500000;
-		stParam.stVideoParam.iOutFps = 10;
-		break;
-	case EN_NLSS_VIDEOIN_CAMERA:
-		//获取视频参数
-		if (m_pVideoDevices != NULL)
-		{
-			stParam.stVideoParam.u.stInCamera.paDevicePath = (char *)m_pVideoDevices[m_CurrentVideoIndex].paPath;
-		}
-		else
-			have_video_source = false;
-		stParam.stVideoParam.u.stInCamera.enLvl = m_videoQ;
-		break;
-	case EN_NLSS_VIDEOIN_RECTSCREEN:
-		stParam.stVideoParam.u.stInRectScreen.iRectLeft = 100;
-		stParam.stVideoParam.u.stInRectScreen.iRectRight = 500;
-		stParam.stVideoParam.u.stInRectScreen.iRectTop = 100;
-		stParam.stVideoParam.u.stInRectScreen.iRectBottom = 500;
-		stParam.stVideoParam.iOutBitrate = 300000;
-
-		break;
-	case EN_NLSS_VIDEOIN_APP:
-		stParam.stVideoParam.iOutBitrate = 300000;
-		stParam.stVideoParam.iOutFps = 10;
-
-		if (m_pAppWinds != NULL)
-		{
-			stParam.stVideoParam.u.stInApp.paAppPath = (char *)m_pAppWinds[m_iAppChangeIndex].paPath;
-		}
-		else
-			have_video_source = false;
-
-		break;
-	case EN_NLSS_VIDEOIN_NONE:
-		have_video_source = false;
-		break;
-	default:
-		break;
-	}
-	stParam.stVideoParam.enInType = m_videoSourceType;
-	stParam.stAudioParam.iInSamplerate = 44100;// m_iAudioSample;
-
-	stParam.stAudioParam.paaudioDeviceName = "";
-	switch (m_audioSourceType)
-	{
-	case EN_NLSS_AUDIOIN_MIC:
-		if (m_pAudioDevices != NULL)
-		{
-			stParam.stAudioParam.paaudioDeviceName = m_pAudioDevices[m_CurrentMicIndex].paPath;
-		}
-		else
-			have_audio_source = false;
-		break;
-
-	case EN_NLSS_AUDIOIN_NONE:
-		have_audio_source = false;
-		break;
-	default:
-		break;
-	}
-
-	stParam.stAudioParam.enInType = m_audioSourceType;
-
-	if (have_video_source)
-		stParam.enOutContent = EN_NLSS_OUTCONTENT_VIDEO;
-	else if (!have_audio_source && !have_video_source)
-	{
-		qDebug() << "没有视频源也没有音频源输入";
-	}
+	SetVideoOutParam(&stParam.stVideoParam, EN_NLSS_VIDEOQUALITY_MIDDLE, true);
 
 	std::string strUrl = m_strUrl.toStdString();
-	stParam.paOutUrl = new char[1024];
-	memset(stParam.paOutUrl, 0, 1024);
-	strcpy(stParam.paOutUrl, strUrl.c_str());
+	char* paOutUrl = new char[1024];
+	memset(paOutUrl, 0, 1024);
+	strcpy(paOutUrl, strUrl.c_str());
+	initLiveStream(m_hNlssService, &stParam, paOutUrl);
 
-	if (NLSS_OK != Nlss_InitParam(m_hNlssService, &stParam))
-	{
-		MessageBox(NULL, L"推流参数初始化失败", L"答疑时间", MB_OK);
-		delete[]stParam.paOutUrl;
-		return false;
-	}
+	ST_NLSS_VIDEOIN_PARAM stChildVInParam;
+	SetVideoInParam(&stChildVInParam, EN_NLSS_VIDEOIN_CAMERA, (char *)m_pVideoDevices[m_CurrentVideoIndex].paPath, EN_NLSS_VIDEOQUALITY_HIGH);
+	hChildVideoService1 = Nlss_ChildVideoOpen(m_hNlssService, &stChildVInParam);
+	Nlss_Start(m_hNlssService);
+
+	ST_NLSS_RECTSCREEN_PARAM stRect = { 2, 300, 1, 169 };
+	Nlss_ChildVideoSetDisplayRect(hChildVideoService1, &stRect);
+	Nlss_ChildVideoStartCapture(hChildVideoService1);
+	Nlss_StartVideoPreview(m_hNlssService);
+
 	m_bInited = true;
-
-	delete[]stParam.paOutUrl;
 	return true;
 }
 
@@ -325,7 +397,7 @@ void UICamera::EnumAvailableMediaDevices()
 		}
 	}
 	// 获取视频和音频设备
-	Nlss_GetFreeDeviceInf(m_pVideoDevices, m_pAudioDevices);
+	Nlss_GetFreeDeviceInf(m_pVideoDevices,10, m_pAudioDevices,10);
 }
 
 void UICamera::StartLiveVideo()
@@ -343,26 +415,23 @@ void UICamera::StartLiveVideo()
 		return;
 	}
 
-	if (m_bPreviewing)
-	{
-		Nlss_StopVideoPreview(m_hNlssService);
-		Nlss_StopVideoCapture(m_hNlssService);
-	}
+// 	if (m_bPreviewing)
+// 	{
+// 		Nlss_StopVideoPreview(m_hNlssService);
+// 		Nlss_Stop(m_hNlssService);
+// 	}
 
- 	Nlss_SetVideoWaterMark(m_hNlssService, NULL);
- 	Nlss_SetVideoDisplayRatio(m_hNlssService, 0, 0);
-
-	if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
-	{
-		qDebug() << "打开视频采集出错";
-		return;
-	}
-
-	if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
-	{
-		qDebug() << "打开视频预览出错";
-		return;
-	}
+// 	if (NLSS_OK != Nlss_Start(m_hNlssService))
+// 	{
+// 		qDebug() << "打开视频采集出错";
+// 		return;
+// 	}
+// 
+// 	if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
+// 	{
+// 		qDebug() << "打开视频预览出错";
+// 		return;
+// 	}
 
 	if (!m_bPreviewing)
 	{
@@ -491,7 +560,6 @@ void UICamera::ChangeLiveVideo()
 // 
 // 		Nlss_SetVideoWaterMark(m_hNlssService, NULL);
 // 
-// 		Nlss_SetVideoDisplayRatio(m_hNlssService, 0, 0);
 // 
 // 		if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
 // 		{
@@ -535,7 +603,6 @@ void UICamera::ChangeLiveVideo()
 // 
 // 		Nlss_SetVideoWaterMark(m_hNlssService, NULL);
 // 
-// 		Nlss_SetVideoDisplayRatio(m_hNlssService, 0, 0);
 // 
 // 		if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
 // 		{
@@ -555,7 +622,7 @@ void UICamera::ChangeLiveVideo()
 void UICamera::StopCaptureVideo()
 {
 	m_bPreviewing = false;
-	Nlss_StopVideoCapture(m_hNlssService);
+	Nlss_Stop(m_hNlssService);
 	Nlss_StopVideoPreview(m_hNlssService);
 }
 
@@ -632,13 +699,12 @@ void UICamera::refurbish()
 	if (m_bPreviewing)
 	{
 		Nlss_StopVideoPreview(m_hNlssService);
-		Nlss_StopVideoCapture(m_hNlssService);
+		Nlss_Stop(m_hNlssService);
 	}
 
 	Nlss_SetVideoWaterMark(m_hNlssService, NULL);
-	Nlss_SetVideoDisplayRatio(m_hNlssService, 0, 0);
 
-	if (NLSS_OK != Nlss_StartVideoCapture(m_hNlssService))
+	if (NLSS_OK != Nlss_Start(m_hNlssService))
 	{
 		qDebug() << "打开视频采集出错";
 		return;

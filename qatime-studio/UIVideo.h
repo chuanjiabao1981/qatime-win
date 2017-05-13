@@ -91,7 +91,7 @@ public:
 	void StopLiveVideo();								// 停止直播
 	bool InitMediaCapture();							// 初始化直播参数
 	void SetMediaCapture(_HNLSSERVICE hNlssService);														
-	static void SetVideoSampler(ST_NLSS_VIDEO_SAMPLER *pSampler);
+	static void SetVideoSampler(void *pNlssChildID, ST_NLSS_VIDEO_SAMPLER *pSampler);
 	static void OnLiveStreamStatusNty(EN_NLSS_STATUS enStatus, EN_NLSS_ERRCODE enErrCode);
 	void ChangeAppPath(int index);						// 改变应用
 	bool IsCurrentPreview();							// 当前是否预览

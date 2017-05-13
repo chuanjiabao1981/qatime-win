@@ -272,6 +272,7 @@ void IMInterface::EndLive(const std::string& sessionID)
 {
 	Rts::Hangup(IMInterface::getInstance()->getSessionID(), &CallbackHangup);
 	VChat::End("");
+	emit IMInterface::getInstance()->PeopleStatus(true);
 }
 
 void CallbackStartChannel(nim::NIMResCode res_code, const std::string& session_id, int channel_type, const std::string& uid)
