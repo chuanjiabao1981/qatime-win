@@ -597,33 +597,24 @@ void LiveStatusManager::Finish1v1StartLive()
 		m_sLiveToken = data["live_token"].toString();
 		m_iBeatStep = data["beat_step"].toInt();
 
-		if (m_newParent)
+		if (status == "teaching")
 		{
-			// 更新课程状态
-			m_newParent->start1v1LiveStream();
-			m_newParent->SendRequestStatus("直播中");
+			if (m_newParent)
+			{
+				// 更新课程状态
+				m_newParent->start1v1LiveStream();
+				m_newParent->SendRequestStatus("直播中");
 
-			Start1v1HeartBeat();
+				Start1v1HeartBeat();
+			}
 		}
-
-// 		if (status == "teaching")
-// 		{
-// 			if (m_newParent)
-// 			{
-// 				// 更新课程状态
-// 				m_newParent->start1v1LiveStream();
-// 				m_newParent->SendRequestStatus("直播中");
-// 
-// 				Start1v1HeartBeat();
-// 			}
-// 		}
-// 		else
-// 		{
-// 			if (m_newParent)
-// 			{
-// 				m_newParent->show1v1ErrorTip(TIP_START_LIVE_ERROR);
-// 			}
-// 		}
+		else
+		{
+			if (m_newParent)
+			{
+				m_newParent->show1v1ErrorTip(TIP_START_LIVE_ERROR);
+			}
+		}
 	}
 	else if (obj["status"].toInt() == 0)
 	{

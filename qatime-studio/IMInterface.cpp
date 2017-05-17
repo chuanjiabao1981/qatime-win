@@ -426,7 +426,7 @@ void CallbackRecData(const std::string& session_id, int channel_type, const std:
 {
 	if (session_id == IMInterface::getInstance()->getSessionID())
 	{
-		emit IMInterface::getInstance()->rtsDataReceived(data);
+		emit IMInterface::getInstance()->rtsDataReceived(data, uid);
 	}	
 }
 

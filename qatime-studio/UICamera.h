@@ -16,6 +16,12 @@
 #define STARTLS_ASYNC
 #pragma execution_character_set("utf-8")
 
+bool initLiveStream(_HNLSSERVICE hNLSService, ST_NLSS_PARAM *pstParam, char *paOutUrl);
+void SetAudioParam(ST_NLSS_AUDIO_PARAM *pstAudioParam, char *pAudioPath, EN_NLSS_AUDIOIN_TYPE enAudioType);
+bool SetVideoInParam(ST_NLSS_VIDEOIN_PARAM *pstVideoParam, EN_NLSS_VIDEOIN_TYPE mVideoSourceType, char *pVideoPath, EN_NLSS_VIDEOQUALITY_LVL  enLvl);
+bool SetVideoOutParam(ST_NLSS_VIDEOOUT_PARAM *pstVideoParam, EN_NLSS_VIDEOQUALITY_LVL enVideoQ, bool bWideScreen);
+int GetOutBitrate(int iWidth, int iHeight, int iFps);
+
 class UIMainWindow;
 class UIWindowSet;
 class UICamera : public QWidget
@@ -48,8 +54,8 @@ public:
 	int								m_iVideoDeviceNum;	// 视频设备个数
 	int								m_iAudioDeviceNum;	// 音频设备个数
 	int								m_iAppWindNum;		// 其他应用个数
-//	ST_NLSS_INDEVICE_INF*			m_pVideoDevices;	// 视频设备
-//	ST_NLSS_INDEVICE_INF*			m_pAudioDevices;	// 音频设备
+// 	ST_NLSS_INDEVICE_INF*			m_pVideoDevices;	// 视频设备
+// 	ST_NLSS_INDEVICE_INF*			m_pAudioDevices;	// 音频设备
 	ST_NLSS_INDEVICE_INF*			m_pAppWinds;		// 其他应用
 	EN_NLSS_VIDEOQUALITY_LVL		m_videoQ;			// 画面清晰度
 	int								m_CurrentMicIndex;	// 当前麦克风索引
@@ -59,6 +65,14 @@ public:
 	UIWindowSet*					m_Parent;			// 主窗口
 	QTimer*							m_refreshTimer;		// 刷新窗口
 	static UICamera*				m_pThis;			
+
+	int32_t m_iVideoOutWidth;
+	int32_t m_iVideoOutHeight;
+	int32_t m_iVideoOutWidthOrigin;
+	int32_t m_iVideoOutHeightOrigin;
+	float m_iVideoOutWidthStreach;
+	float m_iVideoOutHeigthStreach;
+
 #ifdef STARTLS_ASYNC
 	Worker* m_pWorker;
 #endif
@@ -73,6 +87,7 @@ Q_SIGNALS:
 #ifdef STARTLS_ASYNC
 	void sig_StartLiveStream();
 	void sig_StopLiveStream();
+	void sig_StopCapture();
 #endif
 
 private slots:
@@ -110,6 +125,9 @@ public:
 	void SetChangeVideo(int index);
 	void setBkImage(QString qsImage);
 	void refurbish();
+
+	bool GetVideoOutParam(ST_NLSS_VIDEOOUT_PARAM *pstVideoParam);
+	bool GetVideoInParam(ST_NLSS_VIDEOIN_PARAM *VideoInParam, EN_NLSS_VIDEOIN_TYPE mVideoSourceType, std::string&m_AccID);
 };
 
 #endif // UICamera_H

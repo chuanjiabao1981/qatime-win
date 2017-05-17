@@ -113,7 +113,7 @@ void UITalk::InsertChat(QPixmap* pixmap, QString name, QString time, QString tex
 
 	// 第二行（聊天内容）
 	QHBoxLayout* SecRow = new QHBoxLayout();
-	SecRow->setContentsMargins(30, 0, 0, 0);
+	SecRow->setContentsMargins(30, 0, 10, 0);
 	if (isDigitStr(text))
 	{
 		AnimatedTextBrowser* Text = new AnimatedTextBrowser(this);
@@ -533,7 +533,7 @@ void UITalk::InsertEmoji(QPixmap* pixmap, QString name, QString time, QString te
 
 	AnimatedTextBrowserA* Anim = new AnimatedTextBrowserA(true,this);
 	Anim->setOpenLinks(true);
-	Anim->setMinimumWidth(263);
+	Anim->setMinimumWidth(240);
 	Anim->setFont(font);
 	SecRow->addWidget(Anim);
 	ParseFace(Anim, text);

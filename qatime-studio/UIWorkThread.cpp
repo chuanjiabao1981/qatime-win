@@ -47,3 +47,9 @@ void Worker::slot_StopLiveStream()
         iRet = NLSS_OK;
     emit sig_StopResult((int)iRet);
 }
+
+void Worker::slot_StopCapture()
+{
+	Nlss_StopVideoPreview(m_hNlssService);
+	Nlss_Stop(m_hNlssService);
+}

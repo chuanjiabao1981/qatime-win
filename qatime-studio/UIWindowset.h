@@ -5,8 +5,6 @@
 #include "ui_UIWindowset.h"
 #include "UIMainNewWindow.h"
 #include "UITags.h"
-#include "UIVideo.h"
-#include "UICamera.h"
 #include "UINoticewnd.h"
 #include "UICoursewnd.h"
 #include "UIPersonwnd.h"
@@ -220,7 +218,7 @@ private slots :
 	void deleteClick();										// 清空白板
 	void laserClick();										// 激光笔
 	void drawClick();										// 绘画笔
-	void rtsDataReceived(const std::string& data);			// 接收白板数据
+	void rtsDataReceived(const std::string& data,const std::string &uid);			// 接收白板数据
 	void clickShapeScreen1v1();								// 点击分享屏幕
 	void slot_selectWnd(HWND);								// 选择窗口
 	void slot_refreshWnd();									// 刷新窗口
@@ -323,6 +321,8 @@ public:
 	void	setVideoChange1v1(QString path);						  // 设置一对一摄像头
 	void	start1v1LiveStream();
 	void	show1v1ErrorTip(QString sError);
+	void	ShowLesson();											  // 查询今日课程
+	void	LessonRequestFinished();								  // 返回今日课程
 };
 
 #endif // UIWINDOWSET_H

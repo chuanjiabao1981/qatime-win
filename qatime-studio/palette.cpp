@@ -20,6 +20,7 @@ Palette::Palette(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Palette)
 	, m_timer(NULL)
+	, mStatus(0)
 {
     ui->setupUi(this);
 	setMouseTracking(true);
@@ -261,8 +262,9 @@ void Palette::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void Palette::RecData(const std::string& data)
+void Palette::RecData(const std::string& data, const std::string &uid)
 {
+	m_SenderUid =  uid;
 	qDebug() << data.c_str();
 	float x;
 	float y;
@@ -390,6 +392,9 @@ int Palette::colorConvert(QColor color)
 
 void Palette::SendSyncDraw()
 {
+	if (mStatus == 1)
+		SendFullScreen(mStatus);
+	
 	foreach(Shape *shape, mShapeStack)
 	{
 		QString strMoveInfo;
@@ -436,6 +441,9 @@ void Palette::SendSyncDraw()
 	foreach(Shape *shape, mSycnShapeStack)
 	{
 		QString strMoveInfo;
+		QString strSync;
+		strSync.append(QString("%1:%2,%3;").arg(kMultiBoardOpSync).arg(QString::fromStdString(m_SenderUid)).arg(0));
+		strMoveInfo += strSync;
 		foreach(QPointF pt, shape->PointVec())
 		{
 			QString ptX, ptY, opType, sClr, strInfo;
@@ -448,18 +456,19 @@ void Palette::SendSyncDraw()
 				clr = colorConvert(shape->penColor());
 				sClr = QString::number(clr);			//  颜色类型
 				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
-				emit PicData(strInfo);
+				strMoveInfo += strInfo;
 			}
 			else if (pt == shape->PointVec().last())
 			{
-				emit PicData(strMoveInfo);
 				ptX = QString("%1").arg(pt.x());				//	x的相对坐标
 				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
 				opType = QString::number(DrawOpEnd);			//  消息类型
 				clr = colorConvert(shape->penColor());
 				sClr = QString::number(clr);			//  颜色类型
 				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
-				emit PicData(strInfo);
+				strMoveInfo += strInfo;
+				emit PicData(strMoveInfo);
+				qDebug() << strMoveInfo;
 			}
 			else
 			{
@@ -475,4 +484,12 @@ void Palette::SendSyncDraw()
 			}
 		}
 	}
+}
+
+void Palette::SendFullScreen(int iOpen)
+{
+	mStatus = iOpen;
+	QString strInfo;
+	strInfo.append(QString("%1:%2,%3,%4;").arg(kMultiBoardOpFullScreen).arg(iOpen).arg("0").arg("0"));
+	emit PicData(strInfo);
 }

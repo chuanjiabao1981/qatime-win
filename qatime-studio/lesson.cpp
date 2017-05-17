@@ -27,6 +27,8 @@ void Lesson::readJson(const QJsonObject &json)
 	mStartTime = json["live_time"].toString();
 	mStartTime = mStartTime.mid(0, 5);
 
+	mStatus = json["status"].toString();
+
 	// ∏®µº∞‡ID
 	mCourseID = json["course_id"].toString();
 
@@ -43,7 +45,8 @@ void Lesson::readJson(const QJsonObject &json)
 	mCameraUrl = json["camera_pull_stream"].toString();
 
 	QJsonObject lessons1v1 = json["product_interactive_course"].toObject();
-	mStatus = lessons1v1["status"].toString();
+	if (!lessons1v1.empty())
+		mStatus = lessons1v1["status"].toString();
 }
 
 QString Lesson::BoardUrl()

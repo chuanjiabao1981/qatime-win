@@ -112,7 +112,7 @@ signals:
 	void createRtsRoomSuccessfully(const std::string&);
 	void rtsRoomExistence();
 	void joinRtsRoomSuccessfully(const std::string&, __int64, const std::string&);
-	void rtsDataReceived(const std::string &);
+	void rtsDataReceived(const std::string &, const std::string &uid);
 	void requstError(QString);
 	/****************************************************************音视频相关***********************************************************************************/
 	void createVChatRoomSuccessfully();

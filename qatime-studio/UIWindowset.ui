@@ -1591,6 +1591,12 @@ border-radius:5px;</string>
                   <height>19</height>
                  </size>
                 </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>31</width>
+                  <height>19</height>
+                 </size>
+                </property>
                 <property name="toolTip">
                  <string>屏幕共享</string>
                 </property>
@@ -1600,33 +1606,20 @@ border-radius:5px;</string>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="doc_pushButton">
+               <widget class="QPushButton" name="pushButton_2">
                 <property name="minimumSize">
                  <size>
-                  <width>35</width>
-                  <height>19</height>
+                  <width>0</width>
+                  <height>60</height>
                  </size>
                 </property>
-                <property name="toolTip">
-                 <string>文档管理</string>
+                <property name="styleSheet">
+                 <string notr="true">border-image: url(:/LoginWindow/images/alpha.png);</string>
                 </property>
                 <property name="text">
                  <string/>
                 </property>
                </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_6">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
               </item>
               <item>
                <widget class="QWidget" name="widget_3" native="true">

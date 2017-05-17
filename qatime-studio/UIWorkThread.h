@@ -27,6 +27,7 @@ Q_SIGNALS:
 	protected Q_SLOTS :
 	void slot_StartLiveStream();
     void slot_StopLiveStream();
+	void slot_StopCapture();
 
 private:
 	QThread workerThread;

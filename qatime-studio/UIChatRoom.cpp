@@ -794,6 +794,7 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 			sid = pMsg->local_talk_id_;
 			msgid = pMsg->client_msg_id_;
 			int duration = values["dur"].asUInt();
+			qDebug() << QString::number(duration);
 			qduration = QString::number((duration+500)/1000);
 		}
 
@@ -1115,7 +1116,7 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 			sid = pMsg.local_talk_id_;
 			msgid = pMsg.client_msg_id_;
 			int duration = values["dur"].asUInt();
-			qduration = QString::number(duration / 1000);
+			qduration = QString::number((duration+500) / 1000);
 		}
 
 		stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg.timetag_));

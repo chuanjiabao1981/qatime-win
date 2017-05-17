@@ -5,6 +5,9 @@
 #include <QToolTip>
 #include <QDesktopWidget>
 #include <QScreen>
+#include "UIVideo.h"
+#include "UICamera.h"
+#include "lesson.h"
 #include "IMInterface.h"
 
 #define MAINWINDOW_X_MARGIN 10
@@ -1054,9 +1057,9 @@ void UIWindowSet::clickLive()
 				return;
 			}
 			m_LiveLesson->DeleteItem();
-			m_LiveLesson->setCourseID(m_curTags->CourseID(),false);
 			m_LiveLesson->move(width()/2 - m_LiveLesson->width()/2,height()/2-m_LiveLesson->height()/2);
 			m_LiveLesson->show();
+			ShowLesson();
 		}
 	}
 }
@@ -1527,7 +1530,7 @@ void UIWindowSet::returnCourse()
 		// 辅导班信息
 		QString coursePic;
 		if (m_curTags->Is1v1Lesson())
-			coursePic = data["publicize_url"].toString();
+			coursePic = data["publicize_list_url"].toString();
 		else
 			coursePic = data["publicize"].toString();
 		
@@ -1753,7 +1756,7 @@ void UIWindowSet::UpatateLiveStatus(QWidget* widget, bool bSuc)
 // 				m_CameraInfo->setVisible(true);
 // 				m_CameraInfo->setPlugFlowUrl(m_cameraUrl);
 // 				m_CameraInfo->StartLiveVideo();
-				m_tempTimers->start(1000);
+				m_tempTimers->start(50);
 			}
 		}
 		else if (m_CameraInfo == widget)
@@ -2026,9 +2029,18 @@ void UIWindowSet::showErrorTip(QString sError)
 bool UIWindowSet::IsLiving()
 {
 	if (m_VideoInfo->IsCurrentLiving())
+	{
 		m_ScreenTip->setErrorTip("请先结束直播，再关闭窗口！");
+		return m_VideoInfo->IsCurrentLiving();
+	}
 
-	return m_VideoInfo->IsCurrentLiving();
+	if (m_bLiving1v1)
+	{
+		m_ScreenTip->setErrorTip("请先结束直播，再关闭窗口！");
+		return m_bLiving1v1;
+	}
+
+	return false;
 }
 
 void UIWindowSet::ReturnLogin()
@@ -2244,6 +2256,9 @@ void UIWindowSet::slot_CloseWnd()
 	m_VideoInfo1v1->setVisible(false);
 	m_AppWndTool1v1->setVisible(false);
 
+	// 发送分享窗口到学生端
+	mWhiteBoard->SendFullScreen(0);
+
 	// 设置发送数据模式为自定义发送
 	IMInterface::getInstance()->SetCustomData(false);
 
@@ -2284,6 +2299,9 @@ void UIWindowSet::slot_selectWnd(HWND hwnd)
 	m_VideoInfo1v1->setVisible(true);
 	m_AppWndTool1v1->setVisible(true);
 
+	// 发送分享窗口到学生端
+	mWhiteBoard->SendFullScreen(1);
+
 	// 设置发送数据模式为自定义发送
 	IMInterface::getInstance()->SetCustomData(true);
 
@@ -2317,7 +2335,7 @@ void UIWindowSet::initConnection()
 	connect(instance, SIGNAL(RecVideoCapture(const char*, unsigned int, unsigned int, unsigned int)), m_CameraS1v1Info, SLOT(VideoCapture(const char*, unsigned int, unsigned int, unsigned int)));
 	connect(instance, SIGNAL(PeopleStatus(bool)), m_CameraS1v1Info, SLOT(StartEndVideo(bool)));
 
-	connect(instance, SIGNAL(rtsDataReceived(const std::string&)), this, SLOT(rtsDataReceived(const std::string&)));
+	connect(instance, SIGNAL(rtsDataReceived(const std::string&, const std::string &)), this, SLOT(rtsDataReceived(const std::string&, const std::string &)));
 	connect(instance, SIGNAL(requstError(int)), this, SLOT(requstError(int)));
 }
 
@@ -2445,7 +2463,6 @@ void UIWindowSet::InitSetParamWnds()
 	ui.AudioOut_pushButton->setStyleSheet("QPushButton{border-image:url(./images/Arrow.png);}");
 
 	ui.shapeScreen_pushButton->setStyleSheet("QPushButton{border-image:url(./images/shapeScreen.png);}");
-	ui.doc_pushButton->setStyleSheet("QPushButton{border-image:url(./images/docBtn.png);}");
 
 	connect(ui.Audio1v1_checkBox, SIGNAL(stateChanged(int)), this, SLOT(Audio1v1Status(int)));
 	connect(ui.Audio1v1_pushButton, SIGNAL(clicked()), this, SLOT(clickAudio1v1Param()));
@@ -2597,9 +2614,9 @@ void UIWindowSet::clickLive1v1()
 			return;
 
 		m_LiveLesson->DeleteItem();
-		m_LiveLesson->setCourseID(m_curTags->CourseID(),true);
 		m_LiveLesson->move(width() / 2 - m_LiveLesson->width() / 2, height() / 2 - m_LiveLesson->height() / 2);
 		m_LiveLesson->show();
+		ShowLesson();
 	}
 }
 
@@ -2631,10 +2648,10 @@ void UIWindowSet::selectColor(QColor& color)
 	}
 }
 
-void UIWindowSet::rtsDataReceived(const std::string& data)
+void UIWindowSet::rtsDataReceived(const std::string& data, const std::string &uid)
 {
 	if (mWhiteBoard)
-		mWhiteBoard->RecData(data);
+		mWhiteBoard->RecData(data, uid);
 }
 
 void UIWindowSet::returnClick()
@@ -2680,4 +2697,54 @@ void UIWindowSet::clickShapeScreen1v1()
 			m_AppWnd1v1->AddAppWnd(QString::fromStdWString(it.title),it.id);
 		}
 	}
+}
+
+void UIWindowSet::ShowLesson()
+{
+	QString strUrl;
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/schedule";
+		strUrl.replace("{teacher_id}", m_teacherID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/schedule";
+		strUrl.replace("{teacher_id}", m_teacherID);
+	}
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+
+	request.setRawHeader("Remember-Token", m_Token.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIWindowSet::LessonRequestFinished);
+}
+
+void UIWindowSet::LessonRequestFinished()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonArray courses = obj["data"].toArray();
+	foreach(const QJsonValue & value, courses)
+	{
+		QJsonObject obj = value.toObject();
+		QJsonArray lessons = obj["lessons"].toArray();
+		foreach(const QJsonValue & value, lessons)
+		{
+			Lesson *lesson = new Lesson();
+			lesson->readJson(value.toObject());
+
+			QString curTime = QDateTime::currentDateTime().toString("yyyy-MM-dd");
+			//		curTime = "2017-03-01";
+			if (lesson->Date() == curTime)
+			{
+				AddTodayToLesson(lesson->LessonID(), lesson->CourseID(), lesson->BoardUrl(), lesson->CameraUrl(), lesson->LessonTime(), lesson->ChinaLessonStatus(), lesson->name());
+			}
+			delete lesson;
+		}
+	}
+
+	m_LiveLesson->setCourseID(m_curTags->CourseID(), m_curTags->Is1v1Lesson());
 }

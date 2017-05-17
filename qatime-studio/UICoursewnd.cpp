@@ -92,7 +92,7 @@ void UICourseWnd::setNetworkPic(const QString &szUrl)
 	}
 	else // 否则显示备用图片
 	{
-		QString sUrl = "./images/teacherPhoto.png";
+		QString sUrl = "./images/course_default.png";
 		pixmap = QPixmap(sUrl);
 		QPixmap scaledPixmap = pixmap.scaled(pixSize, Qt::IgnoreAspectRatio);
 		ui.pic_label->setPixmap(scaledPixmap);

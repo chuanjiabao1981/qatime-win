@@ -107,6 +107,7 @@ void UILiveLessonWnd::DeleteItem()
 	}
 
 	m_vecLessonItem.clear();
+	m_vecLessonInfo.clear();
 }
 
 void UILiveLessonWnd::addLesson(QString  id, QString courseid, QString boardUrl, QString cameraUrl, QString time, QString status, QString name)

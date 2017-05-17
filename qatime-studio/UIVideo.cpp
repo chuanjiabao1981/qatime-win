@@ -5,14 +5,13 @@
 #include <sstream>
 #include "define.h"
 
+_HNLSSCHILDSERVICE hChildFullVideoService1;
+
 QMutex UIVideo::m_mutex;
 ST_NLSS_VIDEO_SAMPLER UIVideo::m_SvideoSampler;
 UIVideo* UIVideo::m_pThis = NULL;
 #define  NLSS_720P_BITRATE 800000
-#ifdef TEST
-	#define _DEBUG
-#else
-#endif
+
 UIVideo::UIVideo(QWidget *parent)
 	: QWidget(parent)
 	, m_videoSourceType(EN_NLSS_VIDEOIN_NONE)
@@ -73,7 +72,7 @@ UIVideo::UIVideo(QWidget *parent)
 	m_refreshTimer->start(1000 / 25);
 	connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(slot_onRefreshTimeout()));
 
-//	StartLiveVideo();
+	StartLiveVideo();
 }
 
 UIVideo::~UIVideo()
@@ -188,100 +187,20 @@ void UIVideo::paintEvent(QPaintEvent *)
 
 bool UIVideo::InitMediaCapture()
 {
-/*	bool have_video_source = true;
-	bool have_audio_source = true;
 	ST_NLSS_PARAM stParam;
-	Nlss_GetDefaultParam(m_hNlssService, &stParam);;
-	m_videoSourceType = EN_NLSS_VIDEOIN_FULLSCREEN;
-	
-	switch (m_videoSourceType)
-	{
-	case EN_NLSS_VIDEOIN_FULLSCREEN:
-	{
-		stParam.stVideoParam.iOutFps = 10;
-		int  iFullWidth = GetSystemMetrics(SM_CXSCREEN);
-		int  iFullHeight = GetSystemMetrics(SM_CYSCREEN);
-		stParam.stVideoParam.iOutBitrate = getOutBitrate(iFullWidth, iFullHeight, stParam.stVideoParam.iOutFps);
-	}
-		break;
-	case EN_NLSS_VIDEOIN_CAMERA:
-		//获取视频参数
-		if (m_pVideoDevices != NULL)
-		{
-			stParam.stVideoParam.u.stInCamera.paDevicePath = (char *)m_pVideoDevices[m_CurrentVideoIndex].paPath;
-		}
-		else
-			have_video_source = false;
-		stParam.stVideoParam.u.stInCamera.enLvl = m_videoQ;
-		break;
-	case EN_NLSS_VIDEOIN_RECTSCREEN:
-		stParam.stVideoParam.u.stInRectScreen.iRectLeft = 100;
-		stParam.stVideoParam.u.stInRectScreen.iRectRight = 500;
-		stParam.stVideoParam.u.stInRectScreen.iRectTop = 100;
-		stParam.stVideoParam.u.stInRectScreen.iRectBottom = 500;
-		stParam.stVideoParam.iOutBitrate = 300000;
+	Nlss_GetDefaultParam(m_hNlssService, &stParam);
+	SetVideoOutParam(&stParam.stVideoParam, EN_NLSS_VIDEOQUALITY_SUPER, true);
+	SetAudioParam(&stParam.stAudioParam, (char *)m_pAudioDevices[0].paPath, EN_NLSS_AUDIOIN_MIC);
+	initLiveStream(m_hNlssService, &stParam, (char*)m_strUrl.toStdString().c_str());
 
-		break;
-	case EN_NLSS_VIDEOIN_APP:
-		stParam.stVideoParam.iOutBitrate = 300000;
-		stParam.stVideoParam.iOutFps = 10;
+	ST_NLSS_VIDEOIN_PARAM stChildVInParam;
+	SetVideoInParam(&stChildVInParam, EN_NLSS_VIDEOIN_FULLSCREEN, (char *)m_pVideoDevices[0].paPath, EN_NLSS_VIDEOQUALITY_MIDDLE);
+	hChildFullVideoService1 = Nlss_ChildVideoOpen(m_hNlssService, &stChildVInParam);
+	Nlss_Start(m_hNlssService);
 
-		if (m_pAppWinds != NULL)
-		{
-			stParam.stVideoParam.u.stInApp.paAppPath = (char *)m_pAppWinds[m_iAppChangeIndex].paPath;
-		}
-		else
-			have_video_source = false;
-
-		break;
-	case EN_NLSS_VIDEOIN_NONE:
-		have_video_source = false;
-		break;
-	default:
-		break;
-	}
-	stParam.stVideoParam.enInType = m_videoSourceType;
-	stParam.stAudioParam.iInSamplerate = 44100;// m_iAudioSample;
-
-	stParam.stAudioParam.paaudioDeviceName = "";
-	switch (m_audioSourceType)
-	{
-	case EN_NLSS_AUDIOIN_MIC:
-		if (m_pAudioDevices != NULL)
-		{
-			stParam.stAudioParam.paaudioDeviceName = m_pAudioDevices[m_CurrentMicIndex].paPath;
-		}
-		else
-			have_audio_source = false;
-		break;
-
-	case EN_NLSS_AUDIOIN_NONE:
-		have_audio_source = false;
-		break;
-	default:
-		break;
-	}
-
-	stParam.stAudioParam.enInType = m_audioSourceType;
-
-	if (have_audio_source && m_pVideoDevices!=NULL)
- 		stParam.enOutContent = EN_NLSS_OUTCONTENT_AV;//默认音视频设备都存在则推流音视频，当然，也可以设置成音频/视频，
- 	else 
-		stParam.enOutContent = EN_NLSS_OUTCONTENT_VIDEO;
-
-	std::string strUrl = m_strUrl.toStdString();
-	stParam.paOutUrl = new char[1024];
-	memset(stParam.paOutUrl, 0, 1024);
-	strcpy(stParam.paOutUrl, strUrl.c_str());
-
-	if (NLSS_OK != Nlss_InitParam(m_hNlssService, &stParam))
-	{
-		MessageBox(NULL, L"推流参数初始化失败", L"答疑时间", MB_OK);
-		delete[]stParam.paOutUrl;
-		return false;
-	}
-	m_bInited = true;
-	delete[]stParam.paOutUrl;*/
+	Nlss_ChildVideoSetBackLayer(hChildFullVideoService1);
+	Nlss_ChildVideoStartCapture(hChildFullVideoService1);
+	Nlss_StartVideoPreview(m_hNlssService);
 	return true;
 }
 
@@ -387,6 +306,8 @@ void UIVideo::StartLiveVideo()
 
 	if (m_bPreviewing)
 	{
+		Nlss_ChildVideoStopCapture(hChildFullVideoService1);
+		Nlss_ChildVideoClose(hChildFullVideoService1);
 		Nlss_StopVideoPreview(m_hNlssService);
 		Nlss_Stop(m_hNlssService);
 	}
@@ -404,18 +325,6 @@ void UIVideo::StartLiveVideo()
 	stFilterParam.uiStartx = 10;
 	stFilterParam.uiStarty = 10;
 	Nlss_SetVideoWaterMark(m_hNlssService, &stFilterParam);
-	
- 	if (NLSS_OK != Nlss_Start(m_hNlssService))
- 	{
- 		MessageBox(NULL, L"打开视频采集出错", L"答疑时间", MB_OK);
- 		return;
- 	}
-	
-	if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
-	{
-		MessageBox(NULL, L"打开视频预览出错，具体错误信息请看返回值", L"答疑时间", MB_OK);
-		return;
-	}
 	
 	if (!m_bPreviewing)
 	{

@@ -26,12 +26,13 @@ public:
 	void cleanUp();								//清空白板
 
 	void setIsDraw(bool isDraw);				//设置是否需要画
-	void RecData(const std::string& data);		//接收数据
+	void RecData(const std::string& data, const std::string &uid);		//接收数据
 	std::list<std::string> BoardStringTokenize(const char* input, const char* delimitor);	//解析数据
 
 	void DrawUndo();							//对方撤销
 	int  colorConvert(QColor color);			//解析数据
 	void SendSyncDraw();						//发送同步数据
+	void SendFullScreen(int iOpen);				//发送全屏消息,1：开启 0：关闭
 
 	enum DrawOpType
 	{
@@ -61,6 +62,7 @@ public:
 		kMultiBoardOpSign = 12,
 		kMultiBoardOpSignEnd = 13,
 		kMultiBoardOpDocInfo = 14, //"14:id（文档id）,page_num(当前页数，1开始计算),page_count（总页数）,type(状态通知：0，翻页操作：1);" "14:8c17c252-1276-4817-92ce-688576b8df4c,2,4,1;"
+		kMultiBoardOpFullScreen = 15, //全屏分享
 	};
 
 private:
@@ -86,6 +88,8 @@ private:
 	bool mIsDraw;								//是否需要画
     QPen mPen;
 	QTimer*	 m_timer;
+	int  mStatus;								//全屏共享状态 0：未开启 1：开启
+	std::string	m_SenderUid;					//发送者的uid
 };
 
 #endif // PALETTE_H

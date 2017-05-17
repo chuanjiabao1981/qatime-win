@@ -5,8 +5,10 @@
 #include <sstream>
 #include "define.h"
 #include <QImage>
+#include "sample.h"
 
-_HNLSSCHILDSERVICE hChildVideoService1 = NULL;
+_HNLSSCHILDSERVICE hChildVideoService1;
+
 QMutex UICamera::m_mutex;
 ST_NLSS_VIDEO_SAMPLER UICamera::m_SvideoSampler;
 UICamera*	UICamera::m_pThis=NULL;
@@ -176,6 +178,11 @@ UICamera::UICamera(QWidget *parent)
 	ui.setupUi(this);
 	m_pThis = this;
 
+	m_iVideoOutWidth = 1280;
+	m_iVideoOutWidthOrigin = 1280;
+	m_iVideoOutHeight = 720;
+	m_iVideoOutHeightOrigin = 720;
+
 	UICamera::m_SvideoSampler.iWidth = 0;
 	UICamera::m_SvideoSampler.iHeight = 0;
 	UICamera::m_SvideoSampler.puaData = NULL;//一次性分配一个最大的控件，不断填充不同的数据
@@ -190,6 +197,7 @@ UICamera::UICamera(QWidget *parent)
 	connect(m_pWorker, SIGNAL(sig_ResultReady(int)), this, SLOT(slot_FinishStartLiveStream(int)));
 	connect(this, SIGNAL(sig_StopLiveStream()), m_pWorker, SLOT(slot_StopLiveStream()));
 	connect(m_pWorker, SIGNAL(sig_StopResult(int)), this, SLOT(slot_FinishStopLiveStream(int)));
+	connect(this, SIGNAL(sig_StopCapture()), m_pWorker, SLOT(slot_StopCapture()));
 #endif
 
 	//创建mediacapture类，失败抛出错	
@@ -197,6 +205,8 @@ UICamera::UICamera(QWidget *parent)
 	{
 		MessageBox(NULL, L"创建直播失败，请关闭程序重新启动", L"", MB_OK);
 	}
+
+	m_pWorker->SetMediaCapture(m_hNlssService);
 
 	//默认采集音视频的麦克风以及摄像头设备，所以，先初始化ui控件时，将 音视频设备通通找出来
 	//初始化音视频控件，利用到底层库
@@ -274,10 +284,6 @@ void UICamera::SetVideoSampler(void *pNlssChildID, ST_NLSS_VIDEO_SAMPLER *pSampl
 
 		m_mutex.unlock();
 	}
-
-	QImage qimage;
-	qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_RGB32);
-	qimage.save("123456.png");
 }
 
 void UICamera::OnLiveStreamStatusNty(EN_NLSS_STATUS enStatus, EN_NLSS_ERRCODE enErrCode)
@@ -325,30 +331,54 @@ void UICamera::paintEvent(QPaintEvent *)
 
 bool UICamera::InitMediaCapture()
 {
-	bool have_video_source = true;
-	bool have_audio_source = true;
 	ST_NLSS_PARAM stParam;
 	Nlss_GetDefaultParam(m_hNlssService, &stParam);
-
 	SetVideoOutParam(&stParam.stVideoParam, EN_NLSS_VIDEOQUALITY_MIDDLE, true);
-
-	std::string strUrl = m_strUrl.toStdString();
-	char* paOutUrl = new char[1024];
-	memset(paOutUrl, 0, 1024);
-	strcpy(paOutUrl, strUrl.c_str());
-	initLiveStream(m_hNlssService, &stParam, paOutUrl);
+	SetAudioParam(&stParam.stAudioParam, (char *)m_pAudioDevices[0].paPath, EN_NLSS_AUDIOIN_MIC);
+	initLiveStream(m_hNlssService, &stParam, (char*)m_strUrl.toStdString().c_str());
 
 	ST_NLSS_VIDEOIN_PARAM stChildVInParam;
-	SetVideoInParam(&stChildVInParam, EN_NLSS_VIDEOIN_CAMERA, (char *)m_pVideoDevices[m_CurrentVideoIndex].paPath, EN_NLSS_VIDEOQUALITY_HIGH);
+	SetVideoInParam(&stChildVInParam, EN_NLSS_VIDEOIN_CAMERA, (char *)m_pVideoDevices[0].paPath, EN_NLSS_VIDEOQUALITY_MIDDLE);
 	hChildVideoService1 = Nlss_ChildVideoOpen(m_hNlssService, &stChildVInParam);
-	Nlss_Start(m_hNlssService);
+	return true;
+}
 
-	ST_NLSS_RECTSCREEN_PARAM stRect = { 2, 300, 1, 169 };
-	Nlss_ChildVideoSetDisplayRect(hChildVideoService1, &stRect);
-	Nlss_ChildVideoStartCapture(hChildVideoService1);
-	Nlss_StartVideoPreview(m_hNlssService);
+bool UICamera::GetVideoOutParam(ST_NLSS_VIDEOOUT_PARAM *pstVideoParam)
+{
+	pstVideoParam->enOutCodec = EN_NLSS_VIDEOOUT_CODEC_X264;
+	pstVideoParam->bHardEncode = false;
+	pstVideoParam->iOutFps = 18;
 
-	m_bInited = true;
+	switch (m_videoQ)
+	{
+	case EN_NLSS_VIDEOQUALITY_SUPER:
+		pstVideoParam->iOutWidth = 1920;
+		pstVideoParam->iOutHeight = 1080;
+		break;
+	case EN_NLSS_VIDEOQUALITY_HIGH:
+		pstVideoParam->iOutWidth = 1280;
+		pstVideoParam->iOutHeight = 720;
+		break;
+	case EN_NLSS_VIDEOQUALITY_MIDDLE:
+		pstVideoParam->iOutWidth = 640;
+		pstVideoParam->iOutHeight = 480;
+		break;
+	case EN_NLSS_VIDEOQUALITY_LOW:
+		pstVideoParam->iOutWidth = 320;
+		pstVideoParam->iOutHeight = 240;
+		break;
+	default:
+		return false;
+		break;
+	}
+
+	m_iVideoOutHeight = pstVideoParam->iOutHeight;
+	m_iVideoOutWidth = pstVideoParam->iOutWidth;
+	m_iVideoOutWidthStreach = (float)m_iVideoOutWidth / m_iVideoOutWidthOrigin;
+	m_iVideoOutHeigthStreach = (float)m_iVideoOutHeight / m_iVideoOutHeightOrigin;
+	m_iVideoOutWidthOrigin = m_iVideoOutWidth;
+	m_iVideoOutHeightOrigin = m_iVideoOutHeight;
+	pstVideoParam->iOutBitrate = GetOutBitrate(pstVideoParam->iOutWidth, pstVideoParam->iOutHeight, pstVideoParam->iOutFps);
 	return true;
 }
 
@@ -402,12 +432,25 @@ void UICamera::EnumAvailableMediaDevices()
 
 void UICamera::StartLiveVideo()
 {
+	ST_NLSS_VIDEOIN_PARAM stChildVInParam;
+	std::string accid;
+
 	if (m_hNlssService == NULL)
 	{
 		MessageBox(NULL, L"直播类为空，打开、关闭 预览 / 直播失败", L"答疑时间", MB_OK);
 		return;
 	}
 
+  	if (m_bPreviewing)
+  	{
+		if (hChildVideoService1 != NULL)
+		{
+			Nlss_ChildVideoStopCapture(hChildVideoService1);
+			Nlss_ChildVideoClose(hChildVideoService1);
+		}
+		Nlss_StopVideoPreview(m_hNlssService);
+		Nlss_Stop(m_hNlssService);
+ 	}
 	Nlss_UninitParam(m_hNlssService);
 	if (!InitMediaCapture())
 	{
@@ -415,23 +458,10 @@ void UICamera::StartLiveVideo()
 		return;
 	}
 
-// 	if (m_bPreviewing)
-// 	{
-// 		Nlss_StopVideoPreview(m_hNlssService);
-// 		Nlss_Stop(m_hNlssService);
-// 	}
-
-// 	if (NLSS_OK != Nlss_Start(m_hNlssService))
-// 	{
-// 		qDebug() << "打开视频采集出错";
-// 		return;
-// 	}
-// 
-// 	if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
-// 	{
-// 		qDebug() << "打开视频预览出错";
-// 		return;
-// 	}
+	Nlss_Start(m_hNlssService);
+	Nlss_ChildVideoSetBackLayer(hChildVideoService1);
+	Nlss_ChildVideoStartCapture(hChildVideoService1);
+	Nlss_StartVideoPreview(m_hNlssService);
 
 	if (!m_bPreviewing)
 	{
@@ -443,10 +473,53 @@ void UICamera::StartLiveVideo()
 		MessageBox(NULL, L"推流地址为空，推流参数初始化失败", L"答疑时间", MB_OK);
 		return;
 	}
-	m_pWorker->SetMediaCapture(m_hNlssService);
+	
 	emit sig_StartLiveStream();
 	m_bLiving = true;
 }
+
+bool UICamera::GetVideoInParam(ST_NLSS_VIDEOIN_PARAM *VideoInParam, EN_NLSS_VIDEOIN_TYPE mVideoSourceType, std::string&m_AccID)
+{
+	VideoInParam->enInType = mVideoSourceType;
+	bool bVideoExisten = false;
+	switch (mVideoSourceType)
+	{
+	case EN_NLSS_VIDEOIN_FULLSCREEN:
+
+		VideoInParam->iCaptureFps = 10;
+		m_AccID = "video name is fullscreen";
+		break;
+
+	case EN_NLSS_VIDEOIN_CAMERA:
+
+		//获取视频参数
+		VideoInParam->iCaptureFps = 15;
+
+		if (m_pVideoDevices != NULL)
+		{
+			VideoInParam->u.stInCamera.paDevicePath = (char*)m_pVideoDevices[m_CurrentVideoIndex].paPath;
+		}
+
+		else
+		{
+			return false;
+		}
+
+		VideoInParam->u.stInCamera.enLvl = EN_NLSS_VIDEOQUALITY_MIDDLE;//摄像头的输入分辨率设置成同一个
+		break;
+
+	case EN_NLSS_VIDEOIN_NONE:
+		return false;
+		break;
+
+	default:
+		return false;
+		break;
+	}
+
+	return true;
+}
+
 
 void UICamera::StopLiveVideo()
 {
@@ -622,8 +695,10 @@ void UICamera::ChangeLiveVideo()
 void UICamera::StopCaptureVideo()
 {
 	m_bPreviewing = false;
-	Nlss_Stop(m_hNlssService);
-	Nlss_StopVideoPreview(m_hNlssService);
+	Nlss_ChildVideoStopCapture(hChildVideoService1);
+	Nlss_ChildVideoClose(hChildVideoService1);
+	hChildVideoService1 = NULL;
+	emit sig_StopCapture();
 }
 
 void UICamera::setLessonName(QString strLessonName)
