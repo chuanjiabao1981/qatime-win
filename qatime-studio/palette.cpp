@@ -454,7 +454,7 @@ void Palette::SendSyncDraw()
 				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
 				opType = QString::number(DrawOpStart);			//  消息类型
 				clr = colorConvert(shape->penColor());
-				sClr = QString::number(clr);			//  颜色类型
+				sClr = QString::number(clr);					//  颜色类型
 				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
 				strMoveInfo += strInfo;
 			}
@@ -464,11 +464,9 @@ void Palette::SendSyncDraw()
 				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
 				opType = QString::number(DrawOpEnd);			//  消息类型
 				clr = colorConvert(shape->penColor());
-				sClr = QString::number(clr);			//  颜色类型
+				sClr = QString::number(clr);					//  颜色类型
 				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
 				strMoveInfo += strInfo;
-				emit PicData(strMoveInfo);
-				qDebug() << strMoveInfo;
 			}
 			else
 			{
@@ -483,6 +481,9 @@ void Palette::SendSyncDraw()
 				strMoveInfo += strInfo;
 			}
 		}
+
+		emit PicData(strMoveInfo);
+		qDebug() << strMoveInfo;
 	}
 }
 

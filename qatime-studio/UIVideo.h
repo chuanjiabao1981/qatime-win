@@ -71,6 +71,7 @@ protected:
 Q_SIGNALS:
 	void sig_changeLiveStatus(bool bTrue);
 	void sig_livestreamErrorHappened();
+	void sig_StopCapture();
 #ifdef STARTLS_ASYNC
 	void sig_StartLiveStream();
 	void sig_StopLiveStream();

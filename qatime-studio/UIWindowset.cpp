@@ -261,6 +261,7 @@ void UIWindowSet::CloseDialog()
 	m_curChatRoom = NULL;
 	// 停止采集和互动预览
 	m_CameraInfo->StopCaptureVideo();
+	m_VideoInfo->StopCaptureVideo();
 	// 课程名置空
 	ui.lesson_label->setText(LESSON_LABEL);
 	// 退出弹幕
@@ -813,6 +814,10 @@ void UIWindowSet::AgainSelectTag()
 		//关闭摄像头采集，包括互动直播、直播器
 		if (m_CameraInfo)
 			m_CameraInfo->StopCaptureVideo();
+
+		if (m_VideoInfo)
+			m_VideoInfo->StopCaptureVideo();
+
 		// 课程名置空
 		ui.lesson_label->setText(LESSON_LABEL);
 		// 退出弹幕
@@ -1224,6 +1229,7 @@ void UIWindowSet::clickChange(bool checked)
 			ui.chatcamera_widget->setMaximumWidth(3000);
 
 			m_CameraInfo->StopCaptureVideo();
+			m_VideoInfo->StopCaptureVideo();
 
 			if (m_curTags)
 				m_curTags->setModle(false);
@@ -1248,6 +1254,7 @@ void UIWindowSet::clickChange(bool checked)
 
 			ChangeBtnStyle(true);
 			m_CameraInfo->StartLiveVideo();
+			m_VideoInfo->StartLiveVideo();
 		}
 	}
 }
@@ -1397,13 +1404,29 @@ void UIWindowSet::QueryNotice()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/realtime";
-		strUrl.replace("{id}", strCourseID);
+		if (m_curTags->Is1v1Lesson())
+		{
+			strUrl = "https://qatime.cn/api/v1/live_studio/interactive_courses/{id}/realtime";
+			strUrl.replace("{id}", strCourseID);
+		}
+		else
+		{
+			strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+			strUrl.replace("{id}", strCourseID);
+		}
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/realtime";
-		strUrl.replace("{id}", strCourseID);
+		if (m_curTags->Is1v1Lesson())
+		{
+			strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_courses/{id}/realtime";
+			strUrl.replace("{id}", strCourseID);
+		}
+		else
+		{
+			strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+			strUrl.replace("{id}", strCourseID);
+		}
 	}
 
 	QUrl url = QUrl(strUrl);

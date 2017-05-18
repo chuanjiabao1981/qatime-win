@@ -5,7 +5,6 @@
 #include <sstream>
 #include "define.h"
 #include <QImage>
-#include "sample.h"
 
 _HNLSSCHILDSERVICE hChildVideoService1;
 
@@ -89,10 +88,10 @@ bool SetVideoInParam(ST_NLSS_VIDEOIN_PARAM *pstVideoParam, EN_NLSS_VIDEOIN_TYPE 
 	break;
 	case EN_NLSS_VIDEOIN_CAMERA:
 		//获取视频参数
-		pstVideoParam->iCaptureFps = 20;
+		pstVideoParam->iCaptureFps = 18;
 		if (m_pVideoDevices != NULL)
 		{
-			pstVideoParam->u.stInCamera.paDevicePath = (char *)pVideoPath;
+			pstVideoParam->u.stInCamera.paDevicePath = pVideoPath;
 		}
 		else
 		{
@@ -140,8 +139,6 @@ void SetAudioParam(ST_NLSS_AUDIO_PARAM *pstAudioParam, char *pAudioPath, EN_NLSS
 
 bool initLiveStream(_HNLSSERVICE hNLSService, ST_NLSS_PARAM *pstParam, char *paOutUrl)
 {
-	pstParam->enOutContent = EN_NLSS_OUTCONTENT_VIDEO;
-
 	pstParam->paOutUrl = new char[1024];
 	memset(pstParam->paOutUrl, 0, 1024);
 	strcpy(pstParam->paOutUrl, paOutUrl);
@@ -331,14 +328,21 @@ void UICamera::paintEvent(QPaintEvent *)
 
 bool UICamera::InitMediaCapture()
 {
+	char* pVideoPath;
+	if (m_pVideoDevices)
+		pVideoPath = (char *)m_pVideoDevices[m_CurrentVideoIndex].paPath;
+	else
+		pVideoPath = "";
 	ST_NLSS_PARAM stParam;
 	Nlss_GetDefaultParam(m_hNlssService, &stParam);
 	SetVideoOutParam(&stParam.stVideoParam, EN_NLSS_VIDEOQUALITY_MIDDLE, true);
-	SetAudioParam(&stParam.stAudioParam, (char *)m_pAudioDevices[0].paPath, EN_NLSS_AUDIOIN_MIC);
+	SetAudioParam(&stParam.stAudioParam, "", EN_NLSS_AUDIOIN_MIC);
+
+	stParam.enOutContent = EN_NLSS_OUTCONTENT_VIDEO;
 	initLiveStream(m_hNlssService, &stParam, (char*)m_strUrl.toStdString().c_str());
 
 	ST_NLSS_VIDEOIN_PARAM stChildVInParam;
-	SetVideoInParam(&stChildVInParam, EN_NLSS_VIDEOIN_CAMERA, (char *)m_pVideoDevices[0].paPath, EN_NLSS_VIDEOQUALITY_MIDDLE);
+	SetVideoInParam(&stChildVInParam, EN_NLSS_VIDEOIN_CAMERA, pVideoPath, EN_NLSS_VIDEOQUALITY_MIDDLE);
 	hChildVideoService1 = Nlss_ChildVideoOpen(m_hNlssService, &stChildVInParam);
 	return true;
 }
@@ -432,9 +436,6 @@ void UICamera::EnumAvailableMediaDevices()
 
 void UICamera::StartLiveVideo()
 {
-	ST_NLSS_VIDEOIN_PARAM stChildVInParam;
-	std::string accid;
-
 	if (m_hNlssService == NULL)
 	{
 		MessageBox(NULL, L"直播类为空，打开、关闭 预览 / 直播失败", L"答疑时间", MB_OK);

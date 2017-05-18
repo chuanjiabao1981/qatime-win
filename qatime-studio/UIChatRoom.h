@@ -231,6 +231,7 @@ public slots:
 	void		Request1v1Member();												//请求1v1成员
 	void		SetEnvironmental(bool EnvironmentalTyle);						//设置当前环境
 	void        SetCurAudioPath(std::string path);								//设置当前语音路径
+	QString		parse(QString str);
 private:
 	QToolButton* pPreMonthButton1;
 	QToolButton* pPreMonthButton;

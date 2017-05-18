@@ -53,6 +53,7 @@ UIVideo::UIVideo(QWidget *parent)
 	connect(m_pWorker, SIGNAL(sig_ResultReady(int)), this, SLOT(slot_FinishStartLiveStream(int)));
 	connect(this, SIGNAL(sig_StopLiveStream()), m_pWorker, SLOT(slot_StopLiveStream()));
 	connect(m_pWorker, SIGNAL(sig_StopResult(int)), this, SLOT(slot_FinishStopLiveStream(int)));
+	connect(this, SIGNAL(sig_StopCapture()), m_pWorker, SLOT(slot_StopCapture()));
 #endif
 
 	//创建mediacapture类，失败抛出错	
@@ -67,12 +68,11 @@ UIVideo::UIVideo(QWidget *parent)
 	EnumAvailableMediaDevices();
 
 	SetMediaCapture(m_hNlssService);
+	m_pWorker->SetMediaCapture(m_hNlssService);
 
 	m_refreshTimer = new QTimer(this);
 	m_refreshTimer->start(1000 / 25);
 	connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(slot_onRefreshTimeout()));
-
-	StartLiveVideo();
 }
 
 UIVideo::~UIVideo()
@@ -172,7 +172,6 @@ void UIVideo::paintEvent(QPaintEvent *)
 			qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_RGB32);
 			p.drawImage(rect(), qimage);
 			m_mutex.unlock();
-
 		}
 		else
 		{
@@ -187,20 +186,25 @@ void UIVideo::paintEvent(QPaintEvent *)
 
 bool UIVideo::InitMediaCapture()
 {
+	char* pAudioPath;
+	if (m_pAudioDevices != NULL)
+		pAudioPath = (char*)m_pVideoDevices[m_CurrentVideoIndex].paPath;
+	else
+		pAudioPath = "";
 	ST_NLSS_PARAM stParam;
 	Nlss_GetDefaultParam(m_hNlssService, &stParam);
-	SetVideoOutParam(&stParam.stVideoParam, EN_NLSS_VIDEOQUALITY_SUPER, true);
-	SetAudioParam(&stParam.stAudioParam, (char *)m_pAudioDevices[0].paPath, EN_NLSS_AUDIOIN_MIC);
+	SetVideoOutParam(&stParam.stVideoParam, EN_NLSS_VIDEOQUALITY_HIGH, true);
+	SetAudioParam(&stParam.stAudioParam, pAudioPath, EN_NLSS_AUDIOIN_MIC);
 	initLiveStream(m_hNlssService, &stParam, (char*)m_strUrl.toStdString().c_str());
 
 	ST_NLSS_VIDEOIN_PARAM stChildVInParam;
-	SetVideoInParam(&stChildVInParam, EN_NLSS_VIDEOIN_FULLSCREEN, (char *)m_pVideoDevices[0].paPath, EN_NLSS_VIDEOQUALITY_MIDDLE);
-	hChildFullVideoService1 = Nlss_ChildVideoOpen(m_hNlssService, &stChildVInParam);
+	SetVideoInParam(&stChildVInParam, EN_NLSS_VIDEOIN_FULLSCREEN, "", EN_NLSS_VIDEOQUALITY_SUPER);
 	Nlss_Start(m_hNlssService);
+	Nlss_StartVideoPreview(m_hNlssService);
 
+	hChildFullVideoService1 = Nlss_ChildVideoOpen(m_hNlssService, &stChildVInParam);
 	Nlss_ChildVideoSetBackLayer(hChildFullVideoService1);
 	Nlss_ChildVideoStartCapture(hChildFullVideoService1);
-	Nlss_StartVideoPreview(m_hNlssService);
 	return true;
 }
 
@@ -306,14 +310,16 @@ void UIVideo::StartLiveVideo()
 
 	if (m_bPreviewing)
 	{
-		Nlss_ChildVideoStopCapture(hChildFullVideoService1);
-		Nlss_ChildVideoClose(hChildFullVideoService1);
+		if (hChildFullVideoService1)
+		{
+			Nlss_ChildVideoStopCapture(hChildFullVideoService1);
+			Nlss_ChildVideoClose(hChildFullVideoService1);
+		}
 		Nlss_StopVideoPreview(m_hNlssService);
 		Nlss_Stop(m_hNlssService);
 	}
 
 	Nlss_UninitParam(m_hNlssService);
-
 	if (!InitMediaCapture())
 	{
 		MessageBox(NULL, L"初始化参数失败", L"答疑时间", MB_OK);
@@ -433,6 +439,11 @@ void UIVideo::ChangeLiveVideo()
 
 void UIVideo::StopCaptureVideo()
 {
+	m_bPreviewing = false;
+	Nlss_ChildVideoStopCapture(hChildFullVideoService1);
+	Nlss_ChildVideoClose(hChildFullVideoService1);
+	hChildFullVideoService1 = NULL;
+	emit sig_StopCapture();
 }
 
 void UIVideo::setLessonName(QString strLessonName)
