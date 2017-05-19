@@ -62,7 +62,8 @@ void UIVideoChange1v1::setVideoChange(UIWindowSet* Parent)
 
 void UIVideoChange1v1::setVideoParam(QString name, QString path)
 {
-	ui.Video_comboBox->addItem(name, path);
+	ui.Video_comboBox->insertItem(0, name, path);
+	ui.Video_comboBox->setCurrentIndex(0);
 }
 
 void UIVideoChange1v1::paintEvent(QPaintEvent *event)

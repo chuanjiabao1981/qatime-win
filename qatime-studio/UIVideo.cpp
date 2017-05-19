@@ -284,7 +284,7 @@ void UIVideo::InitDeviceParam()
 
 		for (int i = 0; i < m_iVideoDeviceNum; i++)
 		{
-			m_NewParent->addVideoDevices(QString::fromUtf8(m_pVideoDevices[i].paFriendlyName));
+			m_NewParent->addVideoDevices(QString::fromUtf8(m_pVideoDevices[i].paFriendlyName), QString::fromUtf8(m_pVideoDevices[i].paPath));
 		}
 	}
 
@@ -294,7 +294,7 @@ void UIVideo::InitDeviceParam()
 
 		for (int i = 0; i < m_iAudioDeviceNum; i++)
 		{
-			m_NewParent->addAudioDevices(QString::fromLocal8Bit(m_pAudioDevices[i].paFriendlyName));
+			m_NewParent->addAudioDevices(QString::fromLocal8Bit(m_pAudioDevices[i].paFriendlyName),QString::fromLocal8Bit(m_pAudioDevices[i].paPath));
 
 		}
 	}

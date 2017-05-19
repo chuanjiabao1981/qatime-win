@@ -1,16 +1,8 @@
-/*
-*	Author       hzzhuling15
-*	Date         2015/09/11
-*	Copyright    Hangzhou, Netease Inc.
-*	Brief        
-*   Notice       
-*/
 #include "UIBtnApp.h"
 #include <QtGui/QPainter>
 #include <QtGui/QEvent.h>
 
 CBtnApp::CBtnApp(QWidget *parent /*= 0*/)
-//	: QPushButton(parent)
 	: QRadioButton(parent)
 {
 	setStyleSheet("border-image:url(./images/alpha.png);"

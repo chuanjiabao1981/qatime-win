@@ -1,5 +1,6 @@
 #include "UIAudiochange.h"
 #include <QPainter>
+#include "UIWindowSet.h"
 
 UIAudioChange::UIAudioChange(QWidget *parent)
 	: QWidget(parent)
@@ -48,6 +49,17 @@ void UIAudioChange::setAudioChange(UIWindowSet* Parent)
 void UIAudioChange::setAudioParam(QString strName, QString path)
 {
 	ui.Audio_comboBox->addItem(strName, path);
+
+	DevAudioInfo dev;
+	dev.name = strName;
+	dev.path = path;
+	dev.type = 1;
+	mDeviceInfoMap.insert(path, dev);
+}
+
+const DeviceAudioInfoMap &UIAudioChange::getDeviceInfos()
+{
+	return mDeviceInfoMap;
 }
 
 void UIAudioChange::AudioChanged(int index)

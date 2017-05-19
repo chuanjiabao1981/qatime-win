@@ -10,6 +10,7 @@
 #include "lesson.h"
 #include "IMInterface.h"
 
+
 #define MAINWINDOW_X_MARGIN 10
 #define MAINWINDOW_Y_MARGIN 10
 #define MAINWINDOW_TITLE_HEIGHT 0
@@ -1553,15 +1554,19 @@ void UIWindowSet::returnCourse()
 		// 辅导班信息
 		QString coursePic;
 		if (m_curTags->Is1v1Lesson())
+		{
 			coursePic = data["publicize_list_url"].toString();
+		}
 		else
+		{
 			coursePic = data["publicize"].toString();
+		}
 		
 		QString courseName = data["name"].toString();
 		QString courseGrade = data["grade"].toString();
 		QString courseGrade1 = data["subject"].toString();
 		QString teacherName = data["teacher_name"].toString();
-		QString coursePross = QString::number(data["completed_lesson_count"].toInt());
+		QString coursePross = QString::number(data["completed_lessons_count"].toInt());
 		QString courseProsses = QString::number(data["lessons_count"].toInt());
 
 		QString courseStart = data["live_start_time"].toString();
@@ -1870,16 +1875,16 @@ bool UIWindowSet::IsHasCamera()
 }
 
 // 添加视频源
-void UIWindowSet::addVideoDevices(QString path)
+void UIWindowSet::addVideoDevices(QString name, QString path)
 {
 	m_bHasCamera = true;
-	m_VideoChangeInfo->setVideoParam(path, path);
+	m_VideoChangeInfo->setVideoParam(name, path);
 }
 
 // 添加麦克风
-void UIWindowSet::addAudioDevices(QString path)
+void UIWindowSet::addAudioDevices(QString name, QString path)
 {
-	m_AudioChangeInfo->setAudioParam(path, path);
+	m_AudioChangeInfo->setAudioParam(name, path);
 }
 
 void UIWindowSet::AddTodayToLesson(QString  id, QString courseid, QString boardUrl, QString CameraUrl, QString time, QString status, QString name)
@@ -2108,7 +2113,7 @@ void UIWindowSet::initCallBack()
 	initWhiteBoardWidget();
 	initConnection();
 
-	IMInterface::getInstance()->EnumDeviceDevpath(Audio);
+ 	IMInterface::getInstance()->EnumDeviceDevpath(Audio);
 	IMInterface::getInstance()->EnumDeviceDevpath(Video);
 	IMInterface::getInstance()->EnumDeviceDevpath(AudioOut);
 

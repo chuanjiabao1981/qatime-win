@@ -1,5 +1,6 @@
 #include "UIVideochange.h"
 #include <QPainter>
+#include "UIWindowSet.h"
 
 #define MAINWINDOW_X_MARGIN			0
 #define MAINWINDOW_Y_MARGIN			0
@@ -62,6 +63,17 @@ void UIVideoChange::setVideoChange(UIWindowSet* Parent)
 void UIVideoChange::setVideoParam(QString name, QString path)
 {
 	ui.Video_comboBox->addItem(name, path);
+
+	DevVideoInfo dev;
+	dev.name = name;
+	dev.path = path;
+	dev.type = 3;
+	mDeviceInfoMap.insert(path, dev);
+}
+
+const DeviceVideoInfoMap &UIVideoChange::getDeviceInfos()
+{
+	return mDeviceInfoMap;
 }
 
 void UIVideoChange::paintEvent(QPaintEvent *event)

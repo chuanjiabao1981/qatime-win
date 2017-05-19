@@ -288,8 +288,8 @@ public:
 	void    ErrorStopLive(QWidget* pWidget);					// 直播过程中出错 
 	void	ErrorStop();										// 错误停止
 	bool	IsHasCamera();										// 是否有摄像头
-	void    addVideoDevices(QString path);						// 添加视频源
-	void	addAudioDevices(QString path);						// 添加音频源
+	void    addVideoDevices(QString name, QString path);						// 添加视频源
+	void	addAudioDevices(QString name, QString path);						// 添加音频源
 	void	setAudioChangeIndex(int index);						// 选择音频源
 	void    setVideoChangeIndex(int index);						// 选择视频源
 	void    setRatioChangeIndex(QString ratio);					// 选择分辨率

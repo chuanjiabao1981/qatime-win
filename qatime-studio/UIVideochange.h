@@ -5,11 +5,18 @@
 #include "ui_UIVideochange.h"
 #include <QButtonGroup>
 #include <QVBoxLayout>
-#include "UIWindowSet.h"
 #include <QRadioButton>
 
-class UIWindowSet;
+typedef struct DeviceVideoInfo
+{
+	int type;
+	QString name;
+	QString path;
+}DevVideoInfo;
 
+typedef QMap< QString, DevVideoInfo > DeviceVideoInfoMap;
+
+class UIWindowSet;
 class UIVideoChange : public QWidget
 {
 	Q_OBJECT
@@ -27,6 +34,8 @@ private:
 	QPoint								m_startPos;
 	QPoint								m_clickPos;
 	QPoint								m_WndCurPos;
+
+	DeviceVideoInfoMap						mDeviceInfoMap;
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual bool eventFilter(QObject *target, QEvent *event);
@@ -38,6 +47,7 @@ private slots:
 public:
 	void setVideoChange(UIWindowSet* Parent);
 	void setVideoParam(QString name, QString path);
+	const DeviceVideoInfoMap& getDeviceInfos();
 };
 
 #endif // UIVIDEOCHANGE_H

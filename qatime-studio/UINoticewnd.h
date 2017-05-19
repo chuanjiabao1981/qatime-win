@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include "UIWindowSet.h"
+#include "UITextEdit.h"
 
 class UIWindowSet;
 #pragma execution_character_set("utf-8")
@@ -22,6 +23,7 @@ public:
 	QSpacerItem*		m_spacer;
 
 	std::vector<QLabel*>	m_veclabel;
+	std::vector<UITextEdit*>	m_vecEdit;
 	UIWindowSet*		m_parent;
 	QPushButton*		m_btn;
 private:

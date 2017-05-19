@@ -1,10 +1,3 @@
-/*
-*	Author       hzzhuling15
-*	Date         2015/09/11
-*	Copyright    Hangzhou, Netease Inc.
-*	Brief        
-*   Notice       
-*/
 #ifndef _LS_UI_BtnApp_APP_H_
 #define _LS_UI_BtnApp_APP_H_
 #include <QtWidgets/QRadioButton>
@@ -33,4 +26,4 @@ private:
 
 };
 
-#endif // _LS_MEDIACAPTURE_UI_BtnApp_H_
+#endif

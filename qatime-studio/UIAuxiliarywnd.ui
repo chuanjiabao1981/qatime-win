@@ -261,7 +261,7 @@
             <bool>true</bool>
            </property>
            <property name="toolTip">
-            <string>今日课程</string>
+            <string>今日安排</string>
            </property>
            <property name="styleSheet">
             <string notr="true">QRadioButton:checked {border-image: url(:/LoginWindow/images/tabToday_hover.png);}
@@ -308,7 +308,7 @@ QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/
             <cursorShape>PointingHandCursor</cursorShape>
            </property>
            <property name="toolTip">
-            <string>全部辅导</string>
+            <string>直播课</string>
            </property>
            <property name="styleSheet">
             <string notr="true">QRadioButton:checked {border-image: url(:/LoginWindow/images/tabAll_hover.png);}

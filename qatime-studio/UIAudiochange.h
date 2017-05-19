@@ -4,10 +4,17 @@
 #include <QWidget>
 #include "ui_UIAudiochange.h"
 #include "nlss_type.h"
-#include "UIWindowSet.h"
+
+typedef struct DeviceAudioInfo
+{
+	int type;
+	QString name;
+	QString path;
+}DevAudioInfo;
+
+typedef QMap< QString, DevAudioInfo > DeviceAudioInfoMap;
 
 class UIWindowSet;
-
 class UIAudioChange : public QWidget
 {
 	Q_OBJECT
@@ -25,6 +32,7 @@ private:
 	QPoint								m_clickPos;
 	QPoint								m_WndCurPos;
 	
+	DeviceAudioInfoMap					mDeviceInfoMap;
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual bool eventFilter(QObject *target, QEvent *event);
@@ -37,6 +45,7 @@ private slots:
 public:
 	void setAudioParam(QString strName, QString path);
 	void setAudioChange(UIWindowSet* Parent);
+	const DeviceAudioInfoMap& getDeviceInfos();
 };
 
 #endif // UIAUDIOCHANGE_H

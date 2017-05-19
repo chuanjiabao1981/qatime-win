@@ -48,7 +48,8 @@ void UIAudioChange1v1::setAudioChange(UIWindowSet* Parent)
 
 void UIAudioChange1v1::setAudioParam(QString strName, QString path)
 {
-	ui.Audio_comboBox->addItem(strName, path);
+	ui.Audio_comboBox->insertItem(0,strName, path);
+	ui.Audio_comboBox->setCurrentIndex(0);
 }
 
 void UIAudioChange1v1::AudioChanged(int index)

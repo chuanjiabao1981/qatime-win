@@ -11,6 +11,7 @@ UINoticeWnd::UINoticeWnd(QWidget *parent)
 	, m_spacer(NULL)
 	, m_veclabel(NULL)
 	, m_parent(NULL)
+	, m_vecEdit(NULL)
 {
 	ui.setupUi(this);
 
@@ -132,8 +133,8 @@ void UINoticeWnd::AddNotic(QString text, QString time, bool bInsert)
 	font.setPixelSize(13);
 	font.setFamily(("Î¢ÈíÑÅºÚ"));
 
-	QLabel* LText = new QLabel();
-	LText->setWordWrap(true);
+	UITextEdit* LText = new UITextEdit();
+//	LText->setWordWrap(true);
 	LText->setFont(font);
 	LText->setText(text);
 
@@ -159,7 +160,7 @@ void UINoticeWnd::AddNotic(QString text, QString time, bool bInsert)
 		m_VerAll->addWidget(LSpec);
 	}
 
-	m_veclabel.push_back(LText);
+	m_vecEdit.push_back(LText);
 	m_veclabel.push_back(LTime);
 	m_veclabel.push_back(LSpec);
 
@@ -195,8 +196,20 @@ void UINoticeWnd::DeleteNotice()
 			label = NULL;
 		}
 	}
-	
 	m_veclabel.clear();
+
+	if (m_vecEdit.size() > 0)
+	{
+		std::vector<UITextEdit*>::iterator it;
+		for (it = m_vecEdit.begin(); it != m_vecEdit.end(); it++)
+		{
+			UITextEdit* label = *it;
+			m_VerAll->removeWidget(label);
+			delete label;
+			label = NULL;
+		}
+	}
+	m_vecEdit.clear();
 }
 
 void UINoticeWnd::style(QScrollArea *style)
