@@ -9,7 +9,7 @@
 #include "UICamera.h"
 #include "lesson.h"
 #include "IMInterface.h"
-
+#include "HttpRequest.h"
 
 #define MAINWINDOW_X_MARGIN 10
 #define MAINWINDOW_Y_MARGIN 10
@@ -48,6 +48,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	, m_CameraS1v1Info(NULL)
 	, m_VideoInfo1v1(NULL)
 	, m_AppWnd1v1(NULL)
+	, m_QueryOnlieTimers(NULL)
 {
 	ui.setupUi(this);
 	m_This = this;
@@ -135,6 +136,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	connect(m_LiveLesson, SIGNAL(sig_PullStreaming(QString, QString, QString, QString, QString, bool)), this, SLOT(slot_PullStreaming(QString, QString, QString, QString, QString, bool)));
 	connect(m_LiveLesson, SIGNAL(sig_changeLessonStatus(QString, QString)), this, SLOT(slot_changeLessonStatus(QString, QString)));
 	m_LiveLesson->hide();
+	SetWindowPos((HWND)m_LiveLesson->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
 	m_BulletParamInfo = new UIBulletParam(this);
 	m_BulletParamInfo->setWindowFlags(Qt::FramelessWindowHint);
@@ -172,6 +174,9 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	m_CountTimer = new QTimer(this);
 	connect(m_CountTimer, SIGNAL(timeout()), this, SLOT(slot_onCountTimeout()));
 
+	m_QueryOnlieTimers = new QTimer(this);
+	connect(m_QueryOnlieTimers, SIGNAL(timeout()), this, SLOT(slot_onOnlineTimeout()));
+
 	// 摄像头延迟1秒推流，避免和全屏桌面一起推流启冲突
 	m_tempTimers = new QTimer(this);
 	connect(m_tempTimers, SIGNAL(timeout()), this, SLOT(slot_onTempTimeout()));
@@ -196,6 +201,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	ui.lesson_pushButton->setStyleSheet("border-image: url(./images/lessonBtn_nor.png);"); 
 	ui.course_pushButton->setStyleSheet("border-image: url(./images/courseBtn_nor.png);");
 	ui.person_pushButton->setStyleSheet("border-image: url(./images/personBtn_nor.png);");
+	ui.pic_label->setStyleSheet("border-image: url(./images/online.png);");
 }
 
 UIWindowSet::~UIWindowSet()
@@ -1037,6 +1043,7 @@ void UIWindowSet::clickLive()
 				ui.Live_pushBtn->setText(LIVE_BUTTON_NAME);
 				ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
 
+				setLiveBtnEnable(false);
 				m_VideoInfo->StopLiveVideo();
 
 				m_LiveStatusManager->SendStopLiveHttpMsg();
@@ -1088,9 +1095,12 @@ void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString board
 // 		m_boardUrl = "rtmp://pa0a19f55.live.126.net/live/2794c854398f4d05934157e05e2fe419?wsSecret=16c5154fb843f7b7d2819554d8d3aa94&wsTime=1480648811";
 // 		m_cameraUrl = "rtmp://pa0a19f55.live.126.net/live/0ca7943afaa340c9a7c1a8baa5afac97?wsSecret=f49d13a6ab68601884b5b71487ff51e1&wsTime=1480648749";
 		m_boardUrl = m_curTags->BoardStream();
+		qDebug() << "白板推流地址：" << m_boardUrl;
 		m_cameraUrl = m_curTags->CameraStream();
+		qDebug() << "摄像头推流地址：" << m_cameraUrl;
 		m_VideoInfo->setPlugFlowUrl(m_boardUrl);
 		m_VideoInfo->StartLiveVideo();
+		setLiveBtnEnable(false);
 	}
 }
 
@@ -1218,6 +1228,7 @@ void UIWindowSet::clickChange(bool checked)
 
 			ChangeBtnStyle(true);
 		}
+		ui.online_widget->setVisible(false);
 	}
 	else
 	{
@@ -1241,6 +1252,9 @@ void UIWindowSet::clickChange(bool checked)
 			// 退出弹幕
 			emit ui.Bullet_checkBox->stateChanged(0);
 			CloseBullet();
+
+			// 停止轮询在线人数
+			stopQueryOnlineNum();
 		}
 		else
 		{
@@ -1256,6 +1270,10 @@ void UIWindowSet::clickChange(bool checked)
 			ChangeBtnStyle(true);
 			m_CameraInfo->StartLiveVideo();
 			m_VideoInfo->StartLiveVideo();
+
+			// 开始轮询在线人数
+			ui.online_widget->setVisible(true);
+			startQueryOnlineNum();
 		}
 	}
 }
@@ -1280,9 +1298,9 @@ void UIWindowSet::slots_Modle(bool bModle)
 			ui.camera_widget->setVisible(false);
 			ui.whiteboard_widget->setVisible(false);
 			ui.chatcamera_widget->setMaximumWidth(3000);
-			//		关闭摄像头（直播/互动）
-			//		PlayLive("", "");
 		}
+
+		stopQueryOnlineNum();
 
 		ui.lesson_widget->setVisible(false);
 		ChangeBtnStyle(false);
@@ -1309,6 +1327,8 @@ void UIWindowSet::slots_Modle(bool bModle)
 			m_WhiteBoardTool->setVisible(false);
 			m_AppWndTool1v1->setVisible(false);
 			ui.chatcamera_widget->setMaximumWidth(300);
+
+			startQueryOnlineNum();
 		}
 		
 //		打开摄像头（直播/互动）
@@ -1566,7 +1586,7 @@ void UIWindowSet::returnCourse()
 		QString courseGrade = data["grade"].toString();
 		QString courseGrade1 = data["subject"].toString();
 		QString teacherName = data["teacher_name"].toString();
-		QString coursePross = QString::number(data["completed_lessons_count"].toInt());
+		QString coursePross = QString::number(data["closed_lessons_count"].toInt());
 		QString courseProsses = QString::number(data["lessons_count"].toInt());
 
 		QString courseStart = data["live_start_time"].toString();
@@ -1749,6 +1769,7 @@ void UIWindowSet::QueryPerson()
 void UIWindowSet::setLiveBtnEnable(bool bEnable)
 {
 	ui.Live_pushBtn->setEnabled(bEnable);
+	ui.time_label->setEnabled(bEnable);
 }
 
 
@@ -1776,6 +1797,8 @@ void UIWindowSet::UpatateLiveStatus(QWidget* widget, bool bSuc)
 				m_ScreenTip->setErrorTip("开启直播成功！");
 				m_EnumStatus = CameraStatusClose;
 				m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_lessonid, m_Token);
+
+				setLiveBtnEnable(true);
 			}
 			else//如果摄像头开着，接着推摄像头流
 			{
@@ -1793,6 +1816,7 @@ void UIWindowSet::UpatateLiveStatus(QWidget* widget, bool bSuc)
 			{
 				m_ScreenTip->setErrorTip("开启直播成功！");
 				m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_lessonid, m_Token);
+				setLiveBtnEnable(true);
 			}
 		}
 	}
@@ -1813,6 +1837,7 @@ void UIWindowSet::UpatateLiveStatus(QWidget* widget, bool bSuc)
 			// 提示错误信息
 			m_ScreenTip->setErrorTip("直播过程中网络出现错误，请重新\n开启直播！");
 		}
+		setLiveBtnEnable(true);
 	}
 }
 
@@ -1857,6 +1882,8 @@ void UIWindowSet::ErrorStopLive(QWidget* pWidget)
 
 		m_ScreenTip->setErrorTip("直播过程中网络出现错误，请重新\n开启直播！");
 		m_LiveStatusManager->SendStopLiveHttpMsg();
+
+		setLiveBtnEnable(true);
 	}
 }
 
@@ -2009,9 +2036,9 @@ void UIWindowSet::clickVideoParam()
 
 void UIWindowSet::setVideoChangeIndex(int index)
 {
-	if (m_VideoInfo)
+	if (m_CameraInfo)
 	{
-		m_VideoInfo->SetChangeAudio(index);
+		m_CameraInfo->SetChangeVideo(index);
 	}
 }
 
@@ -2250,6 +2277,7 @@ void UIWindowSet::initWhiteBoardWidget()
 	m_AppWnd1v1->setWindowFlags(Qt::FramelessWindowHint);
 	m_AppWnd1v1->hide();
 	connect(m_AppWnd1v1, SIGNAL(sig_selectWnd(HWND)), this, SLOT(slot_selectWnd(HWND)));
+	SetWindowPos((HWND)m_AppWnd1v1->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 }
 
 void UIWindowSet::slot_shiftWnd()
@@ -2765,7 +2793,6 @@ void UIWindowSet::LessonRequestFinished()
 			lesson->readJson(value.toObject());
 
 			QString curTime = QDateTime::currentDateTime().toString("yyyy-MM-dd");
-			//		curTime = "2017-03-01";
 			if (lesson->Date() == curTime)
 			{
 				AddTodayToLesson(lesson->LessonID(), lesson->CourseID(), lesson->BoardUrl(), lesson->CameraUrl(), lesson->LessonTime(), lesson->ChinaLessonStatus(), lesson->name());
@@ -2775,4 +2802,69 @@ void UIWindowSet::LessonRequestFinished()
 	}
 
 	m_LiveLesson->setCourseID(m_curTags->CourseID(), m_curTags->Is1v1Lesson());
+}
+
+void UIWindowSet::EndDev()
+{
+	IMInterface::getInstance()->endDevice(Audio);
+	IMInterface::getInstance()->endDevice(AudioOut);
+	IMInterface::getInstance()->endDevice(Video);
+}
+
+void UIWindowSet::QueryOnlinePersonNum()
+{
+	if (m_curTags == NULL || !m_curTags->IsModle())
+		return;
+	
+	QString strCourseID = "";
+	if (m_curTags)
+		strCourseID = m_curTags->CourseID();
+	else
+		return;
+
+	QString strUrl;
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/status";
+		strUrl.replace("{id}", strCourseID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/status";
+		strUrl.replace("{id}", strCourseID);
+	}
+
+	HttpRequest http;
+	http.setRawHeader("Remember-Token", m_Token.toUtf8());
+
+	QByteArray result = http.httpGet(strUrl);
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	if (obj["status"].toInt() == 1)
+	{
+		QJsonArray online = data["online_users"].toArray();
+		int iCount = online.size();
+		ui.online_label->setText(QString::number(iCount));
+	}
+}
+
+void UIWindowSet::startQueryOnlineNum()
+{
+	stopQueryOnlineNum();
+	QueryOnlinePersonNum();
+
+	if (m_QueryOnlieTimers)
+		m_QueryOnlieTimers->start(30000);
+}
+
+void UIWindowSet::stopQueryOnlineNum()
+{
+	if (m_QueryOnlieTimers)
+		m_QueryOnlieTimers->stop();
+}
+void UIWindowSet::slot_onOnlineTimeout()
+{
+	QueryOnlinePersonNum();
 }

@@ -173,6 +173,7 @@ bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
 		{
 			QRect rc = ui.text_talk->geometry();
 			m_uitalk->setFixedSize(ui.text_talk->width(), ui.text_talk->height());
+			m_uitalk->ScrollDown();
 		}
 	}
 	else if (target == ui.msgRecord)

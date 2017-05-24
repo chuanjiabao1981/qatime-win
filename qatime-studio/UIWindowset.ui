@@ -579,6 +579,9 @@ border-image: url(:/LoginWindow/images/alpha.png);</string>
         </size>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <property name="leftMargin">
          <number>10</number>
         </property>
@@ -586,7 +589,7 @@ border-image: url(:/LoginWindow/images/alpha.png);</string>
          <number>0</number>
         </property>
         <property name="rightMargin">
-         <number>0</number>
+         <number>10</number>
         </property>
         <property name="bottomMargin">
          <number>0</number>
@@ -602,6 +605,69 @@ border-image: url(:/LoginWindow/images/alpha.png);</string>
           <property name="text">
            <string>暂无直播</string>
           </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="online_widget" native="true">
+          <property name="maximumSize">
+           <size>
+            <width>34</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <widget class="QLabel" name="online_label">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>20</width>
+             <height>35</height>
+            </rect>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>20</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>微软雅黑</family>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="pic_label">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>10</y>
+             <width>14</width>
+             <height>14</height>
+            </rect>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>14</width>
+             <height>14</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>14</width>
+             <height>14</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>

@@ -188,17 +188,18 @@ bool UIVideo::InitMediaCapture()
 {
 	char* pAudioPath;
 	if (m_pAudioDevices != NULL)
-		pAudioPath = (char*)m_pVideoDevices[m_CurrentVideoIndex].paPath;
+		pAudioPath = (char*)m_pAudioDevices[m_CurrentMicIndex].paPath;
 	else
 		pAudioPath = "";
 	ST_NLSS_PARAM stParam;
 	Nlss_GetDefaultParam(m_hNlssService, &stParam);
 	SetVideoOutParam(&stParam.stVideoParam, EN_NLSS_VIDEOQUALITY_HIGH, true);
 	SetAudioParam(&stParam.stAudioParam, pAudioPath, EN_NLSS_AUDIOIN_MIC);
+	stParam.enOutContent = EN_NLSS_OUTCONTENT_AV;
 	initLiveStream(m_hNlssService, &stParam, (char*)m_strUrl.toStdString().c_str());
 
 	ST_NLSS_VIDEOIN_PARAM stChildVInParam;
-	SetVideoInParam(&stChildVInParam, EN_NLSS_VIDEOIN_FULLSCREEN, "", EN_NLSS_VIDEOQUALITY_SUPER);
+	SetVideoInParam(&stChildVInParam, EN_NLSS_VIDEOIN_FULLSCREEN, "", EN_NLSS_VIDEOQUALITY_MIDDLE);
 	Nlss_Start(m_hNlssService);
 	Nlss_StartVideoPreview(m_hNlssService);
 

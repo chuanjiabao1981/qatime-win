@@ -5,6 +5,7 @@
 #include "course1v1.h"
 #include <QDir>
 #include "UIMessageBox.h"
+#include "IMInterface.h"
 
 UIMainNewWindow* m_This = NULL;
 UIMainNewWindow::UIMainNewWindow(QWidget *parent)
@@ -361,12 +362,10 @@ bool UIMainNewWindow::IsMayClose()
 
 void UIMainNewWindow::CloseDialog()
 {
-	nim_http::Uninit();
-
 	if (m_LoginWindow)
 		m_LoginWindow->CloseTray();
 
-	exit(0);
+	LogOut();
 }
 
 void UIMainNewWindow::ShowCourse()
@@ -586,29 +585,6 @@ bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, lo
 	return false;
 }
 //////////////////////////////添加云信功能////////////////////////////////
-// void UIMainNewWindow::initSDK()
-// {
-// 	nim::SDKConfig config;
-// 
-// 	//sdk能力参数（必填）
-// 	config.database_encrypt_key_ = "Netease"; //string（db key必填，目前只支持最多32个字符的加密密钥！建议使用32个字符）
-// 	bool ret = false;
-// 	ret = nim::SDKFunction::LoadSdkDll();
-// 	if (!ret)
-// 		CMessageBox::showMessage(QString("答疑时间"), QString("加载云信SDK失败！"), QString("确定"), QString("取消"));
-// 
-// 	ret = LoadConfig("Netease", "", config);
-// 	if (!ret)
-// 		CMessageBox::showMessage(QString("答疑时间"), QString("加载云信Config失败！"), QString("确定"), QString("取消"));
-// 
-// 	nim_http::Init(); // 初始化云信http
-// 
-// 	// 接受消息回调
-// 	nim::Talk::RegReceiveCb(&nim_comp::TalkCallback::OnReceiveMsgCallback);
-// 	// 发送消息状态回调
-// 	nim::Talk::RegSendMsgCb(&nim_comp::TalkCallback::OnSendMsgCallback);
-// }
-
 void UIMainNewWindow::changeLessonStatus(QString id, QString status)
 {
 	m_AuxiliaryWnd->ChangeAuxiliaryTodayStatus(id, status);
@@ -618,4 +594,19 @@ void UIMainNewWindow::changeMsgNumber(QString chid)
 {
 	if (m_AuxiliaryWnd)
 		m_AuxiliaryWnd->ReceiverNumber(chid);
+}
+
+void UIMainNewWindow::LogOut()
+{
+	auto cb = std::bind(OnLogOutCallback, std::placeholders::_1);
+	nim::Client::Logout(nim::kNIMLogoutAppExit, cb);
+}
+
+void UIMainNewWindow::OnLogOutCallback(nim::NIMResCode res_code)
+{
+	qInfo() << "OnLogoutCallback:" << res_code;
+	
+	nim::VChat::Cleanup();
+	nim_http::Uninit();
+	exit(0);
 }

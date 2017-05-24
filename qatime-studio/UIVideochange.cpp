@@ -30,7 +30,7 @@ UIVideoChange::UIVideoChange(QWidget *parent)
 	ui.Video_comboBox->setStyleSheet(styleSheet);
 	ui.Video_comboBox->setMinimumHeight(22);
 	ui.Video_comboBox->setFont(font);
-	connect(ui.Video_comboBox, SIGNAL(activated(int)), this, SLOT(AudioChanged(int)));
+	connect(ui.Video_comboBox, SIGNAL(activated(int)), this, SLOT(VideoChanged(int)));
 
 	ui.pushButton->setStyleSheet("border-image: url(./images/set_title.png);");
 	ui.pushButton->installEventFilter(this);
@@ -49,10 +49,10 @@ void UIVideoChange::clickClose()
 	hide();
 }
 
-void UIVideoChange::AudioChanged(int index)
+void UIVideoChange::VideoChanged(int index)
 {
 	if (m_Parent)
-		m_Parent->setAudioChangeIndex(index);
+		m_Parent->setVideoChangeIndex(index);
 }
 
 void UIVideoChange::setVideoChange(UIWindowSet* Parent)

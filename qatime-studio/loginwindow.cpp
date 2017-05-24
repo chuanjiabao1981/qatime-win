@@ -183,16 +183,6 @@ void LoginWindow::loginFinished()
 		m_accid = objInfo["chat_account"].toObject()["accid"].toString();
 		m_accidToken = objInfo["chat_account"].toObject()["token"].toString();
 
-// 		mainWin = new UIMainWindow();
-// 		mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
-// 		mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
-// 		mainWin->setRemeberToken(m_teacherToken);
-// 		mainWin->setTeacherInfo(data["user"].toObject());
-// 		mainWin->ShowAuxiliary();
-// 		mainWin->setLoginWindow(this);		
-// 		mainWin->setMainTitle(m_version);
-// 		mainWin->show();
-// 		SetWindowPos((HWND)mainWin->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 		mainWin = new UIMainNewWindow();
 		mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 		mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
@@ -527,7 +517,7 @@ void LoginWindow::CloseWindow()
 {
 	if (mainWin->IsMayClose())
 	{
-		exit(0);
+		mainWin->CloseDialog();
 	}
 }
 

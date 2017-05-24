@@ -111,6 +111,9 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_colorpicker.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_HttpRequest.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_imagewidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -324,6 +327,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_colorpicker.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_HttpRequest.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_imagewidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -519,6 +525,7 @@
     <ClCompile Include="GeneratedFiles\Release\moc_UIWorkThread.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="HttpRequest.cpp" />
     <ClCompile Include="imagewidget.cpp" />
     <ClCompile Include="IMInterface.cpp" />
     <ClCompile Include="lesson.cpp" />
@@ -968,6 +975,16 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing IMInterface.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB -DNDEBUG  "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs\api" "-I.\depend\libs\include" "-I$(QTDIR)\include\QtWebEngineWidgets" "-I$(QTDIR)\include\QtWebView" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
+    </CustomBuild>
+    <CustomBuild Include="HttpRequest.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing HttpRequest.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing HttpRequest.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB -DNDEBUG "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs\api" "-I.\depend\libs\include" "-I$(QTDIR)\include\QtWebEngineWidgets" "-I$(QTDIR)\include\QtWebView" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
     </CustomBuild>
     <ClInclude Include="nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp\nim_audio_cpp.h" />
     <ClInclude Include="nim_sdk\nim_tools_cpp_sdk\nim_http_cpp\nim_tools_http_cpp.h" />

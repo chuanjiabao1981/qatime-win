@@ -41,7 +41,7 @@ bool SetVideoOutParam(ST_NLSS_VIDEOOUT_PARAM *pstVideoParam, EN_NLSS_VIDEOQUALIT
 {
 	pstVideoParam->enOutCodec = EN_NLSS_VIDEOOUT_CODEC_X264;
 	pstVideoParam->bHardEncode = false;
-	pstVideoParam->iOutFps = 20;
+	pstVideoParam->iOutFps = 15;
 
 	switch (enVideoQ)
 	{
@@ -83,7 +83,7 @@ bool SetVideoInParam(ST_NLSS_VIDEOIN_PARAM *pstVideoParam, EN_NLSS_VIDEOIN_TYPE 
 	{
 	case EN_NLSS_VIDEOIN_FULLSCREEN:
 	{
-		pstVideoParam->iCaptureFps = 10;
+		pstVideoParam->iCaptureFps = 8;
 	}
 	break;
 	case EN_NLSS_VIDEOIN_CAMERA:
@@ -765,6 +765,16 @@ void UICamera::refurbish()
 		return;
 	}
 
+	if (m_bPreviewing)
+	{
+		if (hChildVideoService1 != NULL)
+		{
+			Nlss_ChildVideoStopCapture(hChildVideoService1);
+			Nlss_ChildVideoClose(hChildVideoService1);
+		}
+		Nlss_StopVideoPreview(m_hNlssService);
+		Nlss_Stop(m_hNlssService);
+	}
 	Nlss_UninitParam(m_hNlssService);
 	if (!InitMediaCapture())
 	{
@@ -772,29 +782,8 @@ void UICamera::refurbish()
 		return;
 	}
 
-	if (m_bPreviewing)
-	{
-		Nlss_StopVideoPreview(m_hNlssService);
-		Nlss_Stop(m_hNlssService);
-	}
-
-	Nlss_SetVideoWaterMark(m_hNlssService, NULL);
-
-	if (NLSS_OK != Nlss_Start(m_hNlssService))
-	{
-		qDebug() << "打开视频采集出错";
-		return;
-	}
-
-	if (NLSS_OK != Nlss_StartVideoPreview(m_hNlssService))
-	{
-		qDebug() << "打开视频预览出错";
-		return;
-	}
-
-	if (!m_bPreviewing)
-	{
-		m_bPreviewing = true;
-		return;
-	}
+	Nlss_Start(m_hNlssService);
+	Nlss_ChildVideoSetBackLayer(hChildVideoService1);
+	Nlss_ChildVideoStartCapture(hChildVideoService1);
+	Nlss_StartVideoPreview(m_hNlssService);
 }

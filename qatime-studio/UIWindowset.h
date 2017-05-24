@@ -167,6 +167,7 @@ public:
 	UIVideo1v1*						m_VideoInfo1v1;			// 1v1全屏桌面
 	UIAppWnd*						m_AppWnd1v1;			// 选择分享窗口
 	UIAppWndTool*					m_AppWndTool1v1;		// 1v1窗口分享工具条
+	QTimer*							m_QueryOnlieTimers;		// 定时查询在线人数
 private:
 	Ui::UIWindowSet ui;
 
@@ -227,6 +228,7 @@ private slots :
 	void slot_shiftWnd();									// 切换窗口
 	void slot_CloseWnd();									// 关闭屏幕共享
 	void requstError(QString);								// 白板及音视频错误提示
+	void slot_onOnlineTimeout();							// 查询在线人数
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual bool eventFilter(QObject *target, QEvent *event);
@@ -323,6 +325,10 @@ public:
 	void	show1v1ErrorTip(QString sError);
 	void	ShowLesson();											  // 查询今日课程
 	void	LessonRequestFinished();								  // 返回今日课程
+	void    EndDev();												  // 关闭所有设备
+	void    QueryOnlinePersonNum();									  // 查询在线人数
+	void	startQueryOnlineNum();									  // 开始查询在线人数
+	void    stopQueryOnlineNum();									  // 停止查询在线人数
 };
 
 #endif // UIWINDOWSET_H

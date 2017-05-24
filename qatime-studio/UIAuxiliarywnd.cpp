@@ -323,7 +323,8 @@ QPixmap UIAuxiliaryWnd::setTeacherUrl(QString Url)
 
 	QByteArray jpegData = reply->readAll();
 	QPixmap pixmap;
-	pixmap.loadFromData(jpegData);
+	if (!pixmap.loadFromData(jpegData))
+		pixmap = QPixmap("./images/avatar_teacher.png");
 	QPixmap scaledPixmap = pixmap.scaled(QSize(30, 30));
 
 	ui.pic_widget->setAutoFillBackground(true);

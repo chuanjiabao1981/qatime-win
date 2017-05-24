@@ -42,7 +42,7 @@ protected:
 	virtual void focusOutEvent(QFocusEvent *);
 
 private slots:
-	void AudioChanged(int index);
+	void VideoChanged(int index);
 	void clickClose();
 public:
 	void setVideoChange(UIWindowSet* Parent);

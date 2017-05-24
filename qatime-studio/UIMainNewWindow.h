@@ -71,11 +71,7 @@ protected:
 
 public:
 	/*添加云信功能*/
-//	void	initSDK();										// 初始化云信
 	void    InitAudio();									// 初始化语音
-//	bool	LoadConfig(const std::string& app_data_dir, const std::string& app_install_dir, nim::SDKConfig &config);// 加载配置
-//	std::string GetJsonStringWithNoStyled(const QJsonObject& values); // json类型转换
-
 	void	setLoginWindow(LoginWindow* parent);			// 登录窗口
 	void	setVersion(QString version);					// 设置版本号
 	void	SetEnvironmental(bool EnvironmentalTyle);
@@ -98,10 +94,12 @@ public:
 	void	setKeyAndLogin(QString key);					// 登录云信
 	static void OnLoginCallback(const nim::LoginRes& login_res, const void* user_data);
 	static void OnStopAudioCallback(int code, const char* file_path, const char* sid, const char* cid);// 停止语音
+	static void OnLogOutCallback(nim::NIMResCode res_code);
 	void	CreateRoom(QString chatID, QString courseID, QString teacherID, QString token, QString studentName, std::string audioPath, 
 						QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl,bool b1v1Lesson=false);
 	void    changeLessonStatus(QString id, QString status);
 	void	changeMsgNumber(QString chid);
+	void	LogOut();												  // 退出云信登录
 };
 
 #endif // UIMAINNEWWINDOW_H
