@@ -27,7 +27,7 @@ void UITextEdit::textAreaChanged()
 			this->setFixedHeight(newheight);
 		}
 
-		m_timer->start(50);
+//		m_timer->start(50);
 	}
 }
 
@@ -39,6 +39,14 @@ void UITextEdit::timeout()
 		delete m_timer;
 		m_timer = NULL;
 	}
+
+	if (this->verticalScrollBar()->isVisible())
+		this->setFixedHeight(height() + 40);
+}
+
+void UITextEdit::paintEvent(QPaintEvent *e)
+{
+	QTextEdit::paintEvent(e);
 
 	if (this->verticalScrollBar()->isVisible())
 		this->setFixedHeight(height() + 40);

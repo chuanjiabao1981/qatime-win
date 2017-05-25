@@ -15,6 +15,9 @@ public:
 private slots:
 	void textAreaChanged();
 	void timeout();
+
+protected:
+	virtual void paintEvent(QPaintEvent *e);
 };
 
 #endif
