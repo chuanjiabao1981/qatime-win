@@ -484,5 +484,6 @@ void UIVideo::setBkImage(QString qsImage)
 
 void UIVideo::slot_livestreamErrorHappened()
 {
+	qDebug() << "ErrorStopLive 4";
 	m_NewParent->ErrorStopLive(this);
 }

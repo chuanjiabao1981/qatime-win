@@ -13,6 +13,7 @@ AnimatedTextBrowserA::AnimatedTextBrowserA(QWidget *parent)
 AnimatedTextBrowserA::AnimatedTextBrowserA(bool changed, QWidget *parent)
 	: QTextBrowser(parent)
 {
+	m_bar = this->verticalScrollBar();
 	m_bTimer = changed;
 	m_timer = new QTimer(this);
 	connect(m_timer, SIGNAL(timeout()), this, SLOT(slot_onTimeout()));
@@ -35,8 +36,6 @@ void AnimatedTextBrowserA::slot_onTimeout()
 	}
 
 	emit sig_scrollDown();
-// 	if (m_parent)
-// 		m_parent->ScrollDown();
 }
 
 void AnimatedTextBrowserA::addAnimation(const QUrl& url, const QString& fileName)
@@ -93,15 +92,33 @@ void AnimatedTextBrowserA::mousePressEvent(QMouseEvent *e)
 	}
 }
 
-void AnimatedTextBrowserA::resizeEvent(QResizeEvent *e)
-{
-// 	if (this->verticalScrollBar()->isVisible() && m_bTimer)
-// 	{
-// 		this->resize(width(), height() + 5);
-// 	}
-}
-
 void AnimatedTextBrowserA::autoHeight()
 {
-	m_timer->start(200);
+//	m_timer->start(200);
+}
+
+void AnimatedTextBrowserA::paintEvent(QPaintEvent *e)
+{
+	QTextBrowser::paintEvent(e);
+
+	if (!m_bTimer)
+		return;
+
+	static int iCount = 0;
+	if (m_bar->isVisible())
+	{
+		this->setFixedHeight(height() + 100);
+		this->moveCursor(QTextCursor::End);
+	}
+	else
+	{
+		int h = this->document()->size().rheight();
+		this->setFixedHeight(h);
+		
+		if (iCount != 0)
+			return;
+
+		emit sig_scrollDown();
+		iCount++;
+	}
 }

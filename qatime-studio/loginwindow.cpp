@@ -541,8 +541,6 @@ QString LoginWindow::parse(QString str)
 		else if(s == "`")
 			s = "%60";
 		else if (s == "!")
-			s = "%EFBC81";
-		else if (s == "£¡")
 			s = "%21";
 		else if (s == "@")
 			s = "%40";
@@ -562,14 +560,8 @@ QString LoginWindow::parse(QString str)
 			s = "%28";
 		else if (s == ")")
 			s = "%29";
-		else if (s == "£¨")
-			s = "%EFBC88";
-		else if (s == "£©")
-			s = "%EFBC89";
 		else if (s == "_")
 			s = "%5F";
-		else if (s == "¡ª")
-			s = "%E28094";
 		else if (s == "+")
 			s = "%2B";
 		else if (s == "=")
@@ -582,10 +574,6 @@ QString LoginWindow::parse(QString str)
 			s = "%5B";
 		else if (s == "]")
 			s = "%5D";
-		else if (s == "£»")
-			s = "%EFBC9B";
-		else if (s == "£º")
-			s = "%EFBC9A";
 		else if (s == ":")
 			s = "%3A";
 		else if (s == ";")
@@ -594,36 +582,18 @@ QString LoginWindow::parse(QString str)
 			s = "%27";
 		else if (s == "\"")
 			s = "%22";
-		else if (s == "¡®")
-			s = "%E28098";
-		else if (s == "¡°")
-			s = "%E2809C";
 		else if (s == ",")
 			s = "%2C";
-		else if (s == "£¬")
-			s = "%EFBC8C";
-		else if (s == "¡¶")
-			s = "%E3808A";
 		else if (s == "<")
 			s = "%3C";
 		else if (s == ".")
 			s = "%2E";
 		else if (s == ">")
 			s = "%3E";
-		else if (s == "¡£")
-			s = "%E38082";
-		else if (s == "¡·")
-			s = "%E3808B";
 		else if (s == "/")
 			s = "%2F";
 		else if (s == "?")
 			s = "%3F";
-		else if (s == "£¿")
-			s = "%EFBC9F";
-		else if (s == "¡¾")
-			s = "%E38090";
-		else if (s == "¡¿")
-			s = "%E38091";
 
 		encode += s;
 	}

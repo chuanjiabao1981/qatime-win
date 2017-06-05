@@ -10,6 +10,7 @@
 #include "UITalkRecord.h"
 #include <vector>
 #include "UIWindowset.h"
+#include "calendar/DefDateTimeEdit.h"
 
 //---云信
 //#include "nim_client_def.h"
@@ -63,6 +64,7 @@ private:
 	UITalkRecord*					m_uitalkRecord;		// 聊天记录
 
 	//表情框	
+	DefDateTimeEdit*				m_defDateTimeEdit;
 	MyEmotionWidget*				m_smallEmotionWidget;
 	MyEmotionWidget*				m_normalEmotionWidget;
 	QLabel*						    m_lableTitle;
@@ -129,6 +131,7 @@ public slots:
 	void calendaCurrentPageChanged(int year, int month);// 日历当前页面被改变
 	void clickPic();									// 选择图片
 	void LoadImgTimeout();								// 加载图片定时器
+	void slot_CalendarClick(QDate);						// 点击日历
 private:
 //	void		initSDK();									// 初始化云信SDK
 //	bool		LoadConfig(const std::string& app_data_dir,const std::string& app_install_dir, nim::SDKConfig &config); //加载配置

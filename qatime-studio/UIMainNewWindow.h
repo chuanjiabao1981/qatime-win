@@ -93,6 +93,8 @@ public:
 	void    returnKey();									// ·µ»ØKey
 	void	setKeyAndLogin(QString key);					// µÇÂ¼ÔÆÐÅ
 	static void OnLoginCallback(const nim::LoginRes& login_res, const void* user_data);
+	static void OnMultispotLoginCallback(const nim::MultiSpotLoginRes& res);
+	static void OnKickoutCallback(const nim::KickoutRes& res);
 	static void OnStopAudioCallback(int code, const char* file_path, const char* sid, const char* cid);// Í£Ö¹ÓïÒô
 	static void OnLogOutCallback(nim::NIMResCode res_code);
 	void	CreateRoom(QString chatID, QString courseID, QString teacherID, QString token, QString studentName, std::string audioPath, 

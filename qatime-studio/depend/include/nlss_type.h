@@ -182,12 +182,13 @@ typedef struct stru_NLSS_VIDEO_WATER_PARAM{
 */
 typedef struct struct_NLSS_VIDEOOUT_PARAM
 {
-    int                           iOutWidth;         //!< 视频的输出宽.要求是4的倍数
-    int                           iOutHeight;        //!< 视频的输出高.要求是4的倍数
-    int                           iOutFps;           //!< 视频的帧率.
-    int                           iOutBitrate;       //!< 码率.
-    EN_NLSS_VIDEOOUT_CODEC        enOutCodec;        //!< 视频编码器.可以选择X264，Openh264
-    bool                          bHardEncode;       //!< 是否使用视频硬件编码
+    int                           iOutWidth;           //!< 视频的输出宽.要求是4的倍数
+    int                           iOutHeight;          //!< 视频的输出高.要求是4的倍数
+    int                           iOutFps;             //!< 视频的帧率.
+    int                           iOutBitrate;         //!< 码率.
+    EN_NLSS_VIDEOOUT_CODEC        enOutCodec;          //!< 视频编码器.可以选择X264，Openh264
+    bool                          bHardEncode;         //!< 是否使用视频硬件编码
+	bool                          bQosAutoChangeRatio; //!< 是否自动调整分辨率                          
 } ST_NLSS_VIDEOOUT_PARAM;
 
 /**

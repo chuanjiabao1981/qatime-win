@@ -179,7 +179,7 @@ void UIMainNewWindow::ShowAuxiliary()
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 
-	QByteArray append("?status=teaching&per_page=");
+	QByteArray append("?status=teaching&per_page=");//
 	append += "100";
 
 	strUrl += append;
@@ -308,7 +308,15 @@ void UIMainNewWindow::setKeyAndLogin(QString key)
 	config.database_encrypt_key_ = "Netease";
 	//sdk能力参数（必填）
 	nim::Client::Init(key.toStdString(), "Netease", "", config);
+
 	nim_http::Init(); // 初始化云信http
+
+	auto Mcb = std::bind(OnMultispotLoginCallback, std::placeholders::_1);
+	nim::Client::RegMultispotLoginCb(Mcb);
+
+	auto Kcb = std::bind(OnKickoutCallback, std::placeholders::_1);
+	nim::Client::RegKickoutCb(Kcb);
+
 	InitAudio();	  // 初始化语音
 	m_WindowSet->initCallBack();
 
@@ -334,6 +342,20 @@ void UIMainNewWindow::OnLoginCallback(const nim::LoginRes& login_res, const void
 		QString sError = "云信登录失败，错误码";
 		sError += QString::number(ErrorCode);
 		CMessageBox::showMessage(QString("答疑时间"), QString(sError), QString("确定"), QString("取消"));
+	}
+}
+//多端
+void UIMainNewWindow::OnMultispotLoginCallback(const nim::MultiSpotLoginRes& res)
+{
+	bool online = res.notify_type_ == nim::kNIMMultiSpotNotifyTypeImIn;
+	if (!res.other_clients_.empty())
+	{
+	}
+}
+void UIMainNewWindow::OnKickoutCallback(const nim::KickoutRes& res)
+{
+	if (res.client_type_ == nim::kNIMClientTypePCWindows)
+	{
 	}
 }
 void UIMainNewWindow::setLoginWindow(LoginWindow* parent)

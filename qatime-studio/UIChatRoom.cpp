@@ -17,6 +17,8 @@
 #include <QNetworkRequest>
 #include <QFileDialog>
 
+#include "calendar/DefineCalendar.h"
+
 QColor timeColor(153, 153, 153);
 QColor contentColor(102, 102, 102);
 QColor nameColor(85, 170, 255);
@@ -78,8 +80,6 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	initEmotion();
 	this->clickTalk();
 	m_isBorw = false;
-
-//	initSDK();
 	
 	QDate cdate = QDate::currentDate();   //获取今天的日期
 	QTextCharFormat format;
@@ -113,6 +113,10 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 
 	//隐藏讨论、公告、成员
 	ui.header_widget->setVisible(false);
+
+	m_defDateTimeEdit = new DefDateTimeEdit(this);
+	ui.calendar_horizontalLayout->addWidget(m_defDateTimeEdit);
+	connect(m_defDateTimeEdit, SIGNAL(sig_CalendarClick(QDate)), this, SLOT(slot_CalendarClick(QDate)));
 }
 
 UIChatRoom::~UIChatRoom()
@@ -305,12 +309,9 @@ void UIChatRoom::clickNotes()
 		return;
 	}
 	// 消息记录日期
-	
+	m_RecordTime = QDateTime::currentDateTime();
 	QDateTime date = QDateTime::currentDateTime();
-	QString dtstr = date.toString("yyyy-MM-dd");
-	QDate cdate = QDate::currentDate();
-	ui.timeWidget->setSelectedDate(cdate);
-	ui.timeShow->setText(dtstr);
+	m_defDateTimeEdit->setDate(date.date());
 
 	ui.btn_widget->setVisible(false);
 	ui.send_widget->setVisible(false);
@@ -350,8 +351,8 @@ void UIChatRoom::initEmotion()
 	// 初始化小表情框;
 	m_smallEmotionWidget = new MyEmotionWidget(this);
 	connect(m_smallEmotionWidget, SIGNAL(emitFileName(QString)), this, SLOT(setBrow(QString)));
-	m_smallEmotionWidget->setRowAndColumn(10, 9);
-	m_smallEmotionWidget->setEmotionSize(QSize(33, 33));
+	m_smallEmotionWidget->setRowAndColumn(10, 8);
+	m_smallEmotionWidget->setEmotionSize(QSize(34, 33));
 	m_smallEmotionWidget->setEmotionMovieSize(QSize(24, 24));
 	m_smallEmotionWidget->setMaxRow(4);
 	m_smallEmotionWidget->initTableWidget();
@@ -504,6 +505,8 @@ void UIChatRoom::clickSendMseeage()
 
 void UIChatRoom::chickChoseTime()
 {
+// 	m_defDateTimeEdit->click();
+// 	return;
 	if (ui.timeWidget->isHidden())
 	{
 		ui.timeWidget->raise();
@@ -537,26 +540,48 @@ void UIChatRoom::choseTime(QDate date)
 
 		QueryRecord(dtstr);
 	}
-	
+}
+
+void UIChatRoom::slot_CalendarClick(QDate date)
+{
+	QDate dateNow = QDate::currentDate();
+	if (dateNow < date)
+	{
+		//TODO提示，消息记录只能查看之前的消息
+		QToolTip::showText(QCursor::pos(), "没有今天之后的消息记录！");
+	}
+	else
+	{
+		m_defDateTimeEdit->setDate(date);
+		QString dtstr = date.toString("yyyy-MM-dd");
+
+		QueryRecord(dtstr);
+	}
 }
 
 void UIChatRoom::forwardTime()
 {
-	QDate date = ui.timeWidget->selectedDate().addDays(1);	
-	ui.timeWidget->setSelectedDate(date);
-	QString dtstr = date.toString("yyyy-MM-dd");
-	ui.timeShow->setText(dtstr);
+// 	QDate date = ui.timeWidget->selectedDate().addDays(1);	
+// 	ui.timeWidget->setSelectedDate(date);
+// 	QString dtstr = date.toString("yyyy-MM-dd");
+// 	ui.timeShow->setText(dtstr);
 
+	QDate date = m_defDateTimeEdit->date().addDays(1);
+	m_defDateTimeEdit->setDate(date);
+	QString dtstr = date.toString("yyyy-MM-dd");
 	QueryRecord(dtstr);
 }
 
 void UIChatRoom::afterTime()
 {
-	QDate date = ui.timeWidget->selectedDate().addDays(-1);
-	ui.timeWidget->setSelectedDate(date);
-	QString dtstr = date.toString("yyyy-MM-dd");
-	ui.timeShow->setText(dtstr);
+// 	QDate date = ui.timeWidget->selectedDate().addDays(-1);
+// 	ui.timeWidget->setSelectedDate(date);
+// 	QString dtstr = date.toString("yyyy-MM-dd");
+// 	ui.timeShow->setText(dtstr);
 
+	QDate date = m_defDateTimeEdit->date().addDays(-1);
+	m_defDateTimeEdit->setDate(date);
+	QString dtstr = date.toString("yyyy-MM-dd");
 	QueryRecord(dtstr);
 }
 
@@ -993,6 +1018,7 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 
 					strName += " 加入了群聊";
 					m_uitalkRecord->InsertNotice(strName);
+					stepDays(QDateTime::fromMSecsSinceEpoch(pMsg.timetag_));
 				}
 			}
 			else if (id == nim::kNIMNotificationIdTeamMuteMember)
@@ -1011,6 +1037,8 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 					name += "已被解除禁言";
 
 				m_uitalkRecord->InsertNotice(name);
+
+				stepDays(QDateTime::fromMSecsSinceEpoch(pMsg.timetag_));
 			}
 		}
 		return;
@@ -2281,8 +2309,6 @@ QString UIChatRoom::parse(QString str)
 		else if (s == "`")
 			s = "%60";
 		else if (s == "!")
-			s = "%EFBC81";
-		else if (s == "！")
 			s = "%21";
 		else if (s == "@")
 			s = "%40";
@@ -2302,14 +2328,8 @@ QString UIChatRoom::parse(QString str)
 			s = "%28";
 		else if (s == ")")
 			s = "%29";
-		else if (s == "（")
-			s = "%EFBC88";
-		else if (s == "）")
-			s = "%EFBC89";
 		else if (s == "_")
 			s = "%5F";
-		else if (s == "—")
-			s = "%E28094";
 		else if (s == "+")
 			s = "%2B";
 		else if (s == "=")
@@ -2322,10 +2342,6 @@ QString UIChatRoom::parse(QString str)
 			s = "%5B";
 		else if (s == "]")
 			s = "%5D";
-		else if (s == "；")
-			s = "%EFBC9B";
-		else if (s == "：")
-			s = "%EFBC9A";
 		else if (s == ":")
 			s = "%3A";
 		else if (s == ";")
@@ -2334,36 +2350,18 @@ QString UIChatRoom::parse(QString str)
 			s = "%27";
 		else if (s == "\"")
 			s = "%22";
-		else if (s == "‘")
-			s = "%E28098";
-		else if (s == "“")
-			s = "%E2809C";
 		else if (s == ",")
 			s = "%2C";
-		else if (s == "，")
-			s = "%EFBC8C";
-		else if (s == "《")
-			s = "%E3808A";
 		else if (s == "<")
 			s = "%3C";
 		else if (s == ".")
 			s = "%2E";
 		else if (s == ">")
 			s = "%3E";
-		else if (s == "。")
-			s = "%E38082";
-		else if (s == "》")
-			s = "%E3808B";
 		else if (s == "/")
 			s = "%2F";
 		else if (s == "?")
 			s = "%3F";
-		else if (s == "？")
-			s = "%EFBC9F";
-		else if (s == "【")
-			s = "%E38090";
-		else if (s == "】")
-			s = "%E38091";
 
 		encode += s;
 	}

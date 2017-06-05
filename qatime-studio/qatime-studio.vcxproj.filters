@@ -44,6 +44,9 @@
     <Filter Include="nim_http_cpp">
       <UniqueIdentifier>{3a4b0f07-334e-4965-bd6e-7131cee8d83c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Calendar">
+      <UniqueIdentifier>{84251c84-5aa5-4de0-97e8-81e362a97ea7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -709,6 +712,24 @@
     <ClCompile Include="GeneratedFiles\Release\moc_HttpRequest.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="calendar\DefDateTimeEdit.cpp">
+      <Filter>Calendar</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_DefDateTimeEdit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_DefDateTimeEdit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="calendar\DefineCalendar.cpp">
+      <Filter>Calendar</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_DefineCalendar.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_DefineCalendar.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="loginwindow.h">
@@ -1067,6 +1088,12 @@
     </CustomBuild>
     <CustomBuild Include="HttpRequest.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="calendar\DefDateTimeEdit.h">
+      <Filter>Calendar</Filter>
+    </CustomBuild>
+    <CustomBuild Include="calendar\DefineCalendar.h">
+      <Filter>Calendar</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

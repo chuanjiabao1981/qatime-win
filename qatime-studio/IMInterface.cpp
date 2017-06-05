@@ -260,6 +260,7 @@ void IMInterface::setAudioChange(int volumn, bool captrue)
 
 void IMInterface::SetCustomData(bool bVideo)
 {
+	nim::VChat::SetVideoQuality(nim::kNIMVChatVideoQuality720p);
 	VChat::SetCustomData(false,bVideo);
 }
 

@@ -21,12 +21,68 @@ void sleepTime(int secs)
 		QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
 }
 
+void MixClr(const uint8_t* src_clr, uint8_t* dest_clr, uint8_t a)
+{
+	uint16_t temp = ((uint16_t)*src_clr) * a + ((uint16_t)*dest_clr) * (255 - a);
+	*dest_clr = temp / 255;
+}
+
+void I420CopyEx(const uint8* src_y, int src_stride_y, const uint8* src_ya, int src_stride_ya,
+	const uint8* src_u, int src_stride_u, const uint8* src_ua, int src_stride_ua,
+	const uint8* src_v, int src_stride_v, const uint8* src_va, int src_stride_va,
+	uint8* dst_y, int dst_stride_y,
+	uint8* dst_u, int dst_stride_u,
+	uint8* dst_v, int dst_stride_v,
+	int width, int height)
+{
+	if (src_stride_ya == 0 && src_stride_ua == 0 && src_stride_va == 0)
+	{
+		libyuv::I420Copy(src_y, src_stride_y,
+			src_u, src_stride_u,
+			src_v, src_stride_v,
+			dst_y, dst_stride_y,
+			dst_u, dst_stride_u,
+			dst_v, dst_stride_v,
+			width, height);
+	}
+	else
+	{
+		for (int ih = 0; ih < height; ++ih)
+		{
+			bool uv = ih % 2 == 0;
+			for (int iw = 0; iw < width / 2; ++iw)
+			{
+				MixClr(src_y++, dst_y++, *src_ya++);
+				MixClr(src_y++, dst_y++, *src_ya++);
+				if (uv)
+				{
+					MixClr(src_u++, dst_u++, *src_ua++);
+					MixClr(src_v++, dst_v++, *src_va++);
+				}
+			}
+			src_y += (src_stride_y - width);
+			src_ya += (src_stride_ya - width);
+			dst_y += (dst_stride_y - width);
+			if (uv)
+			{
+				src_u += (src_stride_u - width / 2);
+				src_v += (src_stride_v - width / 2);
+				src_ua += (src_stride_ua - width / 2);
+				src_va += (src_stride_va - width / 2);
+				dst_u += (dst_stride_u - width / 2);
+				dst_v += (dst_stride_v - width / 2);
+			}
+		}
+	}
+}
+
 UIVideo1v1::UIVideo1v1(QWidget *parent)
 	: QWidget(parent)
 	, m_capturnTimer(NULL)
 	, m_refreshTimer(NULL)
 	, m_screen(NULL)
 	, capture_hwnd_(NULL)
+	, pdata_(NULL)
 {
 	ui.setupUi(this);
 	m_screen = QGuiApplication::primaryScreen();
@@ -34,7 +90,7 @@ UIVideo1v1::UIVideo1v1(QWidget *parent)
 	// 计时器 改变直播计时时间
 	m_capturnTimer = new QTimer(this);
 	connect(m_capturnTimer, SIGNAL(timeout()), this, SLOT(slot_onCapturnTimeout()));
-	m_capturnTimer->start(60);
+	m_capturnTimer->start(200);
 
 	m_refreshTimer = new QTimer(this);
 	m_refreshTimer->start(1000 / 25);
@@ -253,36 +309,12 @@ void UIVideo1v1::CustomFrame()
 			BitBlt(mem_dc, 0, 0, capture_width_, capture_height_, w_dc, 0, 0, SRCCOPY /*| CAPTUREBLT*/);
 			//__int64 time1 = get_time_ms();
 			//鼠标
-			if (1)
-			{
-				CURSORINFO pci;
-				pci.cbSize = sizeof(CURSORINFO);
-				GetCursorInfo(&pci);
-				POINT ptCursor = pci.ptScreenPos;
-				ICONINFO IconInfo = { 0 };
-				if (GetIconInfo(pci.hCursor, &IconInfo))
-				{
-					ptCursor.x -= IconInfo.xHotspot;
-					ptCursor.y -= IconInfo.yHotspot;
-					if (NULL != IconInfo.hbmMask)
-						DeleteObject(IconInfo.hbmMask);
-					if (NULL != IconInfo.hbmColor)
-						DeleteObject(IconInfo.hbmColor);
-				}
-				if (capture_hwnd_ != nullptr)
-				{
-					ScreenToClient(capture_hwnd_, &ptCursor);
-				}
-				DrawIconEx(mem_dc, ptCursor.x, ptCursor.y, pci.hCursor, 0, 0, 0, NULL, DI_NORMAL | DI_COMPAT);
-			}
 			SelectObject(mem_dc, old_hbitmap);
 			DeleteDC(mem_dc);
 			ReleaseDC(capture_hwnd_, w_dc);
 			__int64 cur_timestamp = QDateTime::currentMSecsSinceEpoch();// 毫秒
 			int wxh = capture_width_ * capture_height_;
-//			emit sig_CustomVideoData(cur_timestamp, (const char*)capture_data_, wxh * 4, capture_width_, capture_height_);
-			AddVideoFrame(true, cur_timestamp, (const char*)capture_data_, wxh * 4, \
-				capture_width_, capture_height_, "", Ft_ARGB_r);
+			AddVideoFrame(true, cur_timestamp, capture_data_, wxh * 4, capture_width_, capture_height_, "", Ft_ARGB_r);
 		}
 	}
 }
@@ -345,10 +377,39 @@ void UIVideo1v1::AddVideoFrame(bool capture, __int64 time, const char* data, int
 		src_buffer = ret_data.c_str();
 		size = wxh * 3 / 2;
 	}
+	
+	int src_w = width;
+	int src_h = height;
 
-	emit sig_CustomVideoData(cur_timestamp, (const char*)src_buffer, size, capture_width_, capture_height_);
-// 	if (capture)
-// 	{
-// 		capture_video_pic_.ResetData(cur_timestamp, src_buffer, size, width, height/*, subtype*/);
-// 	}
+	// 缩放1280*720
+	width = 1280;
+	height = 720;
+	std::string ret_data_tmp;
+	if (width != src_w || height != src_h)
+	{
+		ret_data_tmp.append(width * height * 3 / 2, (char)0);
+		uint8_t* src_y = (uint8_t*)src_buffer;
+		uint8_t* src_u = src_y + src_w * src_h;
+		uint8_t* src_v = src_u + src_w * src_h / 4;
+		uint8_t* des_y = (uint8_t*)ret_data_tmp.c_str();
+		uint8_t* des_u = des_y + width * height;
+		uint8_t* des_v = des_u + width * height / 4;
+		libyuv::FilterMode filter_mode = libyuv::kFilterBox;
+		libyuv::I420Scale(src_y, src_w,
+			src_u, src_w / 2,
+			src_v, src_w / 2,
+			src_w, src_h,
+			des_y, width,
+			des_u, width / 2,
+			des_v, width / 2,
+			width, height,
+			filter_mode);
+	}
+
+	memcpy((char*)src_buffer, ret_data_tmp.c_str(), ret_data_tmp.size());
+	src_buffer = ret_data.c_str();
+	width = 1280;
+	height = 720;
+	size = width*height * 3 / 2;
+	emit sig_CustomVideoData(0, src_buffer, size, width, height);
 }

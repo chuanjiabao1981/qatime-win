@@ -15,7 +15,7 @@ void Course1v1::readJson(const QJsonObject &json)
 
 	mGrade = json["grade"].toString();
 	mTeacherName = json["teacher_name"].toString();
-	mPic = json["publicize_url"].toString();
+	 mPic = json["publicize_info_url"].toString();
 	// ½ø¶È
 	int preset_lesson = json["lessons_count"].toInt();
 	int completed_lesson = json["completed_lesson_count"].toInt();

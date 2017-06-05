@@ -329,6 +329,7 @@ public:
 	void    QueryOnlinePersonNum();									  // 查询在线人数
 	void	startQueryOnlineNum();									  // 开始查询在线人数
 	void    stopQueryOnlineNum();									  // 停止查询在线人数
+	void	RecordLive();											  // 1对1录播
 };
 
 #endif // UIWINDOWSET_H

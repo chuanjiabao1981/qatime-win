@@ -403,6 +403,14 @@ void UIWindowSet::initFont()
 	font.setPixelSize(15);
 	ui.lesson_label->setFont(font);
 
+	font = ui.time_label->font();
+	font.setPixelSize(10);
+	ui.time_label->setFont(font);
+
+	font = ui.time1v1_label->font();
+	font.setPixelSize(10);
+	ui.time1v1_label->setFont(font);
+
 	ui.lesson_widget->setVisible(false);
 	ui.camera_widget->setVisible(false);
 	ui.whiteboard_widget->setVisible(false);
@@ -1045,7 +1053,7 @@ void UIWindowSet::clickLive()
 
 				setLiveBtnEnable(false);
 				m_VideoInfo->StopLiveVideo();
-
+				qDebug() << "位置1";
 				m_LiveStatusManager->SendStopLiveHttpMsg();
 
 				if (m_CountTimer->isActive())
@@ -1092,11 +1100,10 @@ void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString board
 	else
 	{
 		m_CameraInfo->setVisible(false);
-// 		m_boardUrl = "rtmp://pa0a19f55.live.126.net/live/2794c854398f4d05934157e05e2fe419?wsSecret=16c5154fb843f7b7d2819554d8d3aa94&wsTime=1480648811";
-// 		m_cameraUrl = "rtmp://pa0a19f55.live.126.net/live/0ca7943afaa340c9a7c1a8baa5afac97?wsSecret=f49d13a6ab68601884b5b71487ff51e1&wsTime=1480648749";
 		m_boardUrl = m_curTags->BoardStream();
 		qDebug() << "白板推流地址：" << m_boardUrl;
 		m_cameraUrl = m_curTags->CameraStream();
+//		m_cameraUrl = "rtmp://pdl1f3ddaa0.live.126.net/live/df94558f9ed54c3c9f202fdce874f00e?wsSecret=e4d7ff826847f0d3631e114b0f33a7ea&wsTime=1496399983";
 		qDebug() << "摄像头推流地址：" << m_cameraUrl;
 		m_VideoInfo->setPlugFlowUrl(m_boardUrl);
 		m_VideoInfo->StartLiveVideo();
@@ -1881,6 +1888,7 @@ void UIWindowSet::ErrorStopLive(QWidget* pWidget)
 		}
 
 		m_ScreenTip->setErrorTip("直播过程中网络出现错误，请重新\n开启直播！");
+		qDebug() << "位置2";
 		m_LiveStatusManager->SendStopLiveHttpMsg();
 
 		setLiveBtnEnable(true);
@@ -2683,6 +2691,52 @@ void UIWindowSet::start1v1LiveStream()
 	ui.time1v1_label->setVisible(true);
 	ui.Live1v1_pushBtn->setText("结束直播");
 	ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: red;border-radius: 5px; border: 2px solid red;}");
+
+	// 开始旁路直播
+	RecordLive();
+}
+
+void UIWindowSet::RecordLive()
+{
+	if (m_curTags == NULL || !m_curTags->IsModle())
+		return;
+
+	QString strCourseID = "";
+	if (m_curTags)
+		strCourseID = m_curTags->CourseID();
+	else
+		return;
+
+	QString strUrl;
+	if (m_EnvironmentalTyle)
+	{
+		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_courses/{id}/detail";
+		strUrl.replace("{id}", strCourseID);
+	}
+	else
+	{
+		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_courses/{id}/detail";
+		strUrl.replace("{id}", strCourseID);
+	}
+
+	HttpRequest http;
+	http.setRawHeader("Remember-Token", m_Token.toUtf8());
+
+	QByteArray result = http.httpGet(strUrl);
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	if (obj["status"].toInt() == 1)
+	{
+		QJsonObject online = data["interactive_course"].toObject();
+		QString board = online["board_push_stream"].toString();
+		qDebug() << "旁路直播推流地址:" << board;
+	}
+	else
+	{
+		qDebug() << "获取旁路直播推流地址失败！";
+	}
 }
 
 void UIWindowSet::show1v1ErrorTip(QString sError)

@@ -37,6 +37,9 @@ private:
 	char*							capture_data_;
 	int								capture_width_;
 	int								capture_height_;
+
+	char*		pdata_;         //颜色数据首地址
+	int			size_max_;
 protected:
 	virtual void paintEvent(QPaintEvent *);
 

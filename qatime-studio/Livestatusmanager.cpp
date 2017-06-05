@@ -341,6 +341,7 @@ void LiveStatusManager::FinishStartLive()
 			if (m_newParent)
 			{
 				m_newParent->showErrorTip(TIP_START_LIVE_ERROR);
+				qDebug() << "ErrorStopLive 1";
 				m_newParent->ErrorStopLive(NULL);
 			}
 		}
@@ -354,6 +355,7 @@ void LiveStatusManager::FinishStartLive()
 		if (m_newParent)
 		{
 			m_newParent->showErrorTip(TIP_START_LIVE_ERROR);
+			qDebug() << "ErrorStopLive 2";
 			m_newParent->ErrorStopLive(NULL);
 		}
 	}
@@ -362,6 +364,7 @@ void LiveStatusManager::FinishStartLive()
 // 停止直播推流消息
 void LiveStatusManager::SendStopLiveHttpMsg(bool bConnect)
 {
+	qDebug() << "位置3";
 	StopTimer();
 	QString strUrl;
 
