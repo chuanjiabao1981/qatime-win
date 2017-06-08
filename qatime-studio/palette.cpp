@@ -75,7 +75,7 @@ void Palette::revocation()
 
 	QString strInfo;
 	strInfo.append(QString("%1:%2,%3,%4;").arg(QString::number(DrawOpUndo)).arg("").arg("").arg(""));
-	emit PicData(strInfo);
+	emit PicData(strInfo, "");
 	update();
 }
 
@@ -98,7 +98,7 @@ void Palette::cleanUp()
 	QString opType = QString::number(DrawOpClear);	//  消息类型
 	QString strInfo;
 	strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg("").arg("").arg(""));
-	emit PicData(strInfo);
+	emit PicData(strInfo, "");
 }
 
 void Palette::setIsDraw(bool isDraw)
@@ -115,7 +115,7 @@ void Palette::setMouseStyle(bool isDraw)
 		QString opType = QString::number(kMultiBoardOpSignEnd);//  消息类型
 		QString strInfo;
 		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg("").arg("").arg(""));
-		emit PicData(strInfo);
+		emit PicData(strInfo,"");
 
 		QCursor cursor;
 		QPixmap pixmap(":/LoginWindow/images/pen.png");
@@ -183,7 +183,7 @@ void Palette::mousePressEvent(QMouseEvent *event)
 		QString sClr = QString::number(clr);			//  颜色类型
 		QString strInfo;
 		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
-		emit PicData(strInfo);
+		emit PicData(strInfo,"");
     }
         break;
     default:
@@ -210,7 +210,7 @@ void Palette::mouseMoveEvent(QMouseEvent *event)
 		QString strInfo;
 		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
 		qDebug() << strInfo;
-		emit PicData(strInfo);
+		emit PicData(strInfo, "");
 		return;
 	}
 
@@ -232,7 +232,7 @@ void Palette::mouseMoveEvent(QMouseEvent *event)
 		QString strInfo;
 		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
 		qDebug() << strInfo;
-		emit PicData(strInfo);
+		emit PicData(strInfo, "");
     }
 }
 
@@ -258,7 +258,7 @@ void Palette::mouseReleaseEvent(QMouseEvent *event)
 		QString sClr = QString::number(clr);			//  颜色类型
 		QString strInfo;
 		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
-		emit PicData(strInfo);
+		emit PicData(strInfo, "");
     }
 }
 
@@ -280,7 +280,14 @@ void Palette::RecData(const std::string& data, const std::string &uid)
 
 		if (draw_op_type_ == kMultiBoardOpSyncQuery)//同步消息
 		{
-			SendSyncDraw();
+			LONG64 timeX;
+			std::list<std::string> param_list = BoardStringTokenize(cur_data.c_str(), ",");
+			if (param_list.size() > 0)
+			{
+				auto it = param_list.begin();
+				timeX = atoll(it->c_str());
+			}
+			SendSyncDraw(timeX);
 			return;
 		}
 					 
@@ -390,8 +397,10 @@ int Palette::colorConvert(QColor color)
 	return clr;
 }
 
-void Palette::SendSyncDraw()
+void Palette::SendSyncDraw(LONG64 timeX)
 {
+	ReturnSync(timeX);
+
 	if (mStatus == 1)
 		SendFullScreen(mStatus);
 	
@@ -410,18 +419,18 @@ void Palette::SendSyncDraw()
 				clr = colorConvert(shape->penColor());
 				sClr = QString::number(clr);			//  颜色类型
 				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
-				emit PicData(strInfo);
+				emit PicData(strInfo, "");
 			}
 			else if (pt == shape->PointVec().last())
 			{
-				emit PicData(strMoveInfo);
+				emit PicData(strMoveInfo, "");
 				ptX = QString("%1").arg(pt.x());				//	x的相对坐标
 				ptY = QString("%1").arg(pt.y());				//  y的相对坐标
 				opType = QString::number(DrawOpEnd);			//  消息类型
 				clr = colorConvert(shape->penColor());
 				sClr = QString::number(clr);			//  颜色类型
 				strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
-				emit PicData(strInfo);
+				emit PicData(strInfo, "");
 			}
 			else
 			{
@@ -482,7 +491,7 @@ void Palette::SendSyncDraw()
 			}
 		}
 
-		emit PicData(strMoveInfo);
+		emit PicData(strMoveInfo, "");
 		qDebug() << strMoveInfo;
 	}
 }
@@ -492,5 +501,12 @@ void Palette::SendFullScreen(int iOpen)
 	mStatus = iOpen;
 	QString strInfo;
 	strInfo.append(QString("%1:%2,%3,%4;").arg(kMultiBoardOpFullScreen).arg(iOpen).arg("0").arg("0"));
-	emit PicData(strInfo);
+	emit PicData(strInfo, "");
+}
+
+void Palette::ReturnSync(LONG64 timeX)
+{
+	QString strInfo;
+	strInfo.append(QString("%1:%2,%3,%4;").arg(kMultiBoardOpSyncTime).arg(timeX).arg("0").arg("0"));
+	emit PicData(strInfo, QString::fromStdString(m_SenderUid));
 }

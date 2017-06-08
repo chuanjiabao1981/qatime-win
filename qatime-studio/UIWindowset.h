@@ -78,6 +78,7 @@ class UIWhiteBoardTool;
 class UIVideo1v1;
 class UIAppWnd;
 class UIAppWndTool;
+class UIVideoRecord;
 class UIWindowSet : public QWidget
 {
 	Q_OBJECT
@@ -168,6 +169,7 @@ public:
 	UIAppWnd*						m_AppWnd1v1;			// 选择分享窗口
 	UIAppWndTool*					m_AppWndTool1v1;		// 1v1窗口分享工具条
 	QTimer*							m_QueryOnlieTimers;		// 定时查询在线人数
+	UIVideoRecord*					m_VideoRecordInfo;		// 旁路直播
 private:
 	Ui::UIWindowSet ui;
 
@@ -205,7 +207,7 @@ private slots :
 	void joinVChatRoom();									// 加入音视频
 	void joinVChatSuccessfully();							// 加入音视频房间成功
 	void errorInfo(const QString &);						// 加入失败错误信息
-	void PicData(QString);									// 白板数据
+	void PicData(QString,QString);									// 白板数据
 	void setDeviceInfos(int);								// 设备参数
 	void clickVideo1v1Param();								// 摄像头参数
 	void clickAudio1v1Param();								// 麦克风参数

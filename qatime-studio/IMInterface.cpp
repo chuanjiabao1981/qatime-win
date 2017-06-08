@@ -100,7 +100,7 @@ void IMInterface::joinRtsRoom(const std::string &name, bool record/* = false*/)
 
 void IMInterface::SendData(const std::string& session_id, int channel_type, const std::string& data, const std::string& uid /* = "" */)
 {
-	Rts::SendData(IMInterface::getInstance()->getSessionID(), kNIMRtsChannelTypeTcp, data);
+	Rts::SendData(IMInterface::getInstance()->getSessionID(), kNIMRtsChannelTypeTcp, data, uid);
 }
 
 void IMInterface::setSessionID(const std::string &sessionID)

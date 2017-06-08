@@ -302,6 +302,9 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_UIVideochange1v1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIVideoRecord.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_UIViewimage.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -524,6 +527,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_UIVideochange1v1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UIVideoRecord.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_UIViewimage.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -605,6 +611,7 @@
     <ClCompile Include="UIVideo1v1.cpp" />
     <ClCompile Include="UIVideochange.cpp" />
     <ClCompile Include="UIVideochange1v1.cpp" />
+    <ClCompile Include="UIVideoRecord.cpp" />
     <ClCompile Include="UIViewimage.cpp" />
     <ClCompile Include="UIWhiteBoardTool.cpp" />
     <ClCompile Include="UIWindowset.cpp" />
@@ -1129,6 +1136,16 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing UITextEdit.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB -DNDEBUG "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs\api" "-I.\depend\libs\include" "-I$(QTDIR)\include\QtWebEngineWidgets" "-I$(QTDIR)\include\QtWebView" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
+    </CustomBuild>
+    <CustomBuild Include="UIVideoRecord.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing UIVideoRecord.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing UIVideoRecord.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB -DNDEBUG "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs\api" "-I.\depend\libs\include" "-I$(QTDIR)\include\QtWebEngineWidgets" "-I$(QTDIR)\include\QtWebView" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
     </CustomBuild>

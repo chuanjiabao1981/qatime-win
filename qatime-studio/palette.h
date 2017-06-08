@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QStack>
 #include <QPen>
+#include <basetsd.h>
 
 namespace Ui {
 class Palette;
@@ -31,7 +32,8 @@ public:
 
 	void DrawUndo();							//对方撤销
 	int  colorConvert(QColor color);			//解析数据
-	void SendSyncDraw();						//发送同步数据
+	void SendSyncDraw(LONG64 timeX);				//发送同步数据
+	void ReturnSync(LONG64 timeX);
 	void SendFullScreen(int iOpen);				//发送全屏消息,1：开启 0：关闭
 
 	enum DrawOpType
@@ -63,6 +65,7 @@ public:
 		kMultiBoardOpSignEnd = 13,
 		kMultiBoardOpDocInfo = 14, //"14:id（文档id）,page_num(当前页数，1开始计算),page_count（总页数）,type(状态通知：0，翻页操作：1);" "14:8c17c252-1276-4817-92ce-688576b8df4c,2,4,1;"
 		kMultiBoardOpFullScreen = 15, //全屏分享
+		kMultiBoardOpSyncTime = 16, // 同步返回
 	};
 
 private:
@@ -75,7 +78,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event);
 
 signals:
-	void PicData(QString);
+	void PicData(QString,QString);
 private slots:
 	void slot_onCountTimeout();
 private:

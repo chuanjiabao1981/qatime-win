@@ -385,9 +385,12 @@ void UIVideo1v1::AddVideoFrame(bool capture, __int64 time, const char* data, int
 	width = 1280;
 	height = 720;
 	std::string ret_data_tmp;
+	ret_data_tmp.append(width * height * 3 / 2, (char)0);
+	const char* data_buffer = ret_data_tmp.c_str();
+
 	if (width != src_w || height != src_h)
 	{
-		ret_data_tmp.append(width * height * 3 / 2, (char)0);
+		
 		uint8_t* src_y = (uint8_t*)src_buffer;
 		uint8_t* src_u = src_y + src_w * src_h;
 		uint8_t* src_v = src_u + src_w * src_h / 4;
@@ -406,10 +409,10 @@ void UIVideo1v1::AddVideoFrame(bool capture, __int64 time, const char* data, int
 			filter_mode);
 	}
 
-	memcpy((char*)src_buffer, ret_data_tmp.c_str(), ret_data_tmp.size());
-	src_buffer = ret_data.c_str();
+	memcpy((char*)data_buffer, ret_data_tmp.c_str(), ret_data_tmp.size());
+//	src_buffer = ret_data.c_str();
 	width = 1280;
 	height = 720;
 	size = width*height * 3 / 2;
-	emit sig_CustomVideoData(0, src_buffer, size, width, height);
+	emit sig_CustomVideoData(0, data_buffer, size, width, height);
 }

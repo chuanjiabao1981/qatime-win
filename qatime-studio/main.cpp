@@ -60,14 +60,14 @@ void outputMessage(QtMsgType type, const QMessageLogContext &context, const QStr
 
 int main(int argc, char *argv[])
 {
-// 	HANDLE hMutex = CreateMutex(NULL, TRUE, TEXT("QtTeacher_Mutex"));
-// 	//已存在互斥量说明在运行  
-// 	if (ERROR_ALREADY_EXISTS == GetLastError())
-// 	{
-// 		CloseHandle(hMutex);
-// 		hMutex = NULL;
-// 		return 0;
-// 	}
+	HANDLE hMutex = CreateMutex(NULL, TRUE, TEXT("QtTeacher_Mutex"));
+	//已存在互斥量说明在运行  
+	if (ERROR_ALREADY_EXISTS == GetLastError())
+	{
+		CloseHandle(hMutex);
+		hMutex = NULL;
+		return 0;
+	}
 
 	::SetUnhandledExceptionFilter(MyUnhandledExceptionFilter);
 

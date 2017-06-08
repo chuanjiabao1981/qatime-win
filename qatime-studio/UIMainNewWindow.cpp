@@ -354,8 +354,10 @@ void UIMainNewWindow::OnMultispotLoginCallback(const nim::MultiSpotLoginRes& res
 }
 void UIMainNewWindow::OnKickoutCallback(const nim::KickoutRes& res)
 {
+	int i = 0;
 	if (res.client_type_ == nim::kNIMClientTypePCWindows)
 	{
+		i++;
 	}
 }
 void UIMainNewWindow::setLoginWindow(LoginWindow* parent)

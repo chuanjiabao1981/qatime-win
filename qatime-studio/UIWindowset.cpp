@@ -11,6 +11,7 @@
 #include "IMInterface.h"
 #include "HttpRequest.h"
 
+#include "UIVideoRecord.h"
 #define MAINWINDOW_X_MARGIN 10
 #define MAINWINDOW_Y_MARGIN 10
 #define MAINWINDOW_TITLE_HEIGHT 0
@@ -49,6 +50,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	, m_VideoInfo1v1(NULL)
 	, m_AppWnd1v1(NULL)
 	, m_QueryOnlieTimers(NULL)
+	, m_VideoRecordInfo(NULL)
 {
 	ui.setupUi(this);
 	m_This = this;
@@ -107,6 +109,9 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	m_VideoInfo->InitDeviceParam();
 	ui.verticalLayout_6->addWidget(m_VideoInfo);
 	m_VideoInfo->show();
+
+	// 旁路直播
+	m_VideoRecordInfo = new UIVideoRecord();
 
 	m_CameraInfo = new UICamera(ui.widget_5);//camera1_widget
 	m_CameraInfo->setWindowFlags(Qt::FramelessWindowHint);
@@ -2244,7 +2249,7 @@ void UIWindowSet::initWhiteBoardWidget()
 	mWhiteBoard = new Palette();
 	ui.horizontalLayout_21->addWidget(mWhiteBoard);
 	mWhiteBoard->setIsDraw(true);
-	connect(mWhiteBoard, SIGNAL(PicData(QString)), this, SLOT(PicData(QString)));
+	connect(mWhiteBoard, SIGNAL(PicData(QString, QString)), this, SLOT(PicData(QString,QString)));
 
 	m_WhiteBoardTool = new UIWhiteBoardTool(ui.live1v1_widget);
 	m_WhiteBoardTool->hide();
@@ -2373,10 +2378,11 @@ void UIWindowSet::slot_selectWnd(HWND hwnd)
 	m_Camera1v1Info->StartEndVideo(true);
 }
 
-void UIWindowSet::PicData(QString str)
+void UIWindowSet::PicData(QString str,QString uid)
 {
 	std::string picData = str.toStdString();
-	IMInterface::getInstance()->SendData("", 1, picData);
+	std::string strUid = uid.toStdString();
+	IMInterface::getInstance()->SendData("", 1, picData,strUid);
 }
 
 void UIWindowSet::initConnection()
@@ -2667,6 +2673,7 @@ void UIWindowSet::clickLive1v1()
 				ui.time1v1_label->setText("00:00:00");	// 重置时间
 			}
 
+			m_VideoRecordInfo->StopLiveVideo();
 			m_bLiving1v1 = false;
 		}
 		else
@@ -2732,6 +2739,9 @@ void UIWindowSet::RecordLive()
 		QJsonObject online = data["interactive_course"].toObject();
 		QString board = online["board_push_stream"].toString();
 		qDebug() << "旁路直播推流地址:" << board;
+	
+		m_VideoRecordInfo->setPlugFlowUrl(board);
+		m_VideoRecordInfo->StartLiveVideo();
 	}
 	else
 	{
