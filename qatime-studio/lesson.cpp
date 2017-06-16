@@ -44,9 +44,9 @@ void Lesson::readJson(const QJsonObject &json)
 	// 摄像头推流地址
 	mCameraUrl = json["camera_pull_stream"].toString();
 
-	QJsonObject lessons1v1 = json["product_interactive_course"].toObject();
-	if (!lessons1v1.empty())
-		mStatus = lessons1v1["status"].toString();
+// 	QJsonObject lessons1v1 = json["product_interactive_course"].toObject();
+// 	if (!lessons1v1.empty())
+// 		mStatus = lessons1v1["status"].toString();
 }
 
 QString Lesson::BoardUrl()

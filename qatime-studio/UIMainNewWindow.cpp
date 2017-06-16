@@ -377,7 +377,7 @@ void UIMainNewWindow::returnClick()
 }
 
 bool UIMainNewWindow::IsMayClose()
-{
+{	
 	if (m_WindowSet->IsLiving())
 		return false;
 	else
@@ -500,6 +500,7 @@ bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, lo
 				}
 			}
 
+			m_WindowSet->m_bQueryMsg = false;
 			delete pIMsg;
 			pIMsg = NULL;
 		}

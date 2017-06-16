@@ -34,6 +34,7 @@ protected Q_SLOTS:
 	void slot_scrollDown();
 	void slot_Audioclicked(std::string, std::string, std::string, bool);
 	void slot_Btnclicked();
+	void slot_Delay();
 
 private:
 	Ui::UITalkRecord ui;
@@ -45,6 +46,7 @@ private:
 
 	std::vector<CBtnPix*>	m_vecImgProcess;	//存放所有的图片控件
 	std::vector<CBtnAudio*> m_vecAudio;			//所有的audio按钮
+	QTimer*				m_timerDelay;
 public:
 	QVBoxLayout*		m_Ver;
 

@@ -3,9 +3,11 @@
 #include <QTimer>
 #include <QPainter>
 
+
 UITextEdit::UITextEdit(QWidget *parent /*= 0*/)
 	: QTextEdit(parent)
 {
+	m_i = 0;
 	m_timer = new QTimer(this);
 	connect(m_timer, SIGNAL(timeout()), this, SLOT(timeout()));
 	connect(this->document(), SIGNAL(contentsChanged()), this, SLOT(textAreaChanged()));
@@ -50,4 +52,21 @@ void UITextEdit::paintEvent(QPaintEvent *e)
 
 	if (this->verticalScrollBar()->isVisible())
 		this->setFixedHeight(height() + 40);
+	else
+	{
+		m_i++;
+		if (m_i == 2)
+		{
+			QTextDocument *document = this->document();
+			document->adjustSize();
+			if (document&&this)
+			{
+				int newheight = document->size().rheight();
+				if (newheight < this->height())
+				{
+					this->setFixedHeight(newheight);
+				}
+			}
+		}
+	}
 }

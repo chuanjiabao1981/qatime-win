@@ -170,6 +170,9 @@ public:
 	UIAppWndTool*					m_AppWndTool1v1;		// 1v1窗口分享工具条
 	QTimer*							m_QueryOnlieTimers;		// 定时查询在线人数
 	UIVideoRecord*					m_VideoRecordInfo;		// 旁路直播
+
+public:
+	bool							m_bQueryMsg;		// 是否在查询消息记录
 private:
 	Ui::UIWindowSet ui;
 

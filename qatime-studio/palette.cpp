@@ -281,12 +281,12 @@ void Palette::RecData(const std::string& data, const std::string &uid)
 		if (draw_op_type_ == kMultiBoardOpSyncQuery)//同步消息
 		{
 			LONG64 timeX;
-			std::list<std::string> param_list = BoardStringTokenize(cur_data.c_str(), ",");
-			if (param_list.size() > 0)
-			{
-				auto it = param_list.begin();
-				timeX = atoll(it->c_str());
-			}
+// 			std::list<std::string> param_list = BoardStringTokenize(cur_data.c_str(), ",");
+// 			if (param_list.size() > 0)
+// 			{
+// 				auto it = param_list.begin();
+// 				timeX = atoll(it->c_str());
+// 			}
 			SendSyncDraw(timeX);
 			return;
 		}
@@ -399,7 +399,7 @@ int Palette::colorConvert(QColor color)
 
 void Palette::SendSyncDraw(LONG64 timeX)
 {
-	ReturnSync(timeX);
+//	ReturnSync(timeX);
 
 	if (mStatus == 1)
 		SendFullScreen(mStatus);

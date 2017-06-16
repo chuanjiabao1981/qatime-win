@@ -445,7 +445,7 @@ void LoginWindow::CreateTray()
 {
 	QAction* returnAction = new QAction(tr("«–ªª’À∫≈"), this);
 	connect(returnAction, SIGNAL(triggered()), this, SLOT(ReturnAccount()));
-	QAction* closeAction = new QAction(tr("πÿ±’"), this);
+	QAction* closeAction = new QAction(tr("πÿ±’»Ìº˛"), this);
 	connect(closeAction, SIGNAL(triggered()), this, SLOT(CloseWindow()));
 
 

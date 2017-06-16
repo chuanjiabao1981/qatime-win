@@ -12,6 +12,7 @@ public:
 	~UITextEdit();
 
 	QTimer*			m_timer;
+	int				m_i;
 private slots:
 	void textAreaChanged();
 	void timeout();

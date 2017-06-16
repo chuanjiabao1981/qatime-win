@@ -61,17 +61,17 @@ QLabel* UIAuxiliaryList::AddCourse(QString picUrl, QString courseName, QString g
 
 
 	int fontSize = ui.name_label->fontMetrics().width(courseName);//获取之前设置的字符串的像素大小
-	if (fontSize >= ui.name_label->width()) //与label自身相比较
+	if (fontSize >= 150) //与label自身相比较
 	{
-		QString  tmpStr = ui.name_label->fontMetrics().elidedText(courseName, Qt::ElideRight, ui.name_label->width());
+		QString  tmpStr = ui.name_label->fontMetrics().elidedText(courseName, Qt::ElideRight, 150);
 		ui.name_label->setText(tmpStr);
 		ui.name_label->setToolTip(courseName);
 	}
 
 	fontSize = ui.grade_label->fontMetrics().width(grade + "|" + teacherName);//获取之前设置的字符串的像素大小
-	if (fontSize >= ui.grade_label->width()) //与label自身相比较
+	if (fontSize >= 150) //与label自身相比较
 	{
-		QString  tmpStr = ui.grade_label->fontMetrics().elidedText(grade + "|" + teacherName, Qt::ElideRight, ui.name_label->width());
+		QString  tmpStr = ui.grade_label->fontMetrics().elidedText(grade + "|" + teacherName, Qt::ElideRight, 150);
 		ui.grade_label->setText(tmpStr);
 		ui.grade_label->setToolTip(grade + "|" + teacherName);
 	}

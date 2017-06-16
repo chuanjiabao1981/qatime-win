@@ -51,6 +51,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	, m_AppWnd1v1(NULL)
 	, m_QueryOnlieTimers(NULL)
 	, m_VideoRecordInfo(NULL)
+	, m_bQueryMsg(false)
 {
 	ui.setupUi(this);
 	m_This = this;
@@ -1494,7 +1495,21 @@ void UIWindowSet::returnNotice()
 			delete announcements;
 		}
 	}
-	else if (obj["status"].toInt() == 0)
+	else if (error["code"].toInt() == 1002)
+	{
+		QString strError = QString("授权已过期，请重新登录");
+		int iStatus = CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString(strError),
+			QString("确定"),
+			QString());
+		if (iStatus == 1 || iStatus == 0)
+		{
+			ReturnLogin();
+		}
+		return;
+	}
+	else
 	{
 		return;
 	}
@@ -1612,7 +1627,21 @@ void UIWindowSet::returnCourse()
 		if (m_CourseWnd)
 			m_CourseWnd->AddInfo(coursePic, courseName, courseGrade, coursePross, courseStart, courseDesc);
 	}
-	else if (obj["status"].toInt() == 0)
+	else if (error["code"].toInt() == 1002)
+	{
+		QString strError = QString("授权已过期，请重新登录");
+		int iStatus = CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString(strError),
+			QString("确定"),
+			QString());
+		if (iStatus == 1 || iStatus == 0)
+		{
+			ReturnLogin();
+		}
+		return;
+	}
+	else
 	{
 		return;
 	}
@@ -1732,7 +1761,21 @@ void UIWindowSet::returnLesson()
 			}
 		}
 	}
-	else if (obj["status"].toInt() == 0)
+	else if (error["code"].toInt() == 1002)
+	{
+		QString strError = QString("授权已过期，请重新登录");
+		int iStatus = CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString(strError),
+			QString("确定"),
+			QString());
+		if (iStatus == 1 || iStatus == 0)
+		{
+			ReturnLogin();
+		}
+		return;
+	}
+	else
 	{
 		return;
 	}
@@ -2673,7 +2716,7 @@ void UIWindowSet::clickLive1v1()
 				ui.time1v1_label->setText("00:00:00");	// 重置时间
 			}
 
-			m_VideoRecordInfo->StopLiveVideo();
+//			m_VideoRecordInfo->StopLiveVideo();
 			m_bLiving1v1 = false;
 		}
 		else
@@ -2740,8 +2783,8 @@ void UIWindowSet::RecordLive()
 		QString board = online["board_push_stream"].toString();
 		qDebug() << "旁路直播推流地址:" << board;
 	
-		m_VideoRecordInfo->setPlugFlowUrl(board);
-		m_VideoRecordInfo->StartLiveVideo();
+// 		m_VideoRecordInfo->setPlugFlowUrl(board);
+// 		m_VideoRecordInfo->StartLiveVideo();
 	}
 	else
 	{

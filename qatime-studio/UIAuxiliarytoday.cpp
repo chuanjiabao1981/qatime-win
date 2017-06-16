@@ -41,17 +41,17 @@ void UIAuxiliaryToday::AddLesson(QString lessonName, QString courseID, QString c
 // 		ui.status_label->setStyleSheet("color:rgb(255,0,0)");
 
 	int fontSize = ui.course_label->fontMetrics().width(courseName);//获取之前设置的字符串的像素大小
-	if (fontSize >= ui.course_label->width()) //与label自身相比较
+	if (fontSize >= 190) //与label自身相比较
 	{
-		QString  tmpStr = ui.course_label->fontMetrics().elidedText(courseName, Qt::ElideRight, contentsRect().width(), Qt::TextShowMnemonic);
+		QString  tmpStr = ui.course_label->fontMetrics().elidedText(courseName, Qt::ElideRight, 190);
 		ui.course_label->setText(tmpStr);
 		ui.course_label->setToolTip(courseName);
 	}
 
 	fontSize = ui.lesson_label->fontMetrics().width("课程:" + lessonName);//获取之前设置的字符串的像素大小
-	if (fontSize >= ui.lesson_label->width()) //与label自身相比较
+	if (fontSize >= 190) //与label自身相比较
 	{
-		QString  tmpStr = ui.lesson_label->fontMetrics().elidedText("课程:" + lessonName, Qt::ElideRight, contentsRect().width(), Qt::TextShowMnemonic);
+		QString  tmpStr = ui.lesson_label->fontMetrics().elidedText("课程:" + lessonName, Qt::ElideRight, 190);
 		ui.lesson_label->setText(tmpStr);
 		ui.lesson_label->setToolTip("课程:" + lessonName);
 	}

@@ -7,6 +7,8 @@
 #include <QScrollBar>
 #include "windows.h"
 
+#define TIME_DELAY 150
+
 void RecordSleep(int secs)
 {
 	QTime dieTime = QTime::currentTime().addMSecs(secs);
@@ -21,6 +23,7 @@ UITalkRecord::UITalkRecord(QWidget *parent)
 	, m_mainView(NULL)
 	, m_Ver(NULL)
 	, m_parent(NULL)
+	, m_timerDelay(NULL)
 {
 	ui.setupUi(this);
 
@@ -41,6 +44,9 @@ UITalkRecord::UITalkRecord(QWidget *parent)
 	ui.verticalLayout->addWidget(m_view);
 
 	style(m_view);
+
+	m_timerDelay = new QTimer(this);
+	connect(m_timerDelay, SIGNAL(timeout()), this, SLOT(slot_Delay()));
 }
 
 UITalkRecord::~UITalkRecord()
@@ -151,8 +157,9 @@ void UITalkRecord::InsertChat(QPixmap* pixmap, QString name, QString time, QStri
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	RecordSleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	RecordSleep(50);
+// 	ScrollDown();
 }
 
 // 插入语音聊天信息
@@ -230,8 +237,9 @@ void UITalkRecord::InsertAudioChat(QPixmap* pixmap, QString name, QString time, 
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	RecordSleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	RecordSleep(50);
+// 	ScrollDown();
 }
 
 // 插入通知消息等
@@ -267,8 +275,9 @@ void UITalkRecord::InsertNotice(QString text)
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	RecordSleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	RecordSleep(50);
+// 	ScrollDown();
 }
 
 // 插入图片聊天信息
@@ -367,8 +376,9 @@ void UITalkRecord::InsertPic(QPixmap* pixmap, QString name, QString time, QStrin
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	RecordSleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	RecordSleep(50);
+// 	ScrollDown();
 }
 
 // 点击图片获取图片本地url
@@ -459,8 +469,9 @@ void UITalkRecord::InsertEmoji(QPixmap* pixmap, QString name, QString time, QStr
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	RecordSleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	RecordSleep(50);
+// 	ScrollDown();
 }
 
 void UITalkRecord::ParseFace(AnimatedTextBrowserA* Anim, QString qContect)
@@ -678,8 +689,9 @@ void UITalkRecord::style(QScrollArea *style)
 
 void UITalkRecord::DelaySrcoll()
 {
-	RecordSleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	RecordSleep(50);
+// 	ScrollDown();
 }
 
 void UITalkRecord::mousePressEvent(QMouseEvent *e)
@@ -750,8 +762,9 @@ void UITalkRecord::InsertBtn()
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	RecordSleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	RecordSleep(50);
+// 	ScrollDown();
 }
 
 void  UITalkRecord::slot_Btnclicked()
@@ -768,4 +781,10 @@ void  UITalkRecord::slot_Btnclicked()
 		if (m_parent)
 			m_parent->RecordMoved();
 	}
+}
+
+void UITalkRecord::slot_Delay()
+{
+	m_timerDelay->stop();
+	ScrollDown();
 }

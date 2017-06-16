@@ -569,7 +569,9 @@ void UIChatRoom::forwardTime()
 	QDate date = m_defDateTimeEdit->date().addDays(1);
 	m_defDateTimeEdit->setDate(date);
 	QString dtstr = date.toString("yyyy-MM-dd");
-	QueryRecord(dtstr);
+
+	if (!m_parent->m_bQueryMsg)
+		QueryRecord(dtstr);
 }
 
 void UIChatRoom::afterTime()
@@ -582,7 +584,9 @@ void UIChatRoom::afterTime()
 	QDate date = m_defDateTimeEdit->date().addDays(-1);
 	m_defDateTimeEdit->setDate(date);
 	QString dtstr = date.toString("yyyy-MM-dd");
-	QueryRecord(dtstr);
+	
+	if (!m_parent->m_bQueryMsg)
+		QueryRecord(dtstr);
 }
 
 void UIChatRoom::QueryRecord(QString dtstr)
@@ -610,6 +614,8 @@ void UIChatRoom::QueryRecord(QString dtstr)
 	dtstr.replace("00:00:01", "23:59:59");
 	time = QDateTime::fromString(dtstr, "yyyy-MM-dd hh:mm:ss");
 	m_farst_msg_time = time.toMSecsSinceEpoch();
+
+	m_parent->m_bQueryMsg = true;
 	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, kMsgLogNumberShow, 0, m_farst_msg_time, 0, false, true, &UIWindowSet::QueryMsgOnlineCb);
 }
 
@@ -822,6 +828,8 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 			int duration = values["dur"].asUInt();
 			qDebug() << QString::number(duration);
 			qduration = QString::number((duration+500)/1000);
+			if (qduration.toInt() > 60)
+				qduration = "60";
 		}
 
 		stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_));
@@ -1012,7 +1020,7 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 							if (m_StudentInfo.size() == 0)
 								return;
 
-							strName += *m_StudentInfo.find(QString::fromStdString(ids[i]));
+							strName = m_StudentInfo.value(QString::fromStdString(ids[i]), "无名");
 						}
 					}
 
@@ -1146,6 +1154,8 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 			msgid = pMsg.client_msg_id_;
 			int duration = values["dur"].asUInt();
 			qduration = QString::number((duration+500) / 1000);
+			if (qduration.toInt() > 60)
+				qduration = "60";
 		}
 
 		stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg.timetag_));
@@ -1564,7 +1574,20 @@ void UIChatRoom::RequestError(QJsonObject& error)
 {
 	QString strError;
 	if (error["code"].toInt() == 1002)
+	{
 		strError = QString("授权过期,请重新登录！");
+		int iStatus = CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString(strError),
+			QString("确定"),
+			QString());
+		if (iStatus == 1 || iStatus == 0)
+		{
+			if (m_parent)
+				m_parent->ReturnLogin();
+		}
+		return;
+	}
 	else if (error["code"].toInt() == 1003)
 		strError = QString("没有权限访问！");
 	else if (error["code"].toInt() == 1004)

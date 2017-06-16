@@ -33,7 +33,7 @@ private slots:
 	void clickShowNotice();
 	void clickSendAnnounce();
 	void clickCancel();
-
+	void proclamationTextChage();
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual void focusOutEvent(QFocusEvent *);

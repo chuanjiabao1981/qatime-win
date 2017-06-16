@@ -15,6 +15,8 @@ void sleep(int secs)
 		QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
 }
 
+#define TIME_DELAY 150
+
 UITalk::UITalk(QWidget *parent)
 	: QWidget(parent)
 	, m_spacer(NULL)
@@ -22,6 +24,7 @@ UITalk::UITalk(QWidget *parent)
 	, m_Ver(NULL)
 	, m_parent(NULL)
 	, m_vecAudio(NULL)
+	, m_timerDelay(NULL)
 {
 	ui.setupUi(this);
 
@@ -42,6 +45,9 @@ UITalk::UITalk(QWidget *parent)
 	ui.verticalLayout->addWidget(m_view);
 
 	style(m_view);
+
+	m_timerDelay = new QTimer(this);
+	connect(m_timerDelay, SIGNAL(timeout()), this, SLOT(slot_Delay()));
 }
 
 UITalk::~UITalk()
@@ -152,8 +158,8 @@ void UITalk::InsertChat(QPixmap* pixmap, QString name, QString time, QString tex
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	sleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	ScrollDown();
 }
 
 // 插入语音聊天信息
@@ -231,8 +237,9 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	sleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	sleep(50);
+// 	ScrollDown();
 }
 
 // 插入通知消息等
@@ -268,8 +275,9 @@ void UITalk::InsertNotice(QString text)
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	sleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	sleep(50);
+// 	ScrollDown();
 }
 
 // 插入图片聊天信息
@@ -363,8 +371,9 @@ void UITalk::InsertPic(QPixmap* pixmap, QString name, QString time, QString url,
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	sleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	sleep(50);
+// 	ScrollDown();
 }
 
 // 插入图片聊天信息
@@ -557,8 +566,9 @@ void UITalk::InsertEmoji(QPixmap* pixmap, QString name, QString time, QString te
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	sleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	sleep(50);
+// 	ScrollDown();
 }
 
 void UITalk::ParseFace(AnimatedTextBrowserA* Anim, QString qContect)
@@ -776,8 +786,9 @@ void UITalk::style(QScrollArea *style)
 
 void UITalk::DelaySrcoll()
 {
-	sleep(50);
-	ScrollDown();
+	m_timerDelay->start(TIME_DELAY);
+// 	sleep(50);
+// 	ScrollDown();
 }
 
 void UITalk::slot_Audioclicked(std::string path, std::string sid, std::string msgid, bool isPlay)
@@ -805,4 +816,10 @@ void UITalk::stopAudio(char* msgid)
 
 		}
 	}
+}
+
+void UITalk::slot_Delay()
+{
+	m_timerDelay->stop();
+	ScrollDown();
 }

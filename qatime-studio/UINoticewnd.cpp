@@ -3,6 +3,7 @@
 #include <QMouseEvent>
 #include <QObject>
 #include <QScrollBar>
+#include <QToolTip>
 
 UINoticeWnd::UINoticeWnd(QWidget *parent)
 	: QWidget(parent)
@@ -38,7 +39,7 @@ UINoticeWnd::UINoticeWnd(QWidget *parent)
 	ui.cancel_pushButton->setFont(font);
 	ui.textEdit->setFont(font);
 	ui.textEdit->document()->setMaximumBlockCount(5);
-
+	connect(ui.textEdit, SIGNAL(textChanged()), this, SLOT(proclamationTextChage()));
 	ui.A_widget->setVisible(false);
 
 	connect(ui.announce_pushButton, SIGNAL(clicked()), this, SLOT(clickShowNotice()));
@@ -49,6 +50,23 @@ UINoticeWnd::UINoticeWnd(QWidget *parent)
 UINoticeWnd::~UINoticeWnd()
 {
 
+}
+
+void UINoticeWnd::proclamationTextChage()
+{
+	QString textContent = ui.textEdit->toPlainText();
+	int length = textContent.count();
+	int maxLength = 200; // 最大字符数
+	if (length > maxLength)
+	{
+		int position = ui.textEdit->textCursor().position();
+		QTextCursor textCursor = ui.textEdit->textCursor();
+		textContent.remove(position - (length - maxLength), length - maxLength);
+		ui.textEdit->setText(textContent);
+		textCursor.setPosition(position - (length - maxLength));
+		ui.textEdit->setTextCursor(textCursor);
+		QToolTip::showText(mapToGlobal(ui.textEdit->pos()), "最多输入200个字！");
+	}
 }
 
 void UINoticeWnd::clickShowNotice()
