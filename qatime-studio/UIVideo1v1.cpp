@@ -228,7 +228,8 @@ BOOL CALLBACK WindowsEnumerationHandler(HWND hwnd, LPARAM param) {
 	if (wcscmp(window_title, L"UIAuxiliaryWnd") == 0 ||
 		wcscmp(window_title, L"UIAppWnd") == 0 ||
 		wcscmp(window_title, L"UIWindowSet") == 0 ||
-		wcscmp(window_title, L"UIMainWindow") == 0)
+		wcscmp(window_title, L"UIMainWindow") == 0 || 
+		wcscmp(window_title, L"StudentWindow") == 0)
 	{
 		return TRUE;
 	}	
@@ -336,7 +337,7 @@ void UIVideo1v1::setCaptureWnd(HWND hwnd)
 {
 	m_capturnTimer->stop();
 	capture_hwnd_ = hwnd;
-	m_capturnTimer->start(60);
+	m_capturnTimer->start(80);
 
 	// 延时100毫秒首次刷新下窗口
 	sleepTime(100);

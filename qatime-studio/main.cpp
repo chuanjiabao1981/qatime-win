@@ -91,10 +91,7 @@ int main(int argc, char *argv[])
 	LoginWindow w;
 	w.setWindowFlags(Qt::FramelessWindowHint);
 	w.ReadSetting();
+	w.show();
 
-	if (w.IsAutoLogin())
-		w.hide();
-	else
-		w.show();
 	return a.exec();
 }

@@ -122,14 +122,15 @@ void UITalk::InsertChat(QPixmap* pixmap, QString name, QString time, QString tex
 	SecRow->setContentsMargins(30, 0, 10, 0);
 	if (isDigitStr(text))
 	{
-		AnimatedTextBrowser* Text = new AnimatedTextBrowser(this);
+		AnimatedTextBrowserA* Text = new AnimatedTextBrowserA(true, this);
+		Text->setOpenLinks(true);
+		Text->setMinimumWidth(245);
 		Text->setFont(font);
-		Text->append(text);
 		Text->setStyleSheet("color: rgb(85, 85, 85);");
-		Text->setFixedHeight(Text->document()->size().height());
+		Text->append(text);
+		SecRow->addWidget(Text);
 		Text->autoHeight();
 		connect(Text, SIGNAL(sig_scrollDown()), this, SLOT(slot_scrollDown()));
-		SecRow->addWidget(Text);
 	}
 	else
 	{

@@ -58,9 +58,11 @@ UIAuxiliaryWnd::UIAuxiliaryWnd(QWidget *parent)
 
 	m_pWorker = new WorkerPic();
 	connect(this, SIGNAL(sig_StartLoading()), m_pWorker, SLOT(slot_StartLoading()));
+	connect(this, SIGNAL(sig_Close()), m_pWorker, SLOT(slot_Close()));
 
 	m_pWorker1v1 = new WorkerPic();
 	connect(this, SIGNAL(sig_Start1v1Loading()), m_pWorker1v1, SLOT(slot_StartLoading()));
+	connect(this, SIGNAL(sig_Close()), m_pWorker1v1, SLOT(slot_Close()));
 
 	ui.live1V1_widget->setVisible(false);
 	ui.all_widget->setVisible(false);

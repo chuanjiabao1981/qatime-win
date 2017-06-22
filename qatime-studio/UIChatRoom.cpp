@@ -71,6 +71,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.textEdit, SIGNAL(colseBrow()), this, SLOT(colseBrow()));
 	connect(ui.timeWidget, SIGNAL(currentPageChanged(int, int)), this, SLOT(calendaCurrentPageChanged(int, int)));
 	connect(ui.pic_pushButton, SIGNAL(clicked()), this, SLOT(clickPic()));
+	connect(this, SIGNAL(sig_editClear()), this, SLOT(slot_eidtClear()));
 
 	QScrollBar* TalkRecordScrollBar;
 	TalkRecordScrollBar = (QScrollBar*)ui.talkRecord->verticalScrollBar();
@@ -117,6 +118,8 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	m_defDateTimeEdit = new DefDateTimeEdit(this);
 	ui.calendar_horizontalLayout->addWidget(m_defDateTimeEdit);
 	connect(m_defDateTimeEdit, SIGNAL(sig_CalendarClick(QDate)), this, SLOT(slot_CalendarClick(QDate)));
+
+	ui.textEdit->setWordWrapMode(QTextOption::WrapAnywhere);
 }
 
 UIChatRoom::~UIChatRoom()
@@ -467,6 +470,7 @@ void UIChatRoom::clickSendMseeage()
 			m_isBorw = false;
 			m_parent->SendTeacherBullet("(我)", contect, QString::fromStdString(m_CurChatID));
 			stringToHtmlFilter(sendText);
+
 			m_uitalk->InsertEmoji(&image, name, timeStr, sendMsg);
 		}
 		else
@@ -477,9 +481,11 @@ void UIChatRoom::clickSendMseeage()
 			// 本人头像
  			QPixmap image = m_parent->TeacherPhotoPixmap();
 			m_parent->SendTeacherBullet("(我)", sendText, QString::fromStdString(m_CurChatID));
+
 			m_uitalk->InsertChat(&image, qName, timeStr, sendText);
 		}
-		ui.textEdit->clear();
+//		ui.textEdit->clear();
+		emit sig_editClear();
 	}
 	else
 	{
@@ -487,19 +493,18 @@ void UIChatRoom::clickSendMseeage()
 		return;
 	}
 
-	// 发往服务器
+	//发往服务器
 	nim::IMMessage msg;
 	PackageMsg(msg);
 	msg.type_ = nim::kNIMMessageTypeText;
 	msg.content_ = sendMsg.toStdString();
-
+	
 	nim::MessageSetting setting;
 	std::string json_msg = nim::Talk::CreateTextMessage(msg.receiver_accid_, msg.session_type_, msg.client_msg_id_, msg.content_, setting, msg.timetag_);
 	nim::Talk::FileUpPrgCallback* pcb = new nim::Talk::FileUpPrgCallback();
 	nim::Talk::SendMsg(json_msg,"",pcb);
 	m_borw.clear();
 
-	int width =m_uitalk->width();
 	ui.textEdit->setFocus();
 }
 
@@ -2389,4 +2394,10 @@ QString UIChatRoom::parse(QString str)
 		encode += s;
 	}
 	return encode;
+}
+
+void UIChatRoom::slot_eidtClear()
+{
+	ui.textEdit->clear();
+//	m_uitalk->ScrollDown();
 }

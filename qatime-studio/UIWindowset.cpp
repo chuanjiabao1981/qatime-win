@@ -1107,9 +1107,10 @@ void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString board
 	{
 		m_CameraInfo->setVisible(false);
 		m_boardUrl = m_curTags->BoardStream();
+//		m_boardUrl = "rtmp://pdl1f3ddaa0.live.126.net/live/98cbe5a825824c8baf03d8f4313c960d?wsSecret=ec590d57704f2cfac12866761399fbfe&wsTime=1497959633";
 		qDebug() << "白板推流地址：" << m_boardUrl;
 		m_cameraUrl = m_curTags->CameraStream();
-//		m_cameraUrl = "rtmp://pdl1f3ddaa0.live.126.net/live/df94558f9ed54c3c9f202fdce874f00e?wsSecret=e4d7ff826847f0d3631e114b0f33a7ea&wsTime=1496399983";
+//		m_cameraUrl = "rtmp://pdl1f3ddaa0.live.126.net/live/a41d93c303a84f8b9d1e197e7bc421b5?wsSecret=4689c5753a21b5e5c5b404ddf5d07c03&wsTime=1497959678  ";
 		qDebug() << "摄像头推流地址：" << m_cameraUrl;
 		m_VideoInfo->setPlugFlowUrl(m_boardUrl);
 		m_VideoInfo->StartLiveVideo();
@@ -2743,7 +2744,7 @@ void UIWindowSet::start1v1LiveStream()
 	ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: red;border-radius: 5px; border: 2px solid red;}");
 
 	// 开始旁路直播
-	RecordLive();
+//	RecordLive();
 }
 
 void UIWindowSet::RecordLive()
@@ -2843,6 +2844,11 @@ void UIWindowSet::drawClick()
 
 void UIWindowSet::clickShapeScreen1v1()
 {
+	if (!m_bLiving1v1)
+	{
+		QToolTip::showText(QCursor::pos(), "请开启直播后，再分享窗口！");
+		return;
+	}
 	if (m_AppWnd1v1)
 	{
 		m_AppWnd1v1->deleteWnd();

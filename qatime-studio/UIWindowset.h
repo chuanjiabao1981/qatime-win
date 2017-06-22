@@ -178,7 +178,7 @@ private:
 
 signals:
 	void sig_Modle(bool bModle);
-private slots :
+public slots :
 	void MaxDialog();										// 最大化
 	void MinDialog();										// 最小化
 	void CloseDialog();										// 关闭对话框

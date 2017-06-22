@@ -55,6 +55,7 @@ public slots:
 	void setBrow(QString path);
 signals:
 	void sig_StartLoading();
+	void sig_editClear();
 private:
 	Ui::UIChatRoom ui;
 	
@@ -235,6 +236,7 @@ public slots:
 	void		SetEnvironmental(bool EnvironmentalTyle);						//设置当前环境
 	void        SetCurAudioPath(std::string path);								//设置当前语音路径
 	QString		parse(QString str);
+	void        slot_eidtClear();
 private:
 	QToolButton* pPreMonthButton1;
 	QToolButton* pPreMonthButton;
