@@ -158,6 +158,9 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_shape.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIAboutversion.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_UIAppWnd.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -383,6 +386,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_shape.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UIAboutversion.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_UIAppWnd.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -563,6 +569,7 @@
     <ClCompile Include="personList.cpp" />
     <ClCompile Include="personListBuddy.cpp" />
     <ClCompile Include="shape.cpp" />
+    <ClCompile Include="UIAboutversion.cpp" />
     <ClCompile Include="UIAppWnd.cpp" />
     <ClCompile Include="UIAppWndTool.cpp" />
     <ClCompile Include="UIAudiochange.cpp" />
@@ -689,6 +696,7 @@
     <ClInclude Include="course1v1.h" />
     <ClInclude Include="GeneratedFiles\ui_colorpicker.h" />
     <ClInclude Include="GeneratedFiles\ui_palette.h" />
+    <ClInclude Include="GeneratedFiles\ui_UIAboutversion.h" />
     <ClInclude Include="GeneratedFiles\ui_UIAppWnd.h" />
     <ClInclude Include="GeneratedFiles\ui_UIAppWndTool.h" />
     <ClInclude Include="GeneratedFiles\ui_UIAudiochange1v1.h" />
@@ -1146,6 +1154,16 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing UIVideoRecord.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB -DNDEBUG "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs\api" "-I.\depend\libs\include" "-I$(QTDIR)\include\QtWebEngineWidgets" "-I$(QTDIR)\include\QtWebView" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
+    </CustomBuild>
+    <CustomBuild Include="UIAboutversion.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing UIAboutversion.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing UIAboutversion.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB -DNDEBUG "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtWidgets" "-I.\depend\include" "-I.\depend\json" "-I.\depend\libs\api" "-I.\depend\libs\include" "-I$(QTDIR)\include\QtWebEngineWidgets" "-I$(QTDIR)\include\QtWebView" "-I.\nim_sdk\nim_sdk_cpp_vs2010" "-I.\nim_sdk\nim_sdk_cpp_vs2010\util" "-I.\nim_sdk\nim_sdk_cpp_vs2010\helper" "-I.\nim_sdk\nim_sdk_cpp_vs2010\api" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_audio_cpp" "-I.\nim_sdk\nim_tools_cpp_sdk\nim_http_cpp" "-I.\nim_sdk\nim_c_sdk\api" "-I.\nim_sdk\nim_c_sdk\include" "-I.\nim_sdk\nim_c_sdk\util" "-I.\nim_sdk\libyuv\include"</Command>
     </CustomBuild>
@@ -1900,6 +1918,16 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
     <CustomBuild Include="UIAppWndTool.ui">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+    </CustomBuild>
+    <CustomBuild Include="UIAboutversion.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>

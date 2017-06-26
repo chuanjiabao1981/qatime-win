@@ -41,13 +41,14 @@ bool SetVideoOutParam(ST_NLSS_VIDEOOUT_PARAM *pstVideoParam, EN_NLSS_VIDEOQUALIT
 {
 	pstVideoParam->enOutCodec = EN_NLSS_VIDEOOUT_CODEC_X264;
 	pstVideoParam->bHardEncode = false;
-	pstVideoParam->iOutFps = 15;
+	pstVideoParam->iOutFps = 18;
 
 	switch (enVideoQ)
 	{
 	case EN_NLSS_VIDEOQUALITY_SUPER:
 		pstVideoParam->iOutWidth = 1920;
 		pstVideoParam->iOutHeight = 1080;
+		pstVideoParam->iOutFps = 15;
 		break;
 	case EN_NLSS_VIDEOQUALITY_HIGH:
 		pstVideoParam->iOutWidth = 1280;
@@ -56,6 +57,7 @@ bool SetVideoOutParam(ST_NLSS_VIDEOOUT_PARAM *pstVideoParam, EN_NLSS_VIDEOQUALIT
 	case EN_NLSS_VIDEOQUALITY_MIDDLE:
 		pstVideoParam->iOutWidth = 640;
 		pstVideoParam->iOutHeight = 480;
+		pstVideoParam->iOutFps = 15;
 		break;
 	case EN_NLSS_VIDEOQUALITY_LOW:
 		pstVideoParam->iOutWidth = 320;

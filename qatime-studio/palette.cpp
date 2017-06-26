@@ -401,8 +401,7 @@ void Palette::SendSyncDraw(LONG64 timeX)
 {
 //	ReturnSync(timeX);
 
-	if (mStatus == 1)
-		SendFullScreen(mStatus);
+	SendFullScreen(mStatus);
 	
 	foreach(Shape *shape, mShapeStack)
 	{

@@ -111,13 +111,13 @@ QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/
        <widget class="QRadioButton" name="draw_radioButton">
         <property name="minimumSize">
          <size>
-          <width>38</width>
+          <width>58</width>
           <height>30</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>38</width>
+          <width>58</width>
           <height>30</height>
          </size>
         </property>
@@ -142,31 +142,6 @@ QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/
         </property>
         <property name="checked">
          <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="color_pushButton">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>20</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>颜色器</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(0, 0, 0);</string>
-        </property>
-        <property name="text">
-         <string/>
         </property>
        </widget>
       </item>

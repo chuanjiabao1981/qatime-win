@@ -47,6 +47,7 @@ UIAuxiliaryWnd::UIAuxiliaryWnd(QWidget *parent)
 	ui.scrollArea->installEventFilter(this);
 	ui.today_scrollArea->installEventFilter(this);
 	ui.title_pushButton->installEventFilter(this);
+	ui.pic_widget->installEventFilter(this);
 	ui.all_widget->setVisible(false);
 
 	connect(ui.today_radioButton, SIGNAL(clicked()), this, SLOT(clickToday()));
@@ -54,7 +55,7 @@ UIAuxiliaryWnd::UIAuxiliaryWnd(QWidget *parent)
 	connect(ui.live1V1_pushButton, SIGNAL(clicked()), this, SLOT(click1V1()));
 	connect(ui.min_pushButton, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.close_pushButton, SIGNAL(clicked()), this, SLOT(CloseDialog()));
-	connect(ui.pic_btn, SIGNAL(clicked()), this, SLOT(clickPic()));
+//	connect(ui.pic_btn, SIGNAL(clicked()), this, SLOT(clickPic()));
 
 	m_pWorker = new WorkerPic();
 	connect(this, SIGNAL(sig_StartLoading()), m_pWorker, SLOT(slot_StartLoading()));
@@ -113,6 +114,14 @@ bool UIAuxiliaryWnd::eventFilter(QObject *target, QEvent *event)
 		{
 			m_mainAllView->setMaximumWidth(ui.scrollArea->width());
 			m_mainTodayView->setMaximumWidth(ui.today_scrollArea->width());
+		}
+	}
+	else if (target == ui.pic_widget)
+	{
+		QMouseEvent* pMe = static_cast<QMouseEvent*>(event);
+		if (event->type() == QEvent::Enter)
+		{
+			clickPic();
 		}
 	}
 	return false;

@@ -307,7 +307,7 @@ void UIMainNewWindow::setKeyAndLogin(QString key)
 	nim::SDKConfig config;
 	config.database_encrypt_key_ = "Netease";
 	//sdk能力参数（必填）
-	nim::Client::Init(key.toStdString(), "Netease", "", config);
+	bool bSuc = nim::Client::Init(key.toStdString(), "", "", config);
 
 	nim_http::Init(); // 初始化云信http
 

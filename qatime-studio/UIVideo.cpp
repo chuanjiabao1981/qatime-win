@@ -35,6 +35,7 @@ UIVideo::UIVideo(QWidget *parent)
 	, m_pBkImage(NULL)
 	, m_refreshTimer(NULL)
 	, m_bPaint(true)
+	, m_EnVideoQuality(EN_NLSS_VIDEOQUALITY_HIGH)
 {
 	ui.setupUi(this);
 
@@ -193,7 +194,7 @@ bool UIVideo::InitMediaCapture()
 		pAudioPath = "";
 	ST_NLSS_PARAM stParam;
 	Nlss_GetDefaultParam(m_hNlssService, &stParam);
-	SetVideoOutParam(&stParam.stVideoParam, EN_NLSS_VIDEOQUALITY_HIGH, true);
+	SetVideoOutParam(&stParam.stVideoParam, m_EnVideoQuality, true);
 	SetAudioParam(&stParam.stAudioParam, pAudioPath, EN_NLSS_AUDIOIN_MIC);
 	stParam.enOutContent = EN_NLSS_OUTCONTENT_AV;
 	initLiveStream(m_hNlssService, &stParam, (char*)m_strUrl.toStdString().c_str());
@@ -486,4 +487,12 @@ void UIVideo::slot_livestreamErrorHappened()
 {
 	qDebug() << "ErrorStopLive 4";
 	m_NewParent->ErrorStopLive(this);
+}
+
+void UIVideo::setRatio(int iType)
+{
+	if (iType==0)
+		m_EnVideoQuality = EN_NLSS_VIDEOQUALITY_HIGH;
+	else
+		m_EnVideoQuality = EN_NLSS_VIDEOQUALITY_SUPER;
 }

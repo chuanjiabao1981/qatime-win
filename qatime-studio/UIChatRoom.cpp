@@ -748,7 +748,6 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 	// 判断当前过来的消息，是不是此会话窗口
 	if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0 && pMsg->type_ == nim::kNIMMessageTypeText)
 	{
-		qDebug() << "进入此聊天";
 		stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_));
 
 		std::string strName = pMsg->readonly_sender_nickname_;
@@ -1063,7 +1062,6 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 	// 判断当前过来的消息，是不是此会话窗口
 	if (pMsg.type_ == nim::kNIMMessageTypeText)
 	{
-		qDebug() << "进入此聊天";
 		std::string strName = pMsg.readonly_sender_nickname_;
 		std::string strContent = pMsg.content_;
 		std::string strID = pMsg.sender_accid_;
@@ -2002,9 +2000,10 @@ void UIChatRoom::OnPlayAudio(std::string path, std::string sid, std::string msgi
 {
 	if (isPlay)
 	{
+		std::wstring wpath;
 		nim_audio::nim_audio_type audio_format = nim_audio::AAC;
 		{
-			std::wstring wpath = QString::fromStdString(path).toStdWString();
+			wpath = QString::fromStdString(path).toStdWString();
 			FILE* audio_file;
 			if (_wfopen_s(&audio_file, wpath.c_str(), L"rb"))
 				return;
@@ -2225,7 +2224,6 @@ void UIChatRoom::ShowChatMsg(nim::IMMessage pMsg)
 	// 判断当前过来的消息，是不是此会话窗口
 	if (pMsg.type_ == nim::kNIMMessageTypeText)
 	{
-		qDebug() << "进入此聊天";
 		std::string strName = pMsg.readonly_sender_nickname_;
 		std::string strContent = pMsg.content_;
 		std::string strID = pMsg.sender_accid_;

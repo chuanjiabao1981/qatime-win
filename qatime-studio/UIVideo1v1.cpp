@@ -310,6 +310,32 @@ void UIVideo1v1::CustomFrame()
 			BitBlt(mem_dc, 0, 0, capture_width_, capture_height_, w_dc, 0, 0, SRCCOPY /*| CAPTUREBLT*/);
 			//__int64 time1 = get_time_ms();
 			//ЪѓБъ
+			if (1)
+			{
+				CURSORINFO pci;
+				pci.cbSize = sizeof(CURSORINFO);
+				GetCursorInfo(&pci);
+				POINT ptCursor = pci.ptScreenPos;
+				ICONINFO IconInfo = { 0 };
+				if (GetIconInfo(pci.hCursor, &IconInfo))
+				{
+					ptCursor.x -= IconInfo.xHotspot;
+					ptCursor.y -= IconInfo.yHotspot;
+					if (NULL != IconInfo.hbmMask)
+						DeleteObject(IconInfo.hbmMask);
+					if (NULL != IconInfo.hbmColor)
+						DeleteObject(IconInfo.hbmColor);
+				}
+				if (capture_hwnd_ != nullptr)
+				{
+					//RECT rcDlg;
+					//::GetWindowRect(capture_hwnd_, &rcDlg);
+					//ptCursor.x -= rcDlg.left;
+					//ptCursor.y -= rcDlg.top;
+					ScreenToClient(capture_hwnd_, &ptCursor);
+				}
+				DrawIconEx(mem_dc, ptCursor.x, ptCursor.y, pci.hCursor, 0, 0, 0, NULL, DI_NORMAL | DI_COMPAT);
+			}
 			SelectObject(mem_dc, old_hbitmap);
 			DeleteDC(mem_dc);
 			ReleaseDC(capture_hwnd_, w_dc);

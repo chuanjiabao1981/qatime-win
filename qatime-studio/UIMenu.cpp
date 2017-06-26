@@ -9,22 +9,35 @@ UIMenu::UIMenu(QWidget *parent)
 	: QWidget(parent)
 	, m_parent(NULL)
 	, m_EnvironmentalTyle(true)
+	, m_uiversion(NULL)
 {
 	ui.setupUi(this);
 	ui.label->setStyleSheet("border-image: url(./images/t_photo.png);");
-	connect(ui.label, SIGNAL(clicked()), this, SLOT(clickPic()));
 	connect(ui.return_pushButton, SIGNAL(clicked()), this, SLOT(clickReturn()));
 	connect(ui.check_pushButton, SIGNAL(clicked()), this, SLOT(clickCheck()));
+	connect(ui.about_pushButton, SIGNAL(clicked()), this, SLOT(clickAbout()));
 
 	ui.return_pushButton->setStyleSheet("QPushButton{border-image:url(./images/return_n.png);}"
 						"QPushButton:hover{border-image:url(./images/return_h.png);}");
 	ui.check_pushButton->setStyleSheet("QPushButton{border-image:url(./images/check_nor.png);}"
 		"QPushButton:hover{border-image:url(./images/check_hover.png);}");
+	ui.about_pushButton->setStyleSheet("QPushButton{border-image:url(./images/about_nor.png);}"
+		"QPushButton:hover{border-image:url(./images/about_hover.png);}");
+	ui.label->setEnabled(false);
+
+	m_uiversion = new UIAboutVersion();
+	m_uiversion->setWindowFlags(Qt::FramelessWindowHint);
 }
 
 UIMenu::~UIMenu()
 {
-
+	if (m_uiversion)
+	{
+		m_uiversion->hide();
+		delete m_uiversion;
+		m_uiversion = NULL;
+	}
+	
 }
 
 void UIMenu::focusOutEvent(QFocusEvent* e)
@@ -66,7 +79,7 @@ void UIMenu::setName(QString name)
 
 void UIMenu::clickPic()
 {
-	hide();
+//	hide();
 }
 
 void UIMenu::clickReturn()
@@ -94,10 +107,22 @@ void UIMenu::paintEvent(QPaintEvent *event)
 	}
 }
 
+void UIMenu::leaveEvent(QEvent *e)
+{
+	hide();
+}
+
 void UIMenu::clickCheck()
 {
 	checkVersion();
 }
+
+void UIMenu::clickAbout()
+{
+	m_uiversion->show();
+	SetWindowPos((HWND)m_uiversion->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+}
+
 void UIMenu::StartCheck(QString enforce, QString version, QString downpath)
 {
 	// 启动更新程序
@@ -143,6 +168,7 @@ void UIMenu::StartCheck(QString enforce, QString version, QString downpath)
 void UIMenu::setVersion(QString version)
 {
 	m_version = version;
+	m_uiversion->setVersion(m_version);
 }
 
 void UIMenu::checkVersion()

@@ -27,7 +27,7 @@ UIRatio::UIRatio(QWidget *parent)
 	ui.pushButton->installEventFilter(this);
 
 	ui.Ratio_comboBox->addItem("高清", "高清");
-	ui.Ratio_comboBox->addItem("标清", "标清");
+	ui.Ratio_comboBox->addItem("超清", "超清");
 }
 
 UIRatio::~UIRatio()
@@ -56,7 +56,7 @@ void UIRatio::RatioChanged(int i)
 	}
 	else if (i == 1)
 	{
-		m_Parent->setRatioChangeIndex("标清");
+		m_Parent->setRatioChangeIndex("超清");
 	}
 }
 

@@ -61,6 +61,7 @@ public:
 	QTimer*							m_refreshTimer;		// 刷新窗口
 	static UIVideo*					m_pThis;
 	bool							m_bPaint;			// 是否允许绘制
+	EN_NLSS_VIDEOQUALITY_LVL		m_EnVideoQuality;	// 分辨率
 #ifdef STARTLS_ASYNC
 	Worker* m_pWorker;
 #endif
@@ -112,7 +113,7 @@ public:
 	void setBkImage(QString qsImage);
 	void InitDeviceParam();								// 初始化设备参数
 	int  getOutBitrate(int iWidth, int iHeight, int iFps);
-
+	void setRatio(int iType);						    // 0：高清 1：超清
 };
 
 #endif // UIVideo_H

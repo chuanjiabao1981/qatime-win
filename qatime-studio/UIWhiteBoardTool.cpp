@@ -21,11 +21,14 @@ UIWhiteBoardTool::UIWhiteBoardTool(QWidget *parent)
 	ui.delete_pushButton->setStyleSheet("QPushButton{border-image:url(./images/delete_nor.png);}"
 										"QPushButton:hover{border-image:url(./images/delete_hor.png);}"
 										"QPushButton:pressed{border-image:url(./images/delete_hor.png);}");
-	ui.color_pushButton->setStyleSheet("QPushButton{border-image:url(./images/color_m0_nor.png);}"
-										"QPushButton:hover{border-image:url(./images/color_m0_hor.png);}"
-										"QPushButton:pressed{border-image:url(./images/color_m0_hor.png);}");
-
-	connect(ui.color_pushButton, SIGNAL(clicked()), this, SLOT(colorClicked()));
+	QString drawSheet;
+	drawSheet = "QRadioButton:checked {border-image:url(./images/color_m0_hor.png);}"
+				"QRadioButton:unchecked{border-image:url(./images/color_m0_nor.png);}"
+				"QRadioButton:unchecked:hover{border-image:url(./images/color_m0_hor.png);}"
+				"QRadioButton::indicator:checked{border-image:url(:/LoginWindow/images/.png);}"
+				"QRadioButton::indicator:unchecked{border-image:url(:/LoginWindow/images/.png);}"
+				"QRadioButton::indicator:unchecked:hover{border-image:url(:/LoginWindow/images/.png);}";
+	ui.draw_radioButton->setStyleSheet(drawSheet);
 	connect(ui.return_pushButton, SIGNAL(clicked()), this, SLOT(returnClicked()));
 	connect(ui.delete_pushButton, SIGNAL(clicked()), this, SLOT(deleteClicked()));
 	connect(ui.laser_radioButton, SIGNAL(clicked()), this, SLOT(laserClicked()));
@@ -53,7 +56,7 @@ void UIWhiteBoardTool::colorClicked()
 
 		QPoint point = QCursor::pos();
 		int height = mColorPicker->height();
-		mColorPicker->move(point.x(), point.y() - height);
+		mColorPicker->move(point.x()-20, point.y() - height);
 		mColorPicker->setFocus();
 	}
 }
@@ -84,12 +87,15 @@ void UIWhiteBoardTool::setPenColor(int color)
 		break;
 	}
 
-	QString style = "QPushButton{border-image:url(./images/color_m{id}_nor.png);}"
-		"QPushButton:hover{border-image:url(./images/color_m{id}_hor.png);}"
-		"QPushButton:pressed{border-image:url(./images/color_m{id}_hor.png);}";
+	QString style = "QRadioButton:checked {border-image:url(./images/color_m{id}_hor.png);}"
+		"QRadioButton:unchecked{border-image:url(./images/color_m{id}_nor.png);}"
+		"QRadioButton:unchecked:hover{border-image:url(./images/color_m{id}_hor.png);}"
+		"QRadioButton::indicator:checked{border-image:url(:/LoginWindow/images/.png);}"
+		"QRadioButton::indicator:unchecked{border-image:url(:/LoginWindow/images/.png);}"
+		"QRadioButton::indicator:unchecked:hover{border-image:url(:/LoginWindow/images/.png);}"; 
 	
 	style.replace("{id}", QString::number(color));
-	ui.color_pushButton->setStyleSheet(style);
+	ui.draw_radioButton->setStyleSheet(style);
 }
 
 void UIWhiteBoardTool::returnClicked()
@@ -109,6 +115,12 @@ void UIWhiteBoardTool::laserClicked()
 
 void UIWhiteBoardTool::drawClicked()
 {
+	QPoint pt = ui.draw_radioButton->mapFromGlobal(QCursor::pos());
+	if (pt.x()>38)
+	{
+		colorClicked();
+	}
+
 	emit drawClick();
 }
 

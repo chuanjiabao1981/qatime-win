@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>100</width>
-    <height>153</height>
+    <height>186</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -55,7 +55,7 @@
    <property name="geometry">
     <rect>
      <x>2</x>
-     <y>87</y>
+     <y>153</y>
      <width>96</width>
      <height>26</height>
     </rect>
@@ -70,7 +70,7 @@
      <x>1</x>
      <y>1</y>
      <width>98</width>
-     <height>151</height>
+     <height>185</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -97,6 +97,19 @@
    <property name="geometry">
     <rect>
      <x>2</x>
+     <y>87</y>
+     <width>96</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="about_pushButton">
+   <property name="geometry">
+    <rect>
+     <x>2</x>
      <y>120</y>
      <width>96</width>
      <height>26</height>
@@ -112,6 +125,7 @@
   <zorder>name_label</zorder>
   <zorder>label</zorder>
   <zorder>check_pushButton</zorder>
+  <zorder>about_pushButton</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

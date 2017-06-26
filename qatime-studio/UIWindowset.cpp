@@ -292,10 +292,12 @@ void UIWindowSet::MaxDialog()
 {
 	if (this->isMaximized())
 	{
+		ui.max_pushButton->setStyleSheet("border-image: url(./images/login_max.png);");
 		showNormal();
 		return;
 	}
 	showMaximized();
+	ui.max_pushButton->setStyleSheet("border-image: url(./images/login_max1.png);");
 }
 
 bool UIWindowSet::nativeEvent(const QByteArray &eventType, void *message, long *result)
@@ -472,6 +474,9 @@ bool UIWindowSet::eventFilter(QObject *target, QEvent *event)
 {
 	if (target == ui.logo_pushButton)
 	{
+		if (this->isMaximized())
+			return false;
+
 		QMouseEvent* pMe = static_cast<QMouseEvent*>(event);
 		if (event->type() == QEvent::MouseButtonPress)
 		{
@@ -487,6 +492,9 @@ bool UIWindowSet::eventFilter(QObject *target, QEvent *event)
 	}
 	else if (target == ui.title_pushButton)
 	{
+		if (this->isMaximized())
+			return false;
+
 		QMouseEvent* pMe = static_cast<QMouseEvent*>(event);
 		if (event->type() == QEvent::MouseButtonPress)
 		{
@@ -785,6 +793,12 @@ QPixmap UIWindowSet::TeacherPhotoPixmap()
 void UIWindowSet::DeleteTag(UITags* tag)
 {
 	if (m_curTags->IsModle() && m_VideoInfo->IsCurrentLiving())
+	{
+		m_ScreenTip->setErrorTip("请先结束直播，再关闭窗口！");
+		return;
+	}
+
+	if (m_curTags->IsModle() && m_bLiving1v1)
 	{
 		m_ScreenTip->setErrorTip("请先结束直播，再关闭窗口！");
 		return;
@@ -1923,8 +1937,6 @@ void UIWindowSet::ErrorStopLive(QWidget* pWidget)
 		}
 
 		m_VideoInfo->StopLiveVideo();
-// 		if (IsHasCamera() && m_EnumStatus != CameraStatusClose)
-// 			m_CameraInfo->StopLiveVideo();
 
 		ui.Live_pushBtn->setText(LIVE_BUTTON_NAME);
 		ui.Live_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
@@ -2024,6 +2036,7 @@ void UIWindowSet::setTriggerType(bool bType)
 void UIWindowSet::CloseBullet()
 {
 	ui.Bullet_checkBox->setCheckState(Qt::CheckState::Unchecked);
+	ui.Bullet1v1_checkBox->setCheckState(Qt::CheckState::Unchecked);
 }
 
 void UIWindowSet::clickAudioParam()
@@ -2116,6 +2129,14 @@ void UIWindowSet::clickBulletParam()
 void UIWindowSet::setRatioChangeIndex(QString ratio)
 {
 	ui.ratio_pushButton->setText(ratio);
+	if (ratio=="超清")
+	{
+		m_VideoInfo->setRatio(1);
+	}
+	else
+	{
+		m_VideoInfo->setRatio(0);
+	}
 }
 
 void UIWindowSet::SendStopLive()
