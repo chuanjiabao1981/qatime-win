@@ -23,6 +23,12 @@ public:
 	QPoint								m_startPos;
 	QPoint								m_clickPos;
 	QPoint								m_WndCurPos;
+
+	typedef enum enum_LESSON_TYPE{
+		EN_TODAY_LESSON = 0,                  //!< 今日直播
+		EN_ALL_LESSON,                       //!< 全部辅导
+		EN_1V1_LESSON                       //!< 1对1直播
+	}EN_LESSON_TYPE;
 private:
 	Ui::UIAuxiliaryWnd ui;
 	UIMainNewWindow*					m_parent;
@@ -81,7 +87,7 @@ public:
 	void	SetToken(QString mRemeberToken);
 	QPixmap setTeacherUrl(QString url);
 	void	setTeacherName(QString TeacherName);
-	void    AddTodayNoLesson();
+	void    AddTodayNoLesson(EN_LESSON_TYPE type);
 	void    LoadPic();
 	void	LoadPic1v1();
 	void	ReturnAccount();						// 切换账号

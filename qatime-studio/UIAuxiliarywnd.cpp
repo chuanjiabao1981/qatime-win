@@ -347,7 +347,7 @@ QPixmap UIAuxiliaryWnd::setTeacherUrl(QString Url)
 	return scaledPixmap;
 }
 
-void UIAuxiliaryWnd::AddTodayNoLesson()
+void UIAuxiliaryWnd::AddTodayNoLesson(EN_LESSON_TYPE type)
 {
 	QHBoxLayout* layout = new QHBoxLayout();
 	QPixmap pix = QPixmap("./images/nolesson.png");
@@ -355,7 +355,20 @@ void UIAuxiliaryWnd::AddTodayNoLesson()
 	noLesson->setFixedSize(180, 180);
 	noLesson->setPixmap(pix);
 	layout->addWidget(noLesson);
-	m_VerToday->addLayout(layout);
+	switch (type)
+	{
+	case EN_TODAY_LESSON:
+		m_VerToday->addLayout(layout);
+		break;
+	case EN_ALL_LESSON:
+		m_VerAll->addLayout(layout);
+		break;
+	case EN_1V1_LESSON:
+		m_Ver1v1->addLayout(layout);
+		break;
+	default:
+		break;
+	}
 }
 
 void UIAuxiliaryWnd::LoadPic()

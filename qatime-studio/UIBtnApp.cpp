@@ -7,7 +7,8 @@ CBtnApp::CBtnApp(QWidget *parent /*= 0*/)
 {
 	setStyleSheet("border-image:url(./images/alpha.png);"
 				  "text-align:left;");
-	setMaximumWidth(250);
+	setMaximumWidth(320);
+	setFixedHeight(25);
 }
 
 CBtnApp::~CBtnApp()

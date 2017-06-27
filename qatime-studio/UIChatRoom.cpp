@@ -58,7 +58,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.button_notes, SIGNAL(clicked()), this, SLOT(clickNotes()));	
 	connect(ui.toolButton_3, SIGNAL(clicked()), this, SLOT(closeNotes()));
 	connect(ui.timeShow, SIGNAL(Clicked()), this, SLOT(chickChoseTime()));
-	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMseeage()));
+	connect(ui.button_sendMseeage, SIGNAL(clicked()), this, SLOT(clickSendMessage()));
 	connect(ui.timeWidget, SIGNAL(clicked(QDate)), this, SLOT(choseTime(QDate)));
 	connect(ui.toolButton_2, SIGNAL(clicked()), this, SLOT(forwardTime()));
 	connect(ui.toolButton_1, SIGNAL(clicked()), this, SLOT(afterTime()));
@@ -417,7 +417,7 @@ void UIChatRoom::setBrow(QString path)
 }
 
 // 发送消息按钮
-void UIChatRoom::clickSendMseeage()
+void UIChatRoom::clickSendMessage()
 {
 	if (strcmp(m_CurChatID.c_str(),"") == 0)
 	{
@@ -2014,7 +2014,7 @@ void UIChatRoom::OnPlayAudio(std::string path, std::string sid, std::string msgi
 				audio_format = nim_audio::AMR;
 			fclose(audio_file);
 		}
-		nim_audio::Audio::PlayAudio(path.c_str(), sid.c_str(), msgid.c_str(), audio_format);
+		nim_audio::Audio::PlayAudio(wpath.c_str(), sid.c_str(), msgid.c_str(), audio_format);
 	}
 	else
 	{

@@ -27,6 +27,8 @@ UIAppWnd::UIAppWnd(QWidget *parent)
 	connect(ui.ok_pushButton, SIGNAL(clicked()), this, SLOT(clickOK()));
 
 	style(ui.scrollArea);
+	ui.scrollAreaWidgetContents->setStyleSheet(QStringLiteral("background-color: rgb(255, 255, 255);"));
+	ui.verticalLayout->setSpacing(0);
 }
 
 UIAppWnd::~UIAppWnd()
@@ -126,12 +128,21 @@ void UIAppWnd::style(QScrollArea *style)
 
 void UIAppWnd::paintEvent(QPaintEvent *event)
 {
+// 	QPainterPath path;
+// 	QPainter painter(this);
+// 
+// 	QColor color(145, 145, 145);
+// 
+// 	path.addRect(0, 0, this->width() - 1, this->height() - 1);
+// 	painter.setPen(color);
+// 	painter.drawPath(path);
 	QPainterPath path;
 	QPainter painter(this);
 
-	QColor color(145, 145, 145);
+	QColor color(217, 217, 217);
+	for (int i = 0; i < 30; i++)
+		path.addRect(0, i, this->width() - 1, this->height() - i - 1);
 
-	path.addRect(0, 0, this->width() - 1, this->height() - 1);
 	painter.setPen(color);
 	painter.drawPath(path);
 }
@@ -214,6 +225,15 @@ void UIAppWnd::AddAppWnd(QString title, HWND id)
 {
 	CBtnApp* titleName = new CBtnApp(this);
 	titleName->AddWndName(id, title);
+
+	QString style = "QRadioButton:checked {background-color: rgb(251, 239, 193);}"
+		"QRadioButton:unchecked{background-color: rgb(255, 255, 255);}"
+		"QRadioButton:unchecked:hover{background-color: rgb(251, 239, 193);}"
+		"QRadioButton::indicator:checked{border-image:url(:/LoginWindow/images/.png);}"
+		"QRadioButton::indicator:unchecked{border-image:url(:/LoginWindow/images/.png);}"
+		"QRadioButton::indicator:unchecked:hover{border-image:url(:/LoginWindow/images/.png);}";
+	titleName->setStyleSheet(style);
+
 	connect(titleName, SIGNAL(sig_idclicked(HWND)), this, SLOT(slot_click(HWND)));
 	ui.verticalLayout->addWidget(titleName);
 

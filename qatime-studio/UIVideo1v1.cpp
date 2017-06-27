@@ -121,6 +121,7 @@ void UIVideo1v1::paintEvent(QPaintEvent *)
 		QImage qimage;
 		qimage = QImage((uchar*)capture_data_, capture_width_, capture_height_, QImage::Format_RGB32);
  		QImage q = qimage.mirrored(false, true);
+//		QImage qNew = q.scaled(rect().width(), rect().height(), Qt::KeepAspectRatio);
 		p.drawImage(rect(), q);
 	}
 }
@@ -300,15 +301,12 @@ void UIVideo1v1::CustomFrame()
 			int height = rcDlg.bottom - rcDlg.top;
 			InitHBitmap(width, height);
 			if (capture_bitmap_ == nullptr)
-			{
 				return;
-			}
+
 			HDC mem_dc = CreateCompatibleDC(w_dc);
 			HBITMAP old_hbitmap = (HBITMAP)SelectObject(mem_dc, capture_bitmap_);
-			//__int64 time0 = get_time_ms();
 			
 			BitBlt(mem_dc, 0, 0, capture_width_, capture_height_, w_dc, 0, 0, SRCCOPY /*| CAPTUREBLT*/);
-			//__int64 time1 = get_time_ms();
 			//Êó±ê
 			if (1)
 			{
@@ -328,10 +326,6 @@ void UIVideo1v1::CustomFrame()
 				}
 				if (capture_hwnd_ != nullptr)
 				{
-					//RECT rcDlg;
-					//::GetWindowRect(capture_hwnd_, &rcDlg);
-					//ptCursor.x -= rcDlg.left;
-					//ptCursor.y -= rcDlg.top;
 					ScreenToClient(capture_hwnd_, &ptCursor);
 				}
 				DrawIconEx(mem_dc, ptCursor.x, ptCursor.y, pci.hCursor, 0, 0, 0, NULL, DI_NORMAL | DI_COMPAT);
@@ -341,6 +335,10 @@ void UIVideo1v1::CustomFrame()
 			ReleaseDC(capture_hwnd_, w_dc);
 			__int64 cur_timestamp = QDateTime::currentMSecsSinceEpoch();// ºÁÃë
 			int wxh = capture_width_ * capture_height_;
+// 			QImage qimage;
+// 			qimage = QImage((uchar*)capture_data_, capture_width_, capture_height_, QImage::Format_RGB32);
+// 			QImage q=qimage.mirrored(false, true);
+// 			q.save("123.png");
 			AddVideoFrame(true, cur_timestamp, capture_data_, wxh * 4, capture_width_, capture_height_, "", Ft_ARGB_r);
 		}
 	}
@@ -417,7 +415,6 @@ void UIVideo1v1::AddVideoFrame(bool capture, __int64 time, const char* data, int
 
 	if (width != src_w || height != src_h)
 	{
-		
 		uint8_t* src_y = (uint8_t*)src_buffer;
 		uint8_t* src_u = src_y + src_w * src_h;
 		uint8_t* src_v = src_u + src_w * src_h / 4;
@@ -437,9 +434,22 @@ void UIVideo1v1::AddVideoFrame(bool capture, __int64 time, const char* data, int
 	}
 
 	memcpy((char*)data_buffer, ret_data_tmp.c_str(), ret_data_tmp.size());
-//	src_buffer = ret_data.c_str();
 	width = 1280;
 	height = 720;
 	size = width*height * 3 / 2;
 	emit sig_CustomVideoData(0, data_buffer, size, width, height);
+}
+
+void UIVideo1v1::mouseDoubleClickEvent(QMouseEvent* e)
+{
+	if (this->isFullScreen())
+	{
+		setWindowFlags(Qt::SubWindow);
+		showNormal();
+	}
+	else
+	{
+		setWindowFlags(Qt::Window);
+		showFullScreen();
+	}
 }

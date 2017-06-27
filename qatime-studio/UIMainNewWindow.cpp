@@ -159,7 +159,7 @@ void UIMainNewWindow::LessonRequestFinished()
 	if (iCount == 0)
 	{
 		if (m_AuxiliaryWnd)
-			m_AuxiliaryWnd->AddTodayNoLesson();
+			m_AuxiliaryWnd->AddTodayNoLesson(UIAuxiliaryWnd::EN_TODAY_LESSON);
 	}
 
 	ShowAuxiliary();
@@ -194,6 +194,7 @@ void UIMainNewWindow::ShowAuxiliary()
 
 void UIMainNewWindow::AuxiliaryRequestFinished()
 {
+	int iCount = 0;
 	QByteArray result = reply->readAll();
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
@@ -208,11 +209,19 @@ void UIMainNewWindow::AuxiliaryRequestFinished()
 			m_AuxiliaryWnd->AddAuxiliary(course->PicUrl(), course->name(), course->Grade(), course->TeacherName(), course->ChatId(), course->id(), "",
 			mRemeberToken, m_TeacherName, m_AudioPath, course->status(),course->url(), course->CameraURL());
 
+		iCount++;
 		delete course;
 	}
 
 	if (m_AuxiliaryWnd)
 		m_AuxiliaryWnd->LoadPic();
+
+	if (iCount == 0)
+	{
+		if (m_AuxiliaryWnd)
+			m_AuxiliaryWnd->AddTodayNoLesson(UIAuxiliaryWnd::EN_ALL_LESSON);
+	}
+
 	Show1v1Auxiliary();
 }
 
@@ -241,6 +250,7 @@ void UIMainNewWindow::Show1v1Auxiliary()
 
 void UIMainNewWindow::Return1v1AuxiliaryRequestFinished()
 {
+	int iCount = 0;
 	QByteArray result = reply->readAll();
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
@@ -255,11 +265,18 @@ void UIMainNewWindow::Return1v1AuxiliaryRequestFinished()
 			m_AuxiliaryWnd->Add1v1Auxiliary(course->PicUrl(), course->name(), course->Grade(), m_TeacherName, course->ChatId(), course->id(), "",
 			mRemeberToken, m_TeacherName, m_AudioPath, course->status());
 
+		iCount++;
 		delete course;
 	}
 
 	if (m_AuxiliaryWnd)
 		m_AuxiliaryWnd->LoadPic1v1();
+
+	if (iCount == 0)
+	{
+		if (m_AuxiliaryWnd)
+			m_AuxiliaryWnd->AddTodayNoLesson(UIAuxiliaryWnd::EN_1V1_LESSON);
+	}
 }
 
 void UIMainNewWindow::RequestKey()
@@ -427,7 +444,7 @@ void UIMainNewWindow::InitAudio()
 	QDir Dir(audio_path);
 	if (!Dir.exists())
 		Dir.mkdir(audio_path);
-	std::string res_audio_path = audio_path.toStdString();
+	std::wstring res_audio_path = audio_path.toStdWString();
 	bool ret = nim_audio::Audio::Init(res_audio_path);
 
 	nim_audio::Audio::RegStopPlayCb(&UIMainNewWindow::OnStopAudioCallback);
