@@ -26,7 +26,7 @@ protected Q_SLOTS:
 	void slot_faildclicked(CBtnPix*);
 	void slot_scrollDown();
 	void slot_Audioclicked(std::string, std::string, std::string, bool);
-	void slot_Delay();
+	void slot_ScrollDownBottom(int mMax, int mMin);
 
 private:
 	Ui::UITalk ui;
@@ -39,7 +39,7 @@ private:
 	std::vector<CBtnPix*>	m_vecImgProcess;	//存放所有的图片控件
 
 	std::vector<CBtnAudio*> m_vecAudio;			//所有的audio按钮
-	QTimer*				m_timerDelay;
+	
 private:
 	bool isDigitStr(QString str);
 	void style(QScrollArea *style);
@@ -59,7 +59,6 @@ public:
 	void SendStatus(QString msgid);													// 发送状态
 	void setMainWindow(UIChatRoom* parent);											// 设置父窗口
 	void ClearAll();																// 清空
-	void DelaySrcoll();
 	void stopAudio(char* msgid);													// 停止语音播放
 };
 

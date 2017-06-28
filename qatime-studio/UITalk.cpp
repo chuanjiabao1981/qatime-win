@@ -24,7 +24,7 @@ UITalk::UITalk(QWidget *parent)
 	, m_Ver(NULL)
 	, m_parent(NULL)
 	, m_vecAudio(NULL)
-	, m_timerDelay(NULL)
+	
 {
 	ui.setupUi(this);
 
@@ -46,8 +46,10 @@ UITalk::UITalk(QWidget *parent)
 
 	style(m_view);
 
-	m_timerDelay = new QTimer(this);
-	connect(m_timerDelay, SIGNAL(timeout()), this, SLOT(slot_Delay()));
+	QScrollBar * mBar = m_view->verticalScrollBar();
+	connect(mBar, SIGNAL(rangeChanged(int, int)), this, SLOT(slot_ScrollDownBottom(int, int)));
+
+
 }
 
 UITalk::~UITalk()
@@ -159,7 +161,7 @@ void UITalk::InsertChat(QPixmap* pixmap, QString name, QString time, QString tex
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	m_timerDelay->start(TIME_DELAY);
+//	m_timerDelay->start(TIME_DELAY);
 // 	ScrollDown();
 }
 
@@ -238,7 +240,7 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	m_timerDelay->start(TIME_DELAY);
+//	m_timerDelay->start(TIME_DELAY);
 // 	sleep(50);
 // 	ScrollDown();
 }
@@ -276,7 +278,7 @@ void UITalk::InsertNotice(QString text)
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	m_timerDelay->start(TIME_DELAY);
+//	m_timerDelay->start(TIME_DELAY);
 // 	sleep(50);
 // 	ScrollDown();
 }
@@ -372,7 +374,7 @@ void UITalk::InsertPic(QPixmap* pixmap, QString name, QString time, QString url,
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	m_timerDelay->start(TIME_DELAY);
+//	m_timerDelay->start(TIME_DELAY);
 // 	sleep(50);
 // 	ScrollDown();
 }
@@ -567,7 +569,7 @@ void UITalk::InsertEmoji(QPixmap* pixmap, QString name, QString time, QString te
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	m_timerDelay->start(TIME_DELAY);
+//	m_timerDelay->start(TIME_DELAY);
 // 	sleep(50);
 // 	ScrollDown();
 }
@@ -785,12 +787,7 @@ void UITalk::style(QScrollArea *style)
 	}
 }
 
-void UITalk::DelaySrcoll()
-{
-	m_timerDelay->start(TIME_DELAY);
-// 	sleep(50);
-// 	ScrollDown();
-}
+
 
 void UITalk::slot_Audioclicked(std::string path, std::string sid, std::string msgid, bool isPlay)
 {
@@ -819,8 +816,9 @@ void UITalk::stopAudio(char* msgid)
 	}
 }
 
-void UITalk::slot_Delay()
+
+
+void UITalk::slot_ScrollDownBottom(int mMax, int mMin)
 {
-	m_timerDelay->stop();
 	ScrollDown();
 }

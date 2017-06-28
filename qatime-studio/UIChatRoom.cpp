@@ -1993,7 +1993,7 @@ bool UIChatRoom::IsClickPic()
 void UIChatRoom::TalkDown()
 {
 	if (m_uitalk)
-		m_uitalk->DelaySrcoll();
+		m_uitalk->ScrollDown();
 }
 
 void UIChatRoom::OnPlayAudio(std::string path, std::string sid, std::string msgid, bool isPlay)
