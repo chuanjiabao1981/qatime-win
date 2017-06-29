@@ -440,16 +440,7 @@ void UIVideo1v1::AddVideoFrame(bool capture, __int64 time, const char* data, int
 	emit sig_CustomVideoData(0, data_buffer, size, width, height);
 }
 
-void UIVideo1v1::mouseDoubleClickEvent(QMouseEvent* e)
+void UIVideo1v1::mousePressEvent(QMouseEvent *event)
 {
-	if (this->isFullScreen())
-	{
-		setWindowFlags(Qt::SubWindow);
-		showNormal();
-	}
-	else
-	{
-		setWindowFlags(Qt::Window);
-		showFullScreen();
-	}
+	setFocus();
 }

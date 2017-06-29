@@ -20,7 +20,7 @@ Palette::Palette(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Palette)
 	, m_timer(NULL)
-	, mStatus(0)
+	, mStatus(false)
 {
     ui->setupUi(this);
 	setMouseTracking(true);
@@ -155,6 +155,8 @@ void Palette::paintEvent(QPaintEvent *)
 
 void Palette::mousePressEvent(QMouseEvent *event)
 {
+	setFocus();
+
 	if (!mIsDraw)
 	{
 		return;
@@ -401,6 +403,7 @@ void Palette::SendSyncDraw(LONG64 timeX)
 {
 //	ReturnSync(timeX);
 
+	emit sig_sendFullScreen(mStatus);
 	SendFullScreen(mStatus);
 	
 	foreach(Shape *shape, mShapeStack)
@@ -495,11 +498,11 @@ void Palette::SendSyncDraw(LONG64 timeX)
 	}
 }
 
-void Palette::SendFullScreen(int iOpen)
+void Palette::SendFullScreen(bool bOpen)
 {
-	mStatus = iOpen;
+	mStatus = bOpen;
 	QString strInfo;
-	strInfo.append(QString("%1:%2,%3,%4;").arg(kMultiBoardOpFullScreen).arg(iOpen).arg("0").arg("0"));
+	strInfo.append(QString("%1:%2,%3,%4;").arg(kMultiBoardOpFullScreen).arg((int)bOpen).arg("0").arg("0"));
 	emit PicData(strInfo, "");
 }
 

@@ -206,7 +206,7 @@ public slots :
 
 	/*互动直播*/
 	void joinRtsRoom(const std::string &);					// 加入白板房间
-	void joinRoomSuccessfully(const std::string &, __int64, const std::string &);// 加入白板房间成功
+	void joinRoomSuccessfully();							// 加入白板房间成功
 	void joinVChatRoom();									// 加入音视频
 	void joinVChatSuccessfully();							// 加入音视频房间成功
 	void errorInfo(const QString &);						// 加入失败错误信息
@@ -234,6 +234,8 @@ public slots :
 	void slot_CloseWnd();									// 关闭屏幕共享
 	void requstError(QString);								// 白板及音视频错误提示
 	void slot_onOnlineTimeout();							// 查询在线人数
+	void slot_sendFullScreen(bool);							// 发送屏幕共享 false:关闭 true:开启
+	void slot_rtsTcpDiscontect();							// 白板链接断开
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual bool eventFilter(QObject *target, QEvent *event);
