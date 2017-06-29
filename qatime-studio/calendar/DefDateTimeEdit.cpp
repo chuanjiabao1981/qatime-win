@@ -1,6 +1,7 @@
 #include "DefDateTimeEdit.h"
 #include <QPainter>
 #include <QMouseEvent>
+#include <QMessageBox>
 
 DefDateTimeEdit::DefDateTimeEdit(QWidget *parent)
 	: QDateTimeEdit(parent)
@@ -14,19 +15,25 @@ DefDateTimeEdit::DefDateTimeEdit(QWidget *parent)
 
 //	m_DefCalendar->disconnect(SIGNAL(clicked(QDate)));
 	connect(m_DefCalendar, SIGNAL(setFinished(QDateTime)), this, SLOT(getDateTime(QDateTime)));
-	connect(m_DefCalendar, SIGNAL(clicked(QDate)), this, SLOT(CalendarClick(QDate)));
 
+	
+	connect(m_DefCalendar, SIGNAL(clicked(QDate)), this, SLOT(CalendarClick(QDate)));
+	
 	setMyStytle();
 	
 	this->setDateTime(QDateTime::currentDateTime());
 
 	this->setDisplayFormat("yyyy-MM-dd");
+	//设置最大日期，超出日期不可选 add by zbc 20170628
+	this->setMaximumDate(QDate::currentDate());	
 }
 
 DefDateTimeEdit::~DefDateTimeEdit()
 {
 
 }
+
+
 
 void DefDateTimeEdit::CalendarClick(QDate date)
 {
