@@ -303,8 +303,15 @@ void CallbackConnectNotify(const std::string& session_id, int channel_type, int 
 	{
 		if (code != 200)//连接异常，挂断
 		{
-			Rts::Hangup(session_id.c_str(), &CallbackHangup);
-			IMInterface::getInstance()->setSessionID("");
+//			Rts::Hangup(session_id.c_str(), &CallbackHangup);
+//			IMInterface::getInstance()->setSessionID("");
+			qDebug() << __FILE__ << __LINE__ << "rts fail server discontect errorcode：" << code;
+			emit IMInterface::getInstance()->sig_rtsTcpDiscontect();
+		}
+		else
+		{
+			emit IMInterface::getInstance()->joinRtsRoomSuccessfully();
+			qDebug() << __FILE__ << __LINE__ << "rts success server discontect errorcode：" << code;
 		}
 	}
 }
@@ -315,7 +322,7 @@ void CallbackHangup(nim::NIMResCode res_code, const std::string& session_id)
 
 void CallbackCreateConf(nim::NIMResCode res_code)
 {
-	qDebug() << __FILE__ << __LINE__ << "白板创建回调code：" << res_code;
+	qDebug() << __FILE__ << __LINE__ << "rts create callback code：" << res_code;
 	IMInterface *instance = IMInterface::getInstance();
 	if (NULL == instance)
 	{
@@ -357,7 +364,7 @@ void CallbackJoinConf(nim::NIMResCode res_code, const std::string& session_id, _
 	if (nim::kNIMResSuccess == res_code)
 	{
 		IMInterface::getInstance()->setSessionID(session_id);
-		emit IMInterface::getInstance()->joinRtsRoomSuccessfully(session_id, channel_id, custom_info);
+//		emit IMInterface::getInstance()->joinRtsRoomSuccessfully();
 	}
 	else
 	{

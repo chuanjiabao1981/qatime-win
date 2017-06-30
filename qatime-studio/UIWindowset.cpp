@@ -2315,6 +2315,7 @@ void UIWindowSet::initWhiteBoardWidget()
 	ui.horizontalLayout_21->addWidget(mWhiteBoard);
 	mWhiteBoard->setIsDraw(true);
 	connect(mWhiteBoard, SIGNAL(PicData(QString, QString)), this, SLOT(PicData(QString,QString)));
+	connect(mWhiteBoard, SIGNAL(sig_sendFullScreen(bool)), this, SLOT(slot_sendFullScreen(bool)));
 
 	m_WhiteBoardTool = new UIWhiteBoardTool(ui.live1v1_widget);
 	m_WhiteBoardTool->hide();
@@ -2390,8 +2391,10 @@ void UIWindowSet::slot_CloseWnd()
 	m_VideoInfo1v1->setVisible(false);
 	m_AppWndTool1v1->setVisible(false);
 
-	// 发送分享窗口到学生端
-	mWhiteBoard->SendFullScreen(0);
+	// 发送分享窗口通知到学生端
+	mWhiteBoard->SendFullScreen(false);
+	if (m_curChatRoom)
+		m_curChatRoom->SendFullScreen(false);
 
 	// 设置发送数据模式为自定义发送
 	IMInterface::getInstance()->SetCustomData(false);
@@ -2433,8 +2436,10 @@ void UIWindowSet::slot_selectWnd(HWND hwnd)
 	m_VideoInfo1v1->setVisible(true);
 	m_AppWndTool1v1->setVisible(true);
 
-	// 发送分享窗口到学生端
-	mWhiteBoard->SendFullScreen(1);
+	// 发送分享窗口通知到学生端
+	mWhiteBoard->SendFullScreen(true);
+	if (m_curChatRoom)
+		m_curChatRoom->SendFullScreen(true);
 
 	// 设置发送数据模式为自定义发送
 	IMInterface::getInstance()->SetCustomData(true);
@@ -2459,8 +2464,7 @@ void UIWindowSet::initConnection()
 	}
 
 	connect(instance, SIGNAL(createRtsRoomSuccessfully(const std::string&)), this, SLOT(joinRtsRoom(const std::string&)));
-	connect(instance, SIGNAL(joinRtsRoomSuccessfully(const std::string&, __int64, const std::string&)),
- 		this, SLOT(joinRoomSuccessfully(const std::string&, __int64, const std::string&)));
+	connect(instance, SIGNAL(joinRtsRoomSuccessfully()),this, SLOT(joinRoomSuccessfully()));
 	connect(instance, SIGNAL(createVChatRoomSuccessfully()), this, SLOT(joinVChatRoom()));
 	connect(instance, SIGNAL(joinVChatSuccessfully()),this, SLOT(joinVChatSuccessfully()));
  	connect(instance, SIGNAL(hasError(const QString &)), this, SLOT(errorInfo(const QString &)));
@@ -2471,7 +2475,8 @@ void UIWindowSet::initConnection()
 	connect(instance, SIGNAL(PeopleStatus(bool)), m_CameraS1v1Info, SLOT(StartEndVideo(bool)));
 
 	connect(instance, SIGNAL(rtsDataReceived(const std::string&, const std::string &)), this, SLOT(rtsDataReceived(const std::string&, const std::string &)));
-	connect(instance, SIGNAL(requstError(int)), this, SLOT(requstError(int)));
+	connect(instance, SIGNAL(requstError(QString)), this, SLOT(requstError(QString)));
+	connect(instance, SIGNAL(sig_rtsTcpDiscontect()), this, SLOT(slot_rtsTcpDiscontect()));
 }
 
 void UIWindowSet::joinRtsRoom(const std::string &roomName)
@@ -2479,7 +2484,7 @@ void UIWindowSet::joinRtsRoom(const std::string &roomName)
 	IMInterface::getInstance()->joinRtsRoom(roomName, false);
 }
 
-void UIWindowSet::joinRoomSuccessfully(const std::string &session_id, __int64 channel_id, const std::string &custom_info)
+void UIWindowSet::joinRoomSuccessfully()
 {
 	IMInterface::getInstance()->createVChatRoom(m_curTags->ChatID().toStdString());
 }
@@ -3001,4 +3006,40 @@ void UIWindowSet::stopQueryOnlineNum()
 void UIWindowSet::slot_onOnlineTimeout()
 {
 	QueryOnlinePersonNum();
+}
+
+void UIWindowSet::slot_sendFullScreen(bool bType)
+{
+	if (m_curChatRoom)
+		m_curChatRoom->SendFullScreen(bType);
+}
+
+void UIWindowSet::slot_rtsTcpDiscontect()
+{
+	//停止1对1直播
+	ui.Live1v1_pushBtn->setText(LIVE_BUTTON_NAME);
+	ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
+
+	// 结束白板和音视频
+	// 实现结束白板和音视频功能......待写
+	IMInterface::getInstance()->EndLive(m_curTags->ChatID().toStdString());
+
+	m_LiveStatusManager->SendStopLiveHttpMsg1v1();
+
+	if (m_CountTimer->isActive())
+	{
+		m_CountTimer->stop();					// 停止计时
+		m_iTimerCount = 0;						// 重置秒数
+		ui.time1v1_label->setVisible(false);	// 隐藏
+		ui.time1v1_label->setText("00:00:00");	// 重置时间
+	}
+	m_bLiving1v1 = false;
+
+	QString strError;
+	strError = QString("网络不稳定,服务器连接失败\r\n请重新开启直播！");
+	CMessageBox::showMessage(
+		QString("答疑时间"),
+		QString(strError),
+		QString("确定"),
+		QString("取消"));
 }

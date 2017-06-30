@@ -2397,5 +2397,18 @@ QString UIChatRoom::parse(QString str)
 void UIChatRoom::slot_eidtClear()
 {
 	ui.textEdit->clear();
-//	m_uitalk->ScrollDown();
+}
+
+void UIChatRoom::SendFullScreen(bool bType)
+{
+	nim::IMMessage msg;
+	PackageMsg(msg);
+	msg.type_ = nim::kNIMMessageTypeCustom;
+
+	if (bType)
+		msg.content_ = "FullScreenOpen";
+	else
+		msg.content_ = "FullScreenClose";
+
+	nim::Talk::SendMsg(msg.ToJsonString(true));
 }
