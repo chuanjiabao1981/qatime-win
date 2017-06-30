@@ -237,6 +237,9 @@ public slots:
 	void        SetCurAudioPath(std::string path);								//设置当前语音路径
 	QString		parse(QString str);
 	void        slot_eidtClear();
+
+public:
+	void		SendFullScreen(bool bType);										// false:关闭1对1屏幕共享 true;开启1对1屏幕共享
 private:
 	QToolButton* pPreMonthButton1;
 	QToolButton* pPreMonthButton;

@@ -34,7 +34,7 @@ public:
 	int  colorConvert(QColor color);			//解析数据
 	void SendSyncDraw(LONG64 timeX);				//发送同步数据
 	void ReturnSync(LONG64 timeX);
-	void SendFullScreen(int iOpen);				//发送全屏消息,1：开启 0：关闭
+	void SendFullScreen(bool bOpen);				//发送全屏消息,1：开启 0：关闭
 
 	enum DrawOpType
 	{
@@ -79,6 +79,7 @@ protected:
 
 signals:
 	void PicData(QString,QString);
+	void sig_sendFullScreen(bool);
 private slots:
 	void slot_onCountTimeout();
 private:
@@ -91,7 +92,7 @@ private:
 	bool mIsDraw;								//是否需要画
     QPen mPen;
 	QTimer*	 m_timer;
-	int  mStatus;								//全屏共享状态 0：未开启 1：开启
+	bool  mStatus;								//全屏共享状态 0：未开启 1：开启
 	std::string	m_SenderUid;					//发送者的uid
 };
 

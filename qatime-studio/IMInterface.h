@@ -7,6 +7,8 @@
 #include "nim_cpp_rts.h"
 #include "nim_cpp_vchat.h"
 
+#pragma execution_character_set("utf-8")
+
 /****************************************************************白板会话相关回调***********************************************************************************/
 void CallbackStartChannel(nim::NIMResCode res_code, const std::string& session_id, int channel_type, const std::string& uid);
 void CallbackStartNotify(const std::string& session_id, int channel_type, const std::string& uid, const std::string& custom_info);
@@ -111,9 +113,10 @@ signals:
 	/****************************************************************白板相关***********************************************************************************/
 	void createRtsRoomSuccessfully(const std::string&);
 	void rtsRoomExistence();
-	void joinRtsRoomSuccessfully(const std::string&, __int64, const std::string&);
+	void joinRtsRoomSuccessfully();
 	void rtsDataReceived(const std::string &, const std::string &uid);
 	void requstError(QString);
+	void sig_rtsTcpDiscontect();
 	/****************************************************************音视频相关***********************************************************************************/
 	void createVChatRoomSuccessfully();
 	void joinVChatSuccessfully();

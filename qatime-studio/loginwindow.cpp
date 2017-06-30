@@ -17,6 +17,7 @@
 #endif
 TCHAR m_pathHomePage[MAX_PATH] = {0};
 TCHAR m_pathUserName[MAX_PATH] = { 0 };
+TCHAR m_pathUserPass[MAX_PATH] = { 0 };
 TCHAR m_pathTeacherName[MAX_PATH] = { 0 };
 TCHAR m_pathTeacherID[MAX_PATH] = { 0 };
 TCHAR m_pathTeacherToken[MAX_PATH] = { 0 };
@@ -122,7 +123,7 @@ void LoginWindow::mouseReleaseEvent(QMouseEvent *e)
 	move(x() + dx, y() + dy);
 }
 
-// 开始登陆
+// 开始登录
 void LoginWindow::OnLogIn()
 {
 	Logining(true);
@@ -162,7 +163,7 @@ void LoginWindow::OnLogIn()
 	connect(reply, &QNetworkReply::finished, this, &LoginWindow::loginFinished);
 }
 
-// 返回登陆结果
+// 返回登录结果
 void LoginWindow::loginFinished()
 {
 	QString strError;
@@ -221,26 +222,9 @@ void LoginWindow::loginFinished()
 		strError = QString("用户名或密码不正确");
 
 	ui.ErrorTip_Label->setText(strError);
-	ui.UserPass_Edit->setText(QString(""));
 
 	RemeberPassword();
 	Logining(false);
-}
-
-void LoginWindow::AutoLogin()
-{
-	mainWin = new UIMainNewWindow();
-	mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
-	mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
-	mainWin->SetEnvironmental(m_EnvironmentalFormally);
-	mainWin->setRemeberToken(m_teacherToken);
-	mainWin->setAutoTeacherInfo(m_teacherID, m_teacherName, m_teacherUrl, m_accid, m_accidToken);
-	mainWin->RequestKey();
-	/*mainWin->ShowLesson();*/
-	mainWin->setLoginWindow(this);
-	mainWin->setVersion(m_version);
-	mainWin->resize(1, 1);
-	mainWin->show();
 }
 
 void LoginWindow::BrowseHomePage()
@@ -290,6 +274,7 @@ void LoginWindow::ReadSetting()
 	GetPrivateProfileString(L"CONFIG_PATH", L"ACCID", L"", m_pathAccid, MAX_PATH, szTempPath);
 	GetPrivateProfileString(L"CONFIG_PATH", L"ACCIDTOKEN", L"", m_pathAccidToken, MAX_PATH, szTempPath);
 	GetPrivateProfileString(L"CONFIG_PATH", L"VERSION", L"", m_pathVersion, MAX_PATH, szTempPath);
+	GetPrivateProfileString(L"CONFIG_PATH", L"USERPASSWORD", L"", m_pathUserPass, MAX_PATH, szTempPath);
 	m_iRemeber = GetPrivateProfileInt(L"CONFIG_PATH", L"REMEBER", 0, szTempPath);
 
 	m_teacherName = QString::fromStdWString(m_pathTeacherName);
@@ -298,6 +283,7 @@ void LoginWindow::ReadSetting()
 	m_teacherUrl = QString::fromStdWString(m_pathTeacherUrl);
 	m_accid = QString::fromStdWString(m_pathAccid);
 	m_accidToken = QString::fromStdWString(m_pathAccidToken);
+	m_password = QString::fromStdWString(m_pathUserPass);
 	m_version = QString::fromStdWString(m_pathVersion);
 	
 	QString sVersion = "  答疑时间直播助手{version}";
@@ -330,6 +316,9 @@ void LoginWindow::RemeberPassword()
 	lstrcat(szTempPath, L"\\config.ini");
 
 	QString strName = ui.UserName_Edit->text();
+	QString strPassWord = ui.UserPass_Edit->text();
+	QByteArray bPassWord = strPassWord.toLatin1().toBase64();
+	m_password = bPassWord;
 	WritePrivateProfileString(L"CONFIG_PATH", L"USERNAME", (LPCTSTR)strName.utf16(), szTempPath);
 
 	if (ui.remember_checkBox->isChecked())
@@ -346,21 +335,25 @@ void LoginWindow::RemeberPassword()
 		WritePrivateProfileString(L"CONFIG_PATH", L"ACCID", (LPCTSTR)m_accid.utf16(), szTempPath);
 		// 老师accidToken
 		WritePrivateProfileString(L"CONFIG_PATH", L"ACCIDTOKEN", (LPCTSTR)m_accidToken.utf16(), szTempPath);
+		// 老师密码
+		WritePrivateProfileString(L"CONFIG_PATH", L"USERPASSWORD", (LPCTSTR)m_password.utf16(), szTempPath);
 	}
+	ui.UserPass_Edit->setText(QString(""));
 }
 
 void LoginWindow::InitUserName()
 {
+	ui.UserName_Edit->setText(QString::fromStdWString(m_pathUserName));
 	if (m_iRemeber == 1)
 	{
-		Logining(true);
-		ui.UserName_Edit->setText(QString::fromStdWString(m_pathUserName));
 		ui.remember_checkBox->setCheckState(Qt::Checked);
 
-		Checking();
+		QByteArray bPassword = m_password.toLatin1();
+		QString password = QByteArray::fromBase64(bPassword);
+		ui.UserPass_Edit->setText(password);
 	}
-	else
-		this->show();
+
+	this->show();
 }
 
 void LoginWindow::ReturnLogin()
@@ -376,52 +369,6 @@ void LoginWindow::ReturnLogin()
 bool LoginWindow::IsAutoLogin()
 {
 	return (bool)m_iRemeber;
-}
-
-void LoginWindow::Checking()
-{
-	QString strUrl;
-	if (m_EnvironmentalFormally)
-	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
-		strUrl.replace("{teacher_id}", m_teacherID);
-	}
-	else
-	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full?status=teaching";
-		strUrl.replace("{teacher_id}", m_teacherID);
-	}
-
-	QUrl url = QUrl(strUrl);
-	QNetworkRequest request(url);
-	QString str = m_teacherToken;
-
-	request.setRawHeader("Remember-Token", m_teacherToken.toUtf8());
-	reply = manager.get(request);
-	connect(reply, &QNetworkReply::finished, this, &LoginWindow::CheckingFinished);
-}
-
-void LoginWindow::CheckingFinished()
-{
-	QByteArray result = reply->readAll();
-	QJsonDocument document(QJsonDocument::fromJson(result));
-	QJsonObject obj = document.object();
-	if (obj["status"].toInt() == 0)
-	{
-		QString sError;
-		QJsonObject error = obj["error"].toObject();
-		if (error["code"].toInt() == 1002)
-			sError = QString("授权已过期，请重新输入密码");
-
-		ui.ErrorTip_Label->setText(sError);
-		this->show();
-	}
-	else
-	{
-		AutoLogin();
-		hide();
-	}
-	Logining(false);
 }
 
 // 拖动标题做的处理
@@ -619,7 +566,7 @@ void LoginWindow::Logining(bool bLogining)
 	if (bLogining)
 	{
 		ui.login_pushBtn->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(190, 190, 190); ");
-		ui.login_pushBtn->setText("正在登陆中...");
+		ui.login_pushBtn->setText("正在登录中...");
 		ui.login_pushBtn->setEnabled(false);
 		ui.UserName_Edit->setEnabled(false);
 		ui.UserPass_Edit->setEnabled(false);
@@ -627,7 +574,7 @@ void LoginWindow::Logining(bool bLogining)
 	else
 	{
 		ui.login_pushBtn->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(87, 207, 248); ");
-		ui.login_pushBtn->setText("登陆");
+		ui.login_pushBtn->setText("登录");
 		ui.login_pushBtn->setEnabled(true);
 		ui.UserName_Edit->setEnabled(true);
 		ui.UserPass_Edit->setEnabled(true);

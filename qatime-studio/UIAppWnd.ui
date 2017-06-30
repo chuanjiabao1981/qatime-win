@@ -132,6 +132,13 @@
     <string/>
    </property>
   </widget>
+  <zorder>scrollArea</zorder>
+  <zorder>label</zorder>
+  <zorder>label_2</zorder>
+  <zorder>close_pushButton</zorder>
+  <zorder>cancel_pushButton</zorder>
+  <zorder>ok_pushButton</zorder>
+  <zorder>dateTimeEdit</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

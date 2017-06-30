@@ -48,7 +48,7 @@ bool SetVideoOutParam(ST_NLSS_VIDEOOUT_PARAM *pstVideoParam, EN_NLSS_VIDEOQUALIT
 	case EN_NLSS_VIDEOQUALITY_SUPER:
 		pstVideoParam->iOutWidth = 1920;
 		pstVideoParam->iOutHeight = 1080;
-		pstVideoParam->iOutFps = 15;
+		pstVideoParam->iOutFps = 18;
 		break;
 	case EN_NLSS_VIDEOQUALITY_HIGH:
 		pstVideoParam->iOutWidth = 1280;
