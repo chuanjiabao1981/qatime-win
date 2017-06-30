@@ -158,6 +158,24 @@ void UIVideo::OnLiveStreamStatusNty(EN_NLSS_STATUS enStatus, EN_NLSS_ERRCODE enE
 		m_pThis->emit sig_livestreamErrorHappened();
 	}
 }
+#define   WIDTHBYTES(bits)         (((bits)   +   31)   /   32   *   4) 
+#ifndef HDIB 
+#define HDIB HANDLE 
+#endif
+void SuoFangImage(int mWidth, int mHeight)
+{
+	int fx = 1;
+	int NewWidth = int(mWidth*fx + 0.5);
+	int NewHeight = int(mHeight*fx + 0.5);
+	int NewLineBytes = WIDTHBYTES(NewWidth * 8);
+	HDIB hNewDIB = (HDIB)::GlobalAlloc(GHND, 40 + 4 * 256 + NewLineBytes*NewHeight);
+	if (hNewDIB == NULL)
+	{
+		return;
+	}
+	LPBYTE lpDIBnew = (LPBYTE)::GlobalLock((HGLOBAL)hNewDIB);
+	//memcpy(lpDIBnew, lpDIB, 1064);
+}
 
 void UIVideo::paintEvent(QPaintEvent *)
 {
@@ -169,9 +187,11 @@ void UIVideo::paintEvent(QPaintEvent *)
 		if (m_SvideoSampler.iDataSize > 0)
 		{
 			QImage qimage;
+			
 			m_mutex.lock();
 			qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_RGB32);
-			p.drawImage(rect(), qimage);
+
+			//p.drawImage(rect(), qimage);
 			m_mutex.unlock();
 		}
 		else

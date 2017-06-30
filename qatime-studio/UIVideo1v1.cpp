@@ -7,6 +7,8 @@
 #include "windows.h"
 #include <shlobj.h> 
 #include <shlwapi.h>
+
+
 #pragma comment(lib,"Version.lib")
 #pragma comment(lib,"Shlwapi.lib")
 
@@ -111,18 +113,22 @@ void UIVideo1v1::slot_onCapturnTimeout()
 	CustomFrame();
 }
 
+
 void UIVideo1v1::paintEvent(QPaintEvent *)
 {
+	
 	if (this->isVisible())
 	{
 		QPainter p(this);
 		p.setPen(QColor(0x8099be));
-
+		QImage mImage;//add by zbc 20170629
 		QImage qimage;
 		qimage = QImage((uchar*)capture_data_, capture_width_, capture_height_, QImage::Format_RGB32);
- 		QImage q = qimage.mirrored(false, true);
-//		QImage qNew = q.scaled(rect().width(), rect().height(), Qt::KeepAspectRatio);
-		p.drawImage(rect(), q);
+
+		mImage = qimage.mirrored(false, TRUE);
+		QPixmap pixmap = QPixmap::fromImage(mImage);
+		p.drawPixmap(rect(), pixmap.scaled(rect().size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
 	}
 }
 

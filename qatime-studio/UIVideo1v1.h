@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "ui_UIVideo1v1.h"
 
+
 struct CaptureWindowInfo
 {
 	HWND id;
