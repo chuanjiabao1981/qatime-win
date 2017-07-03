@@ -43,6 +43,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	, m_bPerson(false)
 	, m_EnvironmentalTyle(true)
 	, m_UnreadCount(0)
+	, m_b1v1ShapeScreen(false)
 {
 	ui.setupUi(this);
 	setAutoFillBackground(true);
@@ -419,6 +420,13 @@ void UIChatRoom::setBrow(QString path)
 // 发送消息按钮
 void UIChatRoom::clickSendMessage()
 {
+	// Test 测试
+// 	if (ui.textEdit->toPlainText() == "2")
+// 	{
+// 		SendFullScreen(false);
+// 		return;
+// 	}
+
 	if (strcmp(m_CurChatID.c_str(),"") == 0)
 	{
 		QToolTip::showText(QCursor::pos(), "请选择直播间！");
@@ -572,6 +580,13 @@ void UIChatRoom::forwardTime()
 // 	ui.timeShow->setText(dtstr);
 
 	QDate date = m_defDateTimeEdit->date().addDays(1);
+	if (QDate::currentDate() < date)
+	{
+		//TODO提示，消息记录只能查看之前的消息
+		QToolTip::showText(QCursor::pos(), "没有今天之后的消息记录！");
+		return;
+	}
+
 	m_defDateTimeEdit->setDate(date);
 	QString dtstr = date.toString("yyyy-MM-dd");
 
@@ -743,6 +758,15 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 			}
 		}
 		return bValid;
+	}
+	else if (pMsg->type_ == nim::kNIMMessageTypeCustom)
+	{
+		std::string strContent = pMsg->content_;
+		std::string strStatus = "{\"event\":\"FetchPlayStatus\"}";
+		if (strcmp(strContent.c_str(), strStatus.c_str()) == 0)
+		{
+			SendFullScreen(m_b1v1ShapeScreen);
+		}
 	}
 
 	// 判断当前过来的消息，是不是此会话窗口
@@ -2401,14 +2425,21 @@ void UIChatRoom::slot_eidtClear()
 
 void UIChatRoom::SendFullScreen(bool bType)
 {
+	m_b1v1ShapeScreen = bType;
 	nim::IMMessage msg;
 	PackageMsg(msg);
 	msg.type_ = nim::kNIMMessageTypeCustom;
 
 	if (bType)
-		msg.content_ = "FullScreenOpen";
+		msg.content_ = "PublishPlayStatus:desktop";//
 	else
-		msg.content_ = "FullScreenClose";
+		msg.content_ = "PublishPlayStatus:board";//
+
+	msg.msg_setting_.need_offline_ = nim::BS_FALSE;
+	msg.msg_setting_.roaming_ = nim::BS_FALSE;
+	msg.msg_setting_.server_history_saved_ = nim::BS_FALSE;
+	msg.msg_setting_.push_need_badge_ = nim::BS_FALSE;
+	msg.msg_setting_.need_push_ = nim::BS_FALSE;
 
 	nim::Talk::SendMsg(msg.ToJsonString(true));
 }

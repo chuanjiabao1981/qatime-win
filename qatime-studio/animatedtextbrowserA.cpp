@@ -114,11 +114,5 @@ void AnimatedTextBrowserA::paintEvent(QPaintEvent *e)
 	{
 		int h = this->document()->size().rheight();
 		this->setFixedHeight(h);
-		
-		if (iCount != 0)
-			return;
-
-		emit sig_scrollDown();
-		iCount++;
 	}
 }

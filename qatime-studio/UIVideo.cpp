@@ -190,8 +190,7 @@ void UIVideo::paintEvent(QPaintEvent *)
 			
 			m_mutex.lock();
 			qimage = QImage((uchar*)m_SvideoSampler.puaData, m_SvideoSampler.iWidth, m_SvideoSampler.iHeight, QImage::Format_RGB32);
-
-			//p.drawImage(rect(), qimage);
+			p.drawImage(rect(), qimage);
 			m_mutex.unlock();
 		}
 		else

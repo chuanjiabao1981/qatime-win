@@ -259,6 +259,7 @@ void UIAppWnd::slot_click(HWND hwnd)
 	if (hwnd)
 	{
 		emit sig_selectWnd(hwnd);
+		hide();
 	}
 }
 
@@ -280,4 +281,19 @@ void UIAppWnd::deleteWnd()
 	}
 
 	m_vecBtnApp.clear();
+}
+
+void UIAppWnd::focusOutEvent(QFocusEvent *event)
+{
+	QPoint pt = mapFromGlobal(QCursor::pos());
+	pt.setX(pt.x() + geometry().x());
+	pt.setY(pt.y() + geometry().y());
+	QRect rc = this->geometry();
+	if (rc.contains(pt))
+	{
+		setFocus();
+		return;
+	}
+
+	hide();
 }

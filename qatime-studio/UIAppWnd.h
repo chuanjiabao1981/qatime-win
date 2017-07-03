@@ -21,6 +21,7 @@ private:
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result);
+	virtual void focusOutEvent(QFocusEvent *event);
 
 private:
 	void style(QScrollArea *style);

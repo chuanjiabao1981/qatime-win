@@ -387,8 +387,8 @@ int Palette::colorConvert(QColor color)
 		clr = 0xff33ff;
 	else if (color == 0x7dd21f)
 		clr = 0x7dd21f;
-	else if (color == 0x228bf7)
-		clr = 0x228bf7;
+	else if (color == 0x228bf8)
+		clr = 0x228bf8;
 	else if (color == 0xd1021c)
 		clr = 0xd1021c;
 	else if (color == 0xfddc01)

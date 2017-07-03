@@ -124,11 +124,10 @@ void UIVideo1v1::paintEvent(QPaintEvent *)
 		QImage mImage;//add by zbc 20170629
 		QImage qimage;
 		qimage = QImage((uchar*)capture_data_, capture_width_, capture_height_, QImage::Format_RGB32);
+ 		QImage q = qimage.mirrored(false, true);
 
-		mImage = qimage.mirrored(false, TRUE);
-		QPixmap pixmap = QPixmap::fromImage(mImage);
-		p.drawPixmap(rect(), pixmap.scaled(rect().size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-
+		QPixmap pixmap = QPixmap::fromImage(q);
+		p.drawPixmap(rect(), pixmap.scaled(rect().size(), Qt::KeepAspectRatio, Qt::FastTransformation));//SmoothTransformation
 	}
 }
 

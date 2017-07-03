@@ -243,7 +243,8 @@ public:
 private:
 	QToolButton* pPreMonthButton1;
 	QToolButton* pPreMonthButton;
-	bool		 m_bZoom;	// 当垂直滚动条出现后，是否缩放过 
+	bool		 m_bZoom;			// 当垂直滚动条出现后，是否缩放过 
+	bool		 m_b1v1ShapeScreen; // 一对一是否分享屏幕中，默认为false
 };
 
 #endif // UICHATROOM_H

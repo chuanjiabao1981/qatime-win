@@ -2726,6 +2726,8 @@ void UIWindowSet::clickLive1v1()
 			QString("取消"));
 		if (iStatus == 1)
 		{
+			// 把分享屏幕关闭
+			slot_CloseWnd();
 			ui.Live1v1_pushBtn->setText(LIVE_BUTTON_NAME);
 			ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
 
@@ -3016,6 +3018,7 @@ void UIWindowSet::slot_sendFullScreen(bool bType)
 
 void UIWindowSet::slot_rtsTcpDiscontect()
 {
+	slot_CloseWnd();
 	//停止1对1直播
 	ui.Live1v1_pushBtn->setText(LIVE_BUTTON_NAME);
 	ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");

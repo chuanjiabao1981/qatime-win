@@ -640,8 +640,12 @@ void UIMainNewWindow::changeMsgNumber(QString chid)
 
 void UIMainNewWindow::LogOut()
 {
-	auto cb = std::bind(OnLogOutCallback, std::placeholders::_1);
-	nim::Client::Logout(nim::kNIMLogoutAppExit, cb);
+	nim::VChat::Cleanup();
+	nim_http::Uninit();
+	exit(0);
+
+// 	auto cb = std::bind(OnLogOutCallback, std::placeholders::_1);
+// 	nim::Client::Logout(nim::kNIMLogoutAppExit, cb);
 }
 
 void UIMainNewWindow::OnLogOutCallback(nim::NIMResCode res_code)
