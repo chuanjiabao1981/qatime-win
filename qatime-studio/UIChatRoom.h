@@ -11,6 +11,7 @@
 #include <vector>
 #include "UIWindowset.h"
 #include "calendar/DefDateTimeEdit.h"
+#include "UIAudioBar.h"
 
 //---云信
 //#include "nim_client_def.h"
@@ -30,6 +31,8 @@ class UIMainWindow;
 class UITalk;
 class UITalkRecord;
 class UIWindowSet;
+class UIAudioBar;
+
 struct MyImageInfo
 {
 	QPixmap			PhotoImg;		//聊天头像
@@ -59,6 +62,7 @@ signals:
 private:
 	Ui::UIChatRoom ui;
 	
+	static UIChatRoom				*m_pChatRoom;			//add by zbc 20170704
 	QNetworkAccessManager manager;
 	QNetworkReply *reply;
 	UITalk*							m_uitalk;			// 聊天窗的自定义聊天控件
@@ -83,6 +87,16 @@ private:
 	/*								聊天记录参数							*/
 	long long						m_farst_msg_time;	// 最远得消息时间
 	int								kMsgLogNumberShow;	// 一次获取的条数
+	/************************语音进度条**************************************/
+	UIAudioBar*						m_AudioBar;			// 语音进度条窗口
+	bool							m_bSendAudio;		// 默认发送语音
+	QTimer*							m_DisSendMsgTimer;	// 发消息需要2秒间隔
+	bool							m_bCanSend;			// true为可发送消息
+	bool							m_bMute;			// true为被禁言
+	int								m_DisCount;			// 
+	
+	QTimer*							m_AudioBarTimer;	// 语音条显示定时器
+
 	/************************************************************************/
 	QTextCursor*					m_TextCursor;
 	QMap<QString, QString>			m_StudentInfo;		// key ：accid 
@@ -133,6 +147,7 @@ public slots:
 	void clickPic();									// 选择图片
 	void LoadImgTimeout();								// 加载图片定时器
 	void slot_CalendarClick(QDate);						// 点击日历
+	void clickAudio();									// 点击语音
 private:
 //	void		initSDK();									// 初始化云信SDK
 //	bool		LoadConfig(const std::string& app_data_dir,const std::string& app_install_dir, nim::SDKConfig &config); //加载配置
@@ -208,11 +223,26 @@ public:
 	* @param[in] cid 消息id
 	* @return void 无返回值
 	*/
-	static void OnStopAudioCallback(int code, const char* file_path, const char* sid, const char* cid);
+	static void OnStopAudioCallback(int code, const char *file_path, const char *sid, const char *cid);
+	//开始采集回调
+	static void OnStartCaptureCallback(int code);
+	//停止采集回调
+	static void OnStopCaptureCallback(int rescode, const char *sid, const char *cid, const char *file_path, const char *file_ext, long file_size, int audio_duration);
+	//取消采集回调
+	static void OnCancelCaptureCallback(int code);
+
+	
 	std::vector<personListBuddy*>  GetBuddy();						// 获取成员
 	bool		IsPerson();											// 是否请求完成员
 	void		ResultMsg();										// 第一次请求
 	void		ShowChatMsg(nim::IMMessage pMsg);					// 第一次请求回来的消息
+
+	bool		IsCaptureAudio();										//判断当前是否在录制语音
+	void		SetCurAudioPath(std::string path);						// 设置当前语音路径
+	void		InitAudioCallBack();									// 录制语音初始化回调
+	void		finishAudio();											// 完成录音,默认发送语音
+	void		AddAudioMsg(nim::IMMessage pMsg, nim::IMAudio audio);	// 往界面上添加语音消息
+	void		SendAudio(QString msgid, QString path, long size, int audio_duration, std::string file_ex);		// 发送语音
 	
 public slots:
 	void		chickChage(int, QString, QString);
@@ -234,10 +264,9 @@ public slots:
 	void		returnAllMember();												//返回成员
 	void		Request1v1Member();												//请求1v1成员
 	void		SetEnvironmental(bool EnvironmentalTyle);						//设置当前环境
-	void        SetCurAudioPath(std::string path);								//设置当前语音路径
 	QString		parse(QString str);
 	void        slot_eidtClear();
-
+	void		AudioBarTimer();												// 改变窗口后，语音条的显示位置
 public:
 	void		SendFullScreen(bool bType);										// false:关闭1对1屏幕共享 true;开启1对1屏幕共享
 private:
@@ -245,6 +274,7 @@ private:
 	QToolButton* pPreMonthButton;
 	bool		 m_bZoom;			// 当垂直滚动条出现后，是否缩放过 
 	bool		 m_b1v1ShapeScreen; // 一对一是否分享屏幕中，默认为false
+	
 };
 
 #endif // UICHATROOM_H

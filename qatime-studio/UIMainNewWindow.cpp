@@ -456,7 +456,7 @@ void UIMainNewWindow::InitAudio()
 void UIMainNewWindow::OnStopAudioCallback(int code, const char* file_path, const char* sid, const char* cid)
 {
 	QString strSid = QString(QLatin1String(sid));
-	char* pData = new char[strlen(cid)];
+	char* pData = new char[strlen(cid)]; 
 	memcpy(pData, cid, strlen(cid));
 	
 	PostMessage((HWND)m_This->winId(), MSG_SEND_AUDIO_MSG, (WPARAM)(int)strSid.toInt(), (LPARAM)pData);
@@ -588,19 +588,20 @@ bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, lo
 			}
 		}
 		break;
-// 		case MSG_SEND_AUDIO_FINISH_MSG:
-// 		{
-// 			MyAudioStruct* audio = (MyAudioStruct*)pMsg->wParam;
-// 			if (audio)
-// 			{
-// 				if (m_WindowSet)
-// 					m_WindowSet->SendAudio(audio->sSessionID, audio->sMsgID, audio->sFilePath, audio->fileSize, audio->duration, audio->sFileEx);
-// 
-// 				delete audio;
-// 				audio = NULL;
-// 			}
-// 		}
-//		break;
+ 		case MSG_SEND_AUDIO_FINISH_MSG:
+ 		{
+ 			MyAudioStruct* audio = (MyAudioStruct*)pMsg->wParam;
+ 			if (audio)
+ 			{
+ 				if (m_WindowSet)
+ 					m_WindowSet->SendAudio(audio->sSessionID, audio->sMsgID, audio->sFilePath, audio->fileSize, audio->duration, audio->sFileEx);
+ 
+				delete audio;
+ 				audio = NULL;
+ 			}
+			break;
+ 		}
+		
 // 		case MSG_LOAD_AUDIO_SUC_MSG:
 // 		{
 // 			char* chatid = (char*)pMsg->wParam;
@@ -640,6 +641,7 @@ void UIMainNewWindow::changeMsgNumber(QString chid)
 
 void UIMainNewWindow::LogOut()
 {
+	nim_audio::Audio::Cleanup();
 	nim::VChat::Cleanup();
 	nim_http::Uninit();
 	exit(0);

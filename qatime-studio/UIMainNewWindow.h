@@ -22,6 +22,18 @@
 #include "nim_cpp_client.h"
 #include "nim_cpp_tool.h"
 
+// 语音录制完成的参数	add by zbc 20170704
+struct MyAudioStruct
+{
+	std::string sSessionID;
+	std::string sMsgID;
+	std::string sFilePath;
+	std::string sFileEx;
+	long	fileSize;
+	int		duration;
+};
+
+
 class UIWindowSet;
 class UIAuxiliaryWnd;
 class LoginWindow;

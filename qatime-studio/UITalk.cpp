@@ -166,7 +166,7 @@ void UITalk::InsertChat(QPixmap* pixmap, QString name, QString time, QString tex
 }
 
 // 插入语音聊天信息
-void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QString text, std::string path, std::string sid, std::string msgid, bool bTeacher)
+void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QString text, std::string path, std::string sid, std::string msgid, bool bTeacher, bool bRead)
 {
 	if (!pixmap)
 		pixmap = &QPixmap("./images/teacherPhoto.png");
@@ -208,10 +208,11 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 	// 第二行（聊天内容）
 	QHBoxLayout* SecRow = new QHBoxLayout();
 	SecRow->setContentsMargins(30, 0, 0, 0);
-	CBtnAudio* pAudio = new CBtnAudio(path, sid,msgid,this);
+	CBtnAudio* pAudio = new CBtnAudio(path, sid,msgid,this,bRead);
 	pAudio->setFixedSize(80, 25);
 	connect(pAudio, SIGNAL(sig_Audioclicked(std::string, std::string, std::string, bool)), this, SLOT(slot_Audioclicked(std::string, std::string, std::string, bool)));
 	m_vecAudio.push_back(pAudio);
+
 	SecRow->addWidget(pAudio);
 
 	QLabel* LDur = new QLabel(); // 显示时长
@@ -240,9 +241,7 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-//	m_timerDelay->start(TIME_DELAY);
-// 	sleep(50);
-// 	ScrollDown();
+
 }
 
 // 插入通知消息等

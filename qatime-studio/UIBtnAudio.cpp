@@ -9,6 +9,8 @@
 #include "windows.h"
 #include <QFile>
 
+#define LOOP_COUNT 100
+#define LOOP_FAIL_COUNT 160
 CBtnAudio::CBtnAudio(std::string path, std::string sid, std::string msgid, QWidget *parent /*= 0*/, bool bRead)
 : QPushButton(parent)
 , m_path(path)
@@ -20,7 +22,11 @@ CBtnAudio::CBtnAudio(std::string path, std::string sid, std::string msgid, QWidg
 , m_ImageCount(0)
 , m_bDownEnd(false)
 , m_bRead(bRead)
+, m_iCount(0)
+, m_LoadStatus(true)
 {
+	setCursor(Qt::PointingHandCursor);
+
 	m_Timer = new QTimer(this);
 	connect(m_Timer, SIGNAL(timeout()), this, SLOT(slot_onCountTimeout()));
 
@@ -37,6 +43,19 @@ CBtnAudio::~CBtnAudio()
 
 void CBtnAudio::onClicked(bool bChecked)
 {
+	// 加载中状态不可点击
+	QString strPicName = styleSheet();
+	if (strPicName.indexOf("audio_loading") > 0)
+		return;
+	
+	if (!m_LoadStatus)
+	{
+		emit sig_AudioLoadFail(m_msg);
+		setStyleSheet("QPushButton{border-image:url(./images/audio_loading.png);}");
+		m_TimerDown->start(50);
+		return;
+	}
+	
 	// 如果没下载完，直接返回
 	if (!m_bDownEnd)
 		return;
@@ -79,12 +98,14 @@ void CBtnAudio::slot_onCountTimeout()
 
 void CBtnAudio::slot_onDownTimeout()
 {
+	m_iCount++;
 	QString path = QString::fromStdString(m_path);
 	QFile file(path);
 	if (file.exists())
 	{
 		m_TimerDown->stop();
 		m_bDownEnd = true;
+		m_LoadStatus = true;
 		if (m_bRead)
 			setStyleSheet("QPushButton{border-image:url(./images/audio_2.png);}");
 		else
@@ -105,4 +126,27 @@ void CBtnAudio::stopPlay()
 bool CBtnAudio::GetPlayStatus()
 {
 	return m_bIsPlay;
+}
+
+void CBtnAudio::setMsg(nim::IMMessage msg)
+{
+	m_msg = msg;
+}
+
+void CBtnAudio::LoadFail()
+{
+	m_iCount++;
+	emit sig_AudioLoadFail(m_msg);
+
+	if (m_iCount == 20)
+	{
+		m_TimerDown->stop();
+		m_LoadStatus = false;
+		setStyleSheet("QPushButton{border-image:url(./images/audio_fail.png);}");
+	}
+}
+
+void CBtnAudio::LoadSuc()
+{
+
 }

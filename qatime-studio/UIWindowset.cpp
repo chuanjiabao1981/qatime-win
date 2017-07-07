@@ -650,6 +650,7 @@ void UIWindowSet::OpenCourse1v1(QString chatID, QString courseid, QString teache
 		chatRoom->SetEnvironmental(m_EnvironmentalTyle);
 		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount,true);
 		chatRoom->SetCurAudioPath(strCurAudioPath);
+		chatRoom->InitAudioCallBack();		//add by zbc 20170704
 		ui.horizontalLayout_18->addWidget(chatRoom);
 		m_vecChatRoom.push_back(chatRoom);
 		m_mapChatRoom.insert(chatID, chatRoom);
@@ -672,6 +673,7 @@ void UIWindowSet::OpenCourse(QString chatID, QString courseid, QString teacherid
 		chatRoom->SetEnvironmental(m_EnvironmentalTyle);
 		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount);
 		chatRoom->SetCurAudioPath(strCurAudioPath);
+		chatRoom->InitAudioCallBack();		//add by zbc 21070704
 		ui.horizontalLayout_6->addWidget(chatRoom);
 		m_vecChatRoom.push_back(chatRoom);
 		m_mapChatRoom.insert(chatID, chatRoom);
@@ -3045,4 +3047,39 @@ void UIWindowSet::slot_rtsTcpDiscontect()
 		QString(strError),
 		QString("确定"),
 		QString("取消"));
+}
+
+bool UIWindowSet::IsCaptureAudio()
+{
+	if (m_vecChatRoom.size() > 0)
+	{
+		std::vector<UIChatRoom*>::iterator it;
+		for (it = m_vecChatRoom.begin(); it != m_vecChatRoom.end(); it++)
+		{
+			UIChatRoom *mRoom = *it;
+			if (mRoom->IsCaptureAudio())
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void UIWindowSet::SendAudio(std::string sid, std::string msgid, std::string mPath, long mSize, int dur, std::string mfileEx)
+{
+	if (m_vecChatRoom.size() > 0)
+	{
+		std::vector<UIChatRoom*>::iterator it;
+		for (it = m_vecChatRoom.begin(); it != m_vecChatRoom.end(); it++)
+		{
+			UIChatRoom *mRoom = *it;
+			//判断是当前回话窗口
+			if (strcmp(sid.c_str(), mRoom->GetCurChatID().c_str()) == 0)
+			{
+				mRoom->SendAudio(QString::fromStdString(msgid), QString::fromStdString(mPath), mSize, dur, mfileEx);
+				return;
+			}
+		}
+	}
 }

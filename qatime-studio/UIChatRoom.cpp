@@ -24,6 +24,7 @@ QColor contentColor(102, 102, 102);
 QColor nameColor(85, 170, 255);
 QColor selfColor(190,11,11);
 
+UIChatRoom *UIChatRoom::m_pChatRoom = NULL;
 UIChatRoom::UIChatRoom(QWidget *parent)
 	: QWidget(parent)
 	, m_CurChatID("")
@@ -44,13 +45,19 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	, m_EnvironmentalTyle(true)
 	, m_UnreadCount(0)
 	, m_b1v1ShapeScreen(false)
+	, m_AudioBar(NULL)		//add by zbc 20170704
+	, m_bCanSend(true)			
+	, m_bMute(false)
+	, m_DisCount(2)
 {
 	ui.setupUi(this);
+	m_pChatRoom = this;
 	setAutoFillBackground(true);
 	QPalette p = palette();
 	p.setColor(QPalette::Window, QColor("white"));
 	setPalette(p);
 
+	connect(ui.audio_pushButton, SIGNAL(clicked()), this, SLOT(clickAudio()));		//建立语音信号槽
 	connect(ui.button_talk, SIGNAL(clicked()), this, SLOT(clickTalk()));
 	connect(ui.button_proclamation, SIGNAL(clicked()), this, SLOT(clickProclamation()));
 	connect(ui.button_studentList, SIGNAL(clicked()), this, SLOT(clickStudentList()));
@@ -112,6 +119,15 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 
 	m_LoadImgTimer = new QTimer(this);
 	connect(m_LoadImgTimer, SIGNAL(timeout()), this, SLOT(LoadImgTimeout()));
+	//语音进度条
+	m_AudioBarTimer = new QTimer(this);
+	connect(m_AudioBarTimer, SIGNAL(timeout()), this, SLOT(AudioBarTimer()));
+
+	//实例化类
+	m_AudioBar = new UIAudioBar(this);
+	m_AudioBar->setWindowFlags(Qt::FramelessWindowHint);	//隐藏窗口标题栏
+	m_AudioBar->setMainWindow(this);
+	m_AudioBar->hide();
 
 	//隐藏讨论、公告、成员
 	ui.header_widget->setVisible(false);
@@ -182,6 +198,9 @@ bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
 			QRect rc = ui.text_talk->geometry();
 			m_uitalk->setFixedSize(ui.text_talk->width(), ui.text_talk->height());
 			m_uitalk->ScrollDown();
+			//add by zbc 20170707
+			if (m_AudioBarTimer)
+				m_AudioBarTimer->start(100);
 		}
 	}
 	else if (target == ui.msgRecord)
@@ -876,7 +895,7 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 			img = (QPixmap*)Buddy->head->pixmap();
 
 
-		m_uitalk->InsertAudioChat(img, qName, qTime, qduration, path, sid, msgid, false);
+		m_uitalk->InsertAudioChat(img, qName, qTime, qduration, path, sid, msgid, false, false);
 		
 		m_parent->SendStudentBullet(qName, "[语音消息]", QString::fromStdString(m_CurChatID));
 		bValid = true;
@@ -2442,4 +2461,182 @@ void UIChatRoom::SendFullScreen(bool bType)
 	msg.msg_setting_.need_push_ = nim::BS_FALSE;
 
 	nim::Talk::SendMsg(msg.ToJsonString(true));
+}
+
+void UIChatRoom::clickAudio()
+{
+	if (!m_bCanSend)
+	{
+		QToolTip::showText(QCursor::pos(), "发送消息间隔1秒");
+		return;
+	}
+	if (m_bMute)
+	{
+		QToolTip::showText(QCursor::pos(), "已被禁言！");
+		return;
+	}
+	if (m_AudioBar)
+	{
+		if (m_AudioBar->isVisible())
+		{
+			//正在录制录音
+			QToolTip::showText(QCursor::pos(), "正在录制语音！");
+		}
+		else
+		{
+			//判断当前是否有录制
+			if (m_parent && m_parent->IsCaptureAudio())
+			{
+				QToolTip::showText(QCursor::pos(), "录音程序已运行，同时只能运行一个！");
+				return;
+			}
+
+			std::string msg_id = nim::Tool::GetUuid();
+			nim_audio::Audio::StartCapture(m_CurChatID.c_str(), msg_id.c_str(), nim_audio::AMR);
+			int mHeiht = ui.btn_widget->geometry().y();
+			m_AudioBar->setGeometry(0, mHeiht - 26, this->width(), 26);
+			m_AudioBar->MonitorFail();
+			m_AudioBar->show();
+		}
+	}
+
+}
+
+bool UIChatRoom::IsCaptureAudio()
+{
+	return m_AudioBar->isVisible();
+}
+
+//完成录音
+void UIChatRoom::finishAudio()
+{
+	nim_audio::Audio::StopCapture();
+}
+
+void UIChatRoom::InitAudioCallBack()
+{
+	nim_audio::Audio::RegStartCaptureCb(&UIChatRoom::OnStartCaptureCallback);
+	nim_audio::Audio::RegStopCaptureCb(&UIChatRoom::OnStopCaptureCallback);
+	nim_audio::Audio::RegCancelAudioCb(&UIChatRoom::OnCancelCaptureCallback);
+}
+
+void UIChatRoom::OnStartCaptureCallback(int code)
+{
+	if (code != 200)
+	{
+		//提示录音失败
+		QToolTip::showText(QCursor::pos(), "录制语音失败！");
+	}
+	else
+	{
+		if (m_pChatRoom)
+		{
+			m_pChatRoom->m_AudioBar->CaptureAudio();
+		}
+	}
+}
+
+void UIChatRoom::OnStopCaptureCallback(int rescode, const char *sid, const char *cid, const char *file_path, const char *file_ext, long file_size, int audio_duration)
+{
+	if (rescode == 200 && m_pChatRoom)
+	{
+		MyAudioStruct *mAudio = new MyAudioStruct;
+		mAudio->sSessionID = sid;
+		mAudio->sMsgID = cid;
+		mAudio->sFilePath = file_path;
+		mAudio->sFileEx = file_ext;
+		mAudio->fileSize = file_size;
+		mAudio->duration = audio_duration;
+
+		HWND mHwnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
+		if (mHwnd == NULL)
+		{
+			mHwnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
+		}
+		PostMessage(mHwnd, MSG_SEND_AUDIO_FINISH_MSG, (WPARAM)mAudio, 0);
+	}
+}
+
+void UIChatRoom::OnCancelCaptureCallback(int code)
+{
+	if (code == 200 && m_pChatRoom)
+	{
+		//取消录音
+	}
+}
+
+//往界面上添加语音消息
+void UIChatRoom::AddAudioMsg(nim::IMMessage pMsg, nim::IMAudio audio)
+{
+	stepMsgDays(QDateTime::fromMSecsSinceEpoch(pMsg.timetag_));
+
+	std::string strName = pMsg.readonly_sender_nickname_;
+	std::string strContent = pMsg.content_;
+	std::string strID = pMsg.sender_accid_;
+
+	QString qTime = QDateTime::fromMSecsSinceEpoch(pMsg.timetag_).toString("hh:mm:ss"); 
+	QString qName = QString::fromStdString(strName);
+	//聊天头像
+	QPixmap mImage = m_parent->TeacherPhotoPixmap();
+	bool bTeacher = false;
+	if (strcmp(strID.c_str(), m_CurTeacherID.toStdString().c_str()) == 0)
+	{
+		bTeacher = true;
+	}
+
+	QString qDuration = QString::number((audio.duration_ + 500) / 1000);
+	if (qDuration.toInt() > 60)
+	{
+		qDuration = "60";
+	}
+	qName = m_TeachterName + "(我)";
+	std::string sid;	// 会话窗口ID
+	std::string msgid;	// 当前消息ID
+	sid = m_CurChatID;
+	msgid = pMsg.client_msg_id_;
+	m_uitalk->InsertAudioChat(&mImage, qName, qTime, qDuration, pMsg.local_res_path_, sid, msgid, bTeacher);
+}
+
+//发送语音消息
+void UIChatRoom::SendAudio(QString msgid, QString path, long size, int audio_duration, std::string file_ex)
+{
+	if (m_AudioBar->IsSend())
+	{
+		nim::IMMessage msg;
+		PackageMsg(msg);
+		msg.type_ = nim::kNIMMessageTypeAudio;
+
+		msg.local_res_path_ = path.toStdString();
+		msg.client_msg_id_ = msgid.toStdString();
+
+		nim::IMAudio mIMAudio;
+		mIMAudio.md5_ = GetFileMD5(path);
+		mIMAudio.size_ = size;
+		mIMAudio.duration_ = audio_duration;
+		mIMAudio.file_extension_ = file_ex;
+
+		msg.attach_ = mIMAudio.ToJsonString();
+
+		std::string json_msg = nim::Talk::CreateAudioMessage(msg.receiver_accid_, msg.session_type_, msg.client_msg_id_, mIMAudio, msg.local_res_path_, nim::MessageSetting(), msg.timetag_);
+		nim::Talk::SendMsg(json_msg, msg.client_msg_id_);
+
+		AddAudioMsg(msg, mIMAudio);
+
+	}
+	else
+	{
+		wchar_t *mPath = new wchar_t[path.length()];
+		path.toWCharArray(mPath);
+		nim_audio::Audio::CancelAudio(mPath);
+	}
+}
+
+void UIChatRoom::AudioBarTimer()
+{
+	if (m_AudioBarTimer)
+	{
+		m_AudioBarTimer->stop();
+		int height = ui.btn_widget->geometry().y();
+		m_AudioBar->setGeometry(0, height - 26, this->width(), 26);
+	}
 }

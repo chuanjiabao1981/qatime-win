@@ -287,6 +287,10 @@ public:
 	void	SendStatus(nim::SendMessageArc* arcNew);			// 接收消息状态
 	void	OnStopPlayAudio(std::string sid, char* msgid);		// 语音播放结束消息
 	void    OnSendAnnouncements(QString text);					// 发送群公告
+	//语音完成并发送 add by zbc 20170704
+	void	SendAudio(std::string sid, std::string msgid, std::string mPath, long mSize, int dur, std::string mfileEx);
+	/*************************语音处理**************************/
+	bool	IsCaptureAudio();									// 判断当前是否有录制语音
 
 	/*************************直播推流**************************/
 	void	AddTodayToLesson(QString  id, QString courseid, QString boardUrl, QString cameraUrl, QString time, QString status, QString name);// 往选择课程中添加今日课程

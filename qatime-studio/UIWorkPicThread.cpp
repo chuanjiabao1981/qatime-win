@@ -15,7 +15,6 @@
 #include <QPixmap>
 
 WorkerPic::WorkerPic() {
-
 	workerThread.start();
 	this->moveToThread(&workerThread);
 	m_url = "";

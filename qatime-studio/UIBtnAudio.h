@@ -9,6 +9,13 @@
 #define _LS_UI_BUTTON_AUDIO_H_
 #include <QtWidgets/QPushButton>
 #include <QTimer>
+//---云信
+#include "assert.h"
+#include <string>
+#include "nim_cpp_api.h"
+#include "nim_cpp_client.h"
+#include "nim_cpp_tool.h"
+#include "nim_audio_cpp.h"
 #pragma execution_character_set("utf-8")
 
 class CBtnAudio : public QPushButton
@@ -21,6 +28,7 @@ public:
 
 Q_SIGNALS:
 	void sig_Audioclicked(std::string, std::string, std::string, bool);
+	void sig_AudioLoadFail(nim::IMMessage);
 
 public Q_SLOTS:
 	void onClicked(bool);
@@ -40,12 +48,18 @@ private:
 
 	QTimer*	m_Timer;			// 动画定时器
 	QTimer* m_TimerDown;		// 下载语音定时器
+	//add by zbc 20170705
+	int			m_iCount;		// 循环60次 也就是3秒还下载不完，则重新下载
+	nim::IMMessage m_msg;		// 消息结构
+	bool m_LoadStatus;			// 下载状态
 
 public:
 	QString GetMsgID();							// 获取消息
 	void stopPlay();							// 停止播放
 	bool GetPlayStatus();						// 获取播放状态
-
+	void setMsg(nim::IMMessage msg);			//add by zbc 20170705
+	void LoadFail();							// 下载失败
+	void LoadSuc();								// 下载成功
 };
 
 #endif // _LS_MEDIACAPTURE_UI_BUTTON_H_
