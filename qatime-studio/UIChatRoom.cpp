@@ -2474,6 +2474,12 @@ void UIChatRoom::SendFullScreen(bool bType)
 
 void UIChatRoom::clickAudio()
 {
+	if (m_parent && (m_parent->m_VideoInfo->IsCurrentLiving() || m_parent->m_bLiving1v1))
+	{
+		QToolTip::showText(QCursor::pos(), "直播状态下不可以发送语音！");
+		return;
+	}
+
 	if (!m_bCanSend)
 	{
 		QToolTip::showText(QCursor::pos(), "发送消息间隔1秒");
