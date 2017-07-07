@@ -234,7 +234,6 @@ public slots :
 	void slot_CloseWnd();									// 关闭屏幕共享
 	void requstError(QString);								// 白板及音视频错误提示
 	void slot_onOnlineTimeout();							// 查询在线人数
-	void slot_sendFullScreen(bool);							// 发送屏幕共享 false:关闭 true:开启
 	void slot_rtsTcpDiscontect();							// 白板链接断开
 protected:
 	virtual void paintEvent(QPaintEvent *event);

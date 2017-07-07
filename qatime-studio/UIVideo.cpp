@@ -515,3 +515,8 @@ void UIVideo::setRatio(int iType)
 	else
 		m_EnVideoQuality = EN_NLSS_VIDEOQUALITY_SUPER;
 }
+
+void UIVideo::mousePressEvent(QMouseEvent *event)
+{
+	setFocus();
+}

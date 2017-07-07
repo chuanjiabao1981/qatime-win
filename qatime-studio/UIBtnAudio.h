@@ -52,7 +52,6 @@ private:
 	int			m_iCount;		// 循环60次 也就是3秒还下载不完，则重新下载
 	nim::IMMessage m_msg;		// 消息结构
 	bool m_LoadStatus;			// 下载状态
-
 public:
 	QString GetMsgID();							// 获取消息
 	void stopPlay();							// 停止播放

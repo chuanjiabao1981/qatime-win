@@ -8,6 +8,7 @@
 #include <QTimer>
 #include "shape.h"
 #include "windows.h"
+#include "QDateTime"
 
 #define  COLOR_VALUE_BLACK QColor(0, 0, 0)
 #define  COLOR_VALUE_RED QColor(204, 0, 0)
@@ -31,11 +32,6 @@ Palette::Palette(QWidget *parent) :
 
 	m_timer = new QTimer(this);
 	connect(m_timer, SIGNAL(timeout()), this, SLOT(slot_onCountTimeout()));
-}
-
-void Palette::slot_onCountTimeout()
-{
-	
 }
 
 Palette::~Palette()
@@ -211,7 +207,6 @@ void Palette::mouseMoveEvent(QMouseEvent *event)
 		QString sClr = QString::number(clr);			//  颜色类型
 		QString strInfo;
 		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
-		qDebug() << strInfo;
 		emit PicData(strInfo, "");
 		return;
 	}
@@ -233,7 +228,6 @@ void Palette::mouseMoveEvent(QMouseEvent *event)
 		QString sClr = QString::number(clr);			//  颜色类型
 		QString strInfo;
 		strInfo.append(QString("%1:%2,%3,%4;").arg(opType).arg(ptX).arg(ptY).arg(sClr));
-		qDebug() << strInfo;
 		emit PicData(strInfo, "");
     }
 }
@@ -267,7 +261,6 @@ void Palette::mouseReleaseEvent(QMouseEvent *event)
 void Palette::RecData(const std::string& data, const std::string &uid)
 {
 	m_SenderUid =  uid;
-	qDebug() << data.c_str();
 	float x;
 	float y;
 	DWORD clr_;
@@ -282,14 +275,13 @@ void Palette::RecData(const std::string& data, const std::string &uid)
 
 		if (draw_op_type_ == kMultiBoardOpSyncQuery)//同步消息
 		{
-			LONG64 timeX;
-// 			std::list<std::string> param_list = BoardStringTokenize(cur_data.c_str(), ",");
-// 			if (param_list.size() > 0)
-// 			{
-// 				auto it = param_list.begin();
-// 				timeX = atoll(it->c_str());
-// 			}
-			SendSyncDraw(timeX);
+			SendSyncDraw();
+			return;
+		}
+		else if (draw_op_type_ == kMultiBoardOpSyncTime)
+		{
+			qDebug() << __FILE__ << __LINE__ << "recver kMultiBoardOpSyncTime";
+			ParseShiftMsg(cur_data.c_str());
 			return;
 		}
 					 
@@ -389,6 +381,8 @@ int Palette::colorConvert(QColor color)
 		clr = 0x7dd21f;
 	else if (color == 0x228bf8)
 		clr = 0x228bf8;
+	else if (color == 0x228bf7)
+		clr = 0x228bf7;
 	else if (color == 0xd1021c)
 		clr = 0xd1021c;
 	else if (color == 0xfddc01)
@@ -399,12 +393,10 @@ int Palette::colorConvert(QColor color)
 	return clr;
 }
 
-void Palette::SendSyncDraw(LONG64 timeX)
+void Palette::SendSyncDraw()
 {
-//	ReturnSync(timeX);
-
-	emit sig_sendFullScreen(mStatus);
-	SendFullScreen(mStatus);
+	if (mStatus)
+		SendFullScreen(mStatus);
 	
 	foreach(Shape *shape, mShapeStack)
 	{
@@ -494,16 +486,16 @@ void Palette::SendSyncDraw(LONG64 timeX)
 		}
 
 		emit PicData(strMoveInfo, "");
-		qDebug() << strMoveInfo;
 	}
 }
 
 void Palette::SendFullScreen(bool bOpen)
 {
 	mStatus = bOpen;
-	QString strInfo;
-	strInfo.append(QString("%1:%2,%3,%4;").arg(kMultiBoardOpFullScreen).arg((int)bOpen).arg("0").arg("0"));
-	emit PicData(strInfo, "");
+	SendShiftMsg(!mStatus);
+// 	QString strInfo;
+// 	strInfo.append(QString("%1:%2,%3,%4;").arg(kMultiBoardOpFullScreen).arg((int)bOpen).arg("0").arg("0"));
+// 	emit PicData(strInfo, "");
 }
 
 void Palette::ReturnSync(LONG64 timeX)
@@ -511,4 +503,70 @@ void Palette::ReturnSync(LONG64 timeX)
 	QString strInfo;
 	strInfo.append(QString("%1:%2,%3,%4;").arg(kMultiBoardOpSyncTime).arg(timeX).arg("0").arg("0"));
 	emit PicData(strInfo, QString::fromStdString(m_SenderUid));
+}
+
+
+/***************************************************************************/
+/***************************************************************************/
+/*****************		以下为1对1互动 切屏方案		 ***********************/
+/***************************************************************************/
+/***************************************************************************/
+// 生成切换消息
+void Palette::CreateShiftMsg(bool bBoard)
+{
+	QString status;
+	if (bBoard)
+		status = "board";
+	else
+		status = "desktop";
+
+	qint64 timetag_ = QDateTime::currentMSecsSinceEpoch();
+	m_strMsg = QString("%1:%2,%3,%4,%5;").arg(kMultiBoardOpSyncSend).arg(timetag_).arg("0").arg("InteractiveSwitch").arg(status);
+}
+
+void Palette::SendShiftMsg(bool bBoard)
+{
+	CreateShiftMsg(bBoard);
+	emit PicData(m_strMsg, QString::fromStdString(m_SenderUid));
+	m_timer->stop();
+	m_timer->start(2000);
+}
+
+void Palette::slot_onCountTimeout()
+{
+	emit PicData(m_strMsg, QString::fromStdString(m_SenderUid));
+}
+
+// 解析学生端返回的屏幕分享
+void Palette::ParseShiftMsg(std::string data)
+{
+	QString Id;				//消息ID
+	QString parentId;		//父消息ID
+	QString type;			//类型
+	QString status;			//状态
+	std::list<std::string> param_list = BoardStringTokenize(data.c_str(), ",");
+	if (param_list.size() > 0)
+	{
+		auto it = param_list.begin();
+		if (param_list.size() >= 4)
+		{
+			Id = QString(QLatin1String(it->c_str()));
+			++it;
+			parentId = QString(QLatin1String(it->c_str()));
+			if (m_strMsg.indexOf(parentId)>=0)
+			{
+				m_timer->stop();
+				m_strMsg = "";
+			}
+			++it;
+			type = QString(QLatin1String(it->c_str()));
+			++it;
+			status = QString(QLatin1String(it->c_str()));
+		}
+	}
+}
+
+void Palette::stopSendMsg()
+{
+	m_timer->stop();
 }

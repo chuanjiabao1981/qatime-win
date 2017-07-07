@@ -73,7 +73,7 @@ void UIPerson::stateChanged(int i)
 	}
 	else if (i == 2)	// ½ûÑÔ
 	{
-		m_personBuddy->button->setCheckable(Qt::Checked);
+		m_personBuddy->button->setCheckable(true);
 		emit sig_change(true, m_id, m_chatID);
 	}
 }

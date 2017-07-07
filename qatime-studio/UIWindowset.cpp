@@ -824,6 +824,29 @@ void UIWindowSet::DeleteTag(UITags* tag)
 			// 判断是当前会话窗口
 			if (tag == tags)
 			{
+				// 判断当前窗口是否进入直播室
+				if (tags->IsModle())
+				{
+					// 是否是一对一
+					if (tags->Is1v1Lesson())
+					{		
+						// 课程名置空
+//						ui.lesson_label->setText(LESSON_LABEL);
+						//结束云信的摄像头采集
+						IMInterface::getInstance()->endDevice(Video);
+						IMInterface::getInstance()->endDevice(Audio);
+						IMInterface::getInstance()->endDevice(AudioOut);
+					}
+					else
+					{
+						m_CameraInfo->StopCaptureVideo();
+						m_VideoInfo->StopCaptureVideo();
+					}
+					// 退出弹幕
+					emit ui.Bullet_checkBox->stateChanged(0);
+					CloseBullet();
+				}
+
 				bSel = tags->IsSelect();
 				tags->GetRoom()->setVisible(false);
 
@@ -872,12 +895,10 @@ void UIWindowSet::AgainSelectTag()
 void UIWindowSet::ReceiverMsg(const nim::IMMessage* pIMsg)
 {
 	QString strChatID = QString::fromStdString(pIMsg->local_talk_id_.c_str());
-	QMap<QString, UIChatRoom*>::Iterator it;
 	UIChatRoom* room = NULL;
-	it = m_mapChatRoom.find(strChatID);
-	if (it != m_mapChatRoom.end())
+	room = m_mapChatRoom.value(strChatID,NULL);
+	if (room)
 	{
-		room = *it;
 		room->ReceiverMsg(pIMsg);
 	}
 
@@ -911,12 +932,10 @@ void UIWindowSet::ReceiverRecordMsg(nim::QueryMsglogResult* pIMsg)
 void UIWindowSet::ReceiverChatMsg(nim::IMMessage* pIMsg)
 {
 	QString strChatID = QString::fromStdString(pIMsg->local_talk_id_.c_str());
-	QMap<QString, UIChatRoom*>::Iterator it;
 	UIChatRoom* room = NULL;
-	it = m_mapChatRoom.find(strChatID);
-	if (it != m_mapChatRoom.end())
+	room = m_mapChatRoom.value(strChatID,NULL);
+	if (room)
 	{
-		room = *it;
 		room->ShowChatMsg(*pIMsg);
 	}
 }
@@ -2302,7 +2321,10 @@ void UIWindowSet::OnGetTeamMemberCallback(const std::string& tid, int count, con
 
 HWND UIWindowSet::GetParentWnd()
 {
-	return (HWND)m_parent->winId();
+	if (m_parent)
+		return (HWND)m_parent->winId();
+	else
+		return NULL;
 }
 
 /***************************************************************************/
@@ -2317,7 +2339,6 @@ void UIWindowSet::initWhiteBoardWidget()
 	ui.horizontalLayout_21->addWidget(mWhiteBoard);
 	mWhiteBoard->setIsDraw(true);
 	connect(mWhiteBoard, SIGNAL(PicData(QString, QString)), this, SLOT(PicData(QString,QString)));
-	connect(mWhiteBoard, SIGNAL(sig_sendFullScreen(bool)), this, SLOT(slot_sendFullScreen(bool)));
 
 	m_WhiteBoardTool = new UIWhiteBoardTool(ui.live1v1_widget);
 	m_WhiteBoardTool->hide();
@@ -2395,14 +2416,15 @@ void UIWindowSet::slot_CloseWnd()
 
 	// 发送分享窗口通知到学生端
 	mWhiteBoard->SendFullScreen(false);
-	if (m_curChatRoom)
-		m_curChatRoom->SendFullScreen(false);
 
 	// 设置发送数据模式为自定义发送
 	IMInterface::getInstance()->SetCustomData(false);
 
 	// 开启摄像头
 	m_Camera1v1Info->StartEndVideo(false);
+
+	// 禁用鼠标
+	ui.video1v1_checkBox->setEnabled(true);
 }
 
 void UIWindowSet::slot_refreshWnd()
@@ -2440,14 +2462,15 @@ void UIWindowSet::slot_selectWnd(HWND hwnd)
 
 	// 发送分享窗口通知到学生端
 	mWhiteBoard->SendFullScreen(true);
-	if (m_curChatRoom)
-		m_curChatRoom->SendFullScreen(true);
 
 	// 设置发送数据模式为自定义发送
 	IMInterface::getInstance()->SetCustomData(true);
 
 	// 关闭摄像头
 	m_Camera1v1Info->StartEndVideo(true);
+
+	// 禁用鼠标
+	ui.video1v1_checkBox->setEnabled(false);
 }
 
 void UIWindowSet::PicData(QString str,QString uid)
@@ -2488,12 +2511,14 @@ void UIWindowSet::joinRtsRoom(const std::string &roomName)
 
 void UIWindowSet::joinRoomSuccessfully()
 {
-	IMInterface::getInstance()->createVChatRoom(m_curTags->ChatID().toStdString());
+	if (m_curTags)
+		IMInterface::getInstance()->createVChatRoom(m_curTags->ChatID().toStdString());
 }
 
 void UIWindowSet::joinVChatRoom()
 {
-	IMInterface::getInstance()->joinVChatRoom(2,m_curTags->ChatID().toStdString());
+	if (m_curTags)
+		IMInterface::getInstance()->joinVChatRoom(2,m_curTags->ChatID().toStdString());
 }
 
 // 创建音视频成功后，开始直播流程
@@ -2730,6 +2755,7 @@ void UIWindowSet::clickLive1v1()
 		{
 			// 把分享屏幕关闭
 			slot_CloseWnd();
+			mWhiteBoard->stopSendMsg();
 			ui.Live1v1_pushBtn->setText(LIVE_BUTTON_NAME);
 			ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
 
@@ -2747,7 +2773,6 @@ void UIWindowSet::clickLive1v1()
 				ui.time1v1_label->setText("00:00:00");	// 重置时间
 			}
 
-//			m_VideoRecordInfo->StopLiveVideo();
 			m_bLiving1v1 = false;
 		}
 		else
@@ -3012,21 +3037,16 @@ void UIWindowSet::slot_onOnlineTimeout()
 	QueryOnlinePersonNum();
 }
 
-void UIWindowSet::slot_sendFullScreen(bool bType)
-{
-	if (m_curChatRoom)
-		m_curChatRoom->SendFullScreen(bType);
-}
-
 void UIWindowSet::slot_rtsTcpDiscontect()
 {
 	slot_CloseWnd();
+	mWhiteBoard->stopSendMsg();
 	//停止1对1直播
 	ui.Live1v1_pushBtn->setText(LIVE_BUTTON_NAME);
 	ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
 
 	// 结束白板和音视频
-	// 实现结束白板和音视频功能......待写
+	// 实现结束白板和音视频功能.....
 	IMInterface::getInstance()->EndLive(m_curTags->ChatID().toStdString());
 
 	m_LiveStatusManager->SendStopLiveHttpMsg1v1();

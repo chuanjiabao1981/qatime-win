@@ -48,11 +48,12 @@ bool SetVideoOutParam(ST_NLSS_VIDEOOUT_PARAM *pstVideoParam, EN_NLSS_VIDEOQUALIT
 	case EN_NLSS_VIDEOQUALITY_SUPER:
 		pstVideoParam->iOutWidth = 1920;
 		pstVideoParam->iOutHeight = 1080;
-		pstVideoParam->iOutFps = 18;
+		pstVideoParam->iOutFps = 13;
 		break;
 	case EN_NLSS_VIDEOQUALITY_HIGH:
 		pstVideoParam->iOutWidth = 1280;
 		pstVideoParam->iOutHeight = 720;
+		pstVideoParam->iOutFps = 13;
 		break;
 	case EN_NLSS_VIDEOQUALITY_MIDDLE:
 		pstVideoParam->iOutWidth = 640;
@@ -85,12 +86,12 @@ bool SetVideoInParam(ST_NLSS_VIDEOIN_PARAM *pstVideoParam, EN_NLSS_VIDEOIN_TYPE 
 	{
 	case EN_NLSS_VIDEOIN_FULLSCREEN:
 	{
-		pstVideoParam->iCaptureFps = 8;
+		pstVideoParam->iCaptureFps = 10;
 	}
 	break;
 	case EN_NLSS_VIDEOIN_CAMERA:
 		//获取视频参数
-		pstVideoParam->iCaptureFps = 18;
+		pstVideoParam->iCaptureFps = 15;
 		if (m_pVideoDevices != NULL)
 		{
 			pstVideoParam->u.stInCamera.paDevicePath = pVideoPath;

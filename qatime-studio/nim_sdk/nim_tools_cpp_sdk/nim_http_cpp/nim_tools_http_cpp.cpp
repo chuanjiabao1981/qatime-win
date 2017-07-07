@@ -84,11 +84,11 @@ struct ResponseCallbackUserData
 void Init()
 {
 	HMODULE hmod;
-#ifdef _DEBUG
+// #ifdef _DEBUG
+// 	hmod = ::LoadLibrary(L"nim_tools_http_d.dll");
+// #else
 	hmod = ::LoadLibrary(L"nim_tools_http.dll");
-#else
-	hmod = ::LoadLibrary(L"nim_tools_http.dll");
-#endif
+/*#endif*/
 
 	g_nim_http_init = (typeof_nim_http_init)GetProcAddress(hmod,"nim_http_init");
 	g_nim_http_uninit = (typeof_nim_http_uninit)GetProcAddress(hmod,"nim_http_uninit");

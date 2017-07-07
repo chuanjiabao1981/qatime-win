@@ -32,7 +32,7 @@ public:
 
 	void DrawUndo();							//对方撤销
 	int  colorConvert(QColor color);			//解析数据
-	void SendSyncDraw(LONG64 timeX);				//发送同步数据
+	void SendSyncDraw();						//发送同步数据
 	void ReturnSync(LONG64 timeX);
 	void SendFullScreen(bool bOpen);				//发送全屏消息,1：开启 0：关闭
 
@@ -64,8 +64,9 @@ public:
 		kMultiBoardOpSign = 12,
 		kMultiBoardOpSignEnd = 13,
 		kMultiBoardOpDocInfo = 14, //"14:id（文档id）,page_num(当前页数，1开始计算),page_count（总页数）,type(状态通知：0，翻页操作：1);" "14:8c17c252-1276-4817-92ce-688576b8df4c,2,4,1;"
-		kMultiBoardOpFullScreen = 15, //全屏分享
-		kMultiBoardOpSyncTime = 16, // 同步返回
+		kMultiBoardOpFullScreen = 15, // 全屏分享
+		kMultiBoardOpSyncSend = 16,	  // 切换发送
+		kMultiBoardOpSyncTime=17	  // 同步返回
 	};
 
 private:
@@ -79,7 +80,6 @@ protected:
 
 signals:
 	void PicData(QString,QString);
-	void sig_sendFullScreen(bool);
 private slots:
 	void slot_onCountTimeout();
 private:
@@ -91,9 +91,18 @@ private:
     bool mMouseIsPress;							//鼠标是否按下
 	bool mIsDraw;								//是否需要画
     QPen mPen;
-	QTimer*	 m_timer;
 	bool  mStatus;								//全屏共享状态 0：未开启 1：开启
 	std::string	m_SenderUid;					//发送者的uid
+
+	/*****************		以下为1对1互动 切屏方案		 ***********************/
+	QString		m_strMsg;//生成切换消息
+	QTimer*		m_timer; //重新发送定时器
+	void		CreateShiftMsg(bool bBoard);
+	void		SendShiftMsg(bool bBoard);
+	void		ParseShiftMsg(std::string data);
+	
+public:
+	void		stopSendMsg();
 };
 
 #endif // PALETTE_H

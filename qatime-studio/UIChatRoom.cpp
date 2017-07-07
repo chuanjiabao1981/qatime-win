@@ -172,6 +172,24 @@ bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
 				emit ui.button_sendMseeage->clicked();
 				return true;
 			}
+			else if (keyEvent->key() == Qt::Key_Backspace)
+			{
+// 				QString text = ui.textEdit->toPlainText();
+// 				QStringList textList = text.split("￼");
+// 				QString sendText, sendMsg;
+// 				for (int i = 0; i < textList.size(); i++)
+// 				{
+// 					if (i == textList.size() - 1)
+// 					{
+// 						sendText.append(textList.at(i));
+// 						sendMsg.append(textList.at(i));
+// 						break;
+// 					}
+// 					sendText.append(textList.at(i));
+// 					sendMsg.append(textList.at(i));
+// 					sendMsg.append("[" + m_borw.at(i).split("/").at(2).split(".").at(0) + "]");
+// 				}
+			}
 		}
 		if (event->type() == QEvent::MouseButtonRelease) {
 			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
@@ -777,15 +795,6 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 			}
 		}
 		return bValid;
-	}
-	else if (pMsg->type_ == nim::kNIMMessageTypeCustom)
-	{
-		std::string strContent = pMsg->content_;
-		std::string strStatus = "{\"event\":\"FetchPlayStatus\"}";
-		if (strcmp(strContent.c_str(), strStatus.c_str()) == 0)
-		{
-			SendFullScreen(m_b1v1ShapeScreen);
-		}
 	}
 
 	// 判断当前过来的消息，是不是此会话窗口
@@ -2057,7 +2066,7 @@ void UIChatRoom::OnPlayAudio(std::string path, std::string sid, std::string msgi
 				audio_format = nim_audio::AMR;
 			fclose(audio_file);
 		}
-		nim_audio::Audio::PlayAudio(wpath.c_str(), sid.c_str(), msgid.c_str(), audio_format);
+		nim_audio::Audio::PlayAudio(path.c_str(), sid.c_str(), msgid.c_str(), audio_format);
 	}
 	else
 	{
@@ -2625,9 +2634,8 @@ void UIChatRoom::SendAudio(QString msgid, QString path, long size, int audio_dur
 	}
 	else
 	{
-		wchar_t *mPath = new wchar_t[path.length()];
-		path.toWCharArray(mPath);
-		nim_audio::Audio::CancelAudio(mPath);
+		QByteArray mPath = path.toLatin1();
+		nim_audio::Audio::CancelAudio((const char*)mPath.data());
 	}
 }
 

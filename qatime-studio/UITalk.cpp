@@ -24,7 +24,6 @@ UITalk::UITalk(QWidget *parent)
 	, m_Ver(NULL)
 	, m_parent(NULL)
 	, m_vecAudio(NULL)
-	
 {
 	ui.setupUi(this);
 

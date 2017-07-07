@@ -121,13 +121,11 @@ void UIVideo1v1::paintEvent(QPaintEvent *)
 	{
 		QPainter p(this);
 		p.setPen(QColor(0x8099be));
-		QImage mImage;//add by zbc 20170629
 		QImage qimage;
 		qimage = QImage((uchar*)capture_data_, capture_width_, capture_height_, QImage::Format_RGB32);
  		QImage q = qimage.mirrored(false, true);
 
-		QPixmap pixmap = QPixmap::fromImage(q);
-		p.drawPixmap(rect(), pixmap.scaled(rect().size(), Qt::KeepAspectRatio, Qt::FastTransformation));//SmoothTransformation
+		p.drawImage(rect(), q);//SmoothTransformation
 	}
 }
 
@@ -240,7 +238,14 @@ BOOL CALLBACK WindowsEnumerationHandler(HWND hwnd, LPARAM param) {
 		return TRUE;
 	}	
 		
-	list->push_back(window);
+	QString strTitle = QString::fromStdWString(window_title);
+	if (strTitle.indexOf("Microsoft PowerPoint") >= 0 || 
+		strTitle.indexOf("Microsoft Word") >= 0 ||
+		strTitle.indexOf("Microsoft Excel") >= 0 ||
+		strTitle.indexOf("- WPS") >= 0)
+	{
+		list->push_back(window);
+	}
 
 	return TRUE;
 }

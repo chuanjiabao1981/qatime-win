@@ -321,20 +321,18 @@ personListBuddy* personList::findID(const QString id)
 
 	if (!id.isEmpty() && !IdStudents.isEmpty() && !groupMap.isEmpty())
 	{
-		QMap<QString, QListWidgetItem*>::iterator iter;
 		QListWidgetItem* item = NULL;
-		iter = IdStudents.find(id);
-		if (iter == IdStudents.end())
+		item = IdStudents.value(id, NULL);
+		if (item)
 		{
+			Buddy = groupMap.value(item, NULL);
 			return Buddy;
 		}
 		else
 		{
-			item = *iter;
-			Buddy = *groupMap.find(item);
+			return Buddy;
 		}
 	}
-	
 	return Buddy;
 }
 
@@ -354,7 +352,7 @@ void  personList::setAllWidth(int iWidth)
 		QListWidgetItem* pItem = this->item(i);
 		if (pItem)
 		{
-			Buddy = *groupMap.find(pItem);
+			Buddy = groupMap.value(pItem, NULL);
 			if (Buddy)
 			{
 				QRect rc;
@@ -399,7 +397,7 @@ void  personList::setBuddyWidth(int iWidth)
 		QListWidgetItem* pItem = this->item(i);
 		if (pItem)
 		{
-			Buddy = *groupMap.find(pItem);
+			Buddy = groupMap.value(pItem, NULL);
 			if (Buddy)
 			{
 				Buddy->setFixedWidth(iWidth);
@@ -427,7 +425,7 @@ void  personList::setZoomWidth(int iWidth)
 		QListWidgetItem* pItem = this->item(i);
 		if (pItem)
 		{
-			Buddy = *groupMap.find(pItem);
+			Buddy = groupMap.value(pItem, NULL);
 			if (Buddy)
 			{
 				QRect rc;
@@ -486,7 +484,7 @@ std::vector<personListBuddy*>  personList::GetBuddy()
 		QListWidgetItem* pItem = this->item(i);
 		if (pItem)
 		{
-			Buddy = *groupMap.find(pItem);
+			Buddy  = groupMap.value(pItem, NULL);
 			if (Buddy)
 			{
 				vecBuddy.push_back(Buddy);

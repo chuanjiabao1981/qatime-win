@@ -68,6 +68,7 @@ public:
 
 protected:
 	virtual void paintEvent(QPaintEvent *);
+	virtual void mousePressEvent(QMouseEvent *event);
 
 Q_SIGNALS:
 	void sig_changeLiveStatus(bool bTrue);

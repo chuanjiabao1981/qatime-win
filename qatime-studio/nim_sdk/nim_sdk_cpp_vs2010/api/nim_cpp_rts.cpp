@@ -7,6 +7,7 @@
 
 #include "nim_cpp_rts.h"
 #include "nim_sdk_util.h"
+#include "nim_json_util.h"
 #include "nim_string_util.h"
 
 namespace nim
@@ -84,7 +85,7 @@ void JoinConfCallbackWrapper(int code, const char *session_id, const char *json_
 		Rts::JoinConfCallback* cb_pointer = (Rts::JoinConfCallback*)user_data;
 		if (*cb_pointer)
 		{
-			int64_t channel_id = 0;
+			__int64 channel_id = 0;
 			std::string custom_info;
 			Json::Value values;
 			Json::Reader reader;
@@ -216,14 +217,21 @@ void RecDataCallbackWrapper(const char *session_id, int channel_type, const char
 
 //发起相关
 //NIM 创建rts会话，传入的JSON参数定义见nim_rts_def.h
-void Rts::StartChannel(int channel_type, const std::string& uid, RtsStartInfo info, const StartChannelCallback& cb)
+void Rts::StartChannel(int channel_type, const std::string& uid, const std::string& apns, const std::string& custom_info, bool data_record, bool audio_record, const StartChannelCallback& cb)
 {
 	StartChannelCallback* cb_pointer = nullptr;
 	if (cb)
 	{
 		cb_pointer = new StartChannelCallback(cb);
 	}
-	std::string json = info.GetJsonStr();
+	std::string json;
+	Json::Value values_temp;
+	values_temp[nim::kNIMRtsCreateCustomInfo] = custom_info;
+	values_temp[nim::kNIMRtsApnsText] = apns;
+	values_temp[nim::kNIMRtsDataRecord] = data_record ? 1 : 0;
+	values_temp[nim::kNIMRtsAudioRecord] = audio_record ? 1 : 0;
+	Json::FastWriter fs;
+	json = fs.write(values_temp);
 	return NIM_SDK_GET_FUNC(nim_rts_start)(channel_type, uid.c_str(), json.c_str(), &StartChannelCallbackWrapper, cb_pointer);
 }
 
@@ -236,7 +244,7 @@ void Rts::SetStartNotifyCb(const StartNotifyCallback& cb)
 	{
 		g_start_notify_cb_pointer = new StartNotifyCallback(cb);
 	}
-	NIM_SDK_GET_FUNC(nim_rts_set_start_notify_cb_func)(&StartNotifyCallbackWrapper, g_start_notify_cb_pointer);
+	return NIM_SDK_GET_FUNC(nim_rts_set_start_notify_cb_func)(&StartNotifyCallbackWrapper, g_start_notify_cb_pointer);
 }
 
 //NIM 向服务器创建多人rts会话，实际加入会话还需要调用加入接口。

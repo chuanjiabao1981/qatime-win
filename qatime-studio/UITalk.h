@@ -39,7 +39,6 @@ private:
 	std::vector<CBtnPix*>	m_vecImgProcess;	//存放所有的图片控件
 
 	std::vector<CBtnAudio*> m_vecAudio;			//所有的audio按钮
-	
 private:
 	bool isDigitStr(QString str);
 	void style(QScrollArea *style);

@@ -155,6 +155,7 @@ private:
 	QString mLastError;
 
 	DeviceInfoMap mDeviceInfoMap;	//设备类别
+	int	m_RtsPerson;				//白板房间人数
 };
 
 #endif // WHITEBOARD_H

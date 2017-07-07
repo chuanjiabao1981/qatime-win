@@ -426,10 +426,9 @@ void UIAuxiliaryWnd::clickAuxiliaryToday(UIAuxiliaryToday* auxiliaryToday)
 {
 	QMap<QString, UIAuxiliaryList*>::iterator it;
 	UIAuxiliaryList* auxiliary = NULL;
-	it = m_mapAuxiliaryCourseID.find(auxiliaryToday->GetCourseID());
-	if (it != m_mapAuxiliaryCourseID.end())
+	auxiliary = m_mapAuxiliaryCourseID.value(auxiliaryToday->GetCourseID(),NULL);
+	if (auxiliary)
 	{
-		auxiliary = *it;
 		if (m_parent)
 		{
 			m_parent->CreateRoom(auxiliary->ChatID(), auxiliary->CourseID(), auxiliary->TeacherID(), auxiliary->Token(), auxiliary->StudentName(), auxiliary->AudioPath(),
@@ -447,24 +446,20 @@ void UIAuxiliaryWnd::SetEnvironmental(bool bType)
 
 void UIAuxiliaryWnd::ReceiverNumber(QString chatID)
 {
-	QMap<QString, UIAuxiliaryList*>::iterator it;
 	UIAuxiliaryList* auxiliary = NULL;
-	it = m_mapAuxiliaryChatID.find(chatID);
-	if (it != m_mapAuxiliaryChatID.end())
+	auxiliary = m_mapAuxiliaryChatID.value(chatID,NULL);
+	if (auxiliary)
 	{
-		auxiliary = *it;
 		auxiliary->AddMsgCount();
 	}
 }
 
 void UIAuxiliaryWnd::ChangeAuxiliaryTodayStatus(QString lessonid, QString status)
 {
-	QMap<QString, UIAuxiliaryToday*>::iterator it;
 	UIAuxiliaryToday* auxiliary = NULL;
-	it = m_mapAuxiliaryLesson.find(lessonid);
-	if (it != m_mapAuxiliaryLesson.end())
+	auxiliary = m_mapAuxiliaryLesson.value(lessonid,NULL);
+	if (auxiliary)
 	{
-		auxiliary = *it;
 		auxiliary->setStatue(status);
 	}
 }

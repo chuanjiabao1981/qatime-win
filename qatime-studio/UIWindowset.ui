@@ -595,15 +595,34 @@ border-image: url(:/LoginWindow/images/alpha.png);</string>
          <number>0</number>
         </property>
         <item>
-         <widget class="QLabel" name="lesson_label">
+         <widget class="QPushButton" name="lesson_label">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>35</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>35</height>
+           </size>
+          </property>
           <property name="font">
            <font>
             <family>微软雅黑</family>
-            <pointsize>11</pointsize>
+            <pointsize>12</pointsize>
            </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">
+border-image: url(:/LoginWindow/images/alpha.png);text-align : left;</string>
           </property>
           <property name="text">
            <string>暂无直播</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
           </property>
          </widget>
         </item>

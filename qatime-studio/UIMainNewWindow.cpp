@@ -444,7 +444,7 @@ void UIMainNewWindow::InitAudio()
 	QDir Dir(audio_path);
 	if (!Dir.exists())
 		Dir.mkdir(audio_path);
-	std::wstring res_audio_path = audio_path.toStdWString();
+	std::string res_audio_path = audio_path.toStdString();
 	bool ret = nim_audio::Audio::Init(res_audio_path);
 
 	nim_audio::Audio::RegStopPlayCb(&UIMainNewWindow::OnStopAudioCallback);
