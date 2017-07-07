@@ -228,7 +228,7 @@
      <item>
       <widget class="AnimatedTextBrowser" name="text_talk">
        <property name="styleSheet">
-        <string notr="true">QPushButton{border-image: url(:/LoginWindow/images/sendaudio.png)};</string>
+        <string notr="true">border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);</string>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
