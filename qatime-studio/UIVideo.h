@@ -42,6 +42,9 @@ private:
 	QTimer*							m_StartLiveTimer;	// 延迟1秒推流
 	QPixmap*						m_pBkImage;			// 背景
 
+	int								m_iBitRate;			// 发送的码率信息
+	int								m_iCompareCount;	// 对比相等的计数
+
 public:
 	EN_NLSS_VIDEOIN_TYPE			m_videoSourceType;  // 视频源类型
 	EN_NLSS_AUDIOIN_TYPE			m_audioSourceType;	// 音频源类型
@@ -62,6 +65,7 @@ public:
 	static UIVideo*					m_pThis;
 	bool							m_bPaint;			// 是否允许绘制
 	EN_NLSS_VIDEOQUALITY_LVL		m_EnVideoQuality;	// 分辨率
+	QTimer*							m_GetTimer;			// 获取码率
 #ifdef STARTLS_ASYNC
 	Worker* m_pWorker;
 #endif
@@ -83,7 +87,7 @@ private slots:
 	void slot_onRefreshTimeout();						// 刷新界面
 	void slot_onStartLiveTimeout();						// 开始直播
 	void slot_livestreamErrorHappened();				// 出现错误
-
+	void slots_time();
 #ifdef STARTLS_ASYNC
 	void slot_FinishStartLiveStream(int);
 	void slot_FinishStopLiveStream(int);
@@ -115,6 +119,7 @@ public:
 	void InitDeviceParam();								// 初始化设备参数
 	int  getOutBitrate(int iWidth, int iHeight, int iFps);
 	void setRatio(int iType);						    // 0：高清 1：超清
+	void InitFailParam();
 };
 
 #endif // UIVideo_H

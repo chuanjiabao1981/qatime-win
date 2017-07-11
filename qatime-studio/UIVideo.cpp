@@ -36,6 +36,8 @@ UIVideo::UIVideo(QWidget *parent)
 	, m_refreshTimer(NULL)
 	, m_bPaint(true)
 	, m_EnVideoQuality(EN_NLSS_VIDEOQUALITY_HIGH)
+	, m_iBitRate(0)
+	, m_iCompareCount(0)
 {
 	ui.setupUi(this);
 
@@ -74,6 +76,9 @@ UIVideo::UIVideo(QWidget *parent)
 	m_refreshTimer = new QTimer(this);
 	m_refreshTimer->start(1000 / 25);
 	connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(slot_onRefreshTimeout()));
+
+	m_GetTimer = new QTimer(this);
+	connect(m_GetTimer, SIGNAL(timeout()), this, SLOT(slots_time()));
 }
 
 UIVideo::~UIVideo()
@@ -373,6 +378,7 @@ void UIVideo::StopLiveVideo()
 {
 	if (m_bLiving)
 	{
+		m_GetTimer->stop();
 		emit sig_StopLiveStream();
 		m_bLiving = false;
 	}
@@ -402,6 +408,7 @@ void UIVideo::slot_FinishStartLiveStream(int iRet)
 	else
 	{
 		m_NewParent->UpatateLiveStatus(this, true);
+		InitFailParam();
 		qDebug() << "白板直播成功";
 	}
 }
@@ -519,4 +526,38 @@ void UIVideo::setRatio(int iType)
 void UIVideo::mousePressEvent(QMouseEvent *event)
 {
 	setFocus();
+}
+
+void UIVideo::slots_time()
+{
+	ST_NLSS_STATS stats;
+	Nlss_GetStaticInfo(m_hNlssService, &stats);
+
+	int iBitRate = stats.uiVSendBitRate;
+	// 如果上次和这次的码率相同，则m_iCompareCount计数加1
+	if (m_iBitRate == iBitRate)
+	{
+		m_iCompareCount++;
+		qDebug() << __FILE__ << __LINE__ << "码率：" << iBitRate;
+	}
+	else
+		m_iCompareCount = 0;
+		
+	m_iBitRate = iBitRate;
+
+	// 如果连续12相同，则判断推流失败
+	if (m_iCompareCount == 12)
+	{
+		if (m_NewParent)
+			m_NewParent->ErrorStopLive(this);
+
+		qDebug() << __FILE__ << __LINE__ << "自身判断失败！";
+	}
+}
+
+void UIVideo::InitFailParam()
+{
+	m_GetTimer->start(1000);
+	m_iBitRate = 0;
+	m_iCompareCount = 0;
 }
