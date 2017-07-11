@@ -1271,7 +1271,9 @@ void UIChatRoom::OnLoginCallback(const nim::LoginRes& login_res, const void* use
 	if (login_res.res_code_ == nim::kNIMResSuccess)
 		bsuc = true;
 	else
+	{
 		bsuc = false;
+	}
 }
 
 // bool UIChatRoom::LoadConfig(const std::string& app_data_dir, const std::string& app_install_dir, nim::SDKConfig &config)
@@ -1334,7 +1336,7 @@ void UIChatRoom::setKeyAndLogin(QString key)
 	bool bFail = nim::Client::Login(m_appKey.toStdString(), m_accid.toStdString(), m_token.toStdString(), cb);
 	if (!bFail)
 	{
-		CMessageBox::showMessage(QString("答疑时间"), QString("失败！"), QString("确定"), QString("取消"));
+		CMessageBox::showMessage(QString("答疑时间"), QString("云信失败！"), QString("确定"), QString("取消"));
 		return;
 	}
 
