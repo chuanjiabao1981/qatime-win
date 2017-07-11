@@ -330,8 +330,11 @@ p, li { white-space: pre-wrap; }
           <property name="cursor">
            <cursorShape>PointingHandCursor</cursorShape>
           </property>
+          <property name="toolTip">
+           <string>图片</string>
+          </property>
           <property name="styleSheet">
-           <string notr="true">border-image: url(:/LoginWindow/images/pic.png);</string>
+           <string notr="true">QPushButton{border-image: url(:/LoginWindow/images/pic.png)};</string>
           </property>
           <property name="text">
            <string/>
@@ -360,6 +363,37 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="styleSheet">
            <string notr="true">QPushButton{border-image: url(:/LoginWindow/images/sendaudio.png)};</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="Btn_AutoAudio">
+          <property name="minimumSize">
+           <size>
+            <width>20</width>
+            <height>19</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>20</width>
+            <height>19</height>
+           </size>
+          </property>
+          <property name="sizeIncrement">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="toolTip">
+           <string>自动播放语音</string>
           </property>
           <property name="text">
            <string/>

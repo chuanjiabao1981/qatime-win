@@ -27,6 +27,7 @@
 #include "nim_audio_cpp.h"
 
 
+
 class UIMainWindow;
 class UITalk;
 class UITalkRecord;
@@ -96,7 +97,7 @@ private:
 	int								m_DisCount;			// 
 	
 	QTimer*							m_AudioBarTimer;	// 语音条显示定时器
-
+	
 	/************************************************************************/
 	QTextCursor*					m_TextCursor;
 	QMap<QString, QString>			m_StudentInfo;		// key ：accid 
@@ -120,6 +121,7 @@ private:
 	void initEmotion();
 public:
 	QString							m_TeachterName;		// 老师名字
+	
 protected:
 	virtual bool eventFilter(QObject *watched, QEvent *event);
 	void mousePressEvent(QMouseEvent *event);
@@ -148,6 +150,8 @@ public slots:
 	void LoadImgTimeout();								// 加载图片定时器
 	void slot_CalendarClick(QDate);						// 点击日历
 	void clickAudio();									// 点击语音
+	void slot_AutoPlayAudio();							// 点击自动播放语音
+
 private:
 //	void		initSDK();									// 初始化云信SDK
 //	bool		LoadConfig(const std::string& app_data_dir,const std::string& app_install_dir, nim::SDKConfig &config); //加载配置
@@ -205,6 +209,7 @@ public:
 	void		TalkDown();											// 聊天内容置底
 	void		OnPlayAudio(std::string path, std::string sid, std::string msgid, bool isPlay);
 	void		OnStopPlayAudio(char* msgid);
+	
 	/**
 	* 开始播放语音消息的回调（播放语音消息需要和sdk交互，并非一定播放成功）
 	* @param[in] code 返回码
@@ -243,6 +248,7 @@ public:
 	void		finishAudio();											// 完成录音,默认发送语音
 	void		AddAudioMsg(nim::IMMessage pMsg, nim::IMAudio audio);	// 往界面上添加语音消息
 	void		SendAudio(QString msgid, QString path, long size, int audio_duration, std::string file_ex);		// 发送语音
+	QPushButton *GetNowAutoAudioID();									// 获取当前窗口自动播放按钮ID
 	
 public slots:
 	void		chickChage(int, QString, QString);

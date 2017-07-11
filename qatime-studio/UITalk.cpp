@@ -7,6 +7,11 @@
 #include <QScrollBar>
 #include "windows.h"
 
+//自动播放语音，全局状态标识
+extern int		m_AutoAudioState;
+//是否有语音播放中，全局状态标识
+extern bool		m_IsAudioPlaying;
+
 void sleep(int secs)
 {
 	QTime dieTime = QTime::currentTime().addMSecs(secs);
@@ -24,6 +29,7 @@ UITalk::UITalk(QWidget *parent)
 	, m_Ver(NULL)
 	, m_parent(NULL)
 	, m_vecAudio(NULL)
+	, m_pFirstAudio(NULL)
 {
 	ui.setupUi(this);
 
@@ -212,6 +218,15 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 	connect(pAudio, SIGNAL(sig_Audioclicked(std::string, std::string, std::string, bool)), this, SLOT(slot_Audioclicked(std::string, std::string, std::string, bool)));
 	m_vecAudio.push_back(pAudio);
 
+	if (m_pFirstAudio == NULL)
+	{
+		m_pFirstAudio = pAudio;
+	}
+	else
+	{
+		m_pFirstAudio->setLastAudio(pAudio);
+		m_pFirstAudio = pAudio;
+	}
 	SecRow->addWidget(pAudio);
 
 	QLabel* LDur = new QLabel(); // 显示时长
@@ -240,7 +255,31 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
+	if (m_IsAudioPlaying == false)
+	{
+		AutoPlayAudio();  //插入语音后，判断当前自动读取状态来决定是否自动读取语音
+	}	
 
+}
+
+// 插入语音聊天信息(未下载)
+void UITalk::InsertAudioChatNew(QPixmap* pixmap, QString name, QString time, QString text, std::string path, std::string sid, std::string msgid, bool bTeacher, bool bRead)
+{
+	CBtnAudio* pAudio = new CBtnAudio(path, sid, msgid, this, bRead);
+	pAudio->setMsgAll(pixmap, name, time, text, path, sid, msgid, bTeacher, bRead);
+	connect(pAudio, SIGNAL(sig_AudioLoadEnd(QPixmap*, QString, QString, QString, std::string, std::string, std::string, bool, bool,CBtnAudio*)), 
+		this, SLOT(slot_AudioLoadEnd(QPixmap*, QString, QString, QString, std::string, std::string, std::string, bool, bool, CBtnAudio*)));
+	pAudio->hide();
+}
+
+void UITalk::slot_AudioLoadEnd(QPixmap* pixmap, QString name, QString time, QString text, std::string path, std::string sid, std::string msgid, bool bTeacher, bool bRead, CBtnAudio* pAudio)
+{
+	if (pAudio)
+	{
+		delete pAudio;
+		pAudio = NULL;
+	}
+	InsertAudioChat(pixmap, name, time, text, path, sid, msgid, bTeacher, bRead);
 }
 
 // 插入通知消息等
@@ -803,13 +842,13 @@ void UITalk::stopAudio(char* msgid)
 		std::vector<CBtnAudio*>::iterator it;
 		for (it = m_vecAudio.begin(); it != m_vecAudio.end(); it++)
 		{
+			
 			CBtnAudio* img = *it;
 			if (img->GetMsgID() == sMsgid)
 			{
 				img->stopPlay();
 				return;
 			}
-
 		}
 	}
 }
@@ -819,4 +858,40 @@ void UITalk::stopAudio(char* msgid)
 void UITalk::slot_ScrollDownBottom(int mMax, int mMin)
 {
 	ScrollDown();
+}
+
+void UITalk::AutoPlayAudio()
+{
+	if (m_parent && !m_parent->isVisible())
+	{
+		return;
+	}
+	//判断当前自动语音播放状态及语音消息列表是否为空
+	if ((m_parent && (m_AutoAudioState == 1))&&(m_vecAudio.size() > 0))
+	{
+		std::vector<CBtnAudio*>::reverse_iterator it;
+		for (it = m_vecAudio.rbegin(); it != m_vecAudio.rend(); it++)
+		{
+			CBtnAudio* Now_Audio = *it;
+			//如果最后一条信息已读，则退出
+			if ((Now_Audio == *(m_vecAudio.rbegin())) && (Now_Audio->m_bRead))
+			{
+				return;
+			}
+			//寻找到最后一条已读信息,从此条信息的下一条信息开始读取
+			if (Now_Audio->m_bRead)
+			{
+				it--;
+				Now_Audio = *it;
+				Now_Audio->clicked(true);
+				return;
+			}
+			//假如所有信息都未读，从第一条开始读
+			if ((Now_Audio == m_vecAudio[0]) && (Now_Audio->m_bRead == false))
+			{
+				emit Now_Audio->clicked(true);
+				return;
+			}
+		}
+	}
 }

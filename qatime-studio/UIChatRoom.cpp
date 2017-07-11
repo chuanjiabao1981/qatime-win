@@ -19,6 +19,10 @@
 
 #include "calendar/DefineCalendar.h"
 
+
+int			m_AutoAudioState;	// 自动播放语音状态 0-自动播放 1-不自动播放
+bool		m_IsAudioPlaying;	// 语音是否播放中   0-没有语音正在播放 1-有语音正在播放
+
 QColor timeColor(153, 153, 153);
 QColor contentColor(102, 102, 102);
 QColor nameColor(85, 170, 255);
@@ -57,6 +61,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	p.setColor(QPalette::Window, QColor("white"));
 	setPalette(p);
 
+	connect(ui.Btn_AutoAudio, SIGNAL(clicked()), this, SLOT(slot_AutoPlayAudio()));	//建立自动播放语音信号槽
 	connect(ui.audio_pushButton, SIGNAL(clicked()), this, SLOT(clickAudio()));		//建立语音信号槽
 	connect(ui.button_talk, SIGNAL(clicked()), this, SLOT(clickTalk()));
 	connect(ui.button_proclamation, SIGNAL(clicked()), this, SLOT(clickProclamation()));
@@ -80,6 +85,7 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(ui.timeWidget, SIGNAL(currentPageChanged(int, int)), this, SLOT(calendaCurrentPageChanged(int, int)));
 	connect(ui.pic_pushButton, SIGNAL(clicked()), this, SLOT(clickPic()));
 	connect(this, SIGNAL(sig_editClear()), this, SLOT(slot_eidtClear()));
+	
 
 	QScrollBar* TalkRecordScrollBar;
 	TalkRecordScrollBar = (QScrollBar*)ui.talkRecord->verticalScrollBar();
@@ -137,6 +143,10 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(m_defDateTimeEdit, SIGNAL(sig_CalendarClick(QDate)), this, SLOT(slot_CalendarClick(QDate)));
 
 	ui.textEdit->setWordWrapMode(QTextOption::WrapAnywhere);
+
+	m_AutoAudioState = 0;		//默认自动播放语音状态为0，不自动播放
+	m_IsAudioPlaying = false;	//默认状态下语音没有自动播放的
+	ui.Btn_AutoAudio->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio2.png);}");
 }
 
 UIChatRoom::~UIChatRoom()
@@ -904,7 +914,7 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 			img = (QPixmap*)Buddy->head->pixmap();
 
 
-		m_uitalk->InsertAudioChat(img, qName, qTime, qduration, path, sid, msgid, false, false);
+		m_uitalk->InsertAudioChatNew(img, qName, qTime, qduration, path, sid, msgid, false, false);
 		
 		m_parent->SendStudentBullet(qName, "[语音消息]", QString::fromStdString(m_CurChatID));
 		bValid = true;
@@ -2360,7 +2370,7 @@ void UIChatRoom::ShowChatMsg(nim::IMMessage pMsg)
 		if (Buddy)
 			img = (QPixmap*)Buddy->head->pixmap();
 
-		m_uitalk->InsertAudioChat(img, qName, qTime, qduration, path, sid, msgid, false);
+		m_uitalk->InsertAudioChatNew(img, qName, qTime, qduration, path, sid, msgid, false);
 
 		QString audioPath = QString::fromStdString(path);
 		QFile file(audioPath);
@@ -2652,5 +2662,29 @@ void UIChatRoom::AudioBarTimer()
 		m_AudioBarTimer->stop();
 		int height = ui.btn_widget->geometry().y();
 		m_AudioBar->setGeometry(0, height - 26, this->width(), 26);
+	}
+}
+
+QPushButton *UIChatRoom::GetNowAutoAudioID()
+{
+	return ui.Btn_AutoAudio;
+}
+
+//主要设置图标显示及自动播放语音状态
+void UIChatRoom::slot_AutoPlayAudio()
+{
+
+	if (m_AutoAudioState == 0)
+	{
+		m_AutoAudioState = 1;
+		ui.Btn_AutoAudio->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio1.png);}");
+		m_uitalk->AutoPlayAudio();
+	}
+	else
+	if (m_AutoAudioState == 1)
+	{
+		ui.Btn_AutoAudio->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio2.png);}");
+		m_AutoAudioState = 0;
+		return;
 	}
 }
