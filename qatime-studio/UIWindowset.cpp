@@ -12,6 +12,11 @@
 #include "HttpRequest.h"
 
 #include "UIVideoRecord.h"
+
+
+extern int		m_AutoAudioState;
+extern bool		m_IsAudioPlaying;
+
 #define MAINWINDOW_X_MARGIN 10
 #define MAINWINDOW_Y_MARGIN 10
 #define MAINWINDOW_TITLE_HEIGHT 0
@@ -1025,12 +1030,19 @@ void UIWindowSet::clickTag(UITags* tag)
 				tags->GetRoom()->setVisible(true);
 				m_curTags = tags;
 				m_curChatRoom = tags->GetRoom();
+
+				
 			}
 			else
 			{
 				// 隐藏没选中的
 				tags->setStyle(false);
 				tags->GetRoom()->setVisible(false);
+
+				//切换标签时，直接把当前标签下的自动语音播放功能关闭
+				m_AutoAudioState = 0;
+				m_IsAudioPlaying = false;
+				tags->GetRoom()->GetNowAutoAudioID()->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio2.png);}");
 			}
 		}
 	}
