@@ -7,10 +7,12 @@
 #include <QScrollBar>
 #include "windows.h"
 
+
 //自动播放语音，全局状态标识
 extern int		m_AutoAudioState;
 //是否有语音播放中，全局状态标识
 extern bool		m_IsAudioPlaying;
+
 
 void sleep(int secs)
 {
@@ -218,15 +220,20 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 	connect(pAudio, SIGNAL(sig_Audioclicked(std::string, std::string, std::string, bool)), this, SLOT(slot_Audioclicked(std::string, std::string, std::string, bool)));
 	m_vecAudio.push_back(pAudio);
 
-	if (m_pFirstAudio == NULL)
+	//因为是教师端，所以bTeacher 为true，代表老师自己发的语音，所以不插入语音链表
+	if (bTeacher == false)
 	{
-		m_pFirstAudio = pAudio;
+		if (m_pFirstAudio == NULL)
+		{
+			m_pFirstAudio = pAudio;
+		}
+		else
+		{
+			m_pFirstAudio->setLastAudio(pAudio);
+			m_pFirstAudio = pAudio;
+		}
 	}
-	else
-	{
-		m_pFirstAudio->setLastAudio(pAudio);
-		m_pFirstAudio = pAudio;
-	}
+	
 	SecRow->addWidget(pAudio);
 
 	QLabel* LDur = new QLabel(); // 显示时长
@@ -259,6 +266,13 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 	{
 		AutoPlayAudio();  //插入语音后，判断当前自动读取状态来决定是否自动读取语音
 	}	
+
+	if ((m_IsAudioPlaying == false) && (m_AutoAudioState == 1))
+	{
+		pAudio->clicked(true);
+		//AutoPlayAudio();  //插入语音后，判断当前自动读取状态来决定是否自动读取语音
+	}	
+
 
 }
 
@@ -836,6 +850,14 @@ void UITalk::stopAudio(char* msgid)
 {
 	QString strMsgid = QString(QLatin1String(msgid));
 	QString sMsgid = strMsgid.mid(0, 32);
+	//如果语音播放停止，且自动播放状态也关闭时
+	if (m_AutoAudioState == 0)
+	{
+		if (m_parent)
+		{
+			m_parent->GetNowAutoAudioID()->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio2.png);}");
+		}
+	}
 
 	if (m_vecAudio.size() > 0)
 	{

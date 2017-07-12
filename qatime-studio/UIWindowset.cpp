@@ -291,6 +291,10 @@ void UIWindowSet::CloseDialog()
 	IMInterface::getInstance()->endDevice(Audio);
 	IMInterface::getInstance()->endDevice(AudioOut);
 	hide();
+
+	// Çå¿Õ°×°å
+	if (mWhiteBoard)
+		mWhiteBoard->cleanUp();
 }
 
 void UIWindowSet::MaxDialog()
@@ -719,6 +723,7 @@ bool UIWindowSet::IsHasTag(QString chatID, QString status)
 				// Òþ²ØÃ»Ñ¡ÖÐµÄ
 				tags->setStyle(false);
 				tags->GetRoom()->setVisible(false);
+
 			}
 		}
 	}
@@ -841,6 +846,10 @@ void UIWindowSet::DeleteTag(UITags* tag)
 						IMInterface::getInstance()->endDevice(Video);
 						IMInterface::getInstance()->endDevice(Audio);
 						IMInterface::getInstance()->endDevice(AudioOut);
+
+						// Çå¿Õ°×°å
+						if (mWhiteBoard)
+							mWhiteBoard->cleanUp();
 					}
 					else
 					{
@@ -1243,6 +1252,10 @@ void UIWindowSet::clickChange(bool checked)
 			// ÍË³öµ¯Ä»
 			emit ui.Bullet_checkBox->stateChanged(0);
 			CloseBullet();
+
+			// Çå¿Õ°×°å
+			if (mWhiteBoard)
+				mWhiteBoard->cleanUp();
 		}
 		else
 		{
