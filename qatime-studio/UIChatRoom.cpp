@@ -2680,7 +2680,8 @@ void UIChatRoom::slot_AutoPlayAudio()
 	{
 		m_AutoAudioState = 1;
 		ui.Btn_AutoAudio->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio1.png);}");
-		m_uitalk->AutoPlayAudio();
+		//m_uitalk->AutoPlayAudio();	20170712屏蔽掉之前逻辑，该按钮只负责开关功能，不具有自动播放功能
+
 	}
 	else
 	if (m_AutoAudioState == 1)
@@ -2689,4 +2690,5 @@ void UIChatRoom::slot_AutoPlayAudio()
 		m_AutoAudioState = 0;
 		return;
 	}
+
 }

@@ -723,6 +723,7 @@ bool UIWindowSet::IsHasTag(QString chatID, QString status)
 				// 隐藏没选中的
 				tags->setStyle(false);
 				tags->GetRoom()->setVisible(false);
+
 			}
 		}
 	}

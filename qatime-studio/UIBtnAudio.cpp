@@ -8,6 +8,7 @@
 #include "UIBtnAudio.h"
 #include "windows.h"
 #include <QFile>
+#include <QToolTip>
 
 extern int		m_AutoAudioState;
 extern bool		m_IsAudioPlaying;
@@ -61,6 +62,7 @@ CBtnAudio::~CBtnAudio()
 	}
 }
 
+//因为自动语音逻辑改变，所以使用bChecked参数作为自动和手动播放标志，false代表手动，true代表自动
 void CBtnAudio::onClicked(bool bChecked)
 {
 	// 加载中状态不可点击
@@ -75,7 +77,17 @@ void CBtnAudio::onClicked(bool bChecked)
 		m_TimerDown->start(50);
 		return;
 	}
-	
+	//如果手动点击语音，则关闭自动语音播放功能
+	if (bChecked == false)
+	{
+		if (m_AutoAudioState == 1)
+		{
+			QToolTip::showText(QCursor::pos(), "自动语音播放功能已关闭！");
+		}
+		m_AutoAudioState = 0;
+		m_IsAudioPlaying = true;
+	}
+
 	// 如果没下载完，直接返回
 	if (!m_bDownEnd)
 		return;
@@ -135,8 +147,11 @@ void CBtnAudio::slot_onDownTimeout()
 	}
 }
 
+
+
 //逻辑：此处添加了自动语音播放功能，使用的方法是通过链表式的方式关联连续的两条语音
 //语音播放冲突，通过m_IsAudioPlaying这个全局变量解决，当他为true时，代表语音正在播放中，当他为false时，代表当前没有正在语音播放
+//无论什么情况播放停止，都要把语音自动播放状态置false，再继续播放时，再置true
 void CBtnAudio::stopPlay()
 {
 	if (m_bIsPlay)
@@ -144,15 +159,13 @@ void CBtnAudio::stopPlay()
 		m_bIsPlay = false;
 		m_Timer->stop();
 		setStyleSheet("QPushButton{border-image:url(./images/audio_2.png);}");
-		
-		if ((m_pLastAudio && !m_pLastAudio->m_bRead) && (m_AutoAudioState ==1))
+		m_IsAudioPlaying = false;
+		if ((m_pLastAudio && !m_pLastAudio->m_bRead) && (m_AutoAudioState == 1))
 		{
-			emit m_pLastAudio->clicked();
+			m_IsAudioPlaying = true;
+			emit m_pLastAudio->clicked(true);
 		}
-		if (m_pLastAudio == NULL)
-		{
-			m_IsAudioPlaying = false;
-		}
+
 	}
 }
 
