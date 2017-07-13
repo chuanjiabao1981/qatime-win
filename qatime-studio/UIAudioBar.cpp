@@ -8,6 +8,7 @@ UIAudioBar::UIAudioBar(QWidget *parent)
 	, m_timer(NULL)
 	, m_bSend(false)
 	, m_FailTimer(false)
+	, m_bCapturing(false)
 {
 	ui.setupUi(this);
 	
@@ -40,6 +41,8 @@ void UIAudioBar::clickSend()
 	m_timer->stop();
 	if (m_parent)
 		m_parent->finishAudio();
+
+	m_bCapturing = false;
 }
 
 void UIAudioBar::clickCancel()
@@ -51,6 +54,8 @@ void UIAudioBar::clickCancel()
 	m_timer->stop();
 	if (m_parent)
 		m_parent->finishAudio();
+
+	m_bCapturing = false;
 }
 
 void UIAudioBar::slot_onTimeout()
@@ -65,6 +70,7 @@ void UIAudioBar::slot_onTimeout()
 	// 60秒直接发送
 	if (m_iSec == 60)
 	{
+		m_bCapturing = false;
 		emit ui.send_pushButton->clicked();
 		return;
 	}
@@ -73,6 +79,7 @@ void UIAudioBar::slot_onTimeout()
 // 语音条开始执行动作
 void UIAudioBar::CaptureAudio()
 {
+	m_bCapturing = true;
 	m_FailTimer->stop();
 	m_iSec = 0;
 	ui.time_label->setText("");
@@ -87,6 +94,7 @@ bool UIAudioBar::IsSend()
 
 void UIAudioBar::slot_onFailTimeout()
 {
+	m_bCapturing = false;
 	m_FailTimer->stop();
 	QString time = ui.time_label->text();
 	hide();
@@ -96,6 +104,12 @@ void UIAudioBar::slot_onFailTimeout()
 
 void UIAudioBar::MonitorFail()
 {
+	m_bCapturing = true;
 	m_FailTimer->stop();
 	m_FailTimer->start(5000);
+}
+
+bool UIAudioBar::IsCapturing()
+{
+	return m_bCapturing;
 }

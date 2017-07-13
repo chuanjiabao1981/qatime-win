@@ -23,6 +23,7 @@ private:
 	bool				m_bSend;	// 是否发送
 
 	QTimer*				m_FailTimer;// 超时5秒算失败
+	bool				m_bCapturing;	//是否在录制中
 private slots:
 	void clickSend();									// 发送语音
 	void clickCancel();									// 取消发送
@@ -34,6 +35,7 @@ public:
 	void CaptureAudio();								// 开始采集语音
 	bool IsSend();										// 是否发送
 	void MonitorFail();									// 监控是否失败
+	bool IsCapturing();									// 是否在录音采集中 false：录音中 true：未录音
 };
 
 #endif // UIAUDIOBAR_H

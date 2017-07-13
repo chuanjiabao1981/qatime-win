@@ -2531,65 +2531,14 @@ void UIChatRoom::clickAudio()
 
 bool UIChatRoom::IsCaptureAudio()
 {
-	return m_AudioBar->isVisible();
+	return m_AudioBar->IsCapturing();
 }
 
 //完成录音
 void UIChatRoom::finishAudio()
 {
-	nim_audio::Audio::StopCapture();
-}
-
-void UIChatRoom::InitAudioCallBack()
-{
-	nim_audio::Audio::RegStartCaptureCb(&UIChatRoom::OnStartCaptureCallback);
-	nim_audio::Audio::RegStopCaptureCb(&UIChatRoom::OnStopCaptureCallback);
-	nim_audio::Audio::RegCancelAudioCb(&UIChatRoom::OnCancelCaptureCallback);
-}
-
-void UIChatRoom::OnStartCaptureCallback(int code)
-{
-	if (code != 200)
-	{
-		//提示录音失败
-		QToolTip::showText(QCursor::pos(), "录制语音失败！");
-	}
-	else
-	{
-		if (m_pChatRoom)
-		{
-			m_pChatRoom->m_AudioBar->CaptureAudio();
-		}
-	}
-}
-
-void UIChatRoom::OnStopCaptureCallback(int rescode, const char *sid, const char *cid, const char *file_path, const char *file_ext, long file_size, int audio_duration)
-{
-	if (rescode == 200 && m_pChatRoom)
-	{
-		MyAudioStruct *mAudio = new MyAudioStruct;
-		mAudio->sSessionID = sid;
-		mAudio->sMsgID = cid;
-		mAudio->sFilePath = file_path;
-		mAudio->sFileEx = file_ext;
-		mAudio->fileSize = file_size;
-		mAudio->duration = audio_duration;
-
-		HWND mHwnd = FindWindow(L"Qt5QWindowIcon", L"UIMainWindow");
-		if (mHwnd == NULL)
-		{
-			mHwnd = FindWindow(L"Qt5QWindowToolSaveBits", L"UIMainWindow");
-		}
-		PostMessage(mHwnd, MSG_SEND_AUDIO_FINISH_MSG, (WPARAM)mAudio, 0);
-	}
-}
-
-void UIChatRoom::OnCancelCaptureCallback(int code)
-{
-	if (code == 200 && m_pChatRoom)
-	{
-		//取消录音
-	}
+	if (m_parent)
+		m_parent->StopRecord();
 }
 
 //往界面上添加语音消息
@@ -2649,11 +2598,6 @@ void UIChatRoom::SendAudio(QString msgid, QString path, long size, int audio_dur
 
 		AddAudioMsg(msg, mIMAudio);
 
-	}
-	else
-	{
-		QByteArray mPath = path.toLatin1();
-		nim_audio::Audio::CancelAudio((const char*)mPath.data());
 	}
 }
 

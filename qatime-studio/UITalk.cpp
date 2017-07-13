@@ -262,16 +262,16 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-	if (m_IsAudioPlaying == false)
-	{
-		AutoPlayAudio();  //插入语音后，判断当前自动读取状态来决定是否自动读取语音
-	}	
 
-	if ((m_IsAudioPlaying == false) && (m_AutoAudioState == 1))
+	if (m_parent && (m_parent->isVisible()))
 	{
-		pAudio->clicked(true);
-		//AutoPlayAudio();  //插入语音后，判断当前自动读取状态来决定是否自动读取语音
-	}	
+		if ((m_IsAudioPlaying == false) && (m_AutoAudioState == 1))
+		{
+			pAudio->clicked(true);
+			//AutoPlayAudio();  //插入语音后，判断当前自动读取状态来决定是否自动读取语音
+		}
+	}
+
 
 
 }
