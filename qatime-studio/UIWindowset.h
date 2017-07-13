@@ -290,7 +290,14 @@ public:
 	void	SendAudio(std::string sid, std::string msgid, std::string mPath, long mSize, int dur, std::string mfileEx);
 	/*************************语音处理**************************/
 	bool	IsCaptureAudio();									// 判断当前是否有录制语音
-
+	
+	void	InitAudioCallBack();								// 语音录制
+	static void OnStartCaptureCallback(int code);				// 开始采集回调
+	static void OnStopCaptureCallback(int rescode, const char* sid, const char* cid, const char* file_path, const char* file_ext, long file_size, int audio_duration);	// 停止采集回调
+	void	StartCaptureAudio();
+	void	RecordingVoice(std::string chatID, std::string msgID);  // 录制语音
+	void	StopRecord();											// 停止录制语音
+	void	StopAudioAutoPlay();									// 关闭自动语音播放中的相关功能
 	/*************************直播推流**************************/
 	void	AddTodayToLesson(QString  id, QString courseid, QString boardUrl, QString cameraUrl, QString time, QString status, QString name);// 往选择课程中添加今日课程
 	void	UpatateLiveStatus(QWidget* widget, bool bSuc);		// 更新直播状态

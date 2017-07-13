@@ -88,6 +88,7 @@ private:
 	/*								聊天记录参数							*/
 	long long						m_farst_msg_time;	// 最远得消息时间
 	int								kMsgLogNumberShow;	// 一次获取的条数
+public:
 	/************************语音进度条**************************************/
 	UIAudioBar*						m_AudioBar;			// 语音进度条窗口
 	bool							m_bSendAudio;		// 默认发送语音
@@ -229,13 +230,6 @@ public:
 	* @return void 无返回值
 	*/
 	static void OnStopAudioCallback(int code, const char *file_path, const char *sid, const char *cid);
-	//开始采集回调
-	static void OnStartCaptureCallback(int code);
-	//停止采集回调
-	static void OnStopCaptureCallback(int rescode, const char *sid, const char *cid, const char *file_path, const char *file_ext, long file_size, int audio_duration);
-	//取消采集回调
-	static void OnCancelCaptureCallback(int code);
-
 	
 	std::vector<personListBuddy*>  GetBuddy();						// 获取成员
 	bool		IsPerson();											// 是否请求完成员
@@ -244,7 +238,6 @@ public:
 
 	bool		IsCaptureAudio();										//判断当前是否在录制语音
 	void		SetCurAudioPath(std::string path);						// 设置当前语音路径
-	void		InitAudioCallBack();									// 录制语音初始化回调
 	void		finishAudio();											// 完成录音,默认发送语音
 	void		AddAudioMsg(nim::IMMessage pMsg, nim::IMAudio audio);	// 往界面上添加语音消息
 	void		SendAudio(QString msgid, QString path, long size, int audio_duration, std::string file_ex);		// 发送语音

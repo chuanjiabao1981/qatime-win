@@ -14,6 +14,7 @@
 #include "UIVideoRecord.h"
 
 
+
 extern int		m_AutoAudioState;
 extern bool		m_IsAudioPlaying;
 
@@ -23,9 +24,9 @@ extern bool		m_IsAudioPlaying;
 #define LIVE_BUTTON_NAME	"选课直播"
 #define LESSON_LABEL		"暂无直播"
 
-#define Audio 0		//音频设备
-#define AudioOut 2	//扬声器
-#define Video 3		//视频设备
+#define AudioDevice 0		//音频设备
+#define AudioOut 2			//扬声器
+#define Video 3				//视频设备
 #define VIDEO_FPS 50  
 
 UIWindowSet* m_This = NULL;
@@ -262,6 +263,8 @@ void UIWindowSet::CloseDialog()
 		return;
 	}
 
+	//add by zbc 20170712
+	StopAudioAutoPlay();
 	if (m_vecTags.size() > 0)
 	{
 		std::vector<UITags*>::iterator it;
@@ -269,6 +272,8 @@ void UIWindowSet::CloseDialog()
 		{
 			UITags* tags = *it;
 			tags->GetRoom()->setVisible(false);
+			//重置所有窗口的自动语音状态
+			tags->GetRoom()->GetNowAutoAudioID()->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio2.png);}");
 			tags->close();
 			delete tags;
 		}
@@ -288,7 +293,7 @@ void UIWindowSet::CloseDialog()
 
 	//结束云信的摄像头采集
 	IMInterface::getInstance()->endDevice(Video);
-	IMInterface::getInstance()->endDevice(Audio);
+	IMInterface::getInstance()->endDevice(AudioDevice);
 	IMInterface::getInstance()->endDevice(AudioOut);
 	hide();
 
@@ -659,7 +664,6 @@ void UIWindowSet::OpenCourse1v1(QString chatID, QString courseid, QString teache
 		chatRoom->SetEnvironmental(m_EnvironmentalTyle);
 		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount,true);
 		chatRoom->SetCurAudioPath(strCurAudioPath);
-		chatRoom->InitAudioCallBack();		//add by zbc 20170704
 		ui.horizontalLayout_18->addWidget(chatRoom);
 		m_vecChatRoom.push_back(chatRoom);
 		m_mapChatRoom.insert(chatID, chatRoom);
@@ -682,7 +686,6 @@ void UIWindowSet::OpenCourse(QString chatID, QString courseid, QString teacherid
 		chatRoom->SetEnvironmental(m_EnvironmentalTyle);
 		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount);
 		chatRoom->SetCurAudioPath(strCurAudioPath);
-		chatRoom->InitAudioCallBack();		//add by zbc 21070704
 		ui.horizontalLayout_6->addWidget(chatRoom);
 		m_vecChatRoom.push_back(chatRoom);
 		m_mapChatRoom.insert(chatID, chatRoom);
@@ -723,6 +726,9 @@ bool UIWindowSet::IsHasTag(QString chatID, QString status)
 				// 隐藏没选中的
 				tags->setStyle(false);
 				tags->GetRoom()->setVisible(false);
+				//add by zbc 20170712
+				StopAudioAutoPlay();
+				tags->GetRoom()->GetNowAutoAudioID()->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio2.png);}");
 
 			}
 		}
@@ -834,6 +840,9 @@ void UIWindowSet::DeleteTag(UITags* tag)
 			// 判断是当前会话窗口
 			if (tag == tags)
 			{
+				//add by zbc 20170712
+				StopAudioAutoPlay();
+				tags->GetRoom()->GetNowAutoAudioID()->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio2.png);}");
 				// 判断当前窗口是否进入直播室
 				if (tags->IsModle())
 				{
@@ -844,7 +853,7 @@ void UIWindowSet::DeleteTag(UITags* tag)
 //						ui.lesson_label->setText(LESSON_LABEL);
 						//结束云信的摄像头采集
 						IMInterface::getInstance()->endDevice(Video);
-						IMInterface::getInstance()->endDevice(Audio);
+						IMInterface::getInstance()->endDevice(AudioDevice);
 						IMInterface::getInstance()->endDevice(AudioOut);
 
 						// 清空白板
@@ -1023,6 +1032,7 @@ void UIWindowSet::OnStopPlayAudio(std::string sid, char* msgid)
 
 void UIWindowSet::clickTag(UITags* tag)
 {
+	
 	if (m_vecTags.size() > 0)
 	{
 		std::vector<UITags*>::iterator it;
@@ -1049,8 +1059,7 @@ void UIWindowSet::clickTag(UITags* tag)
 				tags->GetRoom()->setVisible(false);
 
 				//切换标签时，直接把当前标签下的自动语音播放功能关闭
-				m_AutoAudioState = 0;
-				m_IsAudioPlaying = false;
+				StopAudioAutoPlay();
 				tags->GetRoom()->GetNowAutoAudioID()->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio2.png);}");
 			}
 		}
@@ -1240,7 +1249,7 @@ void UIWindowSet::clickChange(bool checked)
 
 			//结束云信的摄像头采集
 			IMInterface::getInstance()->endDevice(Video);
-			IMInterface::getInstance()->endDevice(Audio);
+			IMInterface::getInstance()->endDevice(AudioDevice);
 			IMInterface::getInstance()->endDevice(AudioOut);
 
 			if (m_curTags)
@@ -1285,7 +1294,7 @@ void UIWindowSet::clickChange(bool checked)
 			{
 				QString dPath = m_AudioChangeInfo1v1->GetCurPath();
 				if (!dPath.isNull())
-					IMInterface::getInstance()->startDevice(Audio, dPath.toStdString(), 0, 0, 0);
+					IMInterface::getInstance()->startDevice(AudioDevice, dPath.toStdString(), 0, 0, 0);
 			}
 
 			//开启扬声器的采集
@@ -2264,7 +2273,7 @@ void UIWindowSet::initCallBack()
 	initWhiteBoardWidget();
 	initConnection();
 
- 	IMInterface::getInstance()->EnumDeviceDevpath(Audio);
+ 	IMInterface::getInstance()->EnumDeviceDevpath(AudioDevice);
 	IMInterface::getInstance()->EnumDeviceDevpath(Video);
 	IMInterface::getInstance()->EnumDeviceDevpath(AudioOut);
 
@@ -2272,6 +2281,8 @@ void UIWindowSet::initCallBack()
 	nim::Talk::RegReceiveCb(&CallbackReceiveMsg);
 	// 发送消息状态回调
 	nim::Talk::RegSendMsgCb(&CallbackSendMsgArc);
+
+	InitAudioCallBack();
 }
 
 // 接收消息回调
@@ -2577,7 +2588,7 @@ void UIWindowSet::setDeviceInfos(int type)
 {
 	switch (type)
 	{
-	case Audio:
+	case AudioDevice:
 	{
 		foreach(const DevInfo &info, IMInterface::getInstance()->getDeviceInfos())
 		{
@@ -2673,14 +2684,14 @@ void UIWindowSet::Audio1v1Status(int iStatus)
 {
 	if (iStatus)
 	{
-		IMInterface::getInstance()->endDevice(Audio);
+		IMInterface::getInstance()->endDevice(AudioDevice);
 	}
 	else
 	{
 		//开启云信的摄像头采集
 		QString dPath = m_AudioChangeInfo1v1->GetCurPath();
 		if (!dPath.isNull())
-			IMInterface::getInstance()->startDevice(Audio, dPath.toStdString(), 0, 0, 0);
+			IMInterface::getInstance()->startDevice(AudioDevice, dPath.toStdString(), 0, 0, 0);
 	}
 }
 
@@ -2744,8 +2755,8 @@ void UIWindowSet::setAudioChange1v1(QString path)
 	{
 		if (!path.isNull())
 		{
-			IMInterface::getInstance()->endDevice(Audio);
-			IMInterface::getInstance()->startDevice(Audio, path.toStdString(), 0, 0, 0);
+			IMInterface::getInstance()->endDevice(AudioDevice);
+			IMInterface::getInstance()->startDevice(AudioDevice, path.toStdString(), 0, 0, 0);
 		}
 	}
 }
@@ -2999,7 +3010,7 @@ void UIWindowSet::LessonRequestFinished()
 
 void UIWindowSet::EndDev()
 {
-	IMInterface::getInstance()->endDevice(Audio);
+	IMInterface::getInstance()->endDevice(AudioDevice);
 	IMInterface::getInstance()->endDevice(AudioOut);
 	IMInterface::getInstance()->endDevice(Video);
 }
@@ -3128,3 +3139,68 @@ void UIWindowSet::SendAudio(std::string sid, std::string msgid, std::string mPat
 		}
 	}
 }
+
+// 语音切换
+void UIWindowSet::InitAudioCallBack()
+{
+	nim_audio::Audio::RegStartCaptureCb(&OnStartCaptureCallback);
+	nim_audio::Audio::RegStopCaptureCb(&OnStopCaptureCallback);
+}
+
+void UIWindowSet::OnStartCaptureCallback(int code)
+{
+	if (code != 200)
+	{
+		//提示录音失败
+		QToolTip::showText(QCursor::pos(), "录制语音失败！");
+	}
+	else
+	{
+		if (m_This)
+			m_This->StartCaptureAudio();
+	}
+}
+
+void UIWindowSet::StartCaptureAudio()
+{
+	if (m_curChatRoom)
+	{
+		m_curChatRoom->m_AudioBar->CaptureAudio();
+	}
+}
+
+void UIWindowSet::OnStopCaptureCallback(int rescode, const char *sid, const char *cid, const char *file_path, const char *file_ext, long file_size, int audio_duration)
+{
+	if (rescode == 200 && m_This)
+	{
+		MyAudioStruct *mAudio = new MyAudioStruct;
+		mAudio->sSessionID = sid;
+		mAudio->sMsgID = cid;
+		mAudio->sFilePath = file_path;
+		mAudio->sFileEx = file_ext;
+		mAudio->fileSize = file_size;
+		mAudio->duration = audio_duration;
+
+		if (m_This->m_parent)
+			PostMessage((HWND)m_This->m_parent->winId(), MSG_SEND_AUDIO_FINISH_MSG, (WPARAM)mAudio, 0);
+	}
+}
+
+void UIWindowSet::RecordingVoice(std::string chatID, std::string msgID)
+{
+	nim_audio::Audio::StartCapture(chatID.c_str(), msgID.c_str(), nim_audio::AMR);
+}
+
+void UIWindowSet::StopRecord()
+{
+	nim_audio::Audio::StopCapture();
+}
+
+//切换标签时关闭语音自动播放功能的全局变量
+void UIWindowSet::StopAudioAutoPlay()
+{
+	m_AutoAudioState = 0;
+	m_IsAudioPlaying = false;
+	nim_audio::Audio::StopPlayAudio();
+}
+
