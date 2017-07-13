@@ -132,13 +132,14 @@ void LoginWindow::OnLogIn()
 		ui.ErrorTip_Label->setText(QString("请输入用户名"));
 		ui.UserName_Edit->setText(QString(""));
 		ui.UserPass_Edit->setText(QString(""));
+		Logining(false);
 		return;
 	}
 	else if (ui.UserPass_Edit->text().isEmpty())
 	{
 		ui.ErrorTip_Label->setText(QString("请输入密码"));
-		ui.UserName_Edit->setText(QString(""));
 		ui.UserPass_Edit->setText(QString(""));
+		Logining(false);
 		return;
 	}
 

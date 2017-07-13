@@ -803,6 +803,26 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 					}
 				}
 			}
+			else if (id == nim::kNIMNotificationIdTeamUpdate) //公告
+			{
+				const std::string& from_account = pMsg->sender_accid_;
+				Json::Value tinfo_json = json[nim::kNIMNotificationKeyData][nim::kNIMNotificationKeyTeamInfo];
+
+				personListBuddy* Buddy = NULL;
+				QString sName;
+				Buddy = ui.student_list->findID(QString::fromStdString(from_account));
+				if (Buddy)
+					sName = Buddy->name->text();
+
+				if (tinfo_json.isMember(nim::kNIMTeamInfoKeyAnnouncement))
+				{
+					QString info;
+					info = QString("%1 更新了群公告").arg(sName);
+
+					std::string Announcement = tinfo_json[nim::kNIMTeamInfoKeyAnnouncement].asString();
+					m_uitalk->InsertNewNotice(info, QString::fromStdString(Announcement));
+				}
+			}
 		}
 		return bValid;
 	}

@@ -677,7 +677,6 @@ void LiveStatusManager::HeartBeat1v1Timer()
 	QByteArray append("live_token=");
 	append += m_sLiveToken;
 	append.append("&beat_step=");
-	qInfo(append);
 	append += QString::number(m_iBeatStep);
 	append.append("&timestamp=");
 	append += time;

@@ -45,6 +45,7 @@ UITalk::UITalk(QWidget *parent)
 
 	m_Ver = new QVBoxLayout();
 	m_VerAll->addLayout(m_Ver);
+	m_Ver->setSpacing(0);
 
 	m_view->setWidget(m_mainView);
 	m_view->setWidgetResizable(true);
@@ -55,8 +56,6 @@ UITalk::UITalk(QWidget *parent)
 
 	QScrollBar * mBar = m_view->verticalScrollBar();
 	connect(mBar, SIGNAL(rangeChanged(int, int)), this, SLOT(slot_ScrollDownBottom(int, int)));
-
-
 }
 
 UITalk::~UITalk()
@@ -89,6 +88,8 @@ UITalk::~UITalk()
 // 插入文字聊天信息
 void UITalk::InsertChat(QPixmap* pixmap, QString name, QString time, QString text, bool bTeacher)
 {
+	InsertSpacer();
+
 	if (!pixmap)
 		pixmap = &QPixmap("./images/teacherPhoto.png");
 
@@ -175,6 +176,8 @@ void UITalk::InsertChat(QPixmap* pixmap, QString name, QString time, QString tex
 // 插入语音聊天信息
 void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QString text, std::string path, std::string sid, std::string msgid, bool bTeacher, bool bRead)
 {
+	InsertSpacer();
+
 	if (!pixmap)
 		pixmap = &QPixmap("./images/teacherPhoto.png");
 
@@ -299,6 +302,8 @@ void UITalk::slot_AudioLoadEnd(QPixmap* pixmap, QString name, QString time, QStr
 // 插入通知消息等
 void UITalk::InsertNotice(QString text)
 {
+	InsertSpacer();
+
 	QFont font;
 	font.setPointSize(10);
 	font.setFamily(("微软雅黑"));
@@ -337,6 +342,8 @@ void UITalk::InsertNotice(QString text)
 // 插入图片聊天信息
 void UITalk::InsertPic(QPixmap* pixmap, QString name, QString time, QString url, QString sMsgID, bool bTeacher)
 {
+	InsertSpacer();
+
 	if (!pixmap)
 		pixmap = &QPixmap("./images/teacherPhoto.png");
 
@@ -433,6 +440,8 @@ void UITalk::InsertPic(QPixmap* pixmap, QString name, QString time, QString url,
 // 插入图片聊天信息
 void UITalk::InsertPicUrl(QPixmap* pixmap, QString name, QString time, QString url_, QString sMsgID, bool bTeacher)
 {
+	InsertSpacer();
+
 	if (!pixmap)
 		pixmap = &QPixmap("./images/teacherPhoto.png");
 
@@ -556,6 +565,8 @@ void UITalk::slot_btnclicked(QString imgPath, QPixmap pixmap, bool b)
 // 插入表情聊天信息
 void UITalk::InsertEmoji(QPixmap* pixmap, QString name, QString time, QString text, bool bTeacher)
 {
+	InsertSpacer();
+
 	if (!pixmap)
 		pixmap = &QPixmap("./images/teacherPhoto.png");
 
@@ -916,4 +927,77 @@ void UITalk::AutoPlayAudio()
 			}
 		}
 	}
+}
+
+// 插入格式化通知消息等
+void UITalk::InsertNewNotice(QString name, QString text)
+{
+	InsertSpacer();
+
+	QFont font;
+	font.setPixelSize(12);
+	font.setFamily(("微软雅黑"));
+
+	QFont font1;
+	font1.setPixelSize(13);
+	font1.setFamily(("微软雅黑"));
+
+	// 第一行（消息）
+	QVBoxLayout* ver = new QVBoxLayout();
+	ver->setSpacing(0);
+
+	QVBoxLayout* FirstRow = new QVBoxLayout();
+	FirstRow->setContentsMargins(30, 0, 30, 0);
+	QLabel* LName = new QLabel();
+	LName->setText(name);
+	LName->setFont(font);
+	LName->setStyleSheet("color: rgb(153,153,153);border-radius:5px;border-image:url(./images/notice_back.png);"); //学生名字颜色 
+	LName->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	LName->setWordWrap(true);
+	FirstRow->addWidget(LName);
+
+	QHBoxLayout* SecRow = new QHBoxLayout();
+	SecRow->setContentsMargins(30, 0, 30, 0);
+
+	AnimatedTextBrowserA* EditNotice = new AnimatedTextBrowserA(true, this);
+	EditNotice->setText(text);
+	EditNotice->setFont(font1);
+	EditNotice->setStyleSheet("color: rgb(102,102,102);border-radius:5px;border-image:url(./images/notice_back.png);"); //学生名字颜色
+	EditNotice->setWordWrapMode(QTextOption::WrapAnywhere);
+	EditNotice->autoHeight();
+	EditNotice->AutoLeftOrEnter();
+	EditNotice->setEnabled(false);
+	connect(EditNotice, SIGNAL(sig_scrollDown()), this, SLOT(slot_scrollDown()));
+	SecRow->addWidget(EditNotice);
+
+// 	QSpacerItem* spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+// 	ver->addLayout(FirstRow);
+// 	ver->addLayout(SecRow);
+// 	ver->addSpacerItem(spacer);
+
+	m_Ver->addLayout(FirstRow);
+	m_Ver->addLayout(SecRow);
+	m_Ver->addLayout(ver);
+
+	// 添加到布局里
+	if (m_spacer == NULL)
+	{
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_Ver->addSpacerItem(m_spacer);
+	}
+	else
+	{
+		m_Ver->removeItem(m_spacer);
+		m_spacer = NULL;
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_Ver->addSpacerItem(m_spacer);
+	}
+}
+
+// 插入间距
+void UITalk::InsertSpacer()
+{
+	QLabel* pLabel = new QLabel();
+	pLabel->setFixedHeight(10);
+	m_Ver->addWidget(pLabel);
 }

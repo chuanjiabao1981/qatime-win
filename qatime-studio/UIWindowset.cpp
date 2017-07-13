@@ -1563,6 +1563,7 @@ void UIWindowSet::returnNotice()
 
 			//用完之后删除
 			delete announcements;
+			return;
 		}
 	}
 	else if (error["code"].toInt() == 1002)
@@ -2482,6 +2483,9 @@ void UIWindowSet::slot_refreshWnd()
 
 void UIWindowSet::slot_CustomVideoData(__int64 time, const char* data, int size, int iwidth, int iheight)
 {
+	// 重新计算1对1屏幕尺寸
+	Math1v1Screen();
+
 	IMInterface::getInstance()->CustomVideoData(time, data, size, iwidth, iheight);
 }
 
@@ -2505,7 +2509,7 @@ void UIWindowSet::slot_selectWnd(HWND hwnd)
 	// 关闭摄像头
 	m_Camera1v1Info->StartEndVideo(true);
 
-	// 禁用鼠标
+	// 禁用摄像头
 	ui.video1v1_checkBox->setEnabled(false);
 }
 
@@ -3204,3 +3208,20 @@ void UIWindowSet::StopAudioAutoPlay()
 	nim_audio::Audio::StopPlayAudio();
 }
 
+//计算1对1屏幕分享后，窗口的大小
+void UIWindowSet::Math1v1Screen()
+{
+	int iWidth = ui.full1v1_widget->width();
+	int iHeight = ui.full1v1_widget->height();
+
+	// 窗口抓取
+	int iScreenWidth = iWidth;
+	int iScreenHeight = ((double)iWidth / (double)m_VideoInfo1v1->ScreenWidth())*m_VideoInfo1v1->ScreenHeight();
+	if (iScreenHeight > iHeight)
+	{
+		iScreenWidth = ((double)iHeight / (double)m_VideoInfo1v1->ScreenHeight())*m_VideoInfo1v1->ScreenWidth();
+		m_VideoInfo1v1->setFixedSize(iScreenWidth, iHeight);
+	}
+	else
+		m_VideoInfo1v1->setFixedSize(iScreenWidth, iScreenHeight);
+}

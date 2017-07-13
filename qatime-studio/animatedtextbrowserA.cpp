@@ -7,12 +7,13 @@ AnimatedTextBrowserA::AnimatedTextBrowserA(QWidget *parent)
 	:QTextBrowser(parent)
 	, m_bTimer(false)
 {
-
+	m_bAutoLeft = false;
 }
 
 AnimatedTextBrowserA::AnimatedTextBrowserA(bool changed, QWidget *parent)
 	: QTextBrowser(parent)
 {
+	m_bAutoLeft = false;
 	m_bar = this->verticalScrollBar();
 	m_bTimer = changed;
 	m_timer = new QTimer(this);
@@ -101,6 +102,15 @@ void AnimatedTextBrowserA::paintEvent(QPaintEvent *e)
 {
 	QTextBrowser::paintEvent(e);
 
+	if (m_bAutoLeft)
+	{
+		int fontSize = this->fontMetrics().width(toPlainText());//获取之前设置的字符串的像素大小
+		if (fontSize + 10 >= width())
+			this->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+		else
+			this->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	}
+
 	if (!m_bTimer)
 		return;
 
@@ -115,4 +125,9 @@ void AnimatedTextBrowserA::paintEvent(QPaintEvent *e)
 		int h = this->document()->size().rheight();
 		this->setFixedHeight(h);
 	}
+}
+
+void AnimatedTextBrowserA::AutoLeftOrEnter()
+{
+	m_bAutoLeft = true;
 }

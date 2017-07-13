@@ -347,6 +347,7 @@ public:
 	void	startQueryOnlineNum();									  // 开始查询在线人数
 	void    stopQueryOnlineNum();									  // 停止查询在线人数
 	void	RecordLive();											  // 1对1录播
+	void	Math1v1Screen();										  // 计算1对1屏幕分享后，窗口的大小
 };
 
 #endif // UIWINDOWSET_H
