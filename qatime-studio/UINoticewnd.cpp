@@ -81,6 +81,7 @@ void UINoticeWnd::clickShowNotice()
 
 void UINoticeWnd::clickSendAnnounce()
 {
+	DeleteNotice();
 	ui.announce_widget->setVisible(true);
 	ui.A_widget->setVisible(false);
 

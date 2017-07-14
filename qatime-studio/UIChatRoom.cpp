@@ -2574,11 +2574,6 @@ void UIChatRoom::AddAudioMsg(nim::IMMessage pMsg, nim::IMAudio audio)
 	QString qName = QString::fromStdString(strName);
 	//聊天头像
 	QPixmap mImage = m_parent->TeacherPhotoPixmap();
-	bool bTeacher = false;
-	if (strcmp(strID.c_str(), m_CurTeacherID.toStdString().c_str()) == 0)
-	{
-		bTeacher = true;
-	}
 
 	QString qDuration = QString::number((audio.duration_ + 500) / 1000);
 	if (qDuration.toInt() > 60)
@@ -2590,7 +2585,9 @@ void UIChatRoom::AddAudioMsg(nim::IMMessage pMsg, nim::IMAudio audio)
 	std::string msgid;	// 当前消息ID
 	sid = m_CurChatID;
 	msgid = pMsg.client_msg_id_;
-	m_uitalk->InsertAudioChat(&mImage, qName, qTime, qDuration, pMsg.local_res_path_, sid, msgid, bTeacher);
+	m_uitalk->InsertAudioChat(&mImage, qName, qTime, qDuration, pMsg.local_res_path_, sid, msgid, true);
+
+	m_parent->SendTeacherBullet(qName, "[语音消息]", QString::fromStdString(m_CurChatID));
 }
 
 //发送语音消息
