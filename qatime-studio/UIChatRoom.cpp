@@ -92,6 +92,12 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	if (TalkRecordScrollBar)
 		connect((QObject*)TalkRecordScrollBar, SIGNAL(valueChanged(int)), this, SLOT(RecordMoved(int)));
 
+	//实例化类
+	m_AudioBar = new UIAudioBar(this);
+	m_AudioBar->setWindowFlags(Qt::FramelessWindowHint);	//隐藏窗口标题栏
+	m_AudioBar->setMainWindow(this);
+	m_AudioBar->hide();
+
 	initEmotion();
 	this->clickTalk();
 	m_isBorw = false;
@@ -104,8 +110,10 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	ui.timeWidget->setGridVisible(true);	
 
 	// 消息编辑框粘贴过滤代码
-	ui.textEdit->setContextMenuPolicy(Qt::NoContextMenu);
+//	ui.textEdit->setContextMenuPolicy(Qt::NoContextMenu);
 	ui.textEdit->installEventFilter(this);
+	ui.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	ui.textEdit->setStyleSheet("border: 1px solid #ffffff;");//#57cff8
 
 	ui.text_talk->installEventFilter(this);
 	ui.msgRecord->installEventFilter(this);
@@ -128,12 +136,6 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	//语音进度条
 	m_AudioBarTimer = new QTimer(this);
 	connect(m_AudioBarTimer, SIGNAL(timeout()), this, SLOT(AudioBarTimer()));
-
-	//实例化类
-	m_AudioBar = new UIAudioBar(this);
-	m_AudioBar->setWindowFlags(Qt::FramelessWindowHint);	//隐藏窗口标题栏
-	m_AudioBar->setMainWindow(this);
-	m_AudioBar->hide();
 
 	//隐藏讨论、公告、成员
 	ui.header_widget->setVisible(false);
@@ -179,6 +181,11 @@ bool UIChatRoom::eventFilter(QObject *target, QEvent *event)
 			}
 			else if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 			{
+				if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+				{
+					ui.textEdit->insertPlainText("\r");
+					return true;
+				}
 				emit ui.button_sendMseeage->clicked();
 				return true;
 			}

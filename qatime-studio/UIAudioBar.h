@@ -17,13 +17,13 @@ public:
 private:
 	Ui::UIAudioBar ui;
 	UIChatRoom*			m_parent;
-	QTimer*				m_timer;	// 秒数计时器
+	QTimer*				m_timer;		// 秒数计时器
+	bool				m_bSend;		// 是否发送
 
-	int					m_iSec;		// 秒数
-	bool				m_bSend;	// 是否发送
+	QTimer*				m_FailTimer;	// 超时5秒算失败
+	bool				m_bCapturing;	// 是否在录制中
 
-	QTimer*				m_FailTimer;// 超时5秒算失败
-	bool				m_bCapturing;	//是否在录制中
+	QDateTime			m_StartTime;	// 开始录制时得语音节点
 private slots:
 	void clickSend();									// 发送语音
 	void clickCancel();									// 取消发送

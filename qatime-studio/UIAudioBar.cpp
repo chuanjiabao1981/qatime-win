@@ -4,7 +4,6 @@
 UIAudioBar::UIAudioBar(QWidget *parent)
 	: QWidget(parent)
 	, m_parent(NULL)
-	, m_iSec(0)
 	, m_timer(NULL)
 	, m_bSend(false)
 	, m_FailTimer(false)
@@ -60,15 +59,16 @@ void UIAudioBar::clickCancel()
 
 void UIAudioBar::slot_onTimeout()
 {
-	m_iSec++;
-	ui.progressBar->setValue(m_iSec);
+	QDateTime tNowTime = QDateTime::currentDateTime();
+	int sec = m_StartTime.secsTo(tNowTime);
+	ui.progressBar->setValue(sec);
 
-	QString sTime = QString::number(m_iSec);
+	QString sTime = QString::number(sec);
 	sTime += "\"";
 	ui.time_label->setText(sTime);
 
 	// 60ÃëÖ±½Ó·¢ËÍ
-	if (m_iSec == 60)
+	if (sec == 60)
 	{
 		m_bCapturing = false;
 		emit ui.send_pushButton->clicked();
@@ -81,10 +81,11 @@ void UIAudioBar::CaptureAudio()
 {
 	m_bCapturing = true;
 	m_FailTimer->stop();
-	m_iSec = 0;
 	ui.time_label->setText("");
 	ui.progressBar->setValue(0);
-	m_timer->start(1000);
+	m_timer->start(100);
+
+	m_StartTime = QDateTime::currentDateTime();
 }
 
 bool UIAudioBar::IsSend()
