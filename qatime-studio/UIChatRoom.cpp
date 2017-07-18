@@ -337,11 +337,17 @@ void UIChatRoom::clickProclamation()
 // 清屏
 void UIChatRoom::clickCleanText()
 {
+	nim_audio::Audio::StopPlayAudio();	//停止播放语音	add by zbc 20170717
 	delete m_uitalk;
 	m_uitalk = NULL;
 	ui.text_talk->removeEventFilter(m_uitalk);
 	m_uitalk = new UITalk(ui.text_talk);
 	m_uitalk->setMainWindow(this);
+
+	QRect rc = ui.text_talk->geometry();
+	m_uitalk->setFixedSize(ui.text_talk->width(), ui.text_talk->height());
+
+	m_IsAudioPlaying = false;			//设置为当前无语音播放
 	m_uitalk->show();
 }
 // 表情按钮
@@ -2110,6 +2116,7 @@ void UIChatRoom::OnPlayAudio(std::string path, std::string sid, std::string msgi
 	else
 	{
 		nim_audio::Audio::StopPlayAudio();
+		m_IsAudioPlaying = false;	//add by zbc 20170717
 	}
 }
 
@@ -2647,6 +2654,7 @@ void UIChatRoom::slot_AutoPlayAudio()
 	if (m_AutoAudioState == 0)
 	{
 		m_AutoAudioState = 1;
+		m_IsAudioPlaying = false;
 		ui.Btn_AutoAudio->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio1.png);}");
 		//m_uitalk->AutoPlayAudio();	20170712屏蔽掉之前逻辑，该按钮只负责开关功能，不具有自动播放功能
 

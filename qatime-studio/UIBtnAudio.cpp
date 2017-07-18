@@ -12,6 +12,7 @@
 
 extern int		m_AutoAudioState;
 extern bool		m_IsAudioPlaying;
+int m_AutuAndManual;		// 手动和自动播放语音的互斥变量 0为自动 1为手动
 
 #define LOOP_COUNT 100
 #define LOOP_FAIL_COUNT 160
@@ -29,6 +30,7 @@ CBtnAudio::CBtnAudio(std::string path, std::string sid, std::string msgid, QWidg
 	, m_iCount(0)
 	, m_LoadStatus(true)
 	, m_pLastAudio(NULL)
+	, m_AudioPlayCount(0)
 {
 	setCursor(Qt::PointingHandCursor);
 
@@ -65,6 +67,7 @@ CBtnAudio::~CBtnAudio()
 //因为自动语音逻辑改变，所以使用bChecked参数作为自动和手动播放标志，false代表手动，true代表自动
 void CBtnAudio::onClicked(bool bChecked)
 {
+	
 	// 加载中状态不可点击
 	QString strPicName = styleSheet();
 	if (strPicName.indexOf("audio_loading") > 0)
@@ -77,16 +80,19 @@ void CBtnAudio::onClicked(bool bChecked)
 		m_TimerDown->start(50);
 		return;
 	}
-	//如果手动点击语音，则关闭自动语音播放功能
-	if (bChecked == false)
+	//如果手动点击语音，则绕过自动播放语音
+	if ((bChecked == false) && (m_IsAudioPlaying == true))
 	{
-		if (m_AutoAudioState == 1)
-		{
-			QToolTip::showText(QCursor::pos(), "自动语音播放功能已关闭！");
-		}
-		m_AutoAudioState = 0;
-		m_IsAudioPlaying = true;
+		m_AutuAndManual = 1;
+		nim_audio::Audio::StopPlayAudio();
 	}
+	else
+	{
+		m_AutuAndManual = 0;
+	}
+
+	// 语音播放一次，则记录一次
+	m_AudioPlayCount = m_AudioPlayCount + 1;
 
 	// 如果没下载完，直接返回
 	if (!m_bDownEnd)
@@ -152,20 +158,35 @@ void CBtnAudio::slot_onDownTimeout()
 //逻辑：此处添加了自动语音播放功能，使用的方法是通过链表式的方式关联连续的两条语音
 //语音播放冲突，通过m_IsAudioPlaying这个全局变量解决，当他为true时，代表语音正在播放中，当他为false时，代表当前没有正在语音播放
 //无论什么情况播放停止，都要把语音自动播放状态置false，再继续播放时，再置true
+//通过m_AutoAndManual的互斥量来区分开自动和手动的冲突
 void CBtnAudio::stopPlay()
 {
 	if (m_bIsPlay)
 	{
 		m_bIsPlay = false;
 		m_Timer->stop();
-		setStyleSheet("QPushButton{border-image:url(./images/audio_2.png);}");
-		m_IsAudioPlaying = false;
-		if ((m_pLastAudio && !m_pLastAudio->m_bRead) && (m_AutoAudioState == 1))
+		setStyleSheet("QPushButton{border-image:url(./images/audio_2.png);}");	
+		if ((m_AutoAudioState == 1) && (m_AudioPlayCount == 1) && (m_AutuAndManual == 0))
 		{
-			m_IsAudioPlaying = true;
-			emit m_pLastAudio->clicked(true);
+			//m_IsAudioPlaying = false;
+			CBtnAudio* mTestAudio = NULL;
+			mTestAudio = GetFirstNoReadAudio(m_pLastAudio);
+			if (mTestAudio)
+			{
+				//m_IsAudioPlaying = true;
+				emit mTestAudio->clicked(true);
+			}
+			else
+			{
+				m_IsAudioPlaying = false;
+			}
+			
 		}
-
+		if ((m_AudioPlayCount > 1) && (m_AutuAndManual == 0))
+		{
+			m_IsAudioPlaying = false;
+		}
+		m_AutuAndManual = 0;
 	}
 }
 
@@ -232,4 +253,22 @@ void CBtnAudio::slot_onDownEndTimeout()
 		m_TimerDownEnd->stop();
 		emit sig_AudioLoadEnd(m_pixmap,m_name,m_time,m_text,m_path,m_sid,m_msgid,m_bTeacher,m_bRead,this);
 	}
+}
+
+CBtnAudio* CBtnAudio::GetFirstNoReadAudio(CBtnAudio* tAudio)
+{
+	CBtnAudio* mAudio = NULL;
+	mAudio = tAudio;
+	while (mAudio != NULL)
+	{
+		if (mAudio->m_bRead)
+		{
+			mAudio = mAudio->m_pLastAudio;
+		}
+		else
+		{
+			break;
+		}
+	}
+	return mAudio;
 }

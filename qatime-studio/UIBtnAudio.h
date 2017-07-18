@@ -44,6 +44,8 @@ public:
 	std::string m_sid;			// 会话ID
 	std::string m_msgid;		// 消息ID
 	bool m_bIsPlay;				// 语音是否在播放
+	int  m_AudioPlayCount;		// 该语音播放次数
+	
 private:
 	
 	bool m_bDownEnd;			// 语音是否下载完成
@@ -75,6 +77,7 @@ public:
 	void LoadSuc();								// 下载成功
 	void setLastAudio(CBtnAudio* pLastAudio);	// 保存下一个语音
 	void setMsgAll(QPixmap* pixmap, QString name, QString time, QString text, std::string path, std::string sid, std::string msgid, bool bTeacher, bool bRead);
+	CBtnAudio* GetFirstNoReadAudio(CBtnAudio* tAudio);	//获取最近的未读的消息
 };
 
 #endif // _LS_MEDIACAPTURE_UI_BUTTON_H_
