@@ -266,7 +266,7 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 	}
 
 
-	if (m_parent && (m_parent->isVisible()))
+	if (m_parent && (m_parent->isVisible()) && (bTeacher == false))
 	{
 		if ((m_IsAudioPlaying == false) && (m_AutoAudioState == 1))
 		{
