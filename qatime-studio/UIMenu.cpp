@@ -176,12 +176,14 @@ void UIMenu::checkVersion()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/system/check_update?=category=teacher_live&version={version}&platform=windows";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/system/check_update?=category=teacher_live&version={version}&platform=windows";
 		strUrl.replace("{version}", m_version);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/system/check_update?category=teacher_live&version={version}&platform=windows";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/system/check_update?category=teacher_live&version={version}&platform=windows";
 		strUrl.replace("{version}", m_version);
 	}
 
@@ -215,8 +217,9 @@ void UIMenu::returnVersion()
 	}
 }
 
-void UIMenu::SetEnvironmental(bool Environmental)
+void UIMenu::SetEnvironmental(bool Environmental, QString homePage)
 {
+	m_homePage = homePage;
 	m_EnvironmentalTyle = Environmental;
 }
 

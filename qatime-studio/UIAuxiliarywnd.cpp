@@ -416,6 +416,7 @@ void UIAuxiliaryWnd::clickAuxiliary(UIAuxiliaryList* auxiliary)
 {
 	if (m_parent)
 	{
+		qDebug() << __FILE__ << __LINE__ << "点击--" << "辅导班ID：" << auxiliary->CourseID() << "辅导班名字：" << auxiliary->CourseName();
 		m_parent->CreateRoom(auxiliary->ChatID(), auxiliary->CourseID(), auxiliary->TeacherID(), auxiliary->Token(), auxiliary->StudentName(), 
 							auxiliary->AudioPath(), auxiliary->CourseName(), auxiliary->UnreadMsgCount(), auxiliary->Status(), auxiliary->BoardUrl(), auxiliary->CameraUrl(),auxiliary->Is1v1Lesson());
 		auxiliary->ClearMsgNumber();
@@ -431,6 +432,7 @@ void UIAuxiliaryWnd::clickAuxiliaryToday(UIAuxiliaryToday* auxiliaryToday)
 	{
 		if (m_parent)
 		{
+			qDebug() << __FILE__ << __LINE__ << "点击--"<<"辅导班ID：" << auxiliary->CourseID() << "辅导班名字：" << auxiliary->CourseName();
 			m_parent->CreateRoom(auxiliary->ChatID(), auxiliary->CourseID(), auxiliary->TeacherID(), auxiliary->Token(), auxiliary->StudentName(), auxiliary->AudioPath(),
 				auxiliary->CourseName(), auxiliary->UnreadMsgCount(), auxiliary->Status(), auxiliary->BoardUrl(), auxiliary->CameraUrl(), auxiliary->Is1v1Lesson());
 			
@@ -439,9 +441,9 @@ void UIAuxiliaryWnd::clickAuxiliaryToday(UIAuxiliaryToday* auxiliaryToday)
 	}
 }
 
-void UIAuxiliaryWnd::SetEnvironmental(bool bType)
+void UIAuxiliaryWnd::SetEnvironmental(bool bType, QString homePage)
 {
-	m_UIMenu->SetEnvironmental(bType);
+	m_UIMenu->SetEnvironmental(bType,homePage);
 }
 
 void UIAuxiliaryWnd::ReceiverNumber(QString chatID)

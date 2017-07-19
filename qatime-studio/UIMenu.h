@@ -26,6 +26,7 @@ private:
 	QNetworkAccessManager			manager;
 	bool							m_EnvironmentalTyle;
 	QString							m_token;
+	QString							m_homePage;
 private slots:
 	void clickPic();
 	void clickReturn();
@@ -42,7 +43,7 @@ public:
 	void setPic(QPixmap pix);
 	void setName(QString name);
 	void setVersion(QString version);
-	void SetEnvironmental(bool Environmental);
+	void SetEnvironmental(bool Environmental, QString homePage);
 	void setToken(QString token);
 	void StartCheck(QString enforce, QString version, QString downpath);
 	void checkVersion();

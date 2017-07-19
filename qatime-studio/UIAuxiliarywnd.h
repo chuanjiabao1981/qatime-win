@@ -9,6 +9,8 @@
 #include "UIMainNewWindow.h"
 #include "UIMenu.h"
 
+#pragma execution_character_set("utf-8")
+
 class UIMenu;
 class UIMainNewWindow;
 class UIAuxiliaryWnd : public QWidget
@@ -92,7 +94,7 @@ public:
 	void	LoadPic1v1();
 	void	ReturnAccount();						// 切换账号
 	void    setVersion(QString version);			// 设置版本号
-	void	SetEnvironmental(bool bType);			// 设置当前环境
+	void	SetEnvironmental(bool bType, QString homePage);			// 设置当前环境
 	void	ReceiverNumber(QString chatID);			// 接收消息
 	void    ChangeAuxiliaryTodayStatus(QString lessonid, QString status);	// 开始直播的时候，改变上课状态
 };

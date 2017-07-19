@@ -85,6 +85,7 @@ private:
 	QSystemTrayIcon *trayIcon;
 	QMenu * menu;
 	bool							m_EnvironmentalFormally;	// 环境类型
+	QString m_homePage;			// 访问服务器的路径
 public:
 	void ReturnLogin();			// 重新登陆
 	void ReadSetting();			// 读取配置文件路径信息

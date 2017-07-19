@@ -116,6 +116,7 @@ public:
 
 	UIMainNewWindow*				m_parent;
 	bool							m_EnvironmentalTyle;
+	QString							m_homePage;
 	QString							m_Token;
 	QString							m_teacherID;
 	QString							m_teacherName;
@@ -244,7 +245,7 @@ public:
 	/*************************直播全屏**************************/
 	void	initFont();											// 初始化字体大小
 	void	setMainWindow(UIMainNewWindow* parent);
-	void	SetEnvironmental(bool bType);						// 环境变量;
+	void	SetEnvironmental(bool bType, QString homePage);		// 环境变量;
 	void	SetToken(QString token);
 	void	setTeacherID(QString id, QString name);				// 老师ID和名字
 	void	setAccid(QString accid);							// 云信ID

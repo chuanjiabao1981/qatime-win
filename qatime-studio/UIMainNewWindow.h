@@ -77,6 +77,7 @@ private:
 	QString							m_accid;				// 云信自己的ID
 	QString							m_token;				// 云信密码
 	std::string						m_AudioPath;			// 语音消息路径
+	QString							m_homePage;				// 服务器
 
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result); // 添加caption
@@ -86,7 +87,7 @@ public:
 	void    InitAudio();									// 初始化语音
 	void	setLoginWindow(LoginWindow* parent);			// 登录窗口
 	void	setVersion(QString version);					// 设置版本号
-	void	SetEnvironmental(bool EnvironmentalTyle);
+	void	SetEnvironmental(bool EnvironmentalTyle, QString m_homePage);
 	void	setRemeberToken(const QString &token);
 	void	setTeacherInfo(QJsonObject &data);
 	void    returnClick();									// 切换账号
@@ -113,7 +114,13 @@ public:
 						QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl,bool b1v1Lesson=false);
 	void    changeLessonStatus(QString id, QString status);
 	void	changeMsgNumber(QString chid);
-	void	LogOut();												  // 退出云信登录
+	void	LogOut();										// 退出云信登录
+
+signals:
+	void sig_QueryLesson();									// 查询课程
+
+private slots:
+	void slot_QueryLesson();								// 查询课程
 };
 
 #endif // UIMAINNEWWINDOW_H

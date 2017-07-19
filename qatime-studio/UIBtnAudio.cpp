@@ -240,7 +240,7 @@ void CBtnAudio::setMsgAll(QPixmap* pixmap, QString name, QString time, QString t
 
 	m_TimerDownEnd = new QTimer(this);
 	connect(m_TimerDownEnd, SIGNAL(timeout()), this, SLOT(slot_onDownEndTimeout()));
-	m_TimerDownEnd->start(50);
+	m_TimerDownEnd->start(100);
 }
 
 void CBtnAudio::slot_onDownEndTimeout()
@@ -250,8 +250,8 @@ void CBtnAudio::slot_onDownEndTimeout()
 	QFile file(path);
 	if (file.exists())
 	{
-		m_TimerDownEnd->stop();
-		emit sig_AudioLoadEnd(m_pixmap,m_name,m_time,m_text,m_path,m_sid,m_msgid,m_bTeacher,m_bRead,this);
+ 		m_TimerDownEnd->stop();
+ 		emit sig_AudioLoadEnd(m_pixmap,m_name,m_time,m_text,m_path,m_sid,m_msgid,m_bTeacher,m_bRead,this);
 	}
 }
 

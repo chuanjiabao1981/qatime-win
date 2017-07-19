@@ -29,6 +29,7 @@ UIMainNewWindow::UIMainNewWindow(QWidget *parent)
 	m_AuxiliaryWnd->show();
 	SetWindowPos((HWND)m_AuxiliaryWnd->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
+	connect(this, SIGNAL(sig_QueryLesson()), this, SLOT(slot_QueryLesson()));
 }
 
 UIMainNewWindow::~UIMainNewWindow()
@@ -46,11 +47,12 @@ UIMainNewWindow::~UIMainNewWindow()
 	}
 }
 
-void UIMainNewWindow::SetEnvironmental(bool EnvironmentalTyle)
+void UIMainNewWindow::SetEnvironmental(bool EnvironmentalTyle,QString homePage)
 {
+	m_homePage = homePage;
 	m_EnvironmentalTyle = EnvironmentalTyle;
-	m_WindowSet->SetEnvironmental(m_EnvironmentalTyle);
-	m_AuxiliaryWnd->SetEnvironmental(m_EnvironmentalTyle);
+	m_WindowSet->SetEnvironmental(m_EnvironmentalTyle,m_homePage);
+	m_AuxiliaryWnd->SetEnvironmental(m_EnvironmentalTyle, m_homePage);
 }
 
 void UIMainNewWindow::setRemeberToken(const QString &token)
@@ -105,12 +107,14 @@ void UIMainNewWindow::ShowLesson()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/schedule";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/schedule";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 
@@ -170,12 +174,14 @@ void UIMainNewWindow::ShowAuxiliary()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/courses/full";
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/courses/full";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/courses/full";
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 
@@ -230,12 +236,14 @@ void UIMainNewWindow::Show1v1Auxiliary()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/interactive_courses";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/interactive_courses";
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/interactive_courses";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/interactive_courses";
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 
@@ -284,11 +292,13 @@ void UIMainNewWindow::RequestKey()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/app_constant/im_app_key";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/app_constant/im_app_key";
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/app_constant/im_app_key";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/app_constant/im_app_key";
 	}
 
 	QUrl url = QUrl(strUrl);
@@ -337,20 +347,23 @@ void UIMainNewWindow::setKeyAndLogin(QString key)
 	InitAudio();	  // 初始化语音
 	m_WindowSet->initCallBack();
 
+	qDebug() << __FILE__ << __LINE__ << "开始云信登陆！";
 	auto cb = std::bind(OnLoginCallback, std::placeholders::_1, nullptr);
 	nim::Client::Login(key.toStdString(), m_accid.toStdString(), m_token.toStdString(), cb);
 
 	// 查询课程
-	ShowLesson();
+//	ShowLesson();
 }
 
 void UIMainNewWindow::OnLoginCallback(const nim::LoginRes& login_res, const void* user_data)
 {
-	m_This->m_WindowSet->ReceiverLoginMsg(login_res);
+//	m_This->m_WindowSet->ReceiverLoginMsg(login_res);
 	if (login_res.res_code_ == nim::kNIMResSuccess) // 登录成功
 	{
 		if (login_res.login_step_ == nim::kNIMLoginStepLogin)
 		{
+			qDebug() << __FILE__ << __LINE__<<"云信登陆成功！";
+			emit m_This->sig_QueryLesson();
 		}
 	}
 	else
@@ -657,4 +670,9 @@ void UIMainNewWindow::OnLogOutCallback(nim::NIMResCode res_code)
 	nim::VChat::Cleanup();
 	nim_http::Uninit();
 	exit(0);
+}
+
+void UIMainNewWindow::slot_QueryLesson()
+{
+	ShowLesson();
 }

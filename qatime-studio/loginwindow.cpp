@@ -146,10 +146,11 @@ void LoginWindow::OnLogIn()
 	QString str = ui.UserPass_Edit->text();
 	str = parse(str);
 
-	if (m_EnvironmentalFormally)
-		url = QUrl("https://qatime.cn/api/v1/sessions");
-	else
-		url = QUrl("http://testing.qatime.cn/api/v1/sessions");
+	QString strUrl;
+	strUrl += m_homePage;
+	strUrl += "/api/v1/sessions";
+	url = QUrl(strUrl);
+	
 
 	QByteArray append("client_type=pc");
 	append.append("&login_account=");
@@ -189,7 +190,7 @@ void LoginWindow::loginFinished()
 		mainWin = new UIMainNewWindow();
 		mainWin->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 		mainWin->setAttribute(Qt::WA_DeleteOnClose, false);
-		mainWin->SetEnvironmental(m_EnvironmentalFormally);
+		mainWin->SetEnvironmental(m_EnvironmentalFormally,m_homePage);
 		mainWin->setRemeberToken(m_teacherToken);
 		mainWin->setTeacherInfo(data["user"].toObject());
 		mainWin->RequestKey();
@@ -286,6 +287,7 @@ void LoginWindow::ReadSetting()
 	m_accidToken = QString::fromStdWString(m_pathAccidToken);
 	m_password = QString::fromStdWString(m_pathUserPass);
 	m_version = QString::fromStdWString(m_pathVersion);
+	m_homePage = QString::fromStdWString(m_pathHomePage);
 	
 	QString sVersion = "  答疑时间直播助手{version}";
 	sVersion.replace("{version}", m_version);

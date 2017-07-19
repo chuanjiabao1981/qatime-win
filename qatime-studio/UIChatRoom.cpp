@@ -781,6 +781,9 @@ void UIChatRoom::PackageMsg(nim::IMMessage &msg)
 bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 {
 	bool bValid = false;
+	if (MathTime(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_)))
+		return bValid;
+
 	if (pMsg->type_ == nim::kNIMMessageTypeNotification) // 过滤系统消息
 	{
 		Json::Value json;
@@ -925,7 +928,7 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 			sid = pMsg->local_talk_id_;
 			msgid = pMsg->client_msg_id_;
 			int duration = values["dur"].asUInt();
-			qDebug() << QString::number(duration);
+			qDebug() << __FILE__ << __LINE__ << QString::number(duration);
 			qduration = QString::number((duration+500)/1000);
 			if (qduration.toInt() > 60)
 				qduration = "60";
@@ -1601,12 +1604,14 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 	{
 		if (m_EnvironmentalTyle)
 		{
-			strUrl = "https://qatime.cn/api/v1/live_studio/interactive_courses/{id}/announcements";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/interactive_courses/{id}/announcements";
 			strUrl.replace("{id}", m_CurCourseID);
 		}
 		else
 		{
-			strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_courses/{id}/announcements";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/interactive_courses/{id}/announcements";
 			strUrl.replace("{id}", m_CurCourseID);
 		}
 	}
@@ -1614,12 +1619,14 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 	{
 		if (m_EnvironmentalTyle)
 		{
-			strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/announcements";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/courses/{id}/announcements";
 			strUrl.replace("{id}", m_CurCourseID);
 		}
 		else
 		{
-			strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/announcements";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/courses/{id}/announcements";
 			strUrl.replace("{id}", m_CurCourseID);
 		}
 	}
@@ -1733,12 +1740,14 @@ void UIChatRoom::QueryMember()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/courses/{id}/realtime";
 		strUrl.replace("{id}", m_CurCourseID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/courses/{id}/realtime";
 		strUrl.replace("{id}", m_CurCourseID);
 	}
 
@@ -2134,12 +2143,14 @@ void UIChatRoom::Request1v1Member()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_courses/{id}/realtime";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
 		strUrl.replace("{id}", m_CurCourseID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_courses/{id}/realtime";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
 		strUrl.replace("{id}", m_CurCourseID);
 	}
 
@@ -2157,12 +2168,14 @@ void UIChatRoom::RequestMember()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/courses/{id}/realtime";
 		strUrl.replace("{id}", m_CurCourseID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/courses/{id}/realtime";
 		strUrl.replace("{id}", m_CurCourseID);
 	}
 
@@ -2235,15 +2248,16 @@ void UIChatRoom::ResultMsg()
 {
 	QString namber = QString::number(m_UnreadCount);
 	QString chatid = QString::fromStdString(m_CurChatID);
-	if (m_UnreadCount > 50)
-		m_UnreadCount = 50;
+	if (m_UnreadCount > 5)
+		m_UnreadCount = 5;
 
 	long long time = QDateTime::currentMSecsSinceEpoch();
 	nim::MsgLog::QueryMsgOnlineAsync(m_CurChatID, nim::kNIMSessionTypeTeam, m_UnreadCount, 0, time, 0, false, true, &UIWindowSet::QueryFirstMsgOnlineCb);
 }
 
-void UIChatRoom::SetEnvironmental(bool bType)
+void UIChatRoom::SetEnvironmental(bool bType,QString homepage)
 {
+	m_homePage = homepage;
 	m_EnvironmentalTyle = bType;
 }
 
@@ -2667,4 +2681,16 @@ void UIChatRoom::slot_AutoPlayAudio()
 		return;
 	}
 
+}
+
+// 做个保险机制
+bool UIChatRoom::MathTime(QDateTime date)
+{
+	QDateTime curDate = QDateTime::currentDateTime();
+	int Sec = date.secsTo(curDate);
+	// 如果相差时间大于5分钟，则不显示，直接过滤
+	if (Sec > 300)
+		return true;
+	else
+		return false;
 }

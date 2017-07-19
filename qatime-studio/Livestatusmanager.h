@@ -51,6 +51,7 @@ private:
 	int						m_iBoardStatus;			//白板直播状态
 	int						m_iCameraStatus;		//摄像头直播状态
 	bool					m_EnvironmentalTyle;	//当前环境
+	QString					m_homePage;
 
 	// 互动
 	QTimer*					m_1v1HeartTimer;			//1v1心跳定时器
@@ -86,7 +87,7 @@ public:
 	void StopTimer();															// 停止所有计时器
 	void SendCameraSwitchMsg(int iBoard, int iCamera);							// 发送摄像头切换状态消息
 	void RequestError(QJsonObject& error, bool bTrue=true);						// 出现错误
-	void SetEnvironmental(bool bTyle);
+	void SetEnvironmental(bool bTyle, QString homePage);
 
 	// 一对一互动
 	void SendStart1v1LiveHttpMsg(QString sLessonid,QString chatid, QString sToken);	// 往服务器发送1v1直播开始消息

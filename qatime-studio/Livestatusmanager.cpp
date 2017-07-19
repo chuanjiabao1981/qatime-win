@@ -116,10 +116,12 @@ void LiveStatusManager::GetRtmpAddressAndHeartBeat(QString lessonID, QString sTo
 	m_sToken = sToken;
 	QString strUrl;
 #ifdef _DEBUG
-	strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{id}/live_info";
+	strUrl += m_homePage;
+	strUrl = "/api/v1/live_studio/lessons/{id}/live_info";
 	strUrl.replace("{id}", lessonID);
 #else
-	strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{id}/live_info";
+	strUrl += m_homePage;
+	strUrl = "/api/v1/live_studio/lessons/{id}/live_info";
 	strUrl.replace("{id}", lessonID);
 #endif
 
@@ -180,12 +182,14 @@ void LiveStatusManager::HeartBeatTimer()
 
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -253,12 +257,14 @@ void LiveStatusManager::HeartBeatFailTimer()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -290,12 +296,14 @@ void LiveStatusManager::SendStartLiveHttpMsg(int iBoard, int iCamera, QString sL
 
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_start";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_start";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_start";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -370,12 +378,14 @@ void LiveStatusManager::SendStopLiveHttpMsg(bool bConnect)
 
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_end";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_end";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_end";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -454,12 +464,14 @@ void LiveStatusManager::SendCameraSwitchMsg(int iBoard, int iCamera)
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_switch";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_switch";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/lessons/{lessons_id}/live_switch";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_switch";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -562,8 +574,9 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 	}
 }
 
-void LiveStatusManager::SetEnvironmental(bool bTyle)
+void LiveStatusManager::SetEnvironmental(bool bTyle, QString homePage)
 {
+	m_homePage = homePage;
 	m_EnvironmentalTyle = bTyle;
 }
 
@@ -579,12 +592,14 @@ void LiveStatusManager::SendStart1v1LiveHttpMsg(QString sLessonid,QString chatid
 
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/live_start";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_start";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/live_start";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_start";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -657,12 +672,14 @@ void LiveStatusManager::HeartBeat1v1Timer()
 
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -683,7 +700,7 @@ void LiveStatusManager::HeartBeat1v1Timer()
 
 	QString strHeartBeat = "HearBeat:";
 	strHeartBeat += append;
-	qDebug()<<strHeartBeat;
+	qDebug() << __FILE__ << __LINE__ << strHeartBeat;
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat1v1);
@@ -729,12 +746,14 @@ void LiveStatusManager::HeartBeatFailTimer1v1()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -765,12 +784,13 @@ void LiveStatusManager::SendStopLiveHttpMsg1v1(bool bConnect)
 
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/live_end";
+		strUrl += m_homePage;
+		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_end";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_lessons/{lessons_id}/live_end";
+		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_end";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 

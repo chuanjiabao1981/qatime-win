@@ -448,10 +448,11 @@ void UIWindowSet::setMainWindow(UIMainNewWindow* parent)
 	m_parent = parent;
 }
 
-void UIWindowSet::SetEnvironmental(bool bType)
+void UIWindowSet::SetEnvironmental(bool bType, QString homePage)
 {
+	m_homePage = homePage;
 	m_EnvironmentalTyle = bType;
-	m_LiveStatusManager->SetEnvironmental(bType);
+	m_LiveStatusManager->SetEnvironmental(bType, homePage);
 }
 
 void UIWindowSet::SetToken(QString token)
@@ -661,7 +662,7 @@ void UIWindowSet::OpenCourse1v1(QString chatID, QString courseid, QString teache
 		chatRoom = new UIChatRoom(ui.chat1v1_widget);
 		chatRoom->setWindowFlags(Qt::FramelessWindowHint);
 		chatRoom->setMainWindow(this);
-		chatRoom->SetEnvironmental(m_EnvironmentalTyle);
+		chatRoom->SetEnvironmental(m_EnvironmentalTyle,m_homePage);
 		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount,true);
 		chatRoom->SetCurAudioPath(strCurAudioPath);
 		ui.horizontalLayout_18->addWidget(chatRoom);
@@ -683,7 +684,7 @@ void UIWindowSet::OpenCourse(QString chatID, QString courseid, QString teacherid
 		chatRoom = new UIChatRoom(ui.chat_widget);
 		chatRoom->setWindowFlags(Qt::FramelessWindowHint);
 		chatRoom->setMainWindow(this);
-		chatRoom->SetEnvironmental(m_EnvironmentalTyle);
+		chatRoom->SetEnvironmental(m_EnvironmentalTyle, m_homePage);
 		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount);
 		chatRoom->SetCurAudioPath(strCurAudioPath);
 		ui.horizontalLayout_6->addWidget(chatRoom);
@@ -849,8 +850,6 @@ void UIWindowSet::DeleteTag(UITags* tag)
 					// 是否是一对一
 					if (tags->Is1v1Lesson())
 					{		
-						// 课程名置空
-//						ui.lesson_label->setText(LESSON_LABEL);
 						//结束云信的摄像头采集
 						IMInterface::getInstance()->endDevice(Video);
 						IMInterface::getInstance()->endDevice(AudioDevice);
@@ -1510,12 +1509,14 @@ void UIWindowSet::QueryNotice()
 	{
 		if (m_curTags->Is1v1Lesson())
 		{
-			strUrl = "https://qatime.cn/api/v1/live_studio/interactive_courses/{id}/realtime";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
 			strUrl.replace("{id}", strCourseID);
 		}
 		else
 		{
-			strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/courses/{id}/realtime";
 			strUrl.replace("{id}", strCourseID);
 		}
 	}
@@ -1523,12 +1524,14 @@ void UIWindowSet::QueryNotice()
 	{
 		if (m_curTags->Is1v1Lesson())
 		{
-			strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_courses/{id}/realtime";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
 			strUrl.replace("{id}", strCourseID);
 		}
 		else
 		{
-			strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/realtime";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/courses/{id}/realtime";
 			strUrl.replace("{id}", strCourseID);
 		}
 	}
@@ -1627,12 +1630,14 @@ void UIWindowSet::QueryCourse()
 	{
 		if (m_curTags->Is1v1Lesson())
 		{
-			strUrl = "http://qatime.cn/api/v1/live_studio/interactive_courses/{id}";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/interactive_courses/{id}";
 			strUrl.replace("{id}", strCourseID);
 		}
 		else
 		{
-			strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
 			strUrl.replace("{id}", strCourseID);
 			strUrl.replace("{teacherid}", m_teacherID);
 		}
@@ -1641,12 +1646,14 @@ void UIWindowSet::QueryCourse()
 	{
 		if (m_curTags->Is1v1Lesson())
 		{
-			strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_courses/{id}";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/interactive_courses/{id}";
 			strUrl.replace("{id}", strCourseID);
 		}
 		else
 		{
-			strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
 			strUrl.replace("{id}", strCourseID);
 			strUrl.replace("{teacherid}", m_teacherID);
 		}
@@ -1751,12 +1758,14 @@ void UIWindowSet::QueryLesson()
 	{
 		if (m_curTags->Is1v1Lesson())
 		{
-			strUrl = "http://qatime.cn/api/v1/live_studio/interactive_courses/{id}";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/interactive_courses/{id}";
 			strUrl.replace("{id}", strCourseID);
 		}
 		else
 		{
-			strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
 			strUrl.replace("{id}", strCourseID);
 			strUrl.replace("{teacherid}", m_teacherID);
 		}
@@ -1765,12 +1774,14 @@ void UIWindowSet::QueryLesson()
 	{
 		if (m_curTags->Is1v1Lesson())
 		{
-			strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_courses/{id}";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/interactive_courses/{id}";
 			strUrl.replace("{id}", strCourseID);
 		}
 		else
 		{
-			strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
+			strUrl += m_homePage;
+			strUrl += "/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
 			strUrl.replace("{id}", strCourseID);
 			strUrl.replace("{teacherid}", m_teacherID);
 		}
@@ -2856,12 +2867,14 @@ void UIWindowSet::RecordLive()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/interactive_courses/{id}/detail";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_courses/{id}/detail";
 		strUrl.replace("{id}", strCourseID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/interactive_courses/{id}/detail";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_courses/{id}/detail";
 		strUrl.replace("{id}", strCourseID);
 	}
 
@@ -2968,12 +2981,14 @@ void UIWindowSet::ShowLesson()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/teachers/{teacher_id}/schedule";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/teachers/{teacher_id}/schedule";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 
@@ -3033,12 +3048,14 @@ void UIWindowSet::QueryOnlinePersonNum()
 	QString strUrl;
 	if (m_EnvironmentalTyle)
 	{
-		strUrl = "https://qatime.cn/api/v1/live_studio/courses/{id}/status";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/courses/{id}/status";
 		strUrl.replace("{id}", strCourseID);
 	}
 	else
 	{
-		strUrl = "http://testing.qatime.cn/api/v1/live_studio/courses/{id}/status";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/courses/{id}/status";
 		strUrl.replace("{id}", strCourseID);
 	}
 

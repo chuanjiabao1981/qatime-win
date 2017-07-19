@@ -118,6 +118,7 @@ public:
 	int								m_UnreadCount;		// 消息未读数
 	bool							m_bPerson;			// 是否请求完成员
 	bool							m_EnvironmentalTyle;// 环境变量
+	QString							m_homePage;
 	bool							m_b1v1Lesson;
 	void initEmotion();
 public:
@@ -262,10 +263,11 @@ public slots:
 	void		RequestMember();												//请求成员
 	void		returnAllMember();												//返回成员
 	void		Request1v1Member();												//请求1v1成员
-	void		SetEnvironmental(bool EnvironmentalTyle);						//设置当前环境
+	void		SetEnvironmental(bool EnvironmentalTyle, QString homePage);			//设置当前环境
 	QString		parse(QString str);
 	void        slot_eidtClear();
 	void		AudioBarTimer();												// 改变窗口后，语音条的显示位置
+	bool		MathTime(QDateTime date);										// 计算时间
 public:
 	void		SendFullScreen(bool bType);										// false:关闭1对1屏幕共享 true;开启1对1屏幕共享
 private:
