@@ -183,13 +183,13 @@ void LiveStatusManager::HeartBeatTimer()
 	if (m_EnvironmentalTyle)
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -297,13 +297,13 @@ void LiveStatusManager::SendStartLiveHttpMsg(int iBoard, int iCamera, QString sL
 	if (m_EnvironmentalTyle)
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_start";
+		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/live_start";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_start";
+		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/live_start";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -379,13 +379,13 @@ void LiveStatusManager::SendStopLiveHttpMsg(bool bConnect)
 	if (m_EnvironmentalTyle)
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_end";
+		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/live_end";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_end";
+		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/live_end";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -465,13 +465,13 @@ void LiveStatusManager::SendCameraSwitchMsg(int iBoard, int iCamera)
 	if (m_EnvironmentalTyle)
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_switch";
+		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/live_switch";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/lessons/{lessons_id}/live_switch";
+		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/live_switch";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -673,13 +673,13 @@ void LiveStatusManager::HeartBeat1v1Timer()
 	if (m_EnvironmentalTyle)
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -747,13 +747,13 @@ void LiveStatusManager::HeartBeatFailTimer1v1()
 	if (m_EnvironmentalTyle)
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
+		strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
@@ -785,12 +785,13 @@ void LiveStatusManager::SendStopLiveHttpMsg1v1(bool bConnect)
 	if (m_EnvironmentalTyle)
 	{
 		strUrl += m_homePage;
-		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_end";
+		strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_end";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
 	{
-		strUrl = "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_end";
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_end";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
