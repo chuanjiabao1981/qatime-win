@@ -3225,6 +3225,20 @@ void UIWindowSet::StopAudioAutoPlay()
 	nim_audio::Audio::StopPlayAudio();
 }
 
+//用于判断当前显示图像比率是否正常，如果不正常返回false  add by zbc 2170719
+//判断原理：原视频比率与载入后的视频比率 的倍率关系大于2，则判断异常
+bool RateError(double tWidth, double tHeigth, int tOriginalWidth, int tOriginalHeigth)
+{
+	double mCurrentRate, mOriginalRate = 0;
+	mCurrentRate = tWidth / tHeigth;
+	mOriginalRate = tOriginalWidth / tOriginalHeigth;
+	if (((mOriginalRate / mCurrentRate)>= 2) || ((mOriginalRate / mCurrentRate)>=2))
+	{
+		return false;
+	}
+	return true;
+}
+
 //计算1对1屏幕分享后，窗口的大小
 void UIWindowSet::Math1v1Screen()
 {
@@ -3234,11 +3248,53 @@ void UIWindowSet::Math1v1Screen()
 	// 窗口抓取
 	int iScreenWidth = iWidth;
 	int iScreenHeight = ((double)iWidth / (double)m_VideoInfo1v1->ScreenWidth())*m_VideoInfo1v1->ScreenHeight();
+
 	if (iScreenHeight > iHeight)
 	{
 		iScreenWidth = ((double)iHeight / (double)m_VideoInfo1v1->ScreenHeight())*m_VideoInfo1v1->ScreenWidth();
-		m_VideoInfo1v1->setFixedSize(iScreenWidth, iHeight);
+		if (RateError(iScreenWidth, iHeight, m_VideoInfo1v1->ScreenWidth(), m_VideoInfo1v1->ScreenHeight()) == true)
+		{
+			m_VideoInfo1v1->setFixedSize(iScreenWidth, iHeight);
+		}
+		else
+		{
+			//判断转换后是宽还是高异常
+			//计算逻辑：若出现窄条显现，说明只有宽和高之一不正常，然后以正常的为准，进而求得正常的另一部分
+			if (iScreenWidth > iHeight)
+			{
+				iHeight = (iScreenWidth * m_VideoInfo1v1->ScreenHeight()) / m_VideoInfo1v1->ScreenWidth();
+			}
+			else
+			if (iScreenWidth < iHeight)
+			{
+				iScreenWidth = (m_VideoInfo1v1->ScreenWidth() * iHeight) / m_VideoInfo1v1->ScreenHeight();
+			}
+			m_VideoInfo1v1->setFixedSize(iScreenWidth, iHeight);
+		}
 	}
 	else
-		m_VideoInfo1v1->setFixedSize(iScreenWidth, iScreenHeight);
+	{
+		if (RateError(iScreenWidth, iHeight, m_VideoInfo1v1->ScreenWidth(), m_VideoInfo1v1->ScreenHeight()) == true)
+		{
+			m_VideoInfo1v1->setFixedSize(iScreenWidth, iScreenHeight);
+		}
+		else
+		{
+			//判断转换后是宽还是高异常
+			//计算逻辑：若出现窄条显现，说明只有宽和高之一不正常，然后以正常的为准，进而求得正常的另一部分
+			if (iScreenWidth > iHeight)
+			{
+				iHeight = (iScreenWidth * m_VideoInfo1v1->ScreenHeight()) / m_VideoInfo1v1->ScreenWidth();
+			}
+			else
+			if (iScreenWidth < iHeight)
+			{
+				iScreenWidth = (m_VideoInfo1v1->ScreenWidth() * iHeight) / m_VideoInfo1v1->ScreenHeight();
+			}
+			m_VideoInfo1v1->setFixedSize(iScreenWidth, iScreenHeight);
+		}
+	}
+		
+	
 }
+
