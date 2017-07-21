@@ -133,6 +133,14 @@ void UIBulletScreen::slot_onCountTimeout()
 {
 	if (!isVisible())
 		return;
+	//保持窗体无限置顶
+	if ((HWND)winId() != GetForegroundWindow())
+	{
+		RECT rect;
+		GetWindowRect((HWND)winId(), &rect);//获得窗口位置 
+		SetWindowPos((HWND)winId(), HWND_TOPMOST, rect.left, rect.top, 0, 0, SWP_NOSIZE || SWP_NOMOVE || SWP_NOACTIVATE);
+	}
+	
 	
 	QRect rc = this->geometry();
 	if (rc.contains(QCursor::pos()))
