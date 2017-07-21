@@ -18,6 +18,7 @@
 extern int		m_AutoAudioState;
 extern bool		m_IsAudioPlaying;
 
+
 #define MAINWINDOW_X_MARGIN 10
 #define MAINWINDOW_Y_MARGIN 10
 #define MAINWINDOW_TITLE_HEIGHT 0
@@ -160,6 +161,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	m_BulletScreen->setMainWindow(this);
 	m_BulletScreen->hide();
 	SetWindowPos((HWND)m_BulletScreen->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
 
 	ui.live1v1_widget->setVisible(false);
 	ChangeBtnStyle(false);
