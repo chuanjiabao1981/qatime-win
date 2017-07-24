@@ -105,19 +105,9 @@ void UIMainNewWindow::setAutoTeacherInfo(QString studentID, QString studentName,
 void UIMainNewWindow::ShowLesson()
 {
 	QString strUrl;
-	if (m_EnvironmentalTyle)
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
-		strUrl.replace("{teacher_id}", m_teacherID);
-	}
-	else
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
-		strUrl.replace("{teacher_id}", m_teacherID);
-	}
-
+	strUrl += m_homePage;
+	strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
+	strUrl.replace("{teacher_id}", m_teacherID);
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
 	QString str = this->mRemeberToken;
@@ -284,6 +274,61 @@ void UIMainNewWindow::Return1v1AuxiliaryRequestFinished()
 	{
 		if (m_AuxiliaryWnd)
 			m_AuxiliaryWnd->AddTodayNoLesson(UIAuxiliaryWnd::EN_1V1_LESSON);
+	}
+}
+
+void UIMainNewWindow::ShowExclusive()
+{
+	QString strUrl;
+	strUrl += m_homePage;
+	strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
+	strUrl.replace("{teacher_id}", m_teacherID);
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+	QString str = this->mRemeberToken;
+
+	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIMainNewWindow::ReturnExclusiveRequestFinished);
+}
+
+void UIMainNewWindow::ReturnExclusiveRequestFinished()
+{
+	int iCount = 0;
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonArray courses = obj["data"].toArray();
+	foreach(const QJsonValue & value, courses)
+	{
+		QJsonObject obj = value.toObject();
+		QJsonArray lessons = obj["lessons"].toArray();
+		foreach(const QJsonValue & value, lessons)
+		{
+			Lesson *lesson = new Lesson();
+			lesson->readJson(value.toObject());
+
+			QString curTime = QDateTime::currentDateTime().toString("yyyy-MM-dd");
+			//		curTime = "2017-03-01";
+			if (lesson->Date() == curTime)
+			{
+				if (m_AuxiliaryWnd)
+					m_AuxiliaryWnd->AddExclusive(lesson->name(), lesson->CourseID(), lesson->CourseName(), lesson->LessonTime(), lesson->ChinaLessonStatus(), lesson->LessonID());
+
+				if (m_WindowSet)
+					m_WindowSet->AddTodayToLesson(lesson->LessonID(), lesson->CourseID(), lesson->BoardUrl(), lesson->CameraUrl(), lesson->LessonTime(), lesson->ChinaLessonStatus(), lesson->name());
+
+				iCount++;
+			}
+
+			delete lesson;
+		}
+	}
+
+	if (iCount == 0)
+	{
+		if (m_AuxiliaryWnd)
+			m_AuxiliaryWnd->AddTodayNoLesson(UIAuxiliaryWnd::EN_TODAY_LESSON);
 	}
 }
 

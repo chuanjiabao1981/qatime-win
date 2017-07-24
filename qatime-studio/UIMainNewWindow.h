@@ -98,6 +98,9 @@ public:
 	void	AuxiliaryRequestFinished();						// 返回全部课程
 	void    Show1v1Auxiliary();								// 1v1课程
 	void    Return1v1AuxiliaryRequestFinished();			// 返回1v1课程
+	void	ShowExclusive();								// 专属课程
+	void	ReturnExclusiveRequestFinished();				// 返回专属课程列表
+
 	void    CloseDialog();									// 关闭窗口
 	bool	IsMayClose();									// 是否可以关闭窗口
 	void    ShowCourse();									// 显示辅导班
