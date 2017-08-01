@@ -129,6 +129,48 @@ bool UIBulletScreen::eventFilter(QObject *target, QEvent *event)
 	return QWidget::eventFilter(target, event);
 }
 
+
+bool IsCoveredByOtherWindow(HWND hWnd)
+{
+	RECT rcTarget;
+	GetWindowRect(hWnd, &rcTarget);
+
+	bool isChild = (WS_CHILD == (GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD));
+
+	do
+	{
+		HWND hCurWnd = hWnd;
+
+		while (NULL != (hWnd = GetNextWindow(hWnd, GW_HWNDPREV)))
+		{
+			if (IsWindowVisible(hWnd))
+			{
+				RECT rcWnd;
+				GetWindowRect(hWnd, &rcWnd);
+
+				if (!((rcWnd.right < rcTarget.left) || (rcWnd.left > rcTarget.right) ||
+					(rcWnd.bottom < rcTarget.top) || (rcWnd.top > rcTarget.bottom)))
+				{
+					return true;
+				}
+			}
+		}
+
+		if (isChild)
+		{
+			hWnd = GetParent(hCurWnd);
+			isChild = hWnd ? (WS_CHILD == (GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD)) : false;
+		}
+		else
+		{
+			break;
+		}
+
+	} while (true);
+
+	return false;
+}
+
 void UIBulletScreen::slot_onCountTimeout()
 {
 	if (!isVisible())
@@ -136,12 +178,14 @@ void UIBulletScreen::slot_onCountTimeout()
 	//保持窗体无限置顶
 	if ((HWND)winId() != GetForegroundWindow())
 	{
-		RECT rect;
-		GetWindowRect((HWND)winId(), &rect);//获得窗口位置 
-		SetWindowPos((HWND)winId(), HWND_TOPMOST, rect.left, rect.top, 0, 0, SWP_NOSIZE || SWP_NOMOVE || SWP_NOACTIVATE);
+		if (IsCoveredByOtherWindow((HWND)winId()))
+		{
+			RECT rect;
+			GetWindowRect((HWND)winId(), &rect);//获得窗口位置 
+			SetWindowPos((HWND)winId(), HWND_TOPMOST, rect.left, rect.top, 0, 0, SWP_NOSIZE || SWP_NOMOVE || SWP_NOACTIVATE);
+		}
+		
 	}
-	
-	
 	QRect rc = this->geometry();
 	if (rc.contains(QCursor::pos()))
 	{

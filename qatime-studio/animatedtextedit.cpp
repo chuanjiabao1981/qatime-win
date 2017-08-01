@@ -56,6 +56,7 @@ void AnimatedTextEdit::mousePressEvent(QMouseEvent *e)
 	{		
 		emit colseBrow();
 	}
+	QTextEdit::mousePressEvent(e);
 }
 
 

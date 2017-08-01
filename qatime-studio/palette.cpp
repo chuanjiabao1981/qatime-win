@@ -528,6 +528,7 @@ void Palette::SendShiftMsg(bool bBoard)
 {
 	CreateShiftMsg(bBoard);
 	emit PicData(m_strMsg, QString::fromStdString(m_SenderUid));
+	qDebug() << __FILE__ << __LINE__ << m_strMsg; //add by zbc 20170728
 	m_timer->stop();
 	m_timer->start(2000);
 }

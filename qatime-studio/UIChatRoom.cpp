@@ -145,6 +145,9 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	connect(m_defDateTimeEdit, SIGNAL(sig_CalendarClick(QDate)), this, SLOT(slot_CalendarClick(QDate)));
 
 	ui.textEdit->setWordWrapMode(QTextOption::WrapAnywhere);
+	
+	//去掉鼠标右键的粘贴菜单
+	ui.textEdit->setContextMenuPolicy(Qt::NoContextMenu);
 
 	m_AutoAudioState = 0;		//默认自动播放语音状态为0，不自动播放
 	m_IsAudioPlaying = false;	//默认状态下语音没有自动播放的
@@ -2141,18 +2144,9 @@ void UIChatRoom::OnStopPlayAudio(char* msgid)
 void UIChatRoom::Request1v1Member()
 {
 	QString strUrl;
-	if (m_EnvironmentalTyle)
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
-		strUrl.replace("{id}", m_CurCourseID);
-	}
-	else
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
-		strUrl.replace("{id}", m_CurCourseID);
-	}
+	strUrl += m_homePage;
+	strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
+	strUrl.replace("{id}", m_CurCourseID);
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -2680,6 +2674,7 @@ void UIChatRoom::slot_AutoPlayAudio()
 		m_AutoAudioState = 0;
 		return;
 	}
+	qDebug() << "AutoAudioState is " << m_AutoAudioState;
 
 }
 
