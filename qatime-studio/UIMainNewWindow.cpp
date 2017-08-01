@@ -105,19 +105,9 @@ void UIMainNewWindow::setAutoTeacherInfo(QString studentID, QString studentName,
 void UIMainNewWindow::ShowLesson()
 {
 	QString strUrl;
-	if (m_EnvironmentalTyle)
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
-		strUrl.replace("{teacher_id}", m_teacherID);
-	}
-	else
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
-		strUrl.replace("{teacher_id}", m_teacherID);
-	}
-
+	strUrl += m_homePage;
+	strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
+	strUrl.replace("{teacher_id}", m_teacherID);
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
 	QString str = this->mRemeberToken;
@@ -131,6 +121,12 @@ void UIMainNewWindow::LessonRequestFinished()
 {
 	int iCount = 0;
 	QByteArray result = reply->readAll();
+	//添加网络错误判断
+	if (QJsonDocument::fromJson(result).object()["status"] == 0)
+	{
+		RequestError(QJsonDocument::fromJson(result).object()["error"].toObject());
+		return;
+	}
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonArray courses = obj["data"].toArray();
@@ -169,6 +165,39 @@ void UIMainNewWindow::LessonRequestFinished()
 	ShowAuxiliary();
 }
 
+void UIMainNewWindow::RequestError(QJsonObject &error)
+{
+	QString strError;
+	int mErrorCode = 0;
+	mErrorCode = error["code"].toInt();
+	if (mErrorCode == 1002)
+	{
+		strError = QString("授权过期,请重新登录！");
+	}
+	else if (mErrorCode == 1003)
+		strError = QString("没有权限访问！");
+	else if (mErrorCode == 1004)
+		strError = QString("授权失败,请重新登录！");
+	else if (mErrorCode == 3001)
+		strError = QString("参数错误,请重新登录！");
+	else if (mErrorCode == 3002)
+		strError = QString("数据不合法,请重新登录！");
+	else if (mErrorCode == 4001)
+		strError = QString("找不到资源,请重新登录！");
+	else if (mErrorCode == 9999)
+		strError = QString("服务器错误,请重新登录！");
+	else
+		strError = QString("未知错误！");
+
+
+	int iStatus = CMessageBox::showMessage(
+		QString("答疑时间"),
+		QString(strError),
+		QString("确定"),
+		QString());
+}
+
+
 void UIMainNewWindow::ShowAuxiliary()
 {
 	QString strUrl;
@@ -202,6 +231,12 @@ void UIMainNewWindow::AuxiliaryRequestFinished()
 {
 	int iCount = 0;
 	QByteArray result = reply->readAll();
+	//添加网络错误判断
+	if (QJsonDocument::fromJson(result).object()["status"] == 0)
+	{
+		RequestError(QJsonDocument::fromJson(result).object()["error"].toObject());
+		return;
+	}
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonArray courses = obj["data"].toArray();
@@ -260,6 +295,12 @@ void UIMainNewWindow::Return1v1AuxiliaryRequestFinished()
 {
 	int iCount = 0;
 	QByteArray result = reply->readAll();
+	//添加网络错误判断
+	if (QJsonDocument::fromJson(result).object()["status"] == 0)
+	{
+		RequestError(QJsonDocument::fromJson(result).object()["error"].toObject());
+		return;
+	}
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonArray courses = obj["data"].toArray();
@@ -402,8 +443,16 @@ void UIMainNewWindow::setVersion(QString version)
 }
 void UIMainNewWindow::returnClick()
 {
+	//结束线程
+	if (m_AuxiliaryWnd)
+	{
+		emit m_AuxiliaryWnd->sig_Close();
+	}
 	if (m_LoginWindow)
+	{
 		m_LoginWindow->ReturnLogin();
+	}
+		
 }
 
 bool UIMainNewWindow::IsMayClose()
@@ -593,6 +642,15 @@ bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, lo
 			nim::SendMessageArc* arcNew = (nim::SendMessageArc*)pMsg->wParam;
 			if (arcNew)
 			{
+				if(arcNew->rescode_ != 200)
+				{
+					qDebug() << __FILE__ << __LINE__ << "会话ID" << QString::fromStdString(arcNew->talk_id_) << "消息ID" << QString::fromStdString(arcNew->msg_id_)
+						<< "错误码" << arcNew->rescode_ << "消息时间戳" << arcNew->msg_timetag_;
+
+					QString error = "发送消息失败！错误代码：" + QString::number(arcNew->rescode_);
+
+					CMessageBox::showMessage(QString("答疑时间"), error, QString("确定"), QString());
+				}
 				if (m_WindowSet)
 					m_WindowSet->SendStatus(arcNew);
 

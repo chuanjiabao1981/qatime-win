@@ -2028,10 +2028,17 @@ void UIWindowSet::ErrorStopLive(QWidget* pWidget)
 void UIWindowSet::ErrorStop()
 {
 	if (m_CameraInfo)
+	{
 		m_CameraInfo->StopLiveVideo();
-
+		m_CameraInfo->StopCaptureVideo();
+	}
+		
 	if (m_VideoInfo)
+	{
 		m_VideoInfo->StopLiveVideo();
+		m_VideoInfo->StopCaptureVideo();
+	}
+		
 }
 
 bool UIWindowSet::IsHasCamera()

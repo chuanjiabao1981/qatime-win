@@ -174,7 +174,8 @@ void LoginWindow::loginFinished()
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
 	QJsonObject error = obj["error"].toObject();
-
+	int mErrorCode = 0;
+	mErrorCode = error["code"].toInt();
 	// 记住老师信息，用于自动登录
 	if (obj["status"].toInt() == 1 && data.contains("remember_token"))
 	{
@@ -200,25 +201,25 @@ void LoginWindow::loginFinished()
 		mainWin->show();
 		this->hide();
 	}
-	else if (error["code"].toInt() == 1001)
+	else if (mErrorCode == 1001)
 		strError = QString("用户未登录");
-	else if (error["code"].toInt() == 1002)
+	else if (mErrorCode == 1002)
 		strError = QString("授权过期");
-	else if (error["code"].toInt() == 1003)
+	else if (mErrorCode == 1003)
 		strError = QString("没有权限访问");
-	else if (error["code"].toInt() == 1004)
+	else if (mErrorCode == 1004)
 		strError = QString("授权失败");
-	else if (error["code"].toInt() == 2001)
+	else if (mErrorCode == 2001)
 		strError = QString("客户端版本过低");
-	else if (error["code"].toInt() == 2002)
+	else if (mErrorCode == 2002)
 		strError = QString("不支持的客户端");
-	else if (error["code"].toInt() == 3001)
+	else if (mErrorCode == 3001)
 		strError = QString("参数错误");
-	else if (error["code"].toInt() == 3002)
+	else if (mErrorCode == 3002)
 		strError = QString("数据不合法");
-	else if (error["code"].toInt() == 4001)
+	else if (mErrorCode == 4001)
 		strError = QString("找不到资源");
-	else if (error["code"].toInt() == 9999)
+	else if (mErrorCode == 9999)
 		strError = QString("服务器错误");
 	else
 		strError = QString("用户名或密码不正确");

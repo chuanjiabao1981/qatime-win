@@ -115,6 +115,7 @@ public:
 	void    changeLessonStatus(QString id, QString status);
 	void	changeMsgNumber(QString chid);
 	void	LogOut();										// ÍË³öÔÆĞÅµÇÂ¼
+	void	RequestError(QJsonObject &error);				// ¼ì²âÍøÂç´íÎó
 
 signals:
 	void sig_QueryLesson();									// ²éÑ¯¿Î³Ì
