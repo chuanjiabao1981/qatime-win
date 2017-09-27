@@ -32,7 +32,7 @@ private:
 	_HNLSSERVICE					m_hNlssService;
 	static ST_NLSS_VIDEO_SAMPLER	m_SvideoSampler;
 	static  QMutex					m_mutex;
-	bool							m_bLiving;			// 直播
+	
 	bool							m_bPreviewing;		// 预览
 	QString							m_strUrl;			// 推流地址
 	bool							m_bInited;			// 初始化
@@ -46,6 +46,7 @@ private:
 	int								m_iCompareCount;	// 对比相等的计数
 
 public:
+	bool							m_bLiving;			// 直播
 	EN_NLSS_VIDEOIN_TYPE			m_videoSourceType;  // 视频源类型
 	EN_NLSS_AUDIOIN_TYPE			m_audioSourceType;	// 音频源类型
 	int								m_iVideoDeviceNum;	// 视频设备个数
@@ -120,6 +121,7 @@ public:
 	int  getOutBitrate(int iWidth, int iHeight, int iFps);
 	void setRatio(int iType);						    // 0：高清 1：超清
 	void InitFailParam();
+	void DeleteThread();								// 删除多线程
 };
 
 #endif // UIVideo_H

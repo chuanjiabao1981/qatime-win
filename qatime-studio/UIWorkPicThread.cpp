@@ -13,6 +13,8 @@
 #include <QNetworkRequest>
 #include <QEventLoop>
 #include <QPixmap>
+#include <windows.h>
+#include <QFile>
 
 WorkerPic::WorkerPic() {
 	workerThread.start();
@@ -23,7 +25,9 @@ WorkerPic::WorkerPic() {
 
 WorkerPic::~WorkerPic()
 {
-	
+	workerThread.requestInterruption();
+	workerThread.quit();
+	workerThread.wait();
 }
 void WorkerPic::SetUrl(QLabel* pic, QString url)
 {
@@ -31,44 +35,79 @@ void WorkerPic::SetUrl(QLabel* pic, QString url)
 	m_url = url;
 }
 
+
 void WorkerPic::slot_StartLoading()
 {
+	bool mIsPicExist = false;
 	for (int i = 0; i < m_mapUrl.size(); i++)
 	{
+
 		if (m_mapUrl.keys().at(i))
 		{
 			QLabel* pic = m_mapUrl.keys().at(i);
 			QString url_ = m_mapUrl.values().at(i);
 
-			QUrl url(url_);
-			QNetworkAccessManager manager;
-			QEventLoop loop;
-
-			QNetworkReply *reply = manager.get(QNetworkRequest(url));
-			//请求结束并下载完成后，退出子事件循环 
-			QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-			//开启子事件循环 
-			loop.exec();
-
-			if (m_bClose)
-				return;
-
-			QByteArray jpegData = reply->readAll();
-			QPixmap pixmap;
-			QPixmap scaledPixmap;
-			QSize pixSize(pic->width(), pic->height());
-			// 加载成功则显示
-			if (pixmap.loadFromData(jpegData))
+			if (!url_.isEmpty())
 			{
-				scaledPixmap = pixmap.scaled(pixSize, Qt::IgnoreAspectRatio);
+				// 获取图片本地路径
+				QStringList arr = url_.split("/");
+				QString urlName = arr.last();
+
+				QString picPath = "\\catch\\" + urlName;
+
+				TCHAR szTempPath[MAX_PATH] = { 0 };
+				GetCurrentDirectory(MAX_PATH, szTempPath);
+				lstrcat(szTempPath, (LPCTSTR)picPath.utf16());
+
+				QString path = QString::fromStdWString(szTempPath);
+				QFile file(path);
+				mIsPicExist = (file.exists() == true ? true : false);
+
+				// 如果存在，则直接显示
+				if (mIsPicExist)
+				{
+					QPixmap pixmap;
+					QPixmap scaledPixmap;
+					pixmap = QPixmap(path);
+
+					QSize pixSize(pic->width(), pic->height());
+					scaledPixmap = pixmap.scaled(pixSize, Qt::IgnoreAspectRatio);
+					pic->setPixmap(scaledPixmap);
+				}
+				else
+				{
+					QUrl url(url_);
+					QNetworkAccessManager manager;
+					QEventLoop loop;
+
+					QNetworkReply *reply = manager.get(QNetworkRequest(url));
+					//请求结束并下载完成后，退出子事件循环 
+					QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+					//开启子事件循环 
+					loop.exec();
+
+					if (m_bClose)
+						return;
+
+					QByteArray jpegData = reply->readAll();
+					QPixmap pixmap;
+					QPixmap scaledPixmap;
+					QSize pixSize(pic->width(), pic->height());
+					// 加载成功则显示
+					if (pixmap.loadFromData(jpegData))
+					{
+						scaledPixmap = pixmap.scaled(pixSize, Qt::IgnoreAspectRatio);
+						scaledPixmap.save(path);
+					}
+					else // 否则显示备用图片
+					{
+						QString sUrl = "./images/teacherPhoto.png";
+						pixmap = QPixmap(sUrl);
+						scaledPixmap = pixmap.scaled(pixSize, Qt::IgnoreAspectRatio);
+					}
+					pic->setPixmap(scaledPixmap);
+				}
 			}
-			else // 否则显示备用图片
-			{
-				QString sUrl = "./images/teacherPhoto.png";
-				pixmap = QPixmap(sUrl);
-				scaledPixmap = pixmap.scaled(pixSize, Qt::IgnoreAspectRatio);
-			}
-			pic->setPixmap(scaledPixmap);
 		}
 	}
 

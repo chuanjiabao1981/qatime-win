@@ -41,11 +41,11 @@
     <Filter Include="nim_audio_cpp">
       <UniqueIdentifier>{ea6272cf-9564-42f1-ad55-9171de1c6ac6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="nim_http_cpp">
-      <UniqueIdentifier>{3a4b0f07-334e-4965-bd6e-7131cee8d83c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Calendar">
       <UniqueIdentifier>{84251c84-5aa5-4de0-97e8-81e362a97ea7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\nim_http_cpp">
+      <UniqueIdentifier>{3a4b0f07-334e-4965-bd6e-7131cee8d83c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -593,7 +593,7 @@
       <Filter>nim_audio_cpp</Filter>
     </ClCompile>
     <ClCompile Include="nim_sdk\nim_tools_cpp_sdk\nim_http_cpp\nim_tools_http_cpp.cpp">
-      <Filter>nim_http_cpp</Filter>
+      <Filter>Header Files\nim_http_cpp</Filter>
     </ClCompile>
     <ClCompile Include="UICamera1v1.cpp">
       <Filter>Source Files</Filter>
@@ -764,6 +764,24 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AudioThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="ZWeb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ZWeb.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ZWeb.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="UIHomework.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_UIHomework.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_UIHomework.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1149,6 +1167,15 @@
     <CustomBuild Include="AudioThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="ZWeb.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIHomework.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="UIHomework.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_loginwindow.h">
@@ -1290,7 +1317,7 @@
       <Filter>nim_audio_cpp</Filter>
     </ClInclude>
     <ClInclude Include="nim_sdk\nim_tools_cpp_sdk\nim_http_cpp\nim_tools_http_cpp.h">
-      <Filter>nim_http_cpp</Filter>
+      <Filter>Header Files\nim_http_cpp</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UICamera1v1.h">
       <Filter>Generated Files</Filter>
@@ -1326,6 +1353,12 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIAudioBar.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ZPublicDefine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_UIHomework.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -14,6 +14,7 @@ public:
 	~UIAuxiliaryToday();
 
 	QString			m_courseID;		 // 辅导班ID
+	int				m_LessonType;	 // 辅导班类型
 	QString			GetCourseID();	 // 获取辅导班ID
 private:
 	Ui::UIAuxiliaryToday ui;

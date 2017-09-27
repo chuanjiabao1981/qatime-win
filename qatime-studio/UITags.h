@@ -24,7 +24,7 @@ private:
 	QString				m_boardStream;		// 白板直播流地址
 	QString				m_cameraStream;		// 摄像头直播流地址
 	bool				m_bModle;			// 当前窗口模式
-	bool				m_b1v1Lesson;		// 当前窗口课程类型
+	int					m_mLessonType;		// 当前窗口课程类型
 	QString				m_boardUrl;
 	QString				m_cameraUrl;
 protected:
@@ -52,8 +52,8 @@ public:
 	void setCameraStream(QString strCamera);
 	void setModle(bool bModle);		// 设置模式 true为直播状态 false为聊天状态，默认都为聊天状态
 	bool IsModle();
-	void set1v1Lesson(bool b1v1Lesson);
-	bool Is1v1Lesson();
+	void setLessonType(int mLessonType);
+	int GetLessonType();
 };
 
 #endif // UITAGS_H

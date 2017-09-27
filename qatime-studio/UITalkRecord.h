@@ -56,6 +56,7 @@ private:
 	bool isDigitStr(QString str);
 	void style(QScrollArea *style);
 public:
+	void InsertHomeworkInfo(QPixmap *mHeadPic, QString mName, QString mContent, QString mType, QString mTime, QString mURL, bool bTeacher);	// 插入作业类相关信息
 	void InsertChat(QPixmap* head, QString name, QString time, QString text, bool bTeacher=true);  // bTeacher 区分名字颜色
 	void InsertAudioChat(QPixmap* pixmap, QString name, QString time, QString text, std::string path, std::string sid, std::string msgid, bool bTeacher); // 插入语音
 	void InsertNotice(QString text);												// 消息通知

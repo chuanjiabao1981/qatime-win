@@ -32,6 +32,8 @@ public:
 	void DeleteLesson();
 	void style(QScrollArea *style);
 	void setParentBtn(UIWindowSet* parent);
+	void AddLessonTitle(QString mLessonTitle);	// 添加课程类型标题
+	void DeleteLessonTitle();					// 删除课程类型标题
 };
 
 #endif // UILESSONLIST_H

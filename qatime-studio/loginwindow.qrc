@@ -86,5 +86,12 @@
     <file>images/appClose_nor.png</file>
     <file>images/appShift_hor.png</file>
     <file>images/appShift_nor.png</file>
+    <file>images/Exclusive_hover.png</file>
+    <file>images/Exclusive_nor.png</file>
+    <file>images/male.png</file>
+    <file>images/woman.png</file>
+    <file>images/Homework.png</file>
+    <file>images/Question.png</file>
+    <file>images/Courseware.png</file>
   </qresource>
 </RCC>

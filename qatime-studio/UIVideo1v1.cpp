@@ -108,6 +108,7 @@ UIVideo1v1::~UIVideo1v1()
 	}
 }
 
+// 通过timer时间控制传输帧率，目前是200ms发送一张图，相当于每秒发送5张图，也就是帧率为5
 void UIVideo1v1::slot_onCapturnTimeout()
 {
 	CustomFrame();

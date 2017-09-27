@@ -6,6 +6,8 @@
 #include <QTime>
 #include <QScrollBar>
 #include "windows.h"
+#include "UIMessageBox.h"
+#include "UIHomework.h"
 
 
 //自动播放语音，全局状态标识
@@ -169,8 +171,76 @@ void UITalk::InsertChat(QPixmap* pixmap, QString name, QString time, QString tex
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-//	m_timerDelay->start(TIME_DELAY);
-// 	ScrollDown();
+}
+
+void UITalk::InsertHomeworkInfo(QPixmap *mHeadPic, QString mName, QString mContent, QString mType, QString mTime, QString mURL, bool bTeacher)
+{
+	InsertSpacer();
+	if (!mHeadPic)
+	{
+		mHeadPic = &QPixmap("./images/teacherPhoto.png");
+	}
+	// 第一行（头像、名字、时间）
+	QHBoxLayout* FirstRow = new QHBoxLayout();
+	FirstRow->setObjectName("firstRow");
+	QFont font;
+	font.setPointSize(10);
+	font.setFamily(("微软雅黑"));
+	CBtnPix* head = new CBtnPix(*mHeadPic, this);
+	head->setFixedSize(24, 24);
+
+	QFont font1;
+	font1.setPointSize(9);
+	font1.setFamily(("微软雅黑"));
+
+	QLabel* LName = new QLabel();
+	if (mName.count() > 7)
+		mName = mName.mid(0, 7);
+	LName->setText(mName);
+	LName->setFont(font);
+	if (bTeacher)
+		LName->setStyleSheet("color: rgb(190, 11, 11);"); //老师名字颜色
+	else
+		LName->setStyleSheet("color: rgb(135, 195, 237);"); //学生名字颜色
+	LName->setFixedWidth(LName->fontMetrics().width(mName));
+
+	QLabel* LTime = new QLabel();
+	LTime->setStyleSheet("color: rgb(153, 153, 153);");
+	LTime->setText(mTime);
+	LTime->setFont(font1);
+	FirstRow->addWidget(head);
+	FirstRow->addWidget(LName);
+	FirstRow->addWidget(LTime);
+	
+
+	// 第二行（聊天内容）
+	QHBoxLayout* SecRow = new QHBoxLayout();
+	SecRow->setContentsMargins(30, 0, 0, 0);
+	
+	QWidget *mHomeWidget = new QWidget;
+	UIHomework *mHomeworkObject = new UIHomework(mHomeWidget);
+	//mHomeworkObject->show();
+	mHomeworkObject->ShowPage(mContent, mType, mURL);
+	mHomeWidget->setMinimumHeight(68);
+	
+
+	SecRow->addWidget(mHomeWidget);
+	m_Ver->addLayout(FirstRow);
+	m_Ver->addLayout(SecRow);
+	
+	// 添加到布局里
+	if (m_spacer == NULL)
+	{
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_Ver->addSpacerItem(m_spacer);
+	}
+	else
+	{
+		m_Ver->removeItem(m_spacer);
+		m_spacer = NULL;
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_Ver->addSpacerItem(m_spacer);
+	}
 }
 
 // 插入语音聊天信息
@@ -291,12 +361,32 @@ void UITalk::InsertAudioChatNew(QPixmap* pixmap, QString name, QString time, QSt
 
 void UITalk::slot_AudioLoadEnd(QPixmap* pixmap, QString name, QString time, QString text, std::string path, std::string sid, std::string msgid, bool bTeacher, bool bRead, CBtnAudio* pAudio)
 {
-	if (pAudio)
+	try
 	{
-		delete pAudio;
-		pAudio = NULL;
+		if (pAudio)
+		{
+			delete pAudio;
+			pAudio = NULL;
+		}
 	}
-	InsertAudioChat(pixmap, name, time, text, path, sid, msgid, bTeacher, bRead);
+	catch (...)
+	{
+		qDebug() << __FILE__ << __LINE__ << "当前删除语音失败！";
+	}
+
+	try
+	{
+		InsertAudioChat(pixmap, name, time, text, path, sid, msgid, bTeacher, bRead);
+	}
+	catch (...)
+	{
+		qDebug() << __FILE__ << __LINE__ << "name" << name << "time" << time << "text" << text << "path" << QString::fromStdString(path) << "sid" << QString::fromStdString(sid)
+			<< "msgid" << QString::fromStdString(msgid) << "bTeacher" << bTeacher << "bRead" << bRead;
+		QString error = "接收消息失败，请重新进入房间！";
+		CMessageBox::showMessage(QString("答疑时间"), error, QString("确定"), QString());
+		return;
+	}
+	
 }
 
 // 插入通知消息等
@@ -928,6 +1018,51 @@ void UITalk::AutoPlayAudio()
 		}
 	}
 }
+
+
+
+// 插入格式化通知消息等
+void UITalk::InsertOneNotice(QString mText)
+{
+	InsertSpacer();
+
+	QFont font;
+	font.setPixelSize(12);
+	font.setFamily(("微软雅黑"));
+
+	// 第一行（消息）
+	QVBoxLayout* ver = new QVBoxLayout();
+	ver->setSpacing(0);
+
+	QVBoxLayout* FirstRow = new QVBoxLayout();
+	FirstRow->setContentsMargins(30, 0, 30, 0);
+	QLabel* LName = new QLabel();
+	LName->setText(mText);
+	LName->setFont(font);
+	LName->setStyleSheet("color: rgb(153,153,153);border-radius:5px;border-image:url(./images/notice_back.png);"); //字体颜色 
+	LName->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	LName->setWordWrap(true);
+	FirstRow->addWidget(LName);
+
+
+	m_Ver->addLayout(FirstRow);
+	m_Ver->addLayout(ver);
+
+	// 添加到布局里
+	if (m_spacer == NULL)
+	{
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_Ver->addSpacerItem(m_spacer);
+	}
+	else
+	{
+		m_Ver->removeItem(m_spacer);
+		m_spacer = NULL;
+		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_Ver->addSpacerItem(m_spacer);
+	}
+}
+
 
 // 插入格式化通知消息等
 void UITalk::InsertNewNotice(QString name, QString text)

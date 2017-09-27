@@ -25,47 +25,51 @@ public:
 	LiveStatusManager(QObject *parent);
 	~LiveStatusManager();
 
+
+	QString					m_ChannelID;			//回放视频的ChannelID
 private:
 	QUrl url;
 	QNetworkAccessManager	manager;
 	QNetworkReply*			reply;
 	UIMainWindow*			m_parent;
 	UIWindowSet*			m_newParent;
-	QString					m_sToken;				//token
-	QString					m_sLiveToken;			//心跳token
-	QString					m_lessonID;				//课程ID
-	QString					m_Time;					//直播心跳失败调用的时间戳
+	QString					m_sToken;				// token
+	QString					m_sLiveToken;			// 心跳token
+	QString					m_lessonID;				// 课程ID
+	QString					m_Time;					// 直播心跳失败调用的时间戳
+	
 
-	int						m_iGetRtmpCount;		//获取推流地址失败重试次数
-	QTimer*					m_TGetRtmpTimer;		//获取推流地址失败重试
+	int						m_iGetRtmpCount;		// 获取推流地址失败重试次数
+	QTimer*					m_TGetRtmpTimer;		// 获取推流地址失败重试
 
-	int						m_iBeatStep;			//心跳间隔
-	int						m_iHeartCount;			//心跳失败重试次数
-	QTimer*					m_HeartTimer;			//心跳定时器
-	QTimer*					m_HeartFailTimer;		//心跳失败定时器
+	int						m_iBeatStep;			// 心跳间隔
+	int						m_iHeartCount;			// 心跳失败重试次数
+	QTimer*					m_HeartTimer;			// 心跳定时器
+	QTimer*					m_HeartFailTimer;		// 心跳失败定时器
 
-	int						m_iStopLiveCount;		//停止推流发送消息失败重试次数
-	QTimer*					m_StopFailTimer;		//停止推流失败定时器
+	int						m_iStopLiveCount;		// 停止推流发送消息失败重试次数
+	QTimer*					m_StopFailTimer;		// 停止推流失败定时器
 
-	QTimer*					m_SwitchFailTimer;		//切换状态失败定时器
-	int						m_iBoardStatus;			//白板直播状态
-	int						m_iCameraStatus;		//摄像头直播状态
-	bool					m_EnvironmentalTyle;	//当前环境
+	QTimer*					m_SwitchFailTimer;		// 切换状态失败定时器
+	int						m_iBoardStatus;			// 白板直播状态
+	int						m_iCameraStatus;		// 摄像头直播状态
+	bool					m_EnvironmentalTyle;	// 当前环境
 	QString					m_homePage;
 
 	// 互动
-	QTimer*					m_1v1HeartTimer;			//1v1心跳定时器
-	QTimer*					m_1v1HeartFailTimer;		//1v1心跳失败定时器
+	QTimer*					m_1v1HeartTimer;		// 1v1心跳定时器
+	QTimer*					m_1v1HeartFailTimer;	// 1v1心跳失败定时器
+	int						m_mLessonType;			// 辅导班类型
 private slots :
-	void GetRtmpFailTimer();						//获取推流地址失败重试定时器信号槽
-	void HeartBeatTimer();							//心跳定时器信号槽
-	void HeartBeatFailTimer();						//心跳失败信号槽
-	void StopLiveFailTimer();						//停止推流失败信号槽
-	void SwitchFailTimer();							//切换状态失败信号槽
+	void GetRtmpFailTimer();						// 获取推流地址失败重试定时器信号槽
+	void HeartBeatTimer();							// 心跳定时器信号槽
+	void HeartBeatFailTimer();						// 心跳失败信号槽
+	void StopLiveFailTimer();						// 停止推流失败信号槽
+	void SwitchFailTimer();							// 切换状态失败信号槽
 
 	//互动直播
-	void HeartBeat1v1Timer();							//1v1心跳定时器信号槽
-	void HeartBeatFailTimer1v1();						//心跳失败信号槽
+	void HeartBeat1v1Timer();						// 1v1心跳定时器信号槽
+	void HeartBeatFailTimer1v1();					// 心跳失败信号槽
 private:
 	void ReturnRtmpAddressAndHeartBeat();			// 返回白板、摄像头、推流地址 及 心跳间隔
 	void ReturnHeartBeat();							// 返回心跳
@@ -81,7 +85,7 @@ public:
 	void setMainWindow(UIWindowSet* parent);									// 设置父窗口
 	void GetRtmpAddressAndHeartBeat(QString lessonID, QString sToken);			// 获取白板、摄像头、推流地址 及 心跳间隔
 	void SendStartLiveHttpMsg(int iBoard, int iCamera,QString sLessonid,
-								QString sToken);								// 往服务器发送直播开始消息
+								QString sToken, int mLessonType);								// 往服务器发送直播开始消息
 	void SendStopLiveHttpMsg(bool bConnect = true);								// 往服务器发送直播停止消息
 	void StartHeartBeat();														// 开始心跳
 	void StopTimer();															// 停止所有计时器

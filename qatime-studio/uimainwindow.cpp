@@ -1720,7 +1720,7 @@ void UIMainWindow::UpatateLiveStatus(QWidget* widget, bool bSuc)
 
 	if (m_iSucCount == iAllSucCount)
 	{
-		m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_AuxiliaryPanel->getLessonID(), mRemeberToken);
+		//m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_AuxiliaryPanel->getLessonID(), mRemeberToken);
 	}
 }
 

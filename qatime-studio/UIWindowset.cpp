@@ -12,11 +12,13 @@
 #include "HttpRequest.h"
 
 #include "UIVideoRecord.h"
-
+#include "ZPublicDefine.h"
+#include "ZWeb.h"
 
 
 extern int		m_AutoAudioState;
 extern bool		m_IsAudioPlaying;
+int m_PublicCameraStatus;	// 1v1直播时，摄像头状态（1打开，0关闭），用于判断教师是否进行了白板和桌面的切换
 
 
 #define MAINWINDOW_X_MARGIN 10
@@ -29,6 +31,9 @@ extern bool		m_IsAudioPlaying;
 #define AudioOut 2			//扬声器
 #define Video 3				//视频设备
 #define VIDEO_FPS 50  
+
+
+
 
 UIWindowSet* m_This = NULL;
 UIWindowSet::UIWindowSet(QWidget *parent)
@@ -59,6 +64,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	, m_QueryOnlieTimers(NULL)
 	, m_VideoRecordInfo(NULL)
 	, m_bQueryMsg(false)
+	, m_bEveryTime(false)
 {
 	ui.setupUi(this);
 	m_This = this;
@@ -144,9 +150,11 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	m_LessonWnd->setParentBtn(this);
 	m_LessonWnd->hide();
 
-	m_LiveLesson = new UILiveLessonWnd(this);
+	// 去掉选课直播的父窗口
+	 m_LiveLesson = new UILiveLessonWnd(this);
+	// m_LiveLesson = new UILiveLessonWnd();
 	m_LiveLesson->setWindowFlags(Qt::FramelessWindowHint);
-	connect(m_LiveLesson, SIGNAL(sig_PullStreaming(QString, QString, QString, QString, QString, bool)), this, SLOT(slot_PullStreaming(QString, QString, QString, QString, QString, bool)));
+	connect(m_LiveLesson, SIGNAL(sig_PullStreaming(QString, QString, QString, QString, QString, int, bool)), this, SLOT(slot_PullStreaming(QString, QString, QString, QString, QString, int, bool)));
 	connect(m_LiveLesson, SIGNAL(sig_changeLessonStatus(QString, QString)), this, SLOT(slot_changeLessonStatus(QString, QString)));
 	m_LiveLesson->hide();
 	SetWindowPos((HWND)m_LiveLesson->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
@@ -203,6 +211,11 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	ui.Live1v1_pushBtn->setText(LIVE_BUTTON_NAME);
 	ui.Live1v1_pushBtn->setStyleSheet("QPushButton{background-color:white;color: #059ed5;border-radius: 5px; border: 2px solid #059ed5;}");
 
+	// 默认网络状态
+	ui.label_NetState->setText("良好");
+	ui.label_NetState->setStyleSheet("color: rgb(0, 255, 0);");
+	ui.label_NetState->setToolTip("网络良好，可顺畅直播");
+
 	m_LiveStatusManager = new LiveStatusManager(this);
 	m_LiveStatusManager->setMainWindow(this);
 
@@ -216,6 +229,11 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	ui.course_pushButton->setStyleSheet("border-image: url(./images/courseBtn_nor.png);");
 	ui.person_pushButton->setStyleSheet("border-image: url(./images/personBtn_nor.png);");
 	ui.pic_label->setStyleSheet("border-image: url(./images/online.png);");
+
+	// 关联查询云信群组通知信号槽
+	connect(this, SIGNAL(sig_AddAnnouncement(QString, QString)), this, SLOT(slot_AddAnnouncement(QString, QString)));
+
+	m_PublicCameraStatus = 1;	//默认摄像头开启
 }
 
 UIWindowSet::~UIWindowSet()
@@ -626,7 +644,7 @@ int UIWindowSet::mathVideoHeight(int iheight, SCREEN_TYPE type)
 }
 
 void UIWindowSet::AddChatRoom(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, std::string strCurAudioPath,
-							QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl, bool b1v1Lesson)
+							QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl, int mLessonType)
 {
 	show();
 	if (isMinimized())
@@ -645,18 +663,26 @@ void UIWindowSet::AddChatRoom(QString chatID, QString courseid, QString teacheri
 		}
 	}
 
+	qDebug() << __FILE__ << __LINE__<<"event1" << courseid;
 	if (IsHasTag(chatID, status))
 		return;
+	qDebug() << __FILE__ << __LINE__ << "event2" << courseid;
 
-	if (b1v1Lesson)
-		OpenCourse1v1(chatID, courseid, teacherid, token, studentName, strCurAudioPath, courseName, UnreadCount, status, boardurl, cameraUrl, b1v1Lesson);
+	if (mLessonType == d_1V1Lesson)
+	{ 
+		OpenCourse1v1(chatID, courseid, teacherid, token, studentName, strCurAudioPath, courseName, UnreadCount, status, boardurl, cameraUrl, mLessonType);
+	}
 	else
-		OpenCourse(chatID, courseid, teacherid, token, studentName, strCurAudioPath, courseName, UnreadCount, status, boardurl, cameraUrl, b1v1Lesson);
+	{
+		OpenCourse(chatID, courseid, teacherid, token, studentName, strCurAudioPath, courseName, UnreadCount, status, boardurl, cameraUrl, mLessonType);
+	}
+	qDebug() << __FILE__ << __LINE__ << "event3" << courseid;
+
 }
 
 // 打开互动直播
 void UIWindowSet::OpenCourse1v1(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, std::string strCurAudioPath,
-	QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl, bool b1v1Lesson)
+	QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl, int mLessonType)
 {
 	UIChatRoom* chatRoom = IsHasRoom(chatID);
 	if (chatRoom == NULL)
@@ -665,7 +691,7 @@ void UIWindowSet::OpenCourse1v1(QString chatID, QString courseid, QString teache
 		chatRoom->setWindowFlags(Qt::FramelessWindowHint);
 		chatRoom->setMainWindow(this);
 		chatRoom->SetEnvironmental(m_EnvironmentalTyle,m_homePage);
-		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount,true);
+		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount,mLessonType);
 		chatRoom->SetCurAudioPath(strCurAudioPath);
 		ui.horizontalLayout_18->addWidget(chatRoom);
 		m_vecChatRoom.push_back(chatRoom);
@@ -673,12 +699,12 @@ void UIWindowSet::OpenCourse1v1(QString chatID, QString courseid, QString teache
 		chatRoom->show();
 	}
 
-	AddTag(chatID, courseName, courseid, true, chatRoom, status, b1v1Lesson, boardurl, cameraUrl);
+	AddTag(chatID, courseName, courseid, true, chatRoom, status, mLessonType, boardurl, cameraUrl);
 }
 
 // 打开直播课
 void UIWindowSet::OpenCourse(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, std::string strCurAudioPath,
-	QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl, bool b1v1Lesson)
+	QString courseName, int UnreadCount, QString status, QString boardurl, QString cameraUrl, int mLessonType)
 {
 	UIChatRoom* chatRoom = IsHasRoom(chatID);
 	if (chatRoom == NULL)
@@ -687,7 +713,7 @@ void UIWindowSet::OpenCourse(QString chatID, QString courseid, QString teacherid
 		chatRoom->setWindowFlags(Qt::FramelessWindowHint);
 		chatRoom->setMainWindow(this);
 		chatRoom->SetEnvironmental(m_EnvironmentalTyle, m_homePage);
-		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount);
+		chatRoom->setCurChatID(chatID, courseid, teacherid, token, studentName, m_accid, UnreadCount, mLessonType);	
 		chatRoom->SetCurAudioPath(strCurAudioPath);
 		ui.horizontalLayout_6->addWidget(chatRoom);
 		m_vecChatRoom.push_back(chatRoom);
@@ -695,7 +721,7 @@ void UIWindowSet::OpenCourse(QString chatID, QString courseid, QString teacherid
 		chatRoom->show();
 	}
 
-	AddTag(chatID, courseName, courseid, true, chatRoom, status, b1v1Lesson, boardurl, cameraUrl);
+	AddTag(chatID, courseName, courseid, true, chatRoom, status, mLessonType, boardurl, cameraUrl);
 }
 
 bool UIWindowSet::IsHasTag(QString chatID, QString status)
@@ -710,8 +736,17 @@ bool UIWindowSet::IsHasTag(QString chatID, QString status)
 			if (tags->ChatID() == chatID)
 			{
 				// 隐藏与显示互动直播
-				ui.live_widget->setVisible(!tags->Is1v1Lesson());
-				ui.live1v1_widget->setVisible(tags->Is1v1Lesson());
+				if (tags->GetLessonType() == d_1V1Lesson)
+				{
+					ui.live_widget->setVisible(false);
+					ui.live1v1_widget->setVisible(true);
+				}
+				else
+				{
+					ui.live_widget->setVisible(true);
+					ui.live1v1_widget->setVisible(false);
+				}
+
 				
 				tags->setStyle(true);
 				tags->GetRoom()->setVisible(true);
@@ -758,14 +793,14 @@ UIChatRoom* UIWindowSet::IsHasRoom(QString chatID)
 	return NULL;
 }
 
-void UIWindowSet::AddTag(QString chatID, QString name, QString ID, bool sel, UIChatRoom* room, QString status, bool b1v1Lesson, QString board, QString camera)
+void UIWindowSet::AddTag(QString chatID, QString name, QString ID, bool sel, UIChatRoom* room, QString status, int mLessonType, QString board, QString camera)
 {
  	UITags* tag = new UITags(ui.tags_widget);
  	tag->setMaximumWidth(200);
  	tag->SetCourseNameAndID(name, ID, chatID,board,camera);
 	tag->SetRoom(room);
  	tag->setStyle(sel);
-	tag->set1v1Lesson(b1v1Lesson);
+	tag->setLessonType(mLessonType);
  	tag->show();
 	connect(tag, SIGNAL(clickTag(UITags*)), this, SLOT(clickTag(UITags*)));
 	connect(tag, SIGNAL(DeleteTag(UITags*)), this, SLOT(DeleteTag(UITags*)));
@@ -780,8 +815,16 @@ void UIWindowSet::AddTag(QString chatID, QString name, QString ID, bool sel, UIC
 	m_curChatRoom = room;
 	
 	// 隐藏与显示互动直播
-	ui.live_widget->setVisible(!b1v1Lesson);
-	ui.live1v1_widget->setVisible(b1v1Lesson);
+	if (tag->GetLessonType() == d_1V1Lesson)
+	{
+		ui.live_widget->setVisible(false);
+		ui.live1v1_widget->setVisible(true);
+	}
+	else
+	{
+		ui.live_widget->setVisible(true);
+		ui.live1v1_widget->setVisible(false);
+	}
 
 	m_curTags->setModle(false);
 	emit sig_Modle(false);
@@ -850,7 +893,7 @@ void UIWindowSet::DeleteTag(UITags* tag)
 				if (tags->IsModle())
 				{
 					// 是否是一对一
-					if (tags->Is1v1Lesson())
+					if (tags->GetLessonType() == d_1V1Lesson)
 					{		
 						//结束云信的摄像头采集
 						IMInterface::getInstance()->endDevice(Video);
@@ -861,7 +904,8 @@ void UIWindowSet::DeleteTag(UITags* tag)
 						if (mWhiteBoard)
 							mWhiteBoard->cleanUp();
 					}
-					else
+					else 
+					if (tags->GetLessonType() == d_AuxiliryLesson)	// 是直播课
 					{
 						m_CameraInfo->StopCaptureVideo();
 						m_VideoInfo->StopCaptureVideo();
@@ -1043,8 +1087,17 @@ void UIWindowSet::clickTag(UITags* tag)
 			if (tags == tag)
 			{
 				// 隐藏与显示互动直播
-				ui.live_widget->setVisible(!tags->Is1v1Lesson());
-				ui.live1v1_widget->setVisible(tags->Is1v1Lesson());
+				if (tags->GetLessonType() == d_1V1Lesson)
+				{
+					ui.live_widget->setVisible(false);
+					ui.live1v1_widget->setVisible(true);
+				}
+				else
+				{
+					ui.live_widget->setVisible(true);
+					ui.live1v1_widget->setVisible(false);
+				}
+
 
 				tags->setStyle(true);
 				tags->GetRoom()->setVisible(true);
@@ -1113,11 +1166,13 @@ void UIWindowSet::clickLive()
 		bool bLiving = m_VideoInfo->IsCurrentLiving();
 		if (bLiving)
 		{
+			
 			int iStatus = CMessageBox::showMessage(
 				QString("答疑时间"),
 				QString("是否关闭当前直播！"),
 				QString("确定"),
 				QString("取消"));
+			
 			if (iStatus == 1)
 			{
 				ui.Live_pushBtn->setText(LIVE_BUTTON_NAME);
@@ -1135,6 +1190,19 @@ void UIWindowSet::clickLive()
 					ui.time_label->setVisible(false);		// 隐藏
 					ui.time_label->setText("00:00:00");		// 重置时间
 				}
+				QString mOnlineState = "";
+				QString mEndText = "直播结束";
+				if (m_bEveryTime)
+				{
+					mOnlineState = "InstantLesson";
+					mEndText = "互动答疑结束";
+				}
+				else
+				{
+					mOnlineState = "ScheduledLesson";
+				}
+				m_curChatRoom->SendSelfDefineMessageScreen(false, mOnlineState);
+				m_curChatRoom->m_uitalk->InsertOneNotice(mEndText);
 			}
 			else
 				return;
@@ -1143,28 +1211,23 @@ void UIWindowSet::clickLive()
 		{
 			if (m_curTags == NULL)
 				return;
-			
-			if (m_curTags->Is1v1Lesson())
-			{
-				m_ScreenTip->setErrorTip("一对一暂未开启直播功能！");
-				return;
-			}
 			m_LiveLesson->DeleteItem();
 			m_LiveLesson->move(width()/2 - m_LiveLesson->width()/2,height()/2-m_LiveLesson->height()/2);
 			m_LiveLesson->show();
+			m_LiveLesson->setFocus();
 			ShowLesson();
 		}
 	}
 }
 
 // 选中课程开始直播
-void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString boardurl, QString cameraurl, QString name, bool b1v1Lesson)
+void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString boardurl, QString cameraurl, QString name, int mLessonType, bool bEveryTime)
 {
 	m_lessonName = name;
 	ui.lesson_label->setText(m_lessonName);
 	m_lessonid = id;
-
-	if (b1v1Lesson)
+	// 判断如果是1V1的话
+	if (mLessonType == d_1V1Lesson)
 	{
 		QString chatID = m_curTags->ChatID();
 		createRtsRoom(chatID);
@@ -1180,6 +1243,21 @@ void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString board
 		qDebug() << "摄像头推流地址：" << m_cameraUrl;
 		m_VideoInfo->setPlugFlowUrl(m_boardUrl);
 		m_VideoInfo->StartLiveVideo();
+		//插入消息栏通知
+		QString mOnline = "";
+		QString mStartText = "直播开始";
+		if (bEveryTime)
+		{
+			mOnline = "InstantLesson";
+			mStartText = "互动答疑开始";
+		}
+		else
+		{
+			mOnline = "ScheduledLesson";
+		}
+		m_bEveryTime = bEveryTime;
+		m_curChatRoom->SendSelfDefineMessageScreen(true, mOnline);
+		m_curChatRoom->m_uitalk->InsertOneNotice(mStartText);
 		setLiveBtnEnable(false);
 	}
 }
@@ -1235,7 +1313,7 @@ void UIWindowSet::clickChange(bool checked)
 		}
 	}
 
-	if (m_curTags->Is1v1Lesson())
+	if (m_curTags->GetLessonType() == d_1V1Lesson)
 	{
 		if (ui.camera1v1_widget->isVisible())
 		{
@@ -1366,7 +1444,7 @@ void UIWindowSet::slots_Modle(bool bModle)
 {
 	if (!bModle)
 	{
-		if (m_curTags && m_curTags->Is1v1Lesson())
+		if (m_curTags && (m_curTags->GetLessonType() == d_1V1Lesson))
 		{
 			ui.whiteboard1v1_widget->setVisible(false);
 			ui.line_label->setVisible(false);
@@ -1391,7 +1469,7 @@ void UIWindowSet::slots_Modle(bool bModle)
 	}
 	else
 	{
-		if (m_curTags && m_curTags->Is1v1Lesson())
+		if (m_curTags && (m_curTags->GetLessonType() == d_1V1Lesson))
 		{
 			ui.whiteboard1v1_widget->setVisible(true);
 			ui.line_label->setVisible(true);
@@ -1494,8 +1572,35 @@ void UIWindowSet::clickNotice()
 		m_NoticeWnd->DeleteNotice();
 		m_NoticeWnd->show();
 		m_NoticeWnd->setFocus();
-		QueryNotice();
+		// 全都从云信查询最后一条公告
+		//QueryNotice();
+		QueryNoticeFromYX();
 	}
+}
+
+void UIWindowSet::QueryNoticeFromYX()
+{
+	nim::Team::QueryTeamInfoAsync(m_curChatRoom->GetCurChatID(), &UIWindowSet::QueryTeamInfoCallback);
+}
+
+void UIWindowSet::QueryTeamInfoCallback(const std::string& tid, const nim::TeamInfo& result)
+{
+	std::string announcement = result.GetAnnouncement();
+	QDateTime timeDate = QDateTime::currentDateTime();
+	QString strTime = timeDate.toString("yyyy-MM-dd hh:mm:ss");
+	if (m_This)
+	{
+		emit m_This->sig_AddAnnouncement(QString::fromStdString(announcement), strTime);
+	}
+	
+}
+
+void UIWindowSet::slot_AddAnnouncement(QString mAnnouncement, QString mTime)
+{
+	if (m_NoticeWnd)
+	{
+		m_NoticeWnd->AddNotic(mAnnouncement, mTime);
+	}		
 }
 
 void UIWindowSet::QueryNotice()
@@ -1507,36 +1612,20 @@ void UIWindowSet::QueryNotice()
 		return;
 
 	QString strUrl;
-	if (m_EnvironmentalTyle)
+	if (m_curTags->GetLessonType() == d_1V1Lesson)
 	{
-		if (m_curTags->Is1v1Lesson())
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
-			strUrl.replace("{id}", strCourseID);
-		}
-		else
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/courses/{id}/realtime";
-			strUrl.replace("{id}", strCourseID);
-		}
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
+		strUrl.replace("{id}", strCourseID);
 	}
 	else
+	if (m_curTags->GetLessonType() == d_1V1Lesson)
 	{
-		if (m_curTags->Is1v1Lesson())
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
-			strUrl.replace("{id}", strCourseID);
-		}
-		else
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/courses/{id}/realtime";
-			strUrl.replace("{id}", strCourseID);
-		}
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/courses/{id}/realtime";
+		strUrl.replace("{id}", strCourseID);
 	}
+
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -1599,6 +1688,7 @@ void UIWindowSet::OnSendAnnouncements(QString text)
 	}
 }
 
+// 辅导班详情
 void UIWindowSet::clickCourse()
 {
 	if (m_CourseWnd)
@@ -1613,8 +1703,9 @@ void UIWindowSet::clickCourse()
 		ui.course_pushButton->setStyleSheet("border-image: url(./images/courseBtn_hor.png);");
 		m_CourseWnd->move(0, 70);
 		m_CourseWnd->show();
+		m_CourseWnd->setFixedHeight(510);
+		m_CourseWnd->setFixedWidth(410);
 		m_CourseWnd->setFocus();
-
 		QueryCourse();
 	}
 }
@@ -1628,37 +1719,27 @@ void UIWindowSet::QueryCourse()
 		return;
 
 	QString strUrl;
-	if (m_EnvironmentalTyle)
+	// 不同辅导班访问不同接口
+	if (m_curTags->GetLessonType() == d_1V1Lesson)
 	{
-		if (m_curTags->Is1v1Lesson())
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/interactive_courses/{id}";
-			strUrl.replace("{id}", strCourseID);
-		}
-		else
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
-			strUrl.replace("{id}", strCourseID);
-			strUrl.replace("{teacherid}", m_teacherID);
-		}
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_courses/{id}";
+		strUrl.replace("{id}", strCourseID);
 	}
 	else
+	if (m_curTags->GetLessonType() == d_AuxiliryLesson)
 	{
-		if (m_curTags->Is1v1Lesson())
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/interactive_courses/{id}";
-			strUrl.replace("{id}", strCourseID);
-		}
-		else
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
-			strUrl.replace("{id}", strCourseID);
-			strUrl.replace("{teacherid}", m_teacherID);
-		}
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
+		strUrl.replace("{id}", strCourseID);
+		strUrl.replace("{teacherid}", m_teacherID);
+	}
+	else
+	if (m_curTags->GetLessonType() == d_ExclusiveLesson)
+	{
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/customized_groups/{id}/detail";
+		strUrl.replace("{id}", strCourseID);
 	}
 
 	QUrl url = QUrl(strUrl);
@@ -1667,6 +1748,20 @@ void UIWindowSet::QueryCourse()
 	request.setRawHeader("Remember-Token", m_Token.toUtf8());
 	reply = manager.get(request);
 	connect(reply, &QNetworkReply::finished, this, &UIWindowSet::returnCourse);
+}
+
+// 转换时间戳为时间字符串
+QString mFun_ToTimeString(int mTime)
+{
+	if (mTime == 0)
+	{
+		return "";
+	}
+	QDateTime time = QDateTime::currentDateTime();   //获取当前时间  
+	int timeT = time.toTime_t();   //将当前时间转为时间戳  
+	QDateTime m1TestTime = QDateTime::fromTime_t(timeT);
+	QDateTime mTestTime = QDateTime::fromTime_t(mTime);
+	return mTestTime.toString("yyyy-MM-dd");
 }
 
 void UIWindowSet::returnCourse()
@@ -1680,32 +1775,77 @@ void UIWindowSet::returnCourse()
 	{
 		// 辅导班信息
 		QString coursePic;
-		if (m_curTags->Is1v1Lesson())
+		QString teacherName = "";
+		if (m_curTags->GetLessonType() == d_1V1Lesson)
 		{
 			coursePic = data["publicize_list_url"].toString();
+			teacherName = data["teacher_name"].toString();
 		}
 		else
+		if (m_curTags->GetLessonType() == d_AuxiliryLesson)
 		{
 			coursePic = data["publicize"].toString();
+			teacherName = data["teacher_name"].toString();
 		}
-		
 		QString courseName = data["name"].toString();
 		QString courseGrade = data["grade"].toString();
 		QString courseGrade1 = data["subject"].toString();
-		QString teacherName = data["teacher_name"].toString();
+		
 		QString coursePross = QString::number(data["closed_lessons_count"].toInt());
 		QString courseProsses = QString::number(data["lessons_count"].toInt());
-
 		QString courseStart = data["live_start_time"].toString();
 		QString courseEnd = data["live_end_time"].toString();
 		QString courseDesc = data["description"].toString();
+		QString mCourseTarget = data["objective"].toString();
+		QString mFitPeople = data["suit_crowd"].toString();
+		QString mStatus = data["status"].toString();
+		// 专属课的字段
+		if (m_curTags->GetLessonType() == d_ExclusiveLesson)
+		{
+			coursePic = data["customized_group"].toObject()["publicizes_url"].toObject()["list"].toString();
+			courseName = data["customized_group"].toObject()["subject"].toString();
+			courseGrade = data["customized_group"].toObject()["grade"].toString();
+			courseGrade1 = data["customized_group"].toObject()["subject"].toString();
+			teacherName = data["customized_group"].toObject()["teacher_name"].toString();
+			coursePross = QString::number(data["customized_group"].toObject()["closed_events_count"].toInt());
+			courseProsses = QString::number(data["customized_group"].toObject()["events_count"].toInt());
+			courseStart = mFun_ToTimeString(data["customized_group"].toObject()["start_at"].toInt());
+			courseEnd = mFun_ToTimeString(data["customized_group"].toObject()["end_at"].toInt());
+			courseDesc = data["customized_group"].toObject()["description"].toString();
+		}
 
 		// 年级信息
-		courseGrade = courseGrade + courseGrade1 + " | 主讲: " + m_teacherName;
-		coursePross = "课程进度: " + coursePross + "/" + courseProsses;
-		courseStart = "时      间: " + courseStart + "至" + courseEnd;
+		//courseGrade = courseGrade + courseGrade1 + " | 主讲: " + m_teacherName;
+		QString mStatusAndCourseProcess = "";
+		if (mStatus =="published")
+		{
+			mStatus = "招生中";
+		}
+		else
+		if (mStatus == "teaching")
+		{
+			mStatus = "开课中";
+		}
+		else
+		if (mStatus == "completed")
+		{
+			mStatus = "已结束";
+		}
+
+		mStatusAndCourseProcess = mStatus + "[进度" + coursePross + "/" + courseProsses + "]";
+		courseStart = courseStart.left(10) + " 至 " + courseEnd.left(10);
+
+		QJsonArray mTagArray = data["tag_list"].toArray();
 		if (m_CourseWnd)
-			m_CourseWnd->AddInfo(coursePic, courseName, courseGrade, coursePross, courseStart, courseDesc);
+		{
+			m_CourseWnd->CleanCourseInfo();
+			if (!mTagArray.empty())
+			{
+				m_CourseWnd->AddCourseTag(mTagArray);
+			}
+			m_CourseWnd->AddInfo(coursePic, courseGrade1, courseGrade, mStatusAndCourseProcess, courseStart, courseDesc, mCourseTarget, mFitPeople, courseProsses, m_teacherName, courseName);
+		}
+			
 	}
 	else if (error["code"].toInt() == 1002)
 	{
@@ -1756,38 +1896,29 @@ void UIWindowSet::QueryLesson()
 		return;
 
 	QString strUrl;
-	if (m_EnvironmentalTyle)
+
+	if (m_curTags->GetLessonType() == d_1V1Lesson)
 	{
-		if (m_curTags->Is1v1Lesson())
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/interactive_courses/{id}";
-			strUrl.replace("{id}", strCourseID);
-		}
-		else
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
-			strUrl.replace("{id}", strCourseID);
-			strUrl.replace("{teacherid}", m_teacherID);
-		}
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_courses/{id}";
+		strUrl.replace("{id}", strCourseID);
 	}
 	else
+	if (m_curTags->GetLessonType() == d_AuxiliryLesson)
 	{
-		if (m_curTags->Is1v1Lesson())
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/interactive_courses/{id}";
-			strUrl.replace("{id}", strCourseID);
-		}
-		else
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
-			strUrl.replace("{id}", strCourseID);
-			strUrl.replace("{teacherid}", m_teacherID);
-		}
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/teachers/{teacherid}/courses/{id}";
+		strUrl.replace("{id}", strCourseID);
+		strUrl.replace("{teacherid}", m_teacherID);
 	}
+	else
+	if (m_curTags->GetLessonType() == d_ExclusiveLesson)
+	{
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/customized_groups/{id}/detail";
+		strUrl.replace("{id}", strCourseID);
+	}
+
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -1805,11 +1936,12 @@ void UIWindowSet::returnLesson()
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
 	QJsonObject error = obj["error"].toObject();
+	int mWndHeight = 0;	// 窗口显示高度
 	if (obj["status"].toInt() == 1)
 	{
 		// 课程信息
 		QJsonArray lesson;
-		if (m_curTags->Is1v1Lesson())
+		if (m_curTags->GetLessonType() == d_1V1Lesson)
 		{
 			lesson = data["interactive_lessons"].toArray();
 			foreach(const QJsonValue & value, lesson)
@@ -1829,20 +1961,76 @@ void UIWindowSet::returnLesson()
 		}
 		else
 		{
-			lesson = data["lessons"].toArray();
-			foreach(const QJsonValue & value, lesson)
+			if (m_curTags->GetLessonType() == d_ExclusiveLesson)
 			{
-				iCount++;
-				QJsonObject obj = value.toObject();
-				QString strClassDate = obj["class_date"].toString();
-				QString strLiveTime = obj["live_time"].toString();
-				QString strStatus = obj["status"].toString();
-				QString strName = obj["name"].toString();
+				lesson = data["customized_group"].toObject()["offline_lessons"].toArray();
+				QString mLessonTitle;
+				if (lesson.count() > 0)
+				{
+					mLessonTitle = "线上直播";
+					m_LessonWnd->AddLessonTitle(mLessonTitle);
+					mWndHeight = mWndHeight + 40;
+				}					
+				foreach(const QJsonValue & value, lesson)
+				{
+					iCount++;
+					QJsonObject obj = value.toObject();
+					QString strClassDate = obj["class_date"].toString();
+					QString strLiveTime = obj["start_time"].toString();
+					QString strStatus = obj["status"].toString();
+					QString strName = obj["name"].toString();
 
-				strClassDate = strClassDate + "  " + strLiveTime;
-				if (m_LessonWnd)
-					m_LessonWnd->AddLesson(QString().sprintf("%02d", iCount), strClassDate, strName, strStatus);
+					strClassDate = strClassDate + "  " + strLiveTime;
+					if (m_LessonWnd)
+						m_LessonWnd->AddLesson(QString().sprintf("%02d", iCount), strClassDate, strName, strStatus);
+				}
+				lesson = data["customized_group"].toObject()["scheduled_lessons"].toArray();
+				if (lesson.count() > 0)
+				{
+					mLessonTitle = "线下讲课";
+					m_LessonWnd->AddLessonTitle(mLessonTitle);
+					mWndHeight = mWndHeight + 40;
+				}				
+				foreach(const QJsonValue & value, lesson)
+				{
+					iCount++;
+					QJsonObject obj = value.toObject();
+					QString strClassDate = obj["class_date"].toString();
+					QString strLiveTime = obj["start_time"].toString();
+					QString strStatus = obj["status"].toString();
+					QString strName = obj["name"].toString();
+
+					strClassDate = strClassDate + "  " + strLiveTime;
+					if (m_LessonWnd)
+						m_LessonWnd->AddLesson(QString().sprintf("%02d", iCount), strClassDate, strName, strStatus);
+				}
 			}
+			else
+			{ 
+				lesson = data["lessons"].toArray();
+				foreach(const QJsonValue & value, lesson)
+				{
+					iCount++;
+					QJsonObject obj = value.toObject();
+					QString strClassDate = obj["class_date"].toString();
+					QString strLiveTime = obj["live_time"].toString();
+					QString strStatus = obj["status"].toString();
+					QString strName = obj["name"].toString();
+
+					strClassDate = strClassDate + "  " + strLiveTime;
+					if (m_LessonWnd)
+						m_LessonWnd->AddLesson(QString().sprintf("%02d", iCount), strClassDate, strName, strStatus);
+				}
+			}
+		}
+		// 针对课程显示的窗口进行高度自适应
+		if (iCount != 0 && (iCount * 40 < 500))
+		{
+			if ((mWndHeight == 0) && iCount == 1)
+			{
+				mWndHeight = 10;
+			}
+			m_LessonWnd->setFixedHeight(mWndHeight + iCount*42 + 5);
 		}
 	}
 	else if (error["code"].toInt() == 1002)
@@ -1935,7 +2123,8 @@ void UIWindowSet::UpatateLiveStatus(QWidget* widget, bool bSuc)
 			{
 				m_ScreenTip->setErrorTip("开启直播成功！");
 				m_EnumStatus = CameraStatusClose;
-				m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_lessonid, m_Token);
+				// 1代表的是白板，一直为开启状态
+				m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_lessonid, m_Token, m_curTags->GetLessonType());
 
 				setLiveBtnEnable(true);
 			}
@@ -1954,7 +2143,7 @@ void UIWindowSet::UpatateLiveStatus(QWidget* widget, bool bSuc)
 			if (!ui.time_label->isVisible())
 			{
 				m_ScreenTip->setErrorTip("开启直播成功！");
-				m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_lessonid, m_Token);
+				m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_lessonid, m_Token, m_curTags->GetLessonType());
 				setLiveBtnEnable(true);
 			}
 		}
@@ -2004,6 +2193,12 @@ void UIWindowSet::ErrorStopLive(QWidget* pWidget)
 		{
 			return;
 		}
+		QString strError = "直播过程中网络出现错误，请重新\n开启直播！";
+		int iStatus = CMessageBox::showMessage(
+			QString("答疑时间"),
+			QString(strError),
+			QString("确定"),
+			QString());
 
 		m_VideoInfo->StopLiveVideo();
 
@@ -2016,10 +2211,9 @@ void UIWindowSet::ErrorStopLive(QWidget* pWidget)
 			ui.time_label->setVisible(false);		// 隐藏
 			ui.time_label->setText("00:00:00");		// 重置时间
 		}
-
-		m_ScreenTip->setErrorTip("直播过程中网络出现错误，请重新\n开启直播！");
+		
 		qDebug() << "位置2";
-		m_LiveStatusManager->SendStopLiveHttpMsg();
+		//m_LiveStatusManager->SendStopLiveHttpMsg();	add by zbc 20170921 网络不好情况下，先不发送直播关闭
 
 		setLiveBtnEnable(true);
 	}
@@ -2031,12 +2225,20 @@ void UIWindowSet::ErrorStop()
 	{
 		m_CameraInfo->StopLiveVideo();
 		m_CameraInfo->StopCaptureVideo();
+<<<<<<< Updated upstream
+=======
+		m_CameraInfo->DeleteThread();	// add by zbc 20170920
+>>>>>>> Stashed changes
 	}
 		
 	if (m_VideoInfo)
 	{
 		m_VideoInfo->StopLiveVideo();
 		m_VideoInfo->StopCaptureVideo();
+<<<<<<< Updated upstream
+=======
+		m_VideoInfo->DeleteThread();	// add by zbc 20170920
+>>>>>>> Stashed changes
 	}
 		
 }
@@ -2148,7 +2350,10 @@ void UIWindowSet::VideoStatus(int iStatus)
 
 			ui.video_checkBox->setEnabled(false);
 			m_CameraInfo->StopLiveVideo();
-			m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
+			if (m_curTags->GetLessonType() == d_1V1Lesson)
+			{
+				m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
+			}
 		}
 	}
 	else
@@ -2168,7 +2373,10 @@ void UIWindowSet::VideoStatus(int iStatus)
 			ui.video_checkBox->setEnabled(false);
 			m_CameraInfo->setPlugFlowUrl(m_cameraUrl);
 			m_CameraInfo->StartLiveVideo();
-			m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
+			if (m_curTags->GetLessonType() == d_1V1Lesson)
+			{
+				m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
+			}		
 		}
 	}
 }
@@ -2471,8 +2679,18 @@ void UIWindowSet::slot_CloseWnd()
 	m_VideoInfo1v1->setVisible(false);
 	m_AppWndTool1v1->setVisible(false);
 
-	// 发送分享窗口通知到学生端
+	// 发送分享窗口通知到学生端(白板消息)
 	mWhiteBoard->SendFullScreen(false);
+	// 通过自定义群组通知发送白板切换消息 add by zbc 20170825
+	if (m_curChatRoom)
+	{
+		QString mType, mContent;
+		mType = "SwitchVedioObject";
+		mContent = "Board";
+		m_curChatRoom->SendSelfDefineNotification(mType, mContent);
+		m_PublicCameraStatus = 1;
+		SendFrameStatusToWebService(); // 通知web当前教师端直播分享屏幕
+	}
 
 	// 设置发送数据模式为自定义发送
 	IMInterface::getInstance()->SetCustomData(false);
@@ -2522,6 +2740,16 @@ void UIWindowSet::slot_selectWnd(HWND hwnd)
 
 	// 发送分享窗口通知到学生端
 	mWhiteBoard->SendFullScreen(true);
+	// 通过自定义群组通知发送白板切换消息 add by zbc 20170825
+	if (m_curChatRoom)
+	{
+		QString mType, mContent;
+		mType = "SwitchVedioObject";
+		mContent = "Desktop";
+		m_curChatRoom->SendSelfDefineNotification(mType, mContent);
+		m_PublicCameraStatus = 0;
+		SendFrameStatusToWebService(); // 通知web当前教师端直播分享屏幕
+	}
 
 	// 设置发送数据模式为自定义发送
 	IMInterface::getInstance()->SetCustomData(true);
@@ -2551,13 +2779,14 @@ void UIWindowSet::initConnection()
 	connect(instance, SIGNAL(createRtsRoomSuccessfully(const std::string&)), this, SLOT(joinRtsRoom(const std::string&)));
 	connect(instance, SIGNAL(joinRtsRoomSuccessfully()),this, SLOT(joinRoomSuccessfully()));
 	connect(instance, SIGNAL(createVChatRoomSuccessfully()), this, SLOT(joinVChatRoom()));
-	connect(instance, SIGNAL(joinVChatSuccessfully()),this, SLOT(joinVChatSuccessfully()));
+	connect(instance, SIGNAL(joinVChatSuccessfully(QString)),this, SLOT(joinVChatSuccessfully(QString)));
  	connect(instance, SIGNAL(hasError(const QString &)), this, SLOT(errorInfo(const QString &)));
 	connect(instance, SIGNAL(deviceInfos(int)), this, SLOT(setDeviceInfos(int)));
 	connect(instance, SIGNAL(startDeviceSuccessfully(int)), this, SLOT(startDeviceSuccessfully(int)));
 	connect(instance, SIGNAL(VideoCapture(const char*, unsigned int, unsigned int, unsigned int)), m_Camera1v1Info, SLOT(VideoCapture(const char*, unsigned int, unsigned int, unsigned int)));
 	connect(instance, SIGNAL(RecVideoCapture(const char*, unsigned int, unsigned int, unsigned int)), m_CameraS1v1Info, SLOT(VideoCapture(const char*, unsigned int, unsigned int, unsigned int)));
 	connect(instance, SIGNAL(PeopleStatus(bool)), m_CameraS1v1Info, SLOT(StartEndVideo(bool)));
+	connect(instance, SIGNAL(FunctionGetNetState(int)), this, SLOT(slot_GetNetState(int)));
 
 	connect(instance, SIGNAL(rtsDataReceived(const std::string&, const std::string &)), this, SLOT(rtsDataReceived(const std::string&, const std::string &)));
 	connect(instance, SIGNAL(requstError(QString)), this, SLOT(requstError(QString)));
@@ -2572,20 +2801,39 @@ void UIWindowSet::joinRtsRoom(const std::string &roomName)
 void UIWindowSet::joinRoomSuccessfully()
 {
 	if (m_curTags)
+	{
+		if (m_curTags->GetLessonType() == d_1V1Lesson)
+		{
+			IMInterface::getInstance()->m_BoardURL = m_BoardPushURL;
+			IMInterface::getInstance()->m_LessonType = d_1V1Lesson;
+		}
+		else
+		{
+			IMInterface::getInstance()->m_LessonType = m_curTags->GetLessonType();
+		}
 		IMInterface::getInstance()->createVChatRoom(m_curTags->ChatID().toStdString());
+	}
+		
 }
 
 void UIWindowSet::joinVChatRoom()
-{
+{	
 	if (m_curTags)
 		IMInterface::getInstance()->joinVChatRoom(2,m_curTags->ChatID().toStdString());
 }
 
 // 创建音视频成功后，开始直播流程
-void UIWindowSet::joinVChatSuccessfully()
+void UIWindowSet::joinVChatSuccessfully(QString mChannelID)
 {
 	m_bLiving1v1 = true;
+	m_LiveStatusManager->m_ChannelID = mChannelID;
 	m_LiveStatusManager->SendStart1v1LiveHttpMsg(m_lessonid, m_curTags->ChatID(), m_Token);
+	//插入消息栏通知
+	QString mOnline = "";
+	QString mStartText = "直播开始";
+	mOnline = "ScheduledLesson";
+	m_curChatRoom->SendSelfDefineMessageScreen(true, mOnline);
+	m_curChatRoom->m_uitalk->InsertOneNotice(mStartText);
 }
 
 void UIWindowSet::requstError(QString error)
@@ -2834,6 +3082,13 @@ void UIWindowSet::clickLive1v1()
 			}
 
 			m_bLiving1v1 = false;
+			//插入消息栏通知
+			QString mOnline = "";
+			QString mStartText = "直播结束";
+			mOnline = "ScheduledLesson";
+			m_curChatRoom->SendSelfDefineMessageScreen(true, mOnline);
+			m_curChatRoom->m_uitalk->InsertOneNotice(mStartText);
+
 		}
 		else
 			return;
@@ -2846,7 +3101,9 @@ void UIWindowSet::clickLive1v1()
 		m_LiveLesson->DeleteItem();
 		m_LiveLesson->move(width() / 2 - m_LiveLesson->width() / 2, height() / 2 - m_LiveLesson->height() / 2);
 		m_LiveLesson->show();
+		m_LiveLesson->setFocus();	
 		ShowLesson();
+		RecordLive();
 	}
 }
 
@@ -2898,10 +3155,10 @@ void UIWindowSet::RecordLive()
 	if (obj["status"].toInt() == 1)
 	{
 		QJsonObject online = data["interactive_course"].toObject();
-		QString board = online["board_push_stream"].toString();
-		qDebug() << "旁路直播推流地址:" << board;
-	
-// 		m_VideoRecordInfo->setPlugFlowUrl(board);
+		QString mBoardPushURL = online["board_push_stream"].toString();
+		qDebug() << "旁路直播推流地址:" << mBoardPushURL;
+		m_BoardPushURL = mBoardPushURL;
+//		m_VideoRecordInfo->setPlugFlowUrl(mBoardPushURL);
 // 		m_VideoRecordInfo->StartLiveVideo();
 	}
 	else
@@ -2988,10 +3245,16 @@ void UIWindowSet::clickShapeScreen1v1()
 void UIWindowSet::ShowLesson()
 {
 	QString strUrl;
-	if (m_EnvironmentalTyle)
+
+	if (m_curTags->GetLessonType() == d_ExclusiveLesson)
 	{
+		QString strCourseID = "";
+		if (m_curTags)
+			strCourseID = m_curTags->CourseID();
+		else
+			return;
 		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
+		strUrl += "/api/v2/live_studio/teachers/{teacher_id}/schedule_data";
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
 	else
@@ -3000,6 +3263,7 @@ void UIWindowSet::ShowLesson()
 		strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
 		strUrl.replace("{teacher_id}", m_teacherID);
 	}
+
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -3015,25 +3279,46 @@ void UIWindowSet::LessonRequestFinished()
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonArray courses = obj["data"].toArray();
+
 	foreach(const QJsonValue & value, courses)
 	{
-		QJsonObject obj = value.toObject();
-		QJsonArray lessons = obj["lessons"].toArray();
+		QJsonObject objValue;
+		QJsonArray lessons;
+		objValue = value.toObject();
+		lessons = objValue["lessons"].toArray();
 		foreach(const QJsonValue & value, lessons)
 		{
 			Lesson *lesson = new Lesson();
 			lesson->readJson(value.toObject());
+			QString mOffline;
+			mOffline = value.toObject()["model_type"].toString();
+			if (mOffline == "LiveStudio::OfflineLesson")
+			{
+				continue;
+			}
 
 			QString curTime = QDateTime::currentDateTime().toString("yyyy-MM-dd");
 			if (lesson->Date() == curTime)
 			{
-				AddTodayToLesson(lesson->LessonID(), lesson->CourseID(), lesson->BoardUrl(), lesson->CameraUrl(), lesson->LessonTime(), lesson->ChinaLessonStatus(), lesson->name());
+				if (m_curTags->GetLessonType() == d_ExclusiveLesson)
+				{
+					AddTodayToLesson(lesson->LessonID(), lesson->CourseID(), m_curTags->BoardStream(), m_curTags->CameraStream(), lesson->LessonTime(), lesson->ChinaLessonStatus(), lesson->name());
+				}
+				else
+				{
+					AddTodayToLesson(lesson->LessonID(), lesson->CourseID(), lesson->BoardUrl(), lesson->CameraUrl(), lesson->LessonTime(), lesson->ChinaLessonStatus(), lesson->name());
+				}
+				
 			}
 			delete lesson;
 		}
 	}
-
-	m_LiveLesson->setCourseID(m_curTags->CourseID(), m_curTags->Is1v1Lesson());
+	if (m_curTags)
+	{
+		m_LiveLesson->SetURLBasicInfo(m_homePage, m_Token, m_curTags->BoardStream(), m_curTags->CameraStream());
+		m_LiveLesson->setCourseID(m_curTags->CourseID(), m_curTags->GetLessonType());
+	}
+	
 }
 
 void UIWindowSet::EndDev()
@@ -3267,6 +3552,7 @@ void UIWindowSet::Math1v1Screen()
 		}
 		else
 		{
+			qDebug() << __FILE__ << __LINE__ << "height:" << m_VideoInfo1v1->ScreenHeight() << "width:" << m_VideoInfo1v1->ScreenWidth(); //2017/07/20 zbc
 			//判断转换后是宽还是高异常
 			//计算逻辑：若出现窄条显现，说明只有宽和高之一不正常，然后以正常的为准，进而求得正常的另一部分
 			if (iScreenWidth > iHeight)
@@ -3289,6 +3575,7 @@ void UIWindowSet::Math1v1Screen()
 		}
 		else
 		{
+			qDebug() << __FILE__ << __LINE__ << "height:" << m_VideoInfo1v1->ScreenHeight() << "width:" << m_VideoInfo1v1->ScreenWidth(); //2017/07/20 zbc
 			//判断转换后是宽还是高异常
 			//计算逻辑：若出现窄条显现，说明只有宽和高之一不正常，然后以正常的为准，进而求得正常的另一部分
 			if (iScreenWidth > iHeight)
@@ -3307,3 +3594,63 @@ void UIWindowSet::Math1v1Screen()
 	
 }
 
+
+// 根据网络实时状态设置图标
+void UIWindowSet::slot_GetNetState(int mState)
+{
+	switch (mState)
+	{
+		case nim::kNIMVideoChatSessionNetStatVeryGood:
+		{
+			ui.label_NetState->setText("良好");
+			ui.label_NetState->setStyleSheet("color: rgb(0, 255, 0);");
+			ui.label_NetState->setToolTip("网络良好，可顺畅直播");
+			break;
+		}
+		case nim::kNIMVideoChatSessionNetStatGood:
+		{
+			ui.label_NetState->setText("一般");
+			ui.label_NetState->setStyleSheet("color: rgb(255, 185, 15);");
+			ui.label_NetState->setToolTip("网络一般，直播可能出现卡顿");
+			break;
+		}
+		case nim::kNIMVideoChatSessionNetStatBad:
+		{
+			ui.label_NetState->setText("较差");
+			ui.label_NetState->setStyleSheet("color: rgb(205, 38, 38);");
+			ui.label_NetState->setToolTip("网络较差，直播可能出现黑屏");
+			break;
+		}
+		case nim::kNIMVideoChatSessionNetStatVeryBad:
+		{
+			ui.label_NetState->setText("很差");
+			ui.label_NetState->setStyleSheet("color: rgb(255, 0, 0);");
+			ui.label_NetState->setToolTip("网络很差，直播可能会断开连接");
+			break;
+		}
+	}
+}
+
+void UIWindowSet::SendFrameStatusToWebService()
+{
+	ZWeb *mZWeb = new ZWeb;
+	QString strUrl;
+	QJsonObject mUrlJson;
+	
+
+	strUrl += m_homePage;
+	strUrl += "/api/v1/live_studio/interactive_lessons/{LessonID}/live_switch";
+	strUrl.replace("{LessonID}", m_lessonid);
+	QByteArray append("camera=");
+	append += QString::number(m_PublicCameraStatus);
+
+	bool bPostUrl = false;
+	bPostUrl = mZWeb->PostURLInfoBySignal(strUrl, append, m_Token);
+	if (bPostUrl == false)
+	{
+		//delete mZWeb;
+		return;
+	}
+	//delete mZWeb;
+	mZWeb = NULL;
+}

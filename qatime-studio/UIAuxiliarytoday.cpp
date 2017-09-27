@@ -70,7 +70,7 @@ void UIAuxiliaryToday::clickedEnter()
 void UIAuxiliaryToday::enterEvent(QEvent *e)
 {
 	QString str = QString::number(ui.widget_2->width()) + QString::number(ui.widget_2->height());
-	qInfo(str.toUtf8().data());
+	qInfo(str.toUtf8().data(), __FILE__, __LINE__);
 
 //	setStyleSheet("background-color: rgb(251, 239, 193)");
 	return;

@@ -64,10 +64,12 @@ public:
 	static void destroy();
 
 	/****************************************************************白板相关***********************************************************************************/
-	void initWhiteBoard();								//初始化白板
-	void destroyRts();									//清理白板
+	void initWhiteBoard();								// 初始化白板
+	void destroyRts();									// 清理白板
 
-	void initRtsCallback();								//初始化白板相关回调
+	void initRtsCallback();								// 初始化白板相关回调
+	QString						m_BoardURL;				// 白板推流地址
+	int							m_LessonType;			// 上课类型
 
 	//void createRtsRoom(int channel_type, const QString& uid, const QString& apns, const QString& custom_info, bool data_record, bool audio_record);  //创建一对一白板直播房间
 	void createRtsRoom(const std::string &name, const std::string &custom_info = "");			//创建多人白板直播房间
@@ -119,10 +121,11 @@ signals:
 	void sig_rtsTcpDiscontect();
 	/****************************************************************音视频相关***********************************************************************************/
 	void createVChatRoomSuccessfully();
-	void joinVChatSuccessfully();
+	void joinVChatSuccessfully(QString mChannelID);
 	void vChatRoomExistence();
 	void joinVChatRoomSuccessfully(const std::string&, __int64, const std::string&);
 	void PeopleStatus(bool); // 成员变化
+	void FunctionGetNetState(int); // 实时检测网络状态
 	/****************************************************************音视频设备相关***********************************************************************************/
 	void deviceInfos(int);											//设备已遍历完成   参数为设备类型
 	void startDeviceSuccessfully(int);								//设备启动成功     参数为设备类型

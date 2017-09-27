@@ -177,18 +177,19 @@ protected:
 	virtual void leaveEvent(QEvent *);
 
 public:
-	void setTeacherInfo(QJsonObject& data);					// 设置老师信息
+	void setTeacherInfo(QJsonObject& data);					//	设置老师信息
 	void setAutoTeacherInfo(QString teacherID, QString teacherName, 
-		 QString teacherUrl, QString accid, QString token); // 记住密码时使用的方法
-	void setRemeberToken(const QString &name);				// 设置Token
-	void AuxiliaryRequestFinished();						// 辅导班http请求
-	void LessonRequestFinished();							// 课程http请求
-	void EnumAvailableMediaDevices();						// 枚举设备
-	void SendStopLiveHttpMsg(bool bConnect=true);			// 往服务器发送直播停止消息
-	void ShowAuxiliary();									// 显示辅导班
-	void setAudioChangeIndex(int index);					//  改变麦克风
-	void setVideoChangeIndex(int index);					//  改变视频头
-	void setRatioChangeIndex(int index);					//  改变分辨率
+		 QString teacherUrl, QString accid, QString token); //	记住密码时使用的方法
+	void setRemeberToken(const QString &name);				//	设置Token
+	void AuxiliaryRequestFinished();						//	辅导班http请求
+	void LessonRequestFinished();							//	课程http请求
+	void EnumAvailableMediaDevices();						//	枚举设备
+	void SendStopLiveHttpMsg(bool bConnect=true);			//	往服务器发送直播停止消息
+	void ShowAuxiliary();									//	显示辅导班
+	void setAudioChangeIndex(int index);					//	改变麦克风
+	void setVideoChangeIndex(int index);					//	改变视频头
+	void setRatioChangeIndex(int index);					//	改变分辨率
+		
 
 
 	void HideOtherUI( QWidget* self=NULL);					//  隐藏其他界面

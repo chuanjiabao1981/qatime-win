@@ -76,6 +76,12 @@ void UIPersonWnd::AddPerson(std::vector<personListBuddy*> vecBuddy, QString chat
 		AddAllMute(chatID, true);
 	else
 		AddAllMute(chatID, false);
+	// 设置人员列表框高度自适应
+	if (vecBuddy.size() != 0 && (vecBuddy.size() * 42 < 500))
+	{
+		setFixedHeight((vecBuddy.size()+1) * 45 );
+	}
+		
 	setFocus();
 }
 

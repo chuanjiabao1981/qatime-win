@@ -174,18 +174,11 @@ void UIMenu::setVersion(QString version)
 void UIMenu::checkVersion()
 {
 	QString strUrl;
-	if (m_EnvironmentalTyle)
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/system/check_update?=category=teacher_live&version={version}&platform=windows";
-		strUrl.replace("{version}", m_version);
-	}
-	else
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/system/check_update?category=teacher_live&version={version}&platform=windows";
-		strUrl.replace("{version}", m_version);
-	}
+
+	strUrl += m_homePage;
+	strUrl += "/api/v1/system/check_update?category=teacher_live&version={version}&platform=windows";
+	strUrl.replace("{version}", m_version);
+	
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);

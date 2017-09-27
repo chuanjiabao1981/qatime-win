@@ -31,6 +31,11 @@ void Lesson::readJson(const QJsonObject &json)
 
 	// 辅导班ID
 	mCourseID = json["course_id"].toString();
+	// 专属课的走的新接口里并没有mCourseID
+	if (mCourseID.isEmpty())
+	{
+		mCourseID = QString::number(json["product_id"].toInt());
+	}
 
 	// 辅导班名字
 	mCourseName = json["course_name"].toString();

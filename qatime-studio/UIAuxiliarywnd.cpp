@@ -2,6 +2,10 @@
 #include <QScrollBar>
 #include <QPainter>
 #include <QMouseEvent>
+#include "ZPublicDefine.h"
+
+
+QString mPublicTeacherPicturePath;	// 保存教师头像路径的全局变量
 
 UIAuxiliaryWnd::UIAuxiliaryWnd(QWidget *parent)
 	: QWidget(parent)
@@ -65,6 +69,14 @@ UIAuxiliaryWnd::UIAuxiliaryWnd(QWidget *parent)
 	connect(this, SIGNAL(sig_Start1v1Loading()), m_pWorker1v1, SLOT(slot_StartLoading()));
 	connect(this, SIGNAL(sig_Close()), m_pWorker1v1, SLOT(slot_Close()));
 
+<<<<<<< Updated upstream
+=======
+	//创建专属课图片下载线程
+	m_pWorkerExclusive = new WorkerPic(); 
+	connect(this, SIGNAL(sig_StartExclusiveLoading()), m_pWorkerExclusive, SLOT(slot_StartLoading()));
+	connect(this, SIGNAL(sig_Close()), m_pWorkerExclusive, SLOT(slot_Close()));
+
+>>>>>>> Stashed changes
 	ui.live1V1_widget->setVisible(false);
 	ui.all_widget->setVisible(false);
 	m_UIMenu = new UIMenu(this);
@@ -221,12 +233,71 @@ void UIAuxiliaryWnd::click1V1()
 	ui.today_widget->setVisible(false);
 	ui.all_widget->setVisible(false);
 	ui.live1V1_widget->setVisible(true);
+<<<<<<< Updated upstream
+=======
+	ui.Exclusive_widget->setVisible(false);
 }
 
-void UIAuxiliaryWnd::AddTodayAuxiliary(QString lessonName, QString courseID, QString courseName, QString time, QString status, QString lessonid)
+
+void UIAuxiliaryWnd::clickExculsive()
+{
+	ui.today_widget->setVisible(false);
+	ui.all_widget->setVisible(false);
+	ui.live1V1_widget->setVisible(false);
+	ui.Exclusive_widget->setVisible(true);
+	if (m_parent)
+	{
+		if (m_parent->m_BIsExclusiveExcute == true)
+		{
+			return;
+		}
+		ProcedureClearLayout(m_VerExclusive);
+// 		if (m_pWorkerExclusive)
+// 		{
+// 			m_pWorkerExclusive->slot_Close();
+// 		}
+		m_parent->ShowExclusive();
+	}
+}
+
+void UIAuxiliaryWnd::AddExclusive(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
+	QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl)
+{
+	UIAuxiliaryList *mExculsive = new UIAuxiliaryList(ui.Exclusive_widget);
+	QLabel* pic = mExculsive->AddCourse(picUrl, courseName, grade, teacherName, chatID, courseID, teacherID, token, studentName, AudioPath, status, url, cameraUrl, EN_EXCLUSIVE_LESSON);
+	connect(mExculsive, SIGNAL(clickAuxiliary(UIAuxiliaryList*)), this, SLOT(clickAuxiliary(UIAuxiliaryList*)));
+	m_VerExclusive->addWidget(mExculsive);
+
+	QLabel* line = new QLabel();
+	line->setFixedHeight(1);
+	line->setStyleSheet("background-color: rgb(229, 229, 229);");
+	m_VerExclusive->addWidget(line);
+
+	m_mapAuxiliaryChatID.insert(chatID, mExculsive);
+	m_mapExclusiveCourseID.insert(courseID, mExculsive);
+	m_pWorkerExclusive->m_mapUrl.insert(pic, picUrl);
+
+	// 添加到布局里
+	if (m_spacerExclusive == NULL)
+	{
+		m_spacerExclusive = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_VerExclusive->addSpacerItem(m_spacerExclusive);
+	}
+	else
+	{
+		m_VerExclusive->removeItem(m_spacerExclusive);
+		m_spacerExclusive = NULL;
+		m_spacerExclusive = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_VerExclusive->addSpacerItem(m_spacerExclusive);
+	}
+>>>>>>> Stashed changes
+}
+
+void UIAuxiliaryWnd::AddTodayAuxiliary(QString lessonName, QString courseID, QString courseName, QString time, QString status, QString lessonid, int mLessonType)
 {
 	UIAuxiliaryToday* auxiliary = new UIAuxiliaryToday(ui.today_widget);
 	auxiliary->AddLesson(lessonName, courseID, courseName, time, status);
+	auxiliary->m_LessonType = mLessonType;	// 辅导班类型
 	connect(auxiliary, SIGNAL(clickAuxiliaryToday(UIAuxiliaryToday*)), this, SLOT(clickAuxiliaryToday(UIAuxiliaryToday*)));
 	m_VerToday->addWidget(auxiliary);
 	m_mapAuxiliaryLesson.insert(lessonid, auxiliary);
@@ -250,7 +321,7 @@ void UIAuxiliaryWnd::AddAuxiliary(QString picUrl, QString courseName, QString gr
 	QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl)
 {
 	UIAuxiliaryList* auxiliary = new UIAuxiliaryList(ui.all_widget);
-	QLabel* pic = auxiliary->AddCourse(picUrl, courseName, grade, teacherName, chatID, courseID, teacherID, token, studentName, AudioPath, status,url,cameraUrl);
+	QLabel* pic = auxiliary->AddCourse(picUrl, courseName, grade, teacherName, chatID, courseID, teacherID, token, studentName, AudioPath, status,url,cameraUrl, EN_ALL_LESSON);
 	connect(auxiliary, SIGNAL(clickAuxiliary(UIAuxiliaryList*)), this, SLOT(clickAuxiliary(UIAuxiliaryList*)));
 	m_VerAll->addWidget(auxiliary);
 
@@ -282,7 +353,7 @@ void UIAuxiliaryWnd::Add1v1Auxiliary(QString picUrl, QString courseName, QString
 	QString studentName, std::string AudioPath, QString status)
 {
 	UIAuxiliaryList* auxiliary = new UIAuxiliaryList(ui.all_widget);
-	QLabel* pic = auxiliary->AddCourse(picUrl, courseName, grade, teacherName, chatID, courseID, teacherID, token, studentName, AudioPath, status,"","",true);
+	QLabel* pic = auxiliary->AddCourse(picUrl, courseName, grade, teacherName, chatID, courseID, teacherID, token, studentName, AudioPath, status,"","", EN_1V1_LESSON);
 	connect(auxiliary, SIGNAL(clickAuxiliary(UIAuxiliaryList*)), this, SLOT(clickAuxiliary(UIAuxiliaryList*)));
 	m_Ver1v1->addWidget(auxiliary);
 
@@ -292,7 +363,7 @@ void UIAuxiliaryWnd::Add1v1Auxiliary(QString picUrl, QString courseName, QString
 	m_Ver1v1->addWidget(line);
 
 	m_mapAuxiliaryChatID.insert(chatID, auxiliary);
-	m_mapAuxiliaryCourseID.insert(courseID, auxiliary);
+	m_map1v1CourseID.insert(courseID, auxiliary);
 	m_pWorker1v1->m_mapUrl.insert(pic, picUrl);
 
 	// 添加到布局里
@@ -338,6 +409,15 @@ QPixmap UIAuxiliaryWnd::setTeacherUrl(QString Url)
 		pixmap = QPixmap("./images/avatar_teacher.png");
 	QPixmap scaledPixmap = pixmap.scaled(QSize(30, 30));
 
+	// 获取本地程序路径，用于保存教师头像
+	QString picPath = "\\catch\\" + m_TeacherID + ".png";
+	TCHAR szTempPath[MAX_PATH] = { 0 };
+	GetCurrentDirectory(MAX_PATH, szTempPath);
+	lstrcat(szTempPath, (LPCTSTR)picPath.utf16());
+	QString mSavePath = QString::fromStdWString(szTempPath);
+	mPublicTeacherPicturePath = mSavePath;
+	pixmap.save(mSavePath);
+
 	ui.pic_widget->setAutoFillBackground(true);
 	QPalette palette;
 	palette.setBrush(QPalette::Background, QBrush(scaledPixmap));
@@ -347,9 +427,75 @@ QPixmap UIAuxiliaryWnd::setTeacherUrl(QString Url)
 	return scaledPixmap;
 }
 
+void UIAuxiliaryWnd::AddWriteBoard(EN_LESSON_TYPE type)
+{
+	switch (type)
+	{
+	case EN_TODAY_LESSON:
+		ui.today_scrollArea->setStyleSheet(QStringLiteral("border-image: url(./images/alpha.png);"));
+		break;
+	case EN_ALL_LESSON:
+		ui.scrollArea->setStyleSheet(QStringLiteral("border-image: url(./images/alpha.png);"));
+		break;
+	case EN_1V1_LESSON:
+		ui.live1V1_scrollArea->setStyleSheet(QStringLiteral("border-image: url(./images/alpha.png);"));
+		break;
+	case EN_EXCLUSIVE_LESSON:
+		ui.Exclusive_scrollArea->setStyleSheet(QStringLiteral("border-image: url(./images/alpha.png);"));
+		break;
+	default:
+		break;
+	}
+	
+/*	QHBoxLayout* layout = new QHBoxLayout();
+	QPixmap pix = QPixmap("./images/alpha.png");
+	
+	QLabel* noLesson = new QLabel();
+	noLesson->setFixedSize(180, 180);
+	noLesson->setPixmap(pix);
+	layout->addWidget(noLesson);
+	switch (type)
+	{
+	case EN_TODAY_LESSON:
+		m_VerToday->addLayout(layout);
+		break;
+	case EN_ALL_LESSON:
+		m_VerAll->addLayout(layout);
+		break;
+	case EN_1V1_LESSON:
+		m_Ver1v1->addLayout(layout);
+		break;
+	case EN_EXCLUSIVE_LESSON:
+		m_VerExclusive->addLayout(layout);
+		break;
+	default:
+		break;
+	}
+*/
+}
+
+
+
 void UIAuxiliaryWnd::AddTodayNoLesson(EN_LESSON_TYPE type)
 {
-	QHBoxLayout* layout = new QHBoxLayout();
+	switch (type)
+	{
+	case EN_TODAY_LESSON:
+		ui.today_scrollArea->setStyleSheet(QStringLiteral("border-image: url(./images/nolesson1.png);"));
+		break;
+	case EN_ALL_LESSON:
+		ui.scrollArea->setStyleSheet(QStringLiteral("border-image: url(./images/nolesson1.png);"));
+		break;
+	case EN_1V1_LESSON:
+		ui.live1V1_scrollArea->setStyleSheet(QStringLiteral("border-image: url(./images/nolesson1.png);"));
+		break;
+	case EN_EXCLUSIVE_LESSON:
+		ui.Exclusive_scrollArea->setStyleSheet(QStringLiteral("border-image: url(./images/nolesson1.png);"));
+		break;
+	default:
+		break;
+	}
+/*	QHBoxLayout* layout = new QHBoxLayout();
 	QPixmap pix = QPixmap("./images/nolesson.png");
 	QLabel* noLesson = new QLabel();
 	noLesson->setFixedSize(180, 180);
@@ -366,9 +512,13 @@ void UIAuxiliaryWnd::AddTodayNoLesson(EN_LESSON_TYPE type)
 	case EN_1V1_LESSON:
 		m_Ver1v1->addLayout(layout);
 		break;
+	case EN_EXCLUSIVE_LESSON:
+		m_VerExclusive->addLayout(layout);
+		break;
 	default:
 		break;
 	}
+*/
 }
 
 void UIAuxiliaryWnd::LoadPic()
@@ -379,6 +529,11 @@ void UIAuxiliaryWnd::LoadPic()
 void UIAuxiliaryWnd::LoadPic1v1()
 {
 	emit sig_Start1v1Loading();
+}
+
+void UIAuxiliaryWnd::LoadPicExclusive()
+{
+	emit sig_StartExclusiveLoading();
 }
 
 void UIAuxiliaryWnd::clickPic()
@@ -418,7 +573,7 @@ void UIAuxiliaryWnd::clickAuxiliary(UIAuxiliaryList* auxiliary)
 	{
 		qDebug() << __FILE__ << __LINE__ << "点击--" << "辅导班ID：" << auxiliary->CourseID() << "辅导班名字：" << auxiliary->CourseName();
 		m_parent->CreateRoom(auxiliary->ChatID(), auxiliary->CourseID(), auxiliary->TeacherID(), auxiliary->Token(), auxiliary->StudentName(), 
-							auxiliary->AudioPath(), auxiliary->CourseName(), auxiliary->UnreadMsgCount(), auxiliary->Status(), auxiliary->BoardUrl(), auxiliary->CameraUrl(),auxiliary->Is1v1Lesson());
+							auxiliary->AudioPath(), auxiliary->CourseName(), auxiliary->UnreadMsgCount(), auxiliary->Status(), auxiliary->BoardUrl(), auxiliary->CameraUrl(),auxiliary->GetLessonType());
 		auxiliary->ClearMsgNumber();
 	}
 }
@@ -427,14 +582,28 @@ void UIAuxiliaryWnd::clickAuxiliaryToday(UIAuxiliaryToday* auxiliaryToday)
 {
 	QMap<QString, UIAuxiliaryList*>::iterator it;
 	UIAuxiliaryList* auxiliary = NULL;
-	auxiliary = m_mapAuxiliaryCourseID.value(auxiliaryToday->GetCourseID(),NULL);
+	if (auxiliaryToday->m_LessonType == d_1V1Lesson)
+	{
+		auxiliary = m_map1v1CourseID.value(auxiliaryToday->GetCourseID(), NULL);
+	}
+	else
+	if (auxiliaryToday->m_LessonType == d_AuxiliryLesson)
+	{
+		auxiliary = m_mapAuxiliaryCourseID.value(auxiliaryToday->GetCourseID(), NULL);
+	}
+	else
+	if (auxiliaryToday->m_LessonType == d_ExclusiveLesson)
+	{
+		auxiliary = m_mapExclusiveCourseID.value(auxiliaryToday->GetCourseID(), NULL);
+	}
+	
 	if (auxiliary)
 	{
 		if (m_parent)
 		{
 			qDebug() << __FILE__ << __LINE__ << "点击--"<<"辅导班ID：" << auxiliary->CourseID() << "辅导班名字：" << auxiliary->CourseName();
 			m_parent->CreateRoom(auxiliary->ChatID(), auxiliary->CourseID(), auxiliary->TeacherID(), auxiliary->Token(), auxiliary->StudentName(), auxiliary->AudioPath(),
-				auxiliary->CourseName(), auxiliary->UnreadMsgCount(), auxiliary->Status(), auxiliary->BoardUrl(), auxiliary->CameraUrl(), auxiliary->Is1v1Lesson());
+				auxiliary->CourseName(), auxiliary->UnreadMsgCount(), auxiliary->Status(), auxiliary->BoardUrl(), auxiliary->CameraUrl(), auxiliary->GetLessonType());
 			
 			auxiliary->ClearMsgNumber();
 		}
@@ -463,5 +632,29 @@ void UIAuxiliaryWnd::ChangeAuxiliaryTodayStatus(QString lessonid, QString status
 	if (auxiliary)
 	{
 		auxiliary->setStatue(status);
+	}
+}
+
+void UIAuxiliaryWnd::ProcedureClearLayout(QVBoxLayout *tLayout)
+{
+	QLayoutItem *item;
+	while ((item = tLayout->takeAt(0)) != 0)
+	{
+		//删除widget
+		if (item->widget())
+		{
+			delete item->widget();
+			//item->widget()->deleteLater();
+		}
+		
+/*
+		//删除子布局
+		QLayout *childLayout = item->layout();
+		if (childLayout)
+		{
+			ProcedureClearLayout(childLayout);
+		}
+*/
+		delete item;
 	}
 }

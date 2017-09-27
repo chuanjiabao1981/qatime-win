@@ -103,6 +103,7 @@ private slots:
 public:
 	void StartLiveVideo();								// 开始直播
 	void StopLiveVideo();								// 停止直播
+	void DeleteThread();								// 销毁多线程
 	bool InitMediaCapture();							// 初始化直播参数
 	void SetMediaCapture(_HNLSSERVICE hNlssService);														
 	static void SetVideoSampler(void *pNlssChildID, ST_NLSS_VIDEO_SAMPLER *pSampler);

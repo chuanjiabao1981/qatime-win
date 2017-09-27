@@ -10,7 +10,7 @@ UIAuxiliaryList::UIAuxiliaryList(QWidget *parent)
 	: QWidget(parent)
 	, m_iMsgCount(0)
 	, m_pWorker(NULL)
-	, m_b1v1Lesson(false)
+	, m_LessonType(1)
 {
 	ui.setupUi(this);
 	setCursor(Qt::PointingHandCursor);
@@ -40,7 +40,7 @@ UIAuxiliaryList::~UIAuxiliaryList()
 
 
 QLabel* UIAuxiliaryList::AddCourse(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, 
-	QString teacherID, QString token, QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl, bool b1v1Lesson)
+	QString teacherID, QString token, QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl, int mLessonType)
 {
 	m_picUrl = picUrl;
 	m_courseName = courseName;
@@ -52,7 +52,7 @@ QLabel* UIAuxiliaryList::AddCourse(QString picUrl, QString courseName, QString g
 	m_studentName = studentName;
 	m_AudioPath = AudioPath;
 	m_status = status;
-	m_b1v1Lesson = b1v1Lesson;
+	m_LessonType = mLessonType;
 	m_boardUrl = url;
 	m_cameraUrl = cameraUrl;
 
@@ -94,9 +94,9 @@ void UIAuxiliaryList::mousePressEvent(QMouseEvent *e)
 }
 
 // ÊÇ·ñÊÇ1v1¿Î³Ì
-bool UIAuxiliaryList::Is1v1Lesson()
+int UIAuxiliaryList::GetLessonType()
 {
-	return m_b1v1Lesson;
+	return m_LessonType;
 }
 
 void UIAuxiliaryList::enterEvent(QEvent *e)

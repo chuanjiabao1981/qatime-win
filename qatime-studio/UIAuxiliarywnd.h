@@ -21,6 +21,9 @@ public:
 	UIAuxiliaryWnd(QWidget *parent = 0);
 	~UIAuxiliaryWnd();
 
+	// 定义部分公有变量
+	QString								m_TeacherID; // 教师ID
+
 	// 鼠标按下拖动的操作
 	QPoint								m_startPos;
 	QPoint								m_clickPos;
@@ -29,7 +32,8 @@ public:
 	typedef enum enum_LESSON_TYPE{
 		EN_TODAY_LESSON = 0,                  //!< 今日直播
 		EN_ALL_LESSON,                       //!< 全部辅导
-		EN_1V1_LESSON                       //!< 1对1直播
+		EN_1V1_LESSON,                       //!< 1对1直播
+		EN_EXCLUSIVE_LESSON					 //!< 专属课
 	}EN_LESSON_TYPE;
 private:
 	Ui::UIAuxiliaryWnd ui;
@@ -52,9 +56,12 @@ private:
 	// 加载图片线程
 	WorkerPic*							m_pWorker;		// 加载全部辅导班图片
 	WorkerPic*							m_pWorker1v1;	// 加载1v1辅导班图片
+	WorkerPic						   *m_pWorkerExclusive;	//加载专属课图片
 
 	QMap<QString, UIAuxiliaryList*>		m_mapAuxiliaryChatID;	// 会话窗口ID、辅导班
 	QMap<QString, UIAuxiliaryList*>		m_mapAuxiliaryCourseID;	// 辅导班ID、  辅导班
+	QMap<QString, UIAuxiliaryList*>		m_map1v1CourseID;		// 1v1 辅导班ID
+	QMap<QString, UIAuxiliaryList*>		m_mapExclusiveCourseID;	// 专属课 辅导班ID
 	QMap<QString, UIAuxiliaryToday*>	m_mapAuxiliaryLesson;	// 课程ID，	   课程表
 
 	UIMenu*								m_UIMenu;				// 弹出的窗口
@@ -67,9 +74,10 @@ private:
 signals:
 	void	sig_StartLoading();
 	void	sig_Start1v1Loading();
+	void	sig_StartExclusiveLoading();
 	void	sig_Close();
 
-private slots:
+	private slots:
 	void	clickAuxiliary(UIAuxiliaryList*);
 	void    clickAuxiliaryToday(UIAuxiliaryToday*);
 	void    clickToday();
@@ -81,22 +89,32 @@ private slots:
 
 public:
 	void	setMainWindow(UIMainNewWindow* parent);
-	void	AddTodayAuxiliary(QString lessonName, QString courseID, QString courseName, QString time, QString status, QString lessonid);
+	void	AddTodayAuxiliary(QString lessonName, QString courseID, QString courseName, QString time, QString status, QString lessonid, int mLessonType);
 	void    AddAuxiliary(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
-							QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl);
+		QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl);
 	void    Add1v1Auxiliary(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
 		QString studentName, std::string AudioPath, QString status);
+<<<<<<< Updated upstream
+=======
+	void	AddExclusive(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
+		QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl);
+
+>>>>>>> Stashed changes
 	void	SetToken(QString mRemeberToken);
 	QPixmap setTeacherUrl(QString url);
 	void	setTeacherName(QString TeacherName);
 	void    AddTodayNoLesson(EN_LESSON_TYPE type);
 	void    LoadPic();
 	void	LoadPic1v1();
-	void	ReturnAccount();						// 切换账号
-	void    setVersion(QString version);			// 设置版本号
-	void	SetEnvironmental(bool bType, QString homePage);			// 设置当前环境
-	void	ReceiverNumber(QString chatID);			// 接收消息
+	void	LoadPicExclusive();
+	void	ReturnAccount();												// 切换账号
+	void    setVersion(QString version);									// 设置版本号
+	void	SetEnvironmental(bool bType, QString homePage);					// 设置当前环境
+	void	ReceiverNumber(QString chatID);									// 接收消息
 	void    ChangeAuxiliaryTodayStatus(QString lessonid, QString status);	// 开始直播的时候，改变上课状态
+	void	ProcedureClearLayout(QVBoxLayout *tLayout);						// 清空layout
+	void	AddWriteBoard(EN_LESSON_TYPE type);								// 返回自身layout指针
+
 };
 
 #endif // UIAUXILIARYWND_H

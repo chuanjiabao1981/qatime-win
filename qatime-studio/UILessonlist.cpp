@@ -58,6 +58,7 @@ void UILessonList::focusOutEvent(QFocusEvent* e)
 }
 
 
+
 void UILessonList::AddLesson(QString number, QString strTime, QString strName, QString strStatus)
 {
 	UILessonBuddy* buddy = new UILessonBuddy();
@@ -80,10 +81,12 @@ void UILessonList::AddLesson(QString number, QString strTime, QString strName, Q
 		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
 		ui.verticalLayout->addSpacerItem(m_spacer);
 	}
+
 }
 
 void UILessonList::DeleteLesson()
 {
+	DeleteLessonTitle();
 	if (m_vecBuddy.size()>0)
 	{
 		std::vector<UILessonBuddy*>::iterator it;
@@ -154,6 +157,37 @@ void UILessonList::style(QScrollArea *style)
 			"border-radius:4px;"
 			"}"
 			);
+	}
+}
+
+void UILessonList::AddLessonTitle(QString mLessonTitle)
+{
+	QLabel *mLabelTitle = new QLabel();
+	mLabelTitle->setObjectName(mLessonTitle);
+	QFont mFont;
+	mFont.setPointSize(12);
+	mFont.setFamily(("微软雅黑"));
+	mFont.setBold(true);
+	mLabelTitle->setFont(mFont);
+	mLabelTitle->setText(mLessonTitle);
+	ui.verticalLayout->addWidget(mLabelTitle);
+}
+
+void UILessonList::DeleteLessonTitle()
+{
+	//删除课程标题
+	QLabel * templabel = this->findChild<QLabel * >("线上直播");
+	if (templabel != NULL)
+	{
+		
+		delete  templabel;
+		templabel = NULL;
+	}
+	templabel = this->findChild<QLabel * >("线下讲课");
+	if (templabel != NULL)
+	{
+		delete  templabel;
+		templabel = NULL;
 	}
 }
 

@@ -36,19 +36,25 @@ public:
 	QPoint								m_clickPos;
 	QPoint								m_WndCurPos;
 
-	// 是否是1v1课程
-	bool								m_b1v1Lesson;
+	// 课程类型
+	int									m_CurrentLessonType;
+	QString								m_homePage;
+	QString								m_TeacherToken;
+	QString								m_BoardURL;
+	QString								m_CameraURL;
+	QString								m_CourseID;
 
 signals:
-	void sig_PullStreaming(QString, QString, QString, QString, QString,bool);
+	void sig_PullStreaming(QString, QString, QString, QString, QString,int, bool);
 	void sig_changeLessonStatus(QString,QString);
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual bool eventFilter(QObject *target, QEvent *event);
+	virtual void focusOutEvent(QFocusEvent *);
 
 private slots:
 	void clickClose();
-	void slot_dbClick(QString, QString, QString, QString, int, QString);
+	void slot_dbClick(QString, QString, QString, QString, int, QString, bool = false);
 private:
 	Ui::UILiveLessonWnd ui;
 	std::vector<LessonInfo>				m_vecLessonInfo;
@@ -57,8 +63,10 @@ public:
 	void style(QScrollArea *style);
 	void changeStatus(QString id);
 	void DeleteItem();
-	void setCourseID(QString courseid, bool b1v1Lesson);
+	void setCourseID(QString courseid, int mLessonType);
 	void addLesson(QString  id, QString courseid, QString boardUrl, QString cameraUrl, QString time, QString status, QString name);
+	void AddEveryTimeLesson();		// 添加即时直播
+	void SetURLBasicInfo(QString mHomePage, QString mTeacherToken, QString mBoardURL, QString mCameraURL);
 };
 
 #endif // UILIVELESSONWND_H
