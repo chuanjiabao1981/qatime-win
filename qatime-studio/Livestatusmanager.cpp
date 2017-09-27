@@ -1,10 +1,13 @@
 #include "Livestatusmanager.h"
 #include "define.h"
 #include "UIMessageBox.h"
+#include "ZPublicDefine.h"
 
 #define GET_RTMP_FAIL_COUNT		5	// 获取推流地址失败重试次数
 #define HEARTBEAT_FAIL_COUNT	5	// 直播心跳失败重试次数
 #define STOP_LIVE_FAIL_COUNT	5	// 停止推流失败重试次数
+
+extern int m_PublicCameraStatus;
 
 #ifdef TEST
 #define _DEBUG
@@ -21,6 +24,7 @@ LiveStatusManager::LiveStatusManager(QObject *parent)
 	, m_newParent(NULL)
 	, m_EnvironmentalTyle(true)
 	, m_1v1HeartTimer(NULL)
+	, m_mLessonType(1)
 {
 	m_iGetRtmpCount = GET_RTMP_FAIL_COUNT;
 	m_TGetRtmpTimer = new QTimer(this);
@@ -180,10 +184,10 @@ void LiveStatusManager::HeartBeatTimer()
 {
 	QString strUrl;
 
-	if (m_EnvironmentalTyle)
+	if (m_mLessonType == d_ExclusiveLesson)
 	{
 		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl += "/api/v1/live_studio/events/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
@@ -204,7 +208,7 @@ void LiveStatusManager::HeartBeatTimer()
 	QByteArray append("live_token=");
 	append += m_sLiveToken;
 	append.append("&beat_step=");
-	qInfo(append);
+	qInfo(append, __FILE__, __LINE__);
 	append += QString::number(m_iBeatStep);
 	append.append("&timestamp=");
 	append += time;
@@ -221,32 +225,38 @@ void LiveStatusManager::HeartBeatTimer()
 void LiveStatusManager::ReturnHeartBeat()
 {
 	QByteArray result = reply->readAll();
-	QJsonDocument document(QJsonDocument::fromJson(result));
-	QJsonObject obj = document.object();
-	QJsonObject data = obj["data"].toObject();
-	QJsonObject error = obj["error"].toObject();
-	if (obj["status"].toInt() == 1)
-	{
-		m_sLiveToken = data["live_token"].toString();
-		// 成功以后次数重置
-		m_iHeartCount = HEARTBEAT_FAIL_COUNT;
-	}
-	else if (obj["status"].toInt() == 0)
-	{
-		RequestError(error);
-	}
-	else
+	int mNetErrorCode = reply->error();
+	// 更改逻辑为若断网状态，则无限循环心跳
+	if (mNetErrorCode != QNetworkReply::NoError)
 	{
 		// 重试5次后放弃
 		m_iHeartCount--;
 		if (m_iHeartCount < 0)
 		{
 			m_iHeartCount = HEARTBEAT_FAIL_COUNT;
-			return;
+			
 		}
-
 		m_HeartFailTimer->start(300);
+		return;
 	}
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	int mStatus = obj["status"].toInt();
+	//mStatus = 0;
+	if (mStatus == 1)
+	{
+		m_sLiveToken = data["live_token"].toString();
+		// 成功以后次数重置
+		m_iHeartCount = HEARTBEAT_FAIL_COUNT;
+	}
+	else if (mStatus == 0)
+	{
+		m_HeartTimer->stop();
+		RequestError(error);
+	}
+
 }
 
 // 心跳失败重试
@@ -255,10 +265,10 @@ void LiveStatusManager::HeartBeatFailTimer()
 	m_HeartFailTimer->stop();
 
 	QString strUrl;
-	if (m_EnvironmentalTyle)
+	if (m_mLessonType == d_ExclusiveLesson)
 	{
 		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/heart_beat";
+		strUrl += "/api/v1/live_studio/events/{lessons_id}/heart_beat";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
@@ -268,13 +278,14 @@ void LiveStatusManager::HeartBeatFailTimer()
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
+
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
 
 	QByteArray append("live_token=");
 	append += m_sLiveToken;
 	append.append("&beat_step=");
-	qInfo(append);
+	qInfo(append, __FILE__, __LINE__);
 	append += QString::number(m_iBeatStep);
 	append.append("&timestamp=");
 	append += m_Time;
@@ -288,16 +299,17 @@ void LiveStatusManager::HeartBeatFailTimer()
 }
 
 // 发送直播开始状态(0:未直播 1:直播中 2:已关闭)
-void LiveStatusManager::SendStartLiveHttpMsg(int iBoard, int iCamera, QString sLessonid, QString sToken)
+void LiveStatusManager::SendStartLiveHttpMsg(int iBoard, int iCamera, QString sLessonid, QString sToken, int mLessonType)
 {
 	m_lessonID = sLessonid;
 	m_sToken = sToken;
 	QString strUrl;
-
-	if (m_EnvironmentalTyle)
+	// 获取辅导班类型
+	m_mLessonType = mLessonType;
+	if (mLessonType == d_ExclusiveLesson)
 	{
 		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/live_start";
+		strUrl += "/api/v1/live_studio/events/{lessons_id}/live_start";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
@@ -313,8 +325,12 @@ void LiveStatusManager::SendStartLiveHttpMsg(int iBoard, int iCamera, QString sL
 	QByteArray append("board=");
 	append += QString::number(iBoard);
 	append.append("&camera=");
-	qInfo(append);
+	qInfo(append, __FILE__, __LINE__);	// 打印日志
 	append += QString::number(iCamera);
+	append.append("&t=");
+	// 时间戳
+	int mtTime = QDateTime::currentDateTime().toTime_t();
+	append += QString::number(mtTime);
 
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
 	reply = manager.post(request,append);
@@ -376,10 +392,10 @@ void LiveStatusManager::SendStopLiveHttpMsg(bool bConnect)
 	StopTimer();
 	QString strUrl;
 
-	if (m_EnvironmentalTyle)
+	if (m_mLessonType == d_ExclusiveLesson)
 	{
 		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/live_end";
+		strUrl += "/api/v1/live_studio/events/{lessons_id}/live_end";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
@@ -389,11 +405,17 @@ void LiveStatusManager::SendStopLiveHttpMsg(bool bConnect)
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
+
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
+	QByteArray append;
+	append.append("t=");
+	// 时间戳
+	int mtTime = QDateTime::currentDateTime().toTime_t();
+	append += QString::number(mtTime);
 
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
-	reply = manager.post(request,"");
+	reply = manager.post(request,append);
 	if (bConnect)
 		connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::FinishStopLive);
 }
@@ -401,6 +423,21 @@ void LiveStatusManager::SendStopLiveHttpMsg(bool bConnect)
 void LiveStatusManager::FinishStopLive()
 {
 	QByteArray result = reply->readAll();
+	int mNetErrorCode = reply->error();
+	if (mNetErrorCode != QNetworkReply::NoError)
+	{
+		// 重试5次后放弃
+		m_iStopLiveCount--;
+		if (m_iStopLiveCount < 0)
+		{
+			m_StopFailTimer->stop();
+			return;
+		}
+
+		m_StopFailTimer->start(300);
+		m_StopFailTimer->stop();
+		return;
+	}
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
@@ -421,15 +458,7 @@ void LiveStatusManager::FinishStopLive()
 	}
 	else
 	{
-		// 重试5次后放弃
-		m_iStopLiveCount--;
-		if (m_iStopLiveCount < 0)
-		{
-			m_iStopLiveCount = STOP_LIVE_FAIL_COUNT;
-			return;
-		}
-
-		m_StopFailTimer->start(300);
+		
 	}
 }
 
@@ -462,10 +491,11 @@ void LiveStatusManager::SendCameraSwitchMsg(int iBoard, int iCamera)
 	m_iCameraStatus = iCamera;
 
 	QString strUrl;
-	if (m_EnvironmentalTyle)
+	if (m_mLessonType == d_ExclusiveLesson)
 	{
 		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/lessons/{lessons_id}/live_switch";
+		
+		strUrl += "/api/v1/live_studio/events/{lessons_id}/live_switch";
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 	else
@@ -475,15 +505,15 @@ void LiveStatusManager::SendCameraSwitchMsg(int iBoard, int iCamera)
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
+
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
 
 	QByteArray append("board=");
 	append += QString::number(iBoard);
 	append.append("&camera=");
-	qInfo(append);
 	append += QString::number(iCamera);
-
+	qInfo(append, __FILE__, __LINE__);
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
 	reply = manager.post(request,append);
 	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::FinishCameraSwitch);
@@ -521,21 +551,32 @@ void LiveStatusManager::FinishCameraSwitch()
 void LiveStatusManager::SwitchFailTimer()
 {
 	m_SwitchFailTimer->stop();
-
-	SendCameraSwitchMsg(m_iBoardStatus,m_iCameraStatus);
+	if (m_mLessonType == d_1V1Lesson)
+	{
+		SendCameraSwitchMsg(m_iBoardStatus, m_iCameraStatus);
+	}
 }
 
 void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 {
 	QString strError;
-	if (error["code"].toInt() == 1002)
+	int mErrorCode = 0;
+	mErrorCode = error["code"].toInt();
+	if (mErrorCode == 1002)
 	{
+		qDebug() << __FILE__ << __LINE__ << "其他用户登录！";
+		strError = QString("授权过期,请重新登录！");
+/*
 		if (m_newParent)
 			m_newParent->ErrorStop();
 		qDebug() << "DumpAtRequestError 1";
 		StopTimer();
+<<<<<<< Updated upstream
 		qDebug() << "DumpAtRequestError 2";
 		strError = QString("授权过期,请重新登录！");
+=======
+		
+>>>>>>> Stashed changes
 
 		int iStatus = CMessageBox::showMessage(
 			QString("答疑时间"),
@@ -548,18 +589,19 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 				m_newParent->ReturnLogin();
 		}
 		return;
+*/
 	}
-	else if (error["code"].toInt() == 1003)
+	else if (mErrorCode == 1003)
 		strError = QString("没有权限访问！");
-	else if (error["code"].toInt() == 1004)
+	else if (mErrorCode == 1004)
 		strError = QString("授权失败,请重新登录！");
-	else if (error["code"].toInt() == 3001)
+	else if (mErrorCode == 3001)
 		strError = QString("参数错误,请重新登录！");
-	else if (error["code"].toInt() == 3002)
+	else if (mErrorCode == 3002)
 		strError = QString("数据不合法,请重新登录！");
-	else if (error["code"].toInt() == 4001)
+	else if (mErrorCode == 4001)
 		strError = QString("找不到资源,请重新登录！");
-	else if (error["code"].toInt() == 9999)
+	else if (mErrorCode == 9999)
 		strError = QString("服务器错误,请重新登录！");
 	else
 		return;
@@ -569,10 +611,26 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 		QString(strError),
 		QString("确定"),
 		QString());
+
 	if (iStatus == 1 || iStatus == 0)
 	{
 		if (m_newParent)
+		{	
+			qDebug() << __FILE__ << __LINE__ << "网络异常断开";
+			m_newParent->ErrorStop();
+			m_newParent->EndDev();
+			StopTimer();
+			if (m_newParent->m_ScreenTip)
+			{
+				m_newParent->m_ScreenTip->close();
+			}
+			if (m_newParent->m_curChatRoom)
+			{
+				m_newParent->close();
+			}
 			m_newParent->ReturnLogin();
+		}
+			
 	}
 }
 
@@ -592,24 +650,29 @@ void LiveStatusManager::SendStart1v1LiveHttpMsg(QString sLessonid,QString chatid
 	m_sToken = sToken;
 	QString strUrl;
 
-	if (m_EnvironmentalTyle)
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_start";
-		strUrl.replace("{lessons_id}", m_lessonID);
-	}
-	else
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_start";
-		strUrl.replace("{lessons_id}", m_lessonID);
-	}
+	
+	strUrl += m_homePage;
+	strUrl += "/api/v1/live_studio/interactive_lessons/{lessons_id}/live_start";
+	strUrl.replace("{lessons_id}", m_lessonID);
+	
+
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
 
 	QByteArray append("room_id=");
 	append += chatid;
+
+	append.append("&camera=");
+	append += QString::number(m_PublicCameraStatus);
+
+	append.append("&channel_id=");
+	append += m_ChannelID;
+
+	append.append("&t=");
+	// 时间戳
+	int mtTime = QDateTime::currentDateTime().toTime_t();
+	append += QString::number(mtTime);
 
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
 	reply = manager.post(request, append);
@@ -712,6 +775,20 @@ void LiveStatusManager::HeartBeat1v1Timer()
 void LiveStatusManager::ReturnHeartBeat1v1()
 {
 	QByteArray result = reply->readAll();
+	int mNetErrorCode = reply->error();
+	// 更改逻辑为若断网状态，则无限循环心跳
+	if (mNetErrorCode != QNetworkReply::NoError)
+	{
+		// 重试5次后放弃
+		m_iHeartCount--;
+		if (m_iHeartCount < 0)
+		{
+			m_iHeartCount = HEARTBEAT_FAIL_COUNT;
+
+		}
+		m_1v1HeartFailTimer->start(300);
+		return;
+	}
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
@@ -726,18 +803,7 @@ void LiveStatusManager::ReturnHeartBeat1v1()
 	{
 		RequestError(error);
 	}
-	else
-	{
-		// 重试5次后放弃
-		m_iHeartCount--;
-		if (m_iHeartCount < 0)
-		{
-			m_iHeartCount = HEARTBEAT_FAIL_COUNT;
-			return;
-		}
 
-		m_1v1HeartFailTimer->start(300);
-	}
 }
 
 // 心跳失败重试
@@ -765,7 +831,7 @@ void LiveStatusManager::HeartBeatFailTimer1v1()
 	QByteArray append("live_token=");
 	append += m_sLiveToken;
 	append.append("&beat_step=");
-	qInfo(append);
+	qInfo(append, __FILE__, __LINE__);
 	append += QString::number(m_iBeatStep);
 	append.append("&timestamp=");
 	append += m_Time;
@@ -799,6 +865,12 @@ void LiveStatusManager::SendStopLiveHttpMsg1v1(bool bConnect)
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
+	QByteArray append;
+	append.append("t=");
+	// 时间戳
+	int mtTime = QDateTime::currentDateTime().toTime_t();
+	append += QString::number(mtTime);
+
 
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
 	reply = manager.post(request, "");

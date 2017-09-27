@@ -16,8 +16,11 @@
 #include <QToolTip>
 #include <QNetworkRequest>
 #include <QFileDialog>
+#include <QUuid>
 
 #include "calendar/DefineCalendar.h"
+#include "ZPublicDefine.h"
+#include "ZWeb.h"
 
 
 int			m_AutoAudioState;	// 自动播放语音状态 0-自动播放 1-不自动播放
@@ -152,6 +155,9 @@ UIChatRoom::UIChatRoom(QWidget *parent)
 	m_AutoAudioState = 0;		//默认自动播放语音状态为0，不自动播放
 	m_IsAudioPlaying = false;	//默认状态下语音没有自动播放的
 	ui.Btn_AutoAudio->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio2.png);}");
+
+	// 注册发送自定义通知信息的回调
+	nim::SystemMsg::RegSendCustomSysmsgCb(std::bind(&OnSendCustomSysmsgCallback, std::placeholders::_1));
 }
 
 UIChatRoom::~UIChatRoom()
@@ -483,13 +489,27 @@ void UIChatRoom::setBrow(QString path)
 // 发送消息按钮
 void UIChatRoom::clickSendMessage()
 {
+/*
+//测试通知消息发送
+	QString mOnlineState = "";
+	mOnlineState = "ScheduledLesson";
+	QString mOnlineState1 = "";
+	mOnlineState1 = "InstantLesson";
+	SendSelfDefineMessageScreen(false, mOnlineState);
+	SendSelfDefineMessageScreen(false, mOnlineState);
+	SendSelfDefineMessageScreen(true, mOnlineState1);
+	SendSelfDefineMessageScreen(true, mOnlineState1);
+	return;
+*/
+
+	SendSelfDefineNotification("SwitchVedioObject", "Board");
+	//return;
 	// Test 测试
 // 	if (ui.textEdit->toPlainText() == "2")
 // 	{
 // 		SendFullScreen(false);
 // 		return;
 // 	}
-
 	if (strcmp(m_CurChatID.c_str(),"") == 0)
 	{
 		QToolTip::showText(QCursor::pos(), "请选择直播间！");
@@ -786,7 +806,7 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 	bool bValid = false;
 	if (MathTime(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_)))
 		return bValid;
-
+#pragma region 过滤系统消息
 	if (pMsg->type_ == nim::kNIMMessageTypeNotification) // 过滤系统消息
 	{
 		Json::Value json;
@@ -845,6 +865,54 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 		}
 		return bValid;
 	}
+#pragma endregion
+
+#pragma region 自定义消息(作业相关)
+	if (pMsg->type_ == nim::kNIMMessageTypeCustom) 
+	{
+		Json::Value mJson;
+		Json::Reader mReader;
+		mReader.parse(pMsg->attach_, mJson);
+		std::string mType, mContentBody, mTitle, mEvent, mTaskID;
+		QString mURL;
+		bool bTeacher = false;
+		mType = mJson["type"].asString();
+		mContentBody = mJson["body"].asString();
+		mTitle = mJson["title"].asString();
+		mEvent = mJson["event"].asString();
+		mTaskID = mJson["taskable_id"].asString();
+		std::string strID = pMsg->sender_accid_;
+		// 聊天头像
+		QPixmap* mImg = NULL;
+		personListBuddy* mBuddy = NULL;
+		QString mName = ""; 
+		mName = QString::fromStdString(pMsg->readonly_sender_nickname_);
+		mBuddy = ui.student_list->findID(QString::fromStdString(strID));
+		if (mBuddy)
+		{
+			mImg = (QPixmap*)mBuddy->head->pixmap();
+			bTeacher = false;
+		}
+		else
+		{
+			if (mName != m_teacherName)
+			{
+				qDebug() << __FILE__ << __LINE__ << "拿到的教师名是:" << mName << "，实际的教师名是:" << m_teacherName;
+			}
+			mName = "(我)";
+			// 本人头像
+			mImg = &(m_parent->TeacherPhotoPixmap());
+			bTeacher = true;
+		}
+			
+		QString mTime = QDateTime::fromMSecsSinceEpoch(pMsg->timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+		mURL = m_homePage + "/live_studio/customized_groups/" + QString::fromStdString(mTaskID);
+		m_uitalk->InsertHomeworkInfo(mImg, mName, QString::fromStdString(mTitle), QString::fromStdString(mType), mTime, mURL, bTeacher);
+		return true;
+	}
+#pragma endregion
+
+	
 
 	// 判断当前过来的消息，是不是此会话窗口
 	if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0 && pMsg->type_ == nim::kNIMMessageTypeText)
@@ -1092,6 +1160,7 @@ void UIChatRoom::ShowMsgs(const std::vector<nim::IMMessage> &msg)
 
 void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 {
+#pragma region 过滤系统消息
 	if (pMsg.type_ == nim::kNIMMessageTypeNotification) // 过滤系统消息
 	{
 		Json::Value json;
@@ -1156,6 +1225,53 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 		}
 		return;
 	}
+#pragma endregion
+
+#pragma region 自定义消息(作业相关)
+	if (pMsg.type_ == nim::kNIMMessageTypeCustom)
+	{
+		Json::Value mJson;
+		Json::Reader mReader;
+		mReader.parse(pMsg.attach_, mJson);
+		std::string mType, mContentBody, mTitle, mEvent, mTaskID;
+		QString mURL;
+		bool bTeacher = false;
+		mType = mJson["type"].asString();
+		mContentBody = mJson["body"].asString();
+		mTitle = mJson["title"].asString();
+		mEvent = mJson["event"].asString();
+		mTaskID = mJson["taskable_id"].asString();
+		std::string strID = pMsg.sender_accid_;
+		// 聊天头像
+		QPixmap* mImg = NULL;
+		personListBuddy* mBuddy = NULL;
+		QString mName = "";
+		mName = QString::fromStdString(pMsg.readonly_sender_nickname_);
+		mBuddy = ui.student_list->findID(QString::fromStdString(strID));
+		if (mBuddy)
+		{
+			mImg = (QPixmap*)mBuddy->head->pixmap();
+			bTeacher = false;
+		}
+		else
+		{
+			if (mName != m_teacherName)
+			{
+				qDebug() << __FILE__ << __LINE__ << "拿到的教师名是:" << mName << "，实际的教师名是:" << m_teacherName;
+			}
+			mName = "(我)";
+			// 本人头像
+			mImg = &(m_parent->TeacherPhotoPixmap());
+			bTeacher = true;
+		}
+
+		QString mTime = QDateTime::fromMSecsSinceEpoch(pMsg.timetag_).toString("hh:mm:ss");// 原型yyyy-MM-dd hh:mm:ss
+		mURL = m_homePage + "/live_studio/customized_groups/" + QString::fromStdString(mTaskID);
+		m_uitalkRecord->InsertHomeworkInfo(mImg, mName, QString::fromStdString(mTitle), QString::fromStdString(mType), mTime, mURL, bTeacher);
+		return;
+	}
+#pragma endregion
+	
 	
 	// 跨天处理
 	stepDays(QDateTime::fromMSecsSinceEpoch(pMsg.timetag_));
@@ -1337,7 +1453,7 @@ void UIChatRoom::OnLoginCallback(const nim::LoginRes& login_res, const void* use
 // 	return json_str.toStdString();
 // }
 
-void UIChatRoom::setCurChatID(QString chatID, QString courseid, QString teacherid, QString token, QString teacherName, QString accid, int UnreadCount, bool b1v1)
+void UIChatRoom::setCurChatID(QString chatID, QString courseid, QString teacherid, QString token, QString teacherName, QString accid, int UnreadCount, int mLessonType)
 {
 	m_CurChatID = chatID.toStdString();
 	m_CurCourseID = courseid;
@@ -1346,11 +1462,21 @@ void UIChatRoom::setCurChatID(QString chatID, QString courseid, QString teacheri
 	mRemeberToken = token;
 	m_teacherName = teacherName;
 	m_UnreadCount = UnreadCount;
-	m_b1v1Lesson = b1v1;
-	if (b1v1)
+	m_mLessonType = mLessonType;
+	if (m_mLessonType == d_1V1Lesson)
+	{
 		Request1v1Member();
+	}	
 	else
+	if (m_mLessonType == d_AuxiliryLesson)
+	{
 		RequestMember();
+	}
+	else
+	if (m_mLessonType == d_ExclusiveLesson)
+	{
+		RequestExclusiveMember();
+	}
 }
 
 std::string UIChatRoom::GetCurChatID()
@@ -1378,8 +1504,16 @@ void UIChatRoom::setKeyAndLogin(QString key)
 		CMessageBox::showMessage(QString("答疑时间"), QString("云信失败！"), QString("确定"), QString("取消"));
 		return;
 	}
-
 	m_bLogin = true;
+}
+
+void UIChatRoom::OnSendCustomSysmsgCallback(const nim::SendMessageArc& arc)
+{
+	if (arc.rescode_ != nim::kNIMResSuccess)
+	{
+		qDebug() << __FILE__ << __LINE__ << "发送通知失败，错误码：" << arc.rescode_ << "发送的群组ID是：" << QString::fromStdString(arc.talk_id_);
+ 	}
+
 }
 
 void UIChatRoom::ReceiverLoginMsg(const nim::LoginRes& pRes)
@@ -1463,6 +1597,7 @@ bool UIChatRoom::IsCurChatRoom(QString chatID)
 
 void UIChatRoom::OnTeamEventCallback(const nim::TeamEvent& result)
 {
+
 }
 
 //禁言
@@ -1603,37 +1738,26 @@ void UIChatRoom::OnSendAnnouncements(QString Announcements)
 		return;
 	
 	QString strUrl;
-	if (m_b1v1Lesson)
+	if (m_mLessonType == d_1V1Lesson)
 	{
-		if (m_EnvironmentalTyle)
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/interactive_courses/{id}/announcements";
-			strUrl.replace("{id}", m_CurCourseID);
-		}
-		else
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/interactive_courses/{id}/announcements";
-			strUrl.replace("{id}", m_CurCourseID);
-		}
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/interactive_courses/{id}/announcements";
+		strUrl.replace("{id}", m_CurCourseID);
 	}
 	else
-	{
-		if (m_EnvironmentalTyle)
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/courses/{id}/announcements";
-			strUrl.replace("{id}", m_CurCourseID);
-		}
-		else
-		{
-			strUrl += m_homePage;
-			strUrl += "/api/v1/live_studio/courses/{id}/announcements";
-			strUrl.replace("{id}", m_CurCourseID);
-		}
+	if (m_mLessonType == d_AuxiliryLesson)
+	{	
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/courses/{id}/announcements";
+		strUrl.replace("{id}", m_CurCourseID);
 	}
-
+	else
+	if (m_mLessonType == d_ExclusiveLesson)
+	{
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/customized_groups/{id}/announcements";
+		strUrl.replace("{id}", m_CurCourseID);
+	}
 	Announcements = parse(Announcements);
 
 	QUrl url = QUrl(strUrl);
@@ -1741,18 +1865,22 @@ void UIChatRoom ::colseBrow()
 void UIChatRoom::QueryMember()
 {
 	QString strUrl;
-	if (m_EnvironmentalTyle)
+	strUrl += m_homePage;
+	if (m_mLessonType == d_AuxiliryLesson)
 	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/courses/{id}/realtime";
-		strUrl.replace("{id}", m_CurCourseID);
+		strUrl += "/api/v1/live_studio/courses/{id}/realtime";	
 	}
 	else
+	if (m_mLessonType == d_1V1Lesson)
 	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/courses/{id}/realtime";
-		strUrl.replace("{id}", m_CurCourseID);
+		strUrl += "/api/v1/live_studio/interactive_courses/{id}/realtime";
 	}
+	else
+	if (m_mLessonType == d_ExclusiveLesson)
+	{
+		strUrl += "/api/v1/live_studio/customized_groups/{id}/play";
+	}
+	strUrl.replace("{id}", m_CurCourseID);
 
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -1771,8 +1899,18 @@ void UIChatRoom::returnMember()
 	QJsonObject error = obj["error"].toObject();
 	if (obj["status"].toInt() == 1 && data.contains("members"))
 	{
-		// 群成员信息
-		QJsonArray members = data["members"].toArray();
+		QJsonArray members;
+		if (m_mLessonType == d_ExclusiveLesson)
+		{
+			// 群成员信息
+			members = data["chat_team"].toObject()["accounts"].toArray();
+		}
+		else
+		{
+			// 群成员信息
+			members = data["members"].toArray();
+		}
+		
 		int i = 0;
 		foreach(const QJsonValue & value, members)
 		{
@@ -1785,15 +1923,13 @@ void UIChatRoom::returnMember()
 				ui.student_list->addStrdent(pMember->url(), pMember->name(), pMember->accid(), m_drawingWidth);
 				m_StudentInfo.insert(pMember->accid(), pMember->name());
 
-				int iHeight = ui.student_list->parentWidget()->height()-40;
-
 				QString sName;
 				sName += pMember->name();
 				sName += " 加入了群聊";
 				
 				m_uitalk->InsertNotice(sName);
 
-				SetStudentName(m_studentNum + 1);
+				// SetStudentName(m_studentNum + 1);
 			}
 
 			//用完之后删除
@@ -2157,22 +2293,70 @@ void UIChatRoom::Request1v1Member()
 	connect(reply, &QNetworkReply::finished, this, &UIChatRoom::returnAllMember);
 }
 
+void UIChatRoom::RequestExclusiveMember()
+{
+	QString strUrl;
+	strUrl += m_homePage;
+	strUrl += "/api/v1/live_studio/customized_groups/{id}/play";
+	strUrl.replace("{id}", m_CurCourseID);
+
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+	QString str = this->mRemeberToken;
+
+	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIChatRoom::FinishedRequestExclusiveMember);
+
+}
+
+
+void UIChatRoom::FinishedRequestExclusiveMember()
+{
+	QByteArray result = reply->readAll();
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonObject data = obj["data"].toObject();
+	QJsonObject error = obj["error"].toObject();
+	
+	if (obj["status"].toInt() == 1)
+	{
+		QString mURL, mName, mACCID;
+		// 群成员信息
+		QJsonArray mMemberArray = data["customized_group"].toObject()["chat_team"].toObject()["accounts"].toArray();
+		int i = 0;
+		foreach(const QJsonValue & value, mMemberArray)
+		{
+			mURL = value.toObject()["icon"].toString();
+			mName = value.toObject()["name"].toString();
+			mACCID = value.toObject()["accid"].toString();
+			// 添加成员成功，才算显示人数
+			bool bSuc = AddStudent(mURL, mName, mACCID);
+			if (bSuc)
+			{
+				i++;
+			}				
+		}
+		emit sig_StartLoading();
+		m_bPerson = true;
+		ResultMsg();
+		QueryGroup();
+	}
+	else if (obj["status"].toInt() == 0)
+	{
+		RequestError(error);
+		return;
+	}
+}
+
+
 void UIChatRoom::RequestMember()
 {
 	QString strUrl;
-	if (m_EnvironmentalTyle)
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/courses/{id}/realtime";
-		strUrl.replace("{id}", m_CurCourseID);
-	}
-	else
-	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/courses/{id}/realtime";
-		strUrl.replace("{id}", m_CurCourseID);
-	}
-
+	strUrl += m_homePage;
+	strUrl += "/api/v1/live_studio/courses/{id}/realtime";
+	strUrl.replace("{id}", m_CurCourseID);
+	
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
 	QString str = this->mRemeberToken;
@@ -2526,6 +2710,56 @@ void UIChatRoom::SendFullScreen(bool bType)
 	nim::Talk::SendMsg(msg.ToJsonString(true));
 }
 
+void UIChatRoom::SendSelfDefineMessageScreen(bool bType, QString mTempStr)
+{
+	m_b1v1ShapeScreen = bType;
+	nim::IMMessage msg;
+	PackageMsg(msg);
+	msg.type_ = nim::kNIMMessageTypeCustom;
+	QString mStr, mTypeState;
+/* QString 转换 String
+	std::string mmstr;	
+	mmstr = mStr.toStdString();
+*/
+	mStr = "LiveStudio::" + mTempStr;
+
+	if (bType == true)
+	{
+		mTypeState = "start";
+	}
+	else
+	{
+		mTypeState = "close";
+	}
+
+	QJsonObject obj;
+	obj.insert("type", mStr);
+	obj.insert("event", mTypeState);
+	msg.attach_ = QJsonDocument(obj).toJson();
+	nim::Talk::SendMsg(msg.ToJsonString(true));
+	
+}
+
+void UIChatRoom::SendSelfDefineNotification(QString mType, QString mContent)
+{
+	Json::Value mJson;
+	Json::FastWriter mWriter;
+	if (mType == "SwitchVedioObject")
+	{
+		mJson["SwitchVedioObject"] = Json::Value(mContent.toStdString());
+	}
+	nim::SysMessage mMsg;
+	mMsg.receiver_accid_ = m_CurChatID;
+	mMsg.sender_accid_ = m_accid.toStdString();
+	QUuid mUid = QUuid::createUuid();
+	QString strUId = mUid.toString();
+	mMsg.client_msg_id_ = strUId.toStdString();
+	qDebug() << __FILE__ << __LINE__ << "IM发送切屏消息" << mContent << ";msgid"+strUId;
+	mMsg.attach_ = mWriter.write(mJson);
+	mMsg.type_ = nim::kNIMSysMsgTypeCustomTeamMsg;
+	nim::SystemMsg::SendCustomNotificationMsg(mMsg.ToJsonString());
+}
+
 void UIChatRoom::clickAudio()
 {
 	if (m_parent && (m_parent->m_VideoInfo->IsCurrentLiving() || m_parent->m_bLiving1v1))
@@ -2674,7 +2908,11 @@ void UIChatRoom::slot_AutoPlayAudio()
 		m_AutoAudioState = 0;
 		return;
 	}
+<<<<<<< Updated upstream
 	qDebug() << "AutoAudioState is " << m_AutoAudioState;
+=======
+	qDebug() << __FILE__ << __LINE__ << "AutoAudioState is " << m_AutoAudioState;
+>>>>>>> Stashed changes
 
 }
 

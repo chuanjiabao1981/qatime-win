@@ -73,6 +73,12 @@ void UINoticeWnd::clickShowNotice()
 {
 	ui.announce_widget->setVisible(false);
 	ui.A_widget->setVisible(true);
+// 	ui.textEdit->setFixedHeight(150);
+ //	ui.label->setVisible(false);
+ 	//ui.scrollArea->setVisible(false);
+	//setFixedHeight(200);
+	setFixedHeight(490);
+
 	ui.textEdit->setText("");
 	ui.textEdit->setFocus();
 	QTextCursor textCursor = ui.textEdit->textCursor();
@@ -82,8 +88,9 @@ void UINoticeWnd::clickShowNotice()
 void UINoticeWnd::clickSendAnnounce()
 {
 	DeleteNotice();
-	ui.announce_widget->setVisible(true);
+	ui.announce_widget->setVisible(false);
 	ui.A_widget->setVisible(false);
+	
 
 	QString text = ui.textEdit->toPlainText();
 	if (!text.isEmpty())
@@ -196,7 +203,11 @@ void UINoticeWnd::AddNotic(QString text, QString time, bool bInsert)
 		m_spacer = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
 		m_VerAll->addSpacerItem(m_spacer);
 	}
-
+	int m, n, q;
+	m = LText->height();
+	n = LTime->height();
+	q = LSpec->height();
+	setFixedHeight(LText->height() + 100 + LSpec->height() + 20);
 	setFocus();
 	ui.label->setVisible(true);
 	ui.scrollArea->setStyleSheet("QScrollArea{border: 1px solid #ffffff;background-color: rgb(255, 255, 255);border-image: url(:/LoginWindow/images/AuxiliaryPanelBack.png);}");

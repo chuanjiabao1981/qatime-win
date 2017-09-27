@@ -54,13 +54,12 @@ UIVideo::UIVideo(QWidget *parent)
 	m_pWorker = new Worker();
 	connect(this, SIGNAL(sig_StartLiveStream()), m_pWorker, SLOT(slot_StartLiveStream()));
 	connect(m_pWorker, SIGNAL(sig_ResultReady(int)), this, SLOT(slot_FinishStartLiveStream(int)));
-	connect(this, SIGNAL(sig_StopLiveStream()), m_pWorker, SLOT(slot_StopLiveStream()));
+	connect(this, SIGNAL(sig_StopLiveStream()), m_pWorker, SLOT(slot_StopLiveStream()), Qt::DirectConnection);
 	connect(m_pWorker, SIGNAL(sig_StopResult(int)), this, SLOT(slot_FinishStopLiveStream(int)));
-	connect(this, SIGNAL(sig_StopCapture()), m_pWorker, SLOT(slot_StopCapture()));
+	connect(this, SIGNAL(sig_StopCapture()), m_pWorker, SLOT(slot_StopCapture()), Qt::DirectConnection);
 #endif
 
 	//创建mediacapture类，失败抛出错	
-	
 	if (NLSS_OK != Nlss_Create(NULL,NULL, &m_hNlssService))
 	{
 		MessageBox(NULL, L"创建直播失败，请关闭程序重新启动", L"", MB_OK);
@@ -218,6 +217,7 @@ bool UIVideo::InitMediaCapture()
 		pAudioPath = "";
 	ST_NLSS_PARAM stParam;
 	Nlss_GetDefaultParam(m_hNlssService, &stParam);
+	
 	SetVideoOutParam(&stParam.stVideoParam, m_EnVideoQuality, true);
 	SetAudioParam(&stParam.stAudioParam, pAudioPath, EN_NLSS_AUDIOIN_MIC);
 	stParam.enOutContent = EN_NLSS_OUTCONTENT_AV;
@@ -378,7 +378,7 @@ void UIVideo::StopLiveVideo()
 {
 	if (m_bLiving)
 	{
-		m_GetTimer->stop();
+		m_GetTimer->stop();	
 		emit sig_StopLiveStream();
 		m_bLiving = false;
 	}
@@ -403,13 +403,13 @@ void UIVideo::slot_FinishStartLiveStream(int iRet)
 	{
 		m_NewParent->UpatateLiveStatus(this, false);
 		m_bLiving = false;
-		qDebug() << "白板打开直播出错，具体错误信息请看返回值";
+		qDebug() << __FILE__ << __LINE__ << "白板打开直播出错，具体错误信息请看返回值";
 	}
 	else
 	{
 		m_NewParent->UpatateLiveStatus(this, true);
 		InitFailParam();
-		qDebug() << "白板直播成功";
+		qDebug() <<__FILE__<<__LINE__ <<"白板直播成功";
 	}
 }
 
@@ -538,7 +538,7 @@ void UIVideo::slots_time()
 	if (m_iBitRate == iBitRate)
 	{
 		m_iCompareCount++;
-		qDebug() << __FILE__ << __LINE__ << "码率：" << iBitRate;
+		qDebug() << __FILE__ << __LINE__ << "码率：" << iBitRate << "次数" << m_iCompareCount;
 	}
 	else
 		m_iCompareCount = 0;
@@ -550,7 +550,6 @@ void UIVideo::slots_time()
 	{
 		if (m_NewParent)
 			m_NewParent->ErrorStopLive(this);
-
 		qDebug() << __FILE__ << __LINE__ << "自身判断失败！";
 	}
 }
@@ -560,4 +559,9 @@ void UIVideo::InitFailParam()
 	m_GetTimer->start(1000);
 	m_iBitRate = 0;
 	m_iCompareCount = 0;
+}
+
+void UIVideo::DeleteThread()
+{
+	delete m_pWorker;
 }

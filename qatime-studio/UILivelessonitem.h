@@ -19,6 +19,7 @@ public:
 	QString		m_cameraUrl;
 	QString		m_status;
 	QString		m_name;
+	bool		m_bEverytime;	// 是否为即时直播
 
 protected:
 	virtual void mouseDoubleClickEvent(QMouseEvent*);
@@ -26,7 +27,7 @@ protected:
 	virtual void leaveEvent(QEvent* e);
 
 signals:
-	void sig_doubleclick(QString,QString,QString,QString,int,QString);// 课程id,辅导班id,白板推流,摄像头推流,位置索引,课程名称
+	void sig_doubleclick(QString,QString,QString,QString,int,QString,bool);// 课程id,辅导班id,白板推流,摄像头推流,位置索引,课程名称,是否为即时直播
 
 private slots:
 	void clicked();
@@ -35,6 +36,7 @@ private:
 
 public:
 	void AddLesson(QString id, QString chatid, QString boardUrl, QString cameraUrl, QString time, QString status, QString name,int index);
+	void AddAuToDefineLesson(QString id, QString chatid, QString boardUrl, QString cameraUrl, QString time, QString status, QString name, int index, int mLessonType);
 };
 
 #endif // UILIVELESSONITEM_H

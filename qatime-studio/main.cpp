@@ -6,6 +6,7 @@
 #include <QIcon>
 #include "app_dump.h"
 #include <gdiplus.h>
+#include <QDir>
 using namespace Gdiplus;
 
 void registerMetaType()
@@ -58,6 +59,17 @@ void outputMessage(QtMsgType type, const QMessageLogContext &context, const QStr
 	mutex.unlock();
 }
 
+void CreateSaveImageDir()
+{	
+	QString mImageDirPath;
+	mImageDirPath = QDir::currentPath() + "/catch";
+	QDir mImageDir(mImageDirPath);
+	if (!mImageDir.exists())
+	{
+		mImageDir.mkdir(mImageDirPath);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	HANDLE hMutex = CreateMutex(NULL, TRUE, TEXT("QtTeacher_Mutex"));
@@ -92,6 +104,16 @@ int main(int argc, char *argv[])
 	w.setWindowFlags(Qt::FramelessWindowHint);
 	w.ReadSetting();
 	w.show();
+
+	//创建存放课程图片的文件夹
+	try
+	{
+		CreateSaveImageDir();
+	}
+	catch (...)
+	{
+		qDebug() << "fatal: CreateSaveImageDir";
+	}
 
 	return a.exec();
 }

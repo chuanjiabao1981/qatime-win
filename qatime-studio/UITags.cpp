@@ -9,7 +9,7 @@ UITags::UITags(QWidget *parent)
 	, m_boardStream("")
 	, m_cameraStream("")
 	, m_bModle(false)
-	, m_b1v1Lesson(false)
+	, m_mLessonType(1)
 {
 	ui.setupUi(this);
 	connect(ui.close_pushButton, SIGNAL(clicked()), this, SLOT(CloseDialog()));
@@ -206,12 +206,12 @@ void UITags::setModle(bool bModle)
 	}
 }
 
-void UITags::set1v1Lesson(bool b1v1Lesson)
+void UITags::setLessonType(int mLessonType)
 {
-	m_b1v1Lesson = b1v1Lesson;
+	m_mLessonType = mLessonType;
 }
 
-bool UITags::Is1v1Lesson()
+int UITags::GetLessonType()
 {
-	return m_b1v1Lesson;
+	return m_mLessonType;
 }

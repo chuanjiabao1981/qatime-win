@@ -6,6 +6,7 @@
 *   Notice       
 */
 #include "UIWorkThread.h"
+#include "QDebug.h"
 
 Worker::Worker() {
 
@@ -17,7 +18,10 @@ Worker::Worker() {
 Worker::~Worker()
 {
     m_hNlssService = NULL;
-	
+	// «Î«ÛÕ£÷π
+	workerThread.requestInterruption();
+	workerThread.quit();
+	workerThread.wait();
 }
 void Worker::SetMediaCapture(_HNLSSERVICE hNlssService)
 {
@@ -43,13 +47,19 @@ void Worker::slot_StopLiveStream()
     {
         Nlss_StopLiveStream(m_hNlssService);
     }
-    else
-        iRet = NLSS_OK;
+	else
+	{
+		iRet = NLSS_OK;
+	}
+        
     emit sig_StopResult((int)iRet);
 }
 
 void Worker::slot_StopCapture()
 {
-	Nlss_StopVideoPreview(m_hNlssService);
-	Nlss_Stop(m_hNlssService);
+	if (m_hNlssService != NULL)
+	{
+		Nlss_StopVideoPreview(m_hNlssService);
+		Nlss_Stop(m_hNlssService);
+	}
 }

@@ -6,6 +6,7 @@ Course::Course()
 }
 
 
+
 void Course::readJson(const QJsonObject &json)
 {
     mId = json["id"].toInt();

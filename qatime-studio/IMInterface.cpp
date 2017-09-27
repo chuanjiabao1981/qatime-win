@@ -6,6 +6,9 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QImage>
+#include "json.h"
+#include "ZPublicDefine.h"
+
 #define ERROR_INFO(code, error_string) QString("%1	错误代码：%2").arg(error_string).arg(code)
 
 using namespace nim;
@@ -53,6 +56,7 @@ void IMInterface::initWhiteBoard()
 
 void IMInterface::destroyRts()
 {
+	qDebug() << __FILE__ << __LINE__ << "destroyRts";
 	if (!mRtsSession_id.empty())
 	{
 		Rts::Hangup(mRtsSession_id, &CallbackHangup);
@@ -161,13 +165,26 @@ void IMInterface::createVChatRoom(const std::string &name, const std::string &cu
 
 void IMInterface::joinVChatRoom(int chatMode, const std::string &name, const std::string &json_extension /* = "" */)
 {
+	std::string json_value = json_extension;
+	if (m_LessonType == d_1V1Lesson)
+	{
+		Json::FastWriter fs;
+		Json::Value value;
+		value[nim::kNIMVChatSessionId] = "";
+		value[nim::kNIMVChatRtmpUrl] = m_BoardURL.toStdString();
+		value[nim::kNIMVChatBypassRtmp] = 1;	// 开启互动直播功能
+		value[nim::kNIMVChatRtmpRecord] = 1;
+		value[nim::kNIMVChatAudioHighRate] = 1;
+		value[nim::kNIMVChatSplitMode] = nim::kNIMVChatSplitTopHorFloating;
+		json_value = fs.write(value);
+	}
 	switch (chatMode)
 	{
 	case 1:
-		VChat::JoinRoom(kNIMVideoChatModeAudio, name, json_extension, &CallbackOpt2Call);
+		VChat::JoinRoom(kNIMVideoChatModeAudio, name, json_value, &CallbackOpt2Call);
 		break;
 	case 2:
-		VChat::JoinRoom(kNIMVideoChatModeVideo, name, json_extension, &CallbackOpt2Call);
+		VChat::JoinRoom(kNIMVideoChatModeVideo, name, json_value, &CallbackOpt2Call);
 		break;
 	default:
 		break;
@@ -271,6 +288,7 @@ void IMInterface::CustomVideoData(__int64 time, const char* data, int size, int 
 
 void IMInterface::EndLive(const std::string& sessionID)
 {
+	qDebug() << __FILE__ << __LINE__ << "EndLive";
 	Rts::Hangup(IMInterface::getInstance()->getSessionID(), &CallbackHangup);
 	VChat::End("");
 	emit IMInterface::getInstance()->PeopleStatus(true);
@@ -311,10 +329,13 @@ void CallbackConnectNotify(const std::string& session_id, int channel_type, int 
 			qDebug() << __FILE__ << __LINE__ << "rts success server discontect errorcode：" << code;
 		}
 	}
+	qDebug() << __FILE__ << __LINE__ << "rts server errorcode：" << code << "Sessionid:" << QString::fromStdString(session_id);
+	qDebug() << __FILE__ << __LINE__ << QString::fromStdString(IMInterface::getInstance()->getSessionID());
 }
 
 void CallbackHangup(nim::NIMResCode res_code, const std::string& session_id)
 {
+	qDebug() << __FILE__ << __LINE__ << "CallbackHangup错误返回值是：" << res_code;
 }
 
 void CallbackCreateConf(nim::NIMResCode res_code)
@@ -446,10 +467,12 @@ void CallbackNetDetect(int code, nim::NetDetectCbInfo info)
 // 音视频加入回调
 void CallbackOpt2Call(int code, __int64 channel_id, const std::string& json_extension)
 {
-	qDebug() << __FILE__ << __LINE__ << "音视频加入回调code：" << code << channel_id << json_extension.c_str();
+	qDebug() << __FILE__ << __LINE__ << "音视频加入回调code：" << code << QString::number(channel_id) << json_extension.c_str();
+	QString mChannelID = "";
 	if (kNIMResSuccess == code)
 	{
-		emit IMInterface::getInstance()->joinVChatSuccessfully();
+		mChannelID = QString::number(channel_id);
+		emit IMInterface::getInstance()->joinVChatSuccessfully(mChannelID);
 	}
 	else
 	{
@@ -491,6 +514,7 @@ void CallbackVideoRecData(uint64_t time, const char *data, unsigned int size, un
 
 void CallbackVChatCb(nim::NIMVideoChatSessionType type, __int64 channel_id, int code, const char *json, const void*)
 {
+	int i = 0;
 	switch (type)
 	{
 	case nim::kNIMVideoChatSessionTypeStartRes:{
@@ -520,7 +544,10 @@ void CallbackVChatCb(nim::NIMVideoChatSessionType type, __int64 channel_id, int 
 			return;
 		}
 	}break;
-	case nim::kNIMVideoChatSessionTypeNetStatus:{
+	// 网络实时状况反馈
+	case nim::kNIMVideoChatSessionTypeNetStatus:
+	{
+		emit IMInterface::getInstance()->FunctionGetNetState(code);
 	}break;
 	case nim::kNIMVideoChatSessionTypeHangupRes:{
 	}break;

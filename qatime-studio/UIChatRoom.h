@@ -27,6 +27,8 @@
 #include "nim_audio_cpp.h"
 
 
+//设置编码格式，防止中文乱码 add by zbc 20170927
+#pragma execution_character_set("utf-8")
 
 class UIMainWindow;
 class UITalk;
@@ -66,7 +68,7 @@ private:
 	static UIChatRoom				*m_pChatRoom;			//add by zbc 20170704
 	QNetworkAccessManager manager;
 	QNetworkReply *reply;
-	UITalk*							m_uitalk;			// 聊天窗的自定义聊天控件
+	
 	UITalkRecord*					m_uitalkRecord;		// 聊天记录
 
 	//表情框	
@@ -89,6 +91,7 @@ private:
 	long long						m_farst_msg_time;	// 最远得消息时间
 	int								kMsgLogNumberShow;	// 一次获取的条数
 public:
+	UITalk*							m_uitalk;			// 聊天窗的自定义聊天控件
 	/************************语音进度条**************************************/
 	UIAudioBar*						m_AudioBar;			// 语音进度条窗口
 	bool							m_bSendAudio;		// 默认发送语音
@@ -119,7 +122,7 @@ public:
 	bool							m_bPerson;			// 是否请求完成员
 	bool							m_EnvironmentalTyle;// 环境变量
 	QString							m_homePage;
-	bool							m_b1v1Lesson;
+	int								m_mLessonType;		// 辅导班类型
 	void initEmotion();
 public:
 	QString							m_TeachterName;		// 老师名字
@@ -178,6 +181,9 @@ private:
 	*/
 	static void OnTeamEventCallback(const nim::TeamEvent& result);
 
+	// 注册自定义通知回调
+	static void OnSendCustomSysmsgCallback(const nim::SendMessageArc& arc);
+
 	static void OnGetTeamInfoCb(const nim::TeamEvent& team_event);
 
 	QString		UserAppdataPath();
@@ -191,7 +197,7 @@ public:
 	void		ReceiverRecordMsg(nim::QueryMsglogResult* pMsg);	// 接收历史消息记录
 	void		ReceiverLoginMsg(const nim::LoginRes& pRes);				// 接收登录结果
 	void		ReceiverMemberMsg(std::list<nim::TeamMemberProperty>* pMemberMsg); //接收群成员信息
-	void		setCurChatID(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, QString accid, int UnreadCount,bool b1v1=false);		// 设置当前窗口会话ID,用于接收消息时比较
+	void		setCurChatID(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, QString accid, int UnreadCount,int m_LessonType);		// 设置当前窗口会话ID,用于接收消息时比较
 	std::string	GetCurChatID();
 	void		setKeyAndLogin(QString key);						// 设置appkey并登录（获取完Key之后，就可以直接登录）
 	bool		IsLogin();											// 是否登录
@@ -262,6 +268,8 @@ public slots:
 	void		returnMember();
 	void		RequestMember();												//请求成员
 	void		returnAllMember();												//返回成员
+	void		RequestExclusiveMember();										// 查询专属课成员
+	void		FinishedRequestExclusiveMember();								// 根据查询结果添加专属课成员
 	void		Request1v1Member();												//请求1v1成员
 	void		SetEnvironmental(bool EnvironmentalTyle, QString homePage);			//设置当前环境
 	QString		parse(QString str);
@@ -270,6 +278,8 @@ public slots:
 	bool		MathTime(QDateTime date);										// 计算时间
 public:
 	void		SendFullScreen(bool bType);										// false:关闭1对1屏幕共享 true;开启1对1屏幕共享
+	void		SendSelfDefineMessageScreen(bool bType, QString mTempStr);		// Scheduled: 线上直播; Instant: 即时直播
+	void		SendSelfDefineNotification(QString mType, QString mContent);	// 通过群组发送自定义通知，mType为操作类型日后作为扩展使用，目前发送白板与全屏切换消息
 private:
 	QToolButton* pPreMonthButton1;
 	QToolButton* pPreMonthButton;

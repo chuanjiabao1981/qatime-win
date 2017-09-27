@@ -6,6 +6,9 @@
 #include <QDir>
 #include "UIMessageBox.h"
 #include "IMInterface.h"
+#include "ZPublicDefine.h"
+
+QString mPublicGender;	// 保存用户性别
 
 UIMainNewWindow* m_This = NULL;
 UIMainNewWindow::UIMainNewWindow(QWidget *parent)
@@ -13,6 +16,7 @@ UIMainNewWindow::UIMainNewWindow(QWidget *parent)
 	, m_LoginWindow(NULL)
 	, m_AuxiliaryWnd(NULL)
 	, m_WindowSet(NULL)
+	, m_BIsExclusiveExcute(false)
 {
 	ui.setupUi(this);
 	m_This = this;
@@ -72,6 +76,7 @@ void UIMainNewWindow::setTeacherInfo(QJsonObject &data)
 	int iID = data["id"].toInt();
 	m_teacherID = QString::number(iID);
 	m_WindowSet->setTeacherID(m_teacherID, teacherName);
+	m_AuxiliaryWnd->m_TeacherID = m_teacherID;
 
 	// 设置老师头像
 	QString studentPhoto_url = data["avatar_url"].toString();
@@ -102,11 +107,47 @@ void UIMainNewWindow::setAutoTeacherInfo(QString studentID, QString studentName,
 	m_WindowSet->setAccid(m_accid);
 }
 
-void UIMainNewWindow::ShowLesson()
+void UIMainNewWindow::GetUserInfo()
 {
 	QString strUrl;
 	strUrl += m_homePage;
-	strUrl += "/api/v1/live_studio/teachers/{teacher_id}/schedule";
+	strUrl += "/api/v1/teachers/{teacher_id}/info";
+	strUrl.replace("{teacher_id}", m_teacherID);
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+	QString str = this->mRemeberToken;
+
+	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIMainNewWindow::FinishedGetUserInfo);
+}
+
+void UIMainNewWindow::FinishedGetUserInfo()
+{
+	QByteArray result = reply->readAll();
+	//添加网络错误判断
+	if (QJsonDocument::fromJson(result).object()["status"] == 0)
+	{
+		RequestError(QJsonDocument::fromJson(result).object()["error"].toObject());
+		return;
+	}
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QString mGender = obj["data"].toObject()["gender"].toString();
+	mPublicGender = mGender;
+	// 放到个人信息后查询
+	ShowLesson();
+}
+
+
+void UIMainNewWindow::ShowLesson()
+{
+	m_BIsExclusiveExcute = true;
+	
+
+	QString strUrl;
+	strUrl += m_homePage;
+	strUrl += "/api/v2/live_studio/teachers/{teacher_id}/schedule_data";
 	strUrl.replace("{teacher_id}", m_teacherID);
 	QUrl url = QUrl(strUrl);
 	QNetworkRequest request(url);
@@ -139,12 +180,34 @@ void UIMainNewWindow::LessonRequestFinished()
 			Lesson *lesson = new Lesson();
 			lesson->readJson(value.toObject());
 
+			QString mLessonType,mLineType;
+			mLineType = value.toObject()["model_name"].toString();
+			mLessonType = value.toObject()["product_type"].toString();
+			int mTestLessonInt = 0; // 辅助课程类型（整形），用于对应辅导班类型（宏）
+			if (mLessonType == "LiveStudio::InteractiveCourse")
+			{
+				mTestLessonInt = d_1V1Lesson;
+			}
+			else
+			if (mLessonType == "LiveStudio::Course")
+			{
+				mTestLessonInt = d_AuxiliryLesson;
+			}
+			else
+			if (mLessonType == "LiveStudio::CustomizedGroup")
+			{
+				mTestLessonInt = d_ExclusiveLesson;
+			}
+
 			QString curTime = QDateTime::currentDateTime().toString("yyyy-MM-dd");
 			//		curTime = "2017-03-01";
-			if (lesson->Date() == curTime)
+			if ((lesson->Date() == curTime) && (mLineType != "LiveStudio::OfflineLesson"))
 			{
 				if (m_AuxiliaryWnd)
-					m_AuxiliaryWnd->AddTodayAuxiliary(lesson->name(), lesson->CourseID(), lesson->CourseName(), lesson->LessonTime(), lesson->ChinaLessonStatus(), lesson->LessonID());
+				{
+					m_AuxiliaryWnd->AddTodayAuxiliary(lesson->name(), lesson->CourseID(), lesson->CourseName(), lesson->LessonTime(), lesson->ChinaLessonStatus(), lesson->LessonID(), mTestLessonInt);
+				}
+					
 
 				if (m_WindowSet)
 					m_WindowSet->AddTodayToLesson(lesson->LessonID(), lesson->CourseID(), lesson->BoardUrl(), lesson->CameraUrl(),lesson->LessonTime(),lesson->ChinaLessonStatus(),lesson->name());
@@ -155,6 +218,8 @@ void UIMainNewWindow::LessonRequestFinished()
 			delete lesson;
 		}
 	}
+	if (m_AuxiliaryWnd)
+		m_AuxiliaryWnd->LoadPic();
 
 	if (iCount == 0)
 	{
@@ -326,8 +391,116 @@ void UIMainNewWindow::Return1v1AuxiliaryRequestFinished()
 		if (m_AuxiliaryWnd)
 			m_AuxiliaryWnd->AddTodayNoLesson(UIAuxiliaryWnd::EN_1V1_LESSON);
 	}
+	// 显示专属课
+	ShowExclusive();
 }
 
+<<<<<<< Updated upstream
+=======
+void UIMainNewWindow::ShowExclusive()
+{	
+
+	QString strUrl;
+	strUrl += m_homePage;
+	strUrl += "/api/v1/live_studio/teachers/{teacher_id}/customized_groups?status=published,teaching";
+	strUrl.replace("{teacher_id}", m_teacherID);
+// 	QByteArray append("?status=teaching&per_page=");
+// 	append += "100";
+// 	strUrl += append;
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+	QString str = this->mRemeberToken;
+
+	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	reply = manager.get(request);
+	connect(reply, &QNetworkReply::finished, this, &UIMainNewWindow::ReturnExclusiveRequestFinished);
+}
+
+void UIMainNewWindow::ReturnExclusiveRequestFinished()
+{
+	// 添加背景
+	m_AuxiliaryWnd->AddWriteBoard(UIAuxiliaryWnd::EN_EXCLUSIVE_LESSON);
+	int iCount = 0;
+	QByteArray result = reply->readAll();
+	//添加网络错误判断
+	if (QJsonDocument::fromJson(result).object()["status"] == 0)
+	{
+		RequestError(QJsonDocument::fromJson(result).object()["error"].toObject());
+		return;
+	}
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonArray courses = obj["data"].toArray();
+	foreach(const QJsonValue & value, courses)
+	{
+		QJsonObject obj = value.toObject();
+		Course *course = new Course();
+		course->readJson(value.toObject());
+		QString mExclusiveImageURL, mExclusiveBoardURL, mExclusiveCameraURL, mExclusiveChatID;
+		mExclusiveImageURL = value.toObject()["publicizes_url"].toObject()["list"].toString();
+		mExclusiveBoardURL = value.toObject()["board_push_stream"].toString();
+		mExclusiveCameraURL = value.toObject()["camera_push_stream"].toString();
+		mExclusiveChatID = value.toObject()["chat_team"].toObject()["team_id"].toString();
+		if (m_AuxiliaryWnd)
+			m_AuxiliaryWnd->AddExclusive(mExclusiveImageURL, course->name(), course->Grade(), course->TeacherName(), mExclusiveChatID, course->id(), "",
+			mRemeberToken, m_TeacherName, m_AudioPath, course->status(), mExclusiveBoardURL, mExclusiveCameraURL);
+
+		iCount++;
+		delete course;
+	}
+
+	if (m_AuxiliaryWnd)
+		m_AuxiliaryWnd->LoadPicExclusive();
+	
+	
+	if (iCount == 0)
+	{
+		if (m_AuxiliaryWnd)
+			m_AuxiliaryWnd->AddTodayNoLesson(UIAuxiliaryWnd::EN_EXCLUSIVE_LESSON);
+	}
+	m_BIsExclusiveExcute = false;
+}
+
+//服务器改动相关接口机制，填加获取URL中相关信息函数
+void UIMainNewWindow::GetURLInfo(QString strUrl, QJsonObject &urlValue)
+{
+	QUrl url = QUrl(strUrl);
+	QNetworkRequest request(url);
+	QString str = this->mRemeberToken;
+	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	reply = manager.get(request);
+	int iCount = 0;
+	QByteArray result = reply->readAll();
+	//添加网络错误判断
+	if (QJsonDocument::fromJson(result).object()["status"] == 0)
+	{
+		RequestError(QJsonDocument::fromJson(result).object()["error"].toObject());
+		return;
+	}
+	QJsonDocument document(QJsonDocument::fromJson(result));
+	QJsonObject obj = document.object();
+	QJsonArray courses = obj["data"].toArray();
+	foreach(const QJsonValue & value, courses)
+	{
+		QJsonObject obj = value.toObject();
+		Course *course = new Course();
+		course->readJson(value.toObject());
+		QString mExclusiveImageURL;
+		mExclusiveImageURL = value.toObject()["publicizes_url"].toObject()["list"].toString();
+		if (m_AuxiliaryWnd)
+			m_AuxiliaryWnd->AddExclusive(mExclusiveImageURL, course->name(), course->Grade(), course->TeacherName(), course->ChatId(), course->id(), "",
+			mRemeberToken, m_TeacherName, m_AudioPath, course->status(), course->url(), course->CameraURL());
+
+		iCount++;
+		delete course;
+	}
+
+	if (m_AuxiliaryWnd)
+		m_AuxiliaryWnd->LoadPicExclusive();
+
+}
+
+>>>>>>> Stashed changes
 void UIMainNewWindow::RequestKey()
 {
 	QString strUrl;
@@ -446,7 +619,11 @@ void UIMainNewWindow::returnClick()
 	//结束线程
 	if (m_AuxiliaryWnd)
 	{
+<<<<<<< Updated upstream
 		emit m_AuxiliaryWnd->sig_Close();
+=======
+		emit m_AuxiliaryWnd->sig_Close();	
+>>>>>>> Stashed changes
 	}
 	if (m_LoginWindow)
 	{
@@ -485,11 +662,12 @@ void UIMainNewWindow::ShowCourse()
 	}
 }
 
+
 void UIMainNewWindow::CreateRoom(QString chatID, QString courseID, QString teacherID, QString token, QString studentName, std::string audioPath, QString courseName, 
-						int UnreadCount, QString status, QString boardurl, QString cameraUrl, bool b1v1Lesson)
+						int UnreadCount, QString status, QString boardurl, QString cameraUrl, int mLessonType)
 {
 	if (m_WindowSet)
-		m_WindowSet->AddChatRoom(chatID, courseID, teacherID, token, studentName, audioPath, courseName, UnreadCount, status, boardurl, cameraUrl, b1v1Lesson);
+		m_WindowSet->AddChatRoom(chatID, courseID, teacherID, token, studentName, audioPath, courseName, UnreadCount, status, boardurl, cameraUrl, mLessonType);
 }
 
 QPixmap UIMainNewWindow::TeacherPhotoPixmap()
@@ -732,5 +910,7 @@ void UIMainNewWindow::OnLogOutCallback(nim::NIMResCode res_code)
 
 void UIMainNewWindow::slot_QueryLesson()
 {
-	ShowLesson();
+	
+	GetUserInfo();
 }
+

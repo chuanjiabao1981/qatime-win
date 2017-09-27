@@ -3,11 +3,13 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QToolTip>
+#include "ZPublicDefine.h"
+#include "ZWeb.h"
 
 UILiveLessonWnd::UILiveLessonWnd(QWidget *parent)
 	: QWidget(parent)
 	, m_vecLessonItem(NULL)
-	, m_b1v1Lesson(false)
+	, m_CurrentLessonType(1)
 {
 	ui.setupUi(this);
 
@@ -53,12 +55,43 @@ bool UILiveLessonWnd::eventFilter(QObject *target, QEvent *event)
 	return false;
 }
 
-void UILiveLessonWnd::setCourseID(QString courseid, bool b1v1Lesson)
+
+
+void UILiveLessonWnd::AddEveryTimeLesson()
 {
-	m_b1v1Lesson = b1v1Lesson;
-	int i = 0;
-	if (m_vecLessonInfo.size() > 0)
+	UILiveLessonItem* item = new UILiveLessonItem(this);
+	item->AddAuToDefineLesson("", m_CourseID, m_BoardURL, m_CameraURL, "互动答疑", "", "", 0, d_ExclusiveLesson);
+	connect(item, SIGNAL(sig_doubleclick(QString, QString, QString, QString, int, QString, bool)), this, SLOT(slot_dbClick(QString, QString, QString, QString, int, QString, bool)));
+	m_VerAll->addWidget(item);
+
+	m_vecLessonItem.push_back(item);
+	// 添加到布局里
+	if (m_spacerAll == NULL)
 	{
+		m_spacerAll = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_VerAll->addSpacerItem(m_spacerAll);
+	}
+	else
+	{
+		m_VerAll->removeItem(m_spacerAll);
+		m_spacerAll = NULL;
+		m_spacerAll = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		m_VerAll->addSpacerItem(m_spacerAll);
+	}
+}
+
+void UILiveLessonWnd::setCourseID(QString courseid, int mLessonType)
+{
+	m_CurrentLessonType = mLessonType;
+	m_CourseID = courseid;
+	int i = 0;
+	if (mLessonType == d_ExclusiveLesson)
+	{
+		AddEveryTimeLesson();
+		i = i + 1;
+	}
+	if (m_vecLessonInfo.size() > 0)
+	{	
 		std::vector<LessonInfo>::iterator it;
 		for (it = m_vecLessonInfo.begin(); it != m_vecLessonInfo.end(); it++)
 		{
@@ -69,7 +102,7 @@ void UILiveLessonWnd::setCourseID(QString courseid, bool b1v1Lesson)
 				{
 					UILiveLessonItem* item = new UILiveLessonItem(this);
 					item->AddLesson(tags.m_LessonID, tags.m_CourseID, tags.m_BoardUrl, tags.m_CameraUrl, tags.m_time, tags.m_status, tags.m_name, i);
-					connect(item, SIGNAL(sig_doubleclick(QString, QString, QString, QString, int, QString)), this, SLOT(slot_dbClick(QString, QString, QString, QString, int, QString)));
+					connect(item, SIGNAL(sig_doubleclick(QString, QString, QString, QString, int, QString, bool)), this, SLOT(slot_dbClick(QString, QString, QString, QString, int, QString, bool)));
 					m_VerAll->addWidget(item);
 
 					m_vecLessonItem.push_back(item);
@@ -202,11 +235,46 @@ void UILiveLessonWnd::paintEvent(QPaintEvent *event)
 	painter.drawPath(path);
 }
 
-void UILiveLessonWnd::slot_dbClick(QString id, QString courseid, QString boardurl, QString cameraurl, int index, QString name)
+void UILiveLessonWnd::SetURLBasicInfo(QString mHomePage, QString mTeacherToken, QString mBoardURL, QString mCameraURL)
 {
+	m_homePage = mHomePage;
+	m_TeacherToken = mTeacherToken;
+	m_BoardURL = mBoardURL;
+	m_CameraURL = mCameraURL;
+}
+
+void UILiveLessonWnd::slot_dbClick(QString id, QString courseid, QString boardurl, QString cameraurl, int index, QString name, bool bEveryTime)
+{
+	// 如果点击的是即时直播
+	if (bEveryTime == true)
+	{
+		ZWeb* mZWeb = new ZWeb;
+		QString strUrl;
+		QJsonObject mUrlJson;
+
+		strUrl += m_homePage;
+		strUrl += "/api/v1/live_studio/customized_groups/{mGroupID}/instant_lessons";
+		strUrl.replace("{mGroupID}", courseid);
+		bool bPostUrl = false;
+		//bPostUrl = mZWeb.PostURLInfo(strUrl, mUrlJson, m_TeacherToken);
+		bPostUrl = mZWeb->PostURLInfo(strUrl, mUrlJson, m_TeacherToken);
+		if (bPostUrl == false)
+		{
+			//delete mZWeb;
+			return;
+		}
+		id = QString::number(mUrlJson["data"].toObject()["id"].toInt());
+		emit sig_PullStreaming(id, courseid, boardurl, cameraurl, name, m_CurrentLessonType, bEveryTime);
+		hide();
+		//delete mZWeb;
+		return;
+	}
+	emit sig_PullStreaming(id, courseid, boardurl, cameraurl, name, m_CurrentLessonType, false);
+	hide();
+/*	// 如果是第一节课直接推流 限制直播课顺序代码
 	if (index == 0)
 	{
-		emit sig_PullStreaming(id, courseid, boardurl, cameraurl,name,m_b1v1Lesson);
+		emit sig_PullStreaming(id, courseid, boardurl, cameraurl,name,m_CurrentLessonType);
 		hide();
 	}
 	else
@@ -230,7 +298,7 @@ void UILiveLessonWnd::slot_dbClick(QString id, QString courseid, QString boardur
 						changeStatus(item->m_id);
 
 						// 开始直播
-						emit sig_PullStreaming(id, courseid, boardurl, cameraurl, name, m_b1v1Lesson);
+						emit sig_PullStreaming(id, courseid, boardurl, cameraurl, name, m_CurrentLessonType);
 
 						hide();
 					}
@@ -238,6 +306,7 @@ void UILiveLessonWnd::slot_dbClick(QString id, QString courseid, QString boardur
 			}
 		}
 	}
+*/
 }
 
 void UILiveLessonWnd::changeStatus(QString id)
@@ -257,4 +326,19 @@ void UILiveLessonWnd::changeStatus(QString id)
 			}
 		}
 	}
+}
+
+void UILiveLessonWnd::focusOutEvent(QFocusEvent* e)
+{
+	QPoint pt = mapFromGlobal(QCursor::pos());
+	pt.setX(pt.x() + geometry().x());
+	pt.setY(pt.y() + geometry().y());
+	QRect rc = this->geometry();
+	if (rc.contains(pt))
+	{
+		setFocus();
+		return;
+	}
+
+	this->hide();
 }

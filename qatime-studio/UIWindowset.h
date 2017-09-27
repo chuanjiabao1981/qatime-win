@@ -138,6 +138,7 @@ public:
 	QString							m_lessonid;				// 当前直播的课程id
 	QString							m_lessonName;			// 当前直播的课程名称
 	QString							m_boardUrl;				// 当前直播的白板地址
+	QString							m_BoardPushURL;			// 1v1白板推流地址
 	QString							m_cameraUrl;			// 当前直播的摄像头地址
 	QTimer*							m_tempTimers;			// 推摄像头流
 
@@ -174,11 +175,13 @@ public:
 
 public:
 	bool							m_bQueryMsg;		// 是否在查询消息记录
+	bool							m_bEveryTime;		// 是否是即时直播，否的话是普通线上直播
 private:
 	Ui::UIWindowSet ui;
 
 signals:
 	void sig_Modle(bool bModle);
+	void sig_AddAnnouncement(QString, QString);				// 添加云信通知信号
 public slots :
 	void MaxDialog();										// 最大化
 	void MinDialog();										// 最小化
@@ -200,7 +203,7 @@ public slots :
 	void clickVideoParam();									// 摄像头参数
 	void clickRatioParam();									// 分辨率参数
 	void clickBulletParam();								// 弹幕参数
-	void slot_PullStreaming(QString, QString, QString, QString, QString,bool);	// 开始推流
+	void slot_PullStreaming(QString, QString, QString, QString, QString,int, bool);	// 开始推流
 	void slot_changeLessonStatus(QString, QString);			// 改变课程状态
 	void DeleteTag(UITags* tag);							// 删除标签	
 	void slot_onTempTimeout();								// 摄像头推流
@@ -209,7 +212,7 @@ public slots :
 	void joinRtsRoom(const std::string &);					// 加入白板房间
 	void joinRoomSuccessfully();							// 加入白板房间成功
 	void joinVChatRoom();									// 加入音视频
-	void joinVChatSuccessfully();							// 加入音视频房间成功
+	void joinVChatSuccessfully(QString mChannelID);			// 加入音视频房间成功（1v1时，参数为回放的ChannelID）
 	void errorInfo(const QString &);						// 加入失败错误信息
 	void PicData(QString,QString);									// 白板数据
 	void setDeviceInfos(int);								// 设备参数
@@ -236,6 +239,8 @@ public slots :
 	void requstError(QString);								// 白板及音视频错误提示
 	void slot_onOnlineTimeout();							// 查询在线人数
 	void slot_rtsTcpDiscontect();							// 白板链接断开
+	void slot_AddAnnouncement(QString, QString);			// 添加云信通知槽函数
+	void slot_GetNetState(int);								// 设置实时网络状态
 protected:
 	virtual void paintEvent(QPaintEvent *event);
 	virtual bool eventFilter(QObject *target, QEvent *event);
@@ -250,10 +255,10 @@ public:
 	void	setTeacherID(QString id, QString name);				// 老师ID和名字
 	void	setAccid(QString accid);							// 云信ID
 	void	AddChatRoom(QString chatID, QString courseid, QString teacherid, QString token, QString studentName, std::string strCurAudioPath,
-					QString name, int UnreadCount, QString status, QString boardurl, QString cameraUrl, bool b1v1Lesson = false); // 创建聊天
+					QString name, int UnreadCount, QString status, QString boardurl, QString cameraUrl, int mLessonType = 1); // 创建聊天
 	bool	IsHasTag(QString chatID, QString status);			// 此辅导班是否创建标签
 	UIChatRoom* IsHasRoom(QString chatID);						// 此辅导班聊天室是否创建
-	void	AddTag(QString chatID, QString name, QString ID, bool sel, UIChatRoom* room, QString status,bool b1v1Lesson, QString board, QString camera);// 添加标签窗口, 参数sel是否选中此标签
+	void	AddTag(QString chatID, QString name, QString ID, bool sel, UIChatRoom* room, QString status, int mLessonType, QString board, QString camera);// 添加标签窗口, 参数sel是否选中此标签
 	void	titleButtonWidth();
 	QPixmap TeacherPhotoPixmap();								// 老师头像	
 	void    AgainSelectTag();									// 重新选择标签
@@ -265,6 +270,8 @@ public:
 	QPushButton*	GetPersonBtn();
 	QPushButton*	GetCourseBtn();
 	void	QueryNotice();										// 查询公告
+	void	QueryNoticeFromYX();								// 从云信查询公告
+	static void	QueryTeamInfoCallback(const std::string& tid, const nim::TeamInfo& result);	//使用回调函数添加从云信查来的公告
 	void	returnNotice();										// 返回公告
 	void	QueryCourse();										// 查询辅导简介
 	void	returnCourse();										// 返回简介
@@ -272,6 +279,7 @@ public:
 	void	returnLesson();										// 返回课程
 	void	QueryPerson();										// 查询成员
 	void    setLiveBtnEnable(bool bEnable);						// 设置直播按钮样式状态
+	void	SendFrameStatusToWebService();						// 1v1切换分享屏幕时，发送切换状态到web服务器
 
 	/*************************云信聊天**************************/
 	void	initCallBack();
@@ -328,10 +336,10 @@ public:
 	/***************************互动直播*****************************/
 	void	OpenCourse(QString chatID, QString courseid, QString teacherid, QString token, QString studentName,
 				std::string strCurAudioPath, QString courseName, int UnreadCount, QString status,
-				QString boardurl, QString cameraUrl, bool b1v1Lesson);// 打开辅导班
+				QString boardurl, QString cameraUrl, int mLessonType);// 打开辅导班
 	void	OpenCourse1v1(QString chatID, QString courseid, QString teacherid, QString token, QString studentName,
 				std::string strCurAudioPath, QString courseName, int UnreadCount, QString status,
-				QString boardurl, QString cameraUrl, bool b1v1Lesson);// 打开互动直播
+				QString boardurl, QString cameraUrl, int mLessonType);// 打开互动直播
 	void	createRtsRoom(const QString &roomName, const QString &roomInfo = "");// 创建白板链接
 	void	InitSetParamWnds();										  // 打开摄像头参数、麦克风等窗口
 	void	initWhiteBoardWidget();									  // 初始化白板

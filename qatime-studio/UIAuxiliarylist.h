@@ -30,7 +30,7 @@ private:
 	QString				m_cameraUrl;
 
 	Worker*				m_pWorker;
-	bool				m_b1v1Lesson;	// 是否是1v1辅导班
+	int					m_LessonType;	// 辅导班类型
 
 public:
 	QString				PicUrl();
@@ -44,7 +44,7 @@ public:
 	QString				StudentName();
 	QString				Status();
 	int					UnreadMsgCount();
-	bool				Is1v1Lesson();
+	int					GetLessonType();
 	QString				BoardUrl();
 	QString				CameraUrl();
 
@@ -58,8 +58,9 @@ protected:
 	virtual void leaveEvent(QEvent* e);
 
 public:
+	// 默认听课类型为直播课(1-直播课 2-1V1 3-专属课) add by zbc 20170802
 	QLabel* AddCourse(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
-		QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl, bool b1v1Lesson = false); // 新建辅导班
+		QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl, int mLessonType = 1); // 新建辅导班
 
 	void AddMsgCount();			// 改变消息个数
 	void ClearMsgNumber();		// 清空消息数

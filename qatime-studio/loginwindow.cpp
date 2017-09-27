@@ -35,6 +35,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 	, m_TrayMenu(NULL)
 	, m_EnvironmentalFormally(true)
 {
+	
 	ui.setupUi(this);
 	setAutoFillBackground(true);;
 	QPalette p = palette();
@@ -43,7 +44,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 
 	// 检查环境
 	SetEnvironmental();
-
+	
 	connect(ui.login_pushBtn, SIGNAL(clicked()), this, SLOT(OnLogIn()));
 	connect(ui.homepage_pushBtn, SIGNAL(clicked()), this, SLOT(BrowseHomePage()));
 	connect(ui.register_pushBtn, SIGNAL(clicked()), this, SLOT(RegisterAccount()));
@@ -51,7 +52,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 	connect(ui.min_pushBtn, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.close_pushBtn, SIGNAL(clicked()), this, SLOT(CloseDialog()));
 	connect(ui.remember_checkBox, SIGNAL(stateChanged(int)), this, SLOT(changedRemeber(int)));
-
+	
 	ui.UserName_Edit->setTextMargins(45, 3, 20, 3); 
 	ui.UserName_Edit->setStyleSheet("QLineEdit:hover{ border: 1px solid #57cff8 }"
 		"QLineEdit{ border: 1px solid #cccccc }");
@@ -84,6 +85,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 	m_TrayMenu->setWindowFlags(Qt::FramelessWindowHint);
 	m_TrayMenu->SetMainWindow(this);
 	m_TrayMenu->hide();
+	
 }
 
 LoginWindow::~LoginWindow()
@@ -156,7 +158,7 @@ void LoginWindow::OnLogIn()
 	append.append("&login_account=");
 	append += ui.UserName_Edit->text();
 	append.append("&password=");
-	qInfo(append);
+	qInfo(append, __FILE__, __LINE__);
 	append += str;
 	append.append("&client_cate=teacher_live");
 	
@@ -170,6 +172,16 @@ void LoginWindow::loginFinished()
 {
 	QString strError;
 	QByteArray result = reply->readAll();
+	int mNetErrorCode = reply->error();
+	if (mNetErrorCode != QNetworkReply::NoError)
+	{
+		strError = QString("登录超时，请检查网络或者防火墙设置！");
+		qDebug() << __FILE__ << __LINE__ << mNetErrorCode;
+		ui.ErrorTip_Label->setText(strError);
+		RemeberPassword();
+		Logining(false);
+		return;
+	}
 	QJsonDocument document(QJsonDocument::fromJson(result));
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
@@ -221,7 +233,7 @@ void LoginWindow::loginFinished()
 		strError = QString("找不到资源");
 	else if (mErrorCode == 9999)
 		strError = QString("服务器错误");
-	else
+	else 
 		strError = QString("用户名或密码不正确");
 
 	ui.ErrorTip_Label->setText(strError);
@@ -258,6 +270,7 @@ void LoginWindow::MinDialog()
 
 void LoginWindow::CloseDialog()
 {
+	CloseTray();	// 关闭小图标
 	close();
 }
 

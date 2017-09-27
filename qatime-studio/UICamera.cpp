@@ -195,9 +195,9 @@ UICamera::UICamera(QWidget *parent)
 	m_pWorker = new Worker();
 	connect(this, SIGNAL(sig_StartLiveStream()), m_pWorker, SLOT(slot_StartLiveStream()));
 	connect(m_pWorker, SIGNAL(sig_ResultReady(int)), this, SLOT(slot_FinishStartLiveStream(int)));
-	connect(this, SIGNAL(sig_StopLiveStream()), m_pWorker, SLOT(slot_StopLiveStream()));
+	connect(this, SIGNAL(sig_StopLiveStream()), m_pWorker, SLOT(slot_StopLiveStream()), Qt::DirectConnection);
 	connect(m_pWorker, SIGNAL(sig_StopResult(int)), this, SLOT(slot_FinishStopLiveStream(int)));
-	connect(this, SIGNAL(sig_StopCapture()), m_pWorker, SLOT(slot_StopCapture()));
+	connect(this, SIGNAL(sig_StopCapture()), m_pWorker, SLOT(slot_StopCapture()), Qt::DirectConnection);
 #endif
 
 	//创建mediacapture类，失败抛出错	
@@ -789,4 +789,9 @@ void UICamera::refurbish()
 	Nlss_ChildVideoSetBackLayer(hChildVideoService1);
 	Nlss_ChildVideoStartCapture(hChildVideoService1);
 	Nlss_StartVideoPreview(m_hNlssService);
+}
+
+void UICamera::DeleteThread()
+{
+	delete m_pWorker;
 }

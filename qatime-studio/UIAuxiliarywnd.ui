@@ -372,6 +372,53 @@ QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/
            </property>
           </widget>
          </item>
+<<<<<<< Updated upstream
+=======
+         <item>
+          <widget class="QRadioButton" name="rBExclusive">
+           <property name="minimumSize">
+            <size>
+             <width>31</width>
+             <height>23</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>31</width>
+             <height>23</height>
+            </size>
+           </property>
+           <property name="cursor">
+            <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="toolTip">
+            <string>专属课程</string>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QRadioButton:checked {border-image: url(:/LoginWindow/images/Exclusive_hover.png);}
+
+QRadioButton:unchecked {border-image: url(:/LoginWindow/images/Exclusive_nor.png);}
+
+QRadioButton:unchecked:hover {border-image: url(:/LoginWindow/images/Exclusive_hover.png);}
+
+QRadioButton::indicator:checked {border-image: url(:/LoginWindow/images/.png);}
+
+QRadioButton::indicator:unchecked {border-image: url(:/LoginWindow/images/.png);}
+
+QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/.png);}</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+>>>>>>> Stashed changes
         </layout>
        </widget>
       </item>
