@@ -569,14 +569,8 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 /*
 		if (m_newParent)
 			m_newParent->ErrorStop();
-		qDebug() << "DumpAtRequestError 1";
 		StopTimer();
-<<<<<<< Updated upstream
-		qDebug() << "DumpAtRequestError 2";
-		strError = QString("授权过期,请重新登录！");
-=======
 		
->>>>>>> Stashed changes
 
 		int iStatus = CMessageBox::showMessage(
 			QString("答疑时间"),

@@ -2908,11 +2908,7 @@ void UIChatRoom::slot_AutoPlayAudio()
 		m_AutoAudioState = 0;
 		return;
 	}
-<<<<<<< Updated upstream
-	qDebug() << "AutoAudioState is " << m_AutoAudioState;
-=======
 	qDebug() << __FILE__ << __LINE__ << "AutoAudioState is " << m_AutoAudioState;
->>>>>>> Stashed changes
 
 }
 

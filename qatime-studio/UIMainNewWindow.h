@@ -99,14 +99,11 @@ public:
 	void	AuxiliaryRequestFinished();						// 返回全部课程
 	void    Show1v1Auxiliary();								// 1v1课程
 	void    Return1v1AuxiliaryRequestFinished();			// 返回1v1课程
-<<<<<<< Updated upstream
-=======
 	void	ShowExclusive();								// 专属课程
 	void	ReturnExclusiveRequestFinished();				// 返回专属课程列表
 	void	GetUserInfo();									// 个人信息http请求
 	void	FinishedGetUserInfo();							// 获取个人信息
 
->>>>>>> Stashed changes
 	void    CloseDialog();									// 关闭窗口
 	bool	IsMayClose();									// 是否可以关闭窗口
 	void    ShowCourse();									// 显示辅导班
@@ -125,10 +122,7 @@ public:
 	void	changeMsgNumber(QString chid);
 	void	LogOut();										// 退出云信登录
 	void	RequestError(QJsonObject &error);				// 检测网络错误
-<<<<<<< Updated upstream
-=======
 	void	GetURLInfo(QString strUrl, QJsonObject &urlValue);		// 获取URL相关信息
->>>>>>> Stashed changes
 
 signals:
 	void sig_QueryLesson();									// 查询课程

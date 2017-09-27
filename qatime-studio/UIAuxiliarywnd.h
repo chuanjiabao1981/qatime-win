@@ -53,6 +53,11 @@ private:
 	QVBoxLayout*						m_Ver1v1;
 	QSpacerItem*						m_spacer1v1;
 
+	// 专属课程布局
+	QWidget*							m_ExclusiveView;
+	QVBoxLayout*						m_VerExclusive;
+	QSpacerItem*						m_spacerExclusive;
+
 	// 加载图片线程
 	WorkerPic*							m_pWorker;		// 加载全部辅导班图片
 	WorkerPic*							m_pWorker1v1;	// 加载1v1辅导班图片
@@ -86,6 +91,7 @@ signals:
 	void	MinDialog();
 	void	CloseDialog();
 	void    clickPic();
+	void	clickExculsive();
 
 public:
 	void	setMainWindow(UIMainNewWindow* parent);
@@ -94,12 +100,9 @@ public:
 		QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl);
 	void    Add1v1Auxiliary(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
 		QString studentName, std::string AudioPath, QString status);
-<<<<<<< Updated upstream
-=======
 	void	AddExclusive(QString picUrl, QString courseName, QString grade, QString teacherName, QString chatID, QString courseID, QString teacherID, QString token,
 		QString studentName, std::string AudioPath, QString status, QString url, QString cameraUrl);
 
->>>>>>> Stashed changes
 	void	SetToken(QString mRemeberToken);
 	QPixmap setTeacherUrl(QString url);
 	void	setTeacherName(QString TeacherName);

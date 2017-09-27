@@ -38,8 +38,6 @@
 	#define _DEBUG
 #else
 #endif
-
-
 UIMainWindow::UIMainWindow(QWidget *parent)
 	: QWidget(parent)
 	, m_VideoInfo(NULL)
@@ -148,7 +146,6 @@ UIMainWindow::UIMainWindow(QWidget *parent)
 //	m_BulletScreen->setMainWindow(this);
 	m_BulletScreen->hide();
 	SetWindowPos((HWND)m_BulletScreen->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-
 
 	m_HoverWnd = new UIHoverWindow();
 	m_HoverWnd->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);

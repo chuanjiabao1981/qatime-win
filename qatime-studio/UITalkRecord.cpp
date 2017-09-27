@@ -812,7 +812,7 @@ void UITalkRecord::InsertBtn()
 	m_btn->setText("点击查看更多消息");
 	m_btn->setFont(font);
 	m_btn->setFixedHeight(30);
-	m_btn->setStyleSheet("color: rgb(153, 153, 153);");
+	m_btn->setStyleSheet("color: rgb(153, 153, 153);border:none");
 	connect(m_btn, SIGNAL(clicked()), this, SLOT(slot_Btnclicked()));
 
 	m_btnLayout->addWidget(m_btn);

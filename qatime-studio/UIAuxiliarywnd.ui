@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>283</width>
+    <width>324</width>
     <height>691</height>
    </rect>
   </property>
@@ -372,8 +372,6 @@ QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/
            </property>
           </widget>
          </item>
-<<<<<<< Updated upstream
-=======
          <item>
           <widget class="QRadioButton" name="rBExclusive">
            <property name="minimumSize">
@@ -418,7 +416,6 @@ QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/
            </property>
           </widget>
          </item>
->>>>>>> Stashed changes
         </layout>
        </widget>
       </item>
@@ -515,7 +512,60 @@ QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>82</width>
+              <width>69</width>
+              <height>592</height>
+             </rect>
+            </property>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="Exclusive_widget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>600</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-image: url(:/LoginWindow/images/alpha.png);</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>5</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>5</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QScrollArea" name="Exclusive_scrollArea">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents_4">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>69</width>
               <height>592</height>
              </rect>
             </property>
@@ -559,7 +609,7 @@ QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>83</width>
+              <width>69</width>
               <height>592</height>
              </rect>
             </property>
@@ -610,7 +660,7 @@ QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>82</width>
+              <width>69</width>
               <height>592</height>
              </rect>
             </property>

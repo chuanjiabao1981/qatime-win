@@ -48,6 +48,15 @@ UIAuxiliaryWnd::UIAuxiliaryWnd(QWidget *parent)
 	ui.live1V1_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	style(ui.live1V1_scrollArea);
 
+	// 设置专属课程垂直布局
+	m_ExclusiveView = new QWidget();
+	ui.Exclusive_scrollArea->setWidget(m_ExclusiveView);
+	m_VerExclusive = new QVBoxLayout(m_ExclusiveView);
+	m_VerExclusive->setSpacing(0);
+	m_VerExclusive->setContentsMargins(5, 5, 0, 0);
+	ui.Exclusive_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	style(ui.Exclusive_scrollArea);
+
 	ui.scrollArea->installEventFilter(this);
 	ui.today_scrollArea->installEventFilter(this);
 	ui.title_pushButton->installEventFilter(this);
@@ -57,6 +66,7 @@ UIAuxiliaryWnd::UIAuxiliaryWnd(QWidget *parent)
 	connect(ui.today_radioButton, SIGNAL(clicked()), this, SLOT(clickToday()));
 	connect(ui.all_radioButton, SIGNAL(clicked()), this, SLOT(clickAll()));
 	connect(ui.live1V1_pushButton, SIGNAL(clicked()), this, SLOT(click1V1()));
+	connect(ui.rBExclusive, SIGNAL(clicked()), this, SLOT(clickExculsive()));
 	connect(ui.min_pushButton, SIGNAL(clicked()), this, SLOT(MinDialog()));
 	connect(ui.close_pushButton, SIGNAL(clicked()), this, SLOT(CloseDialog()));
 //	connect(ui.pic_btn, SIGNAL(clicked()), this, SLOT(clickPic()));
@@ -69,16 +79,15 @@ UIAuxiliaryWnd::UIAuxiliaryWnd(QWidget *parent)
 	connect(this, SIGNAL(sig_Start1v1Loading()), m_pWorker1v1, SLOT(slot_StartLoading()));
 	connect(this, SIGNAL(sig_Close()), m_pWorker1v1, SLOT(slot_Close()));
 
-<<<<<<< Updated upstream
-=======
 	//创建专属课图片下载线程
 	m_pWorkerExclusive = new WorkerPic(); 
 	connect(this, SIGNAL(sig_StartExclusiveLoading()), m_pWorkerExclusive, SLOT(slot_StartLoading()));
 	connect(this, SIGNAL(sig_Close()), m_pWorkerExclusive, SLOT(slot_Close()));
 
->>>>>>> Stashed changes
 	ui.live1V1_widget->setVisible(false);
 	ui.all_widget->setVisible(false);
+	ui.Exclusive_widget->setVisible(false);	//add by zbc 20170724
+	this->setFixedWidth(283);				//固定界面框大小为283
 	m_UIMenu = new UIMenu(this);
 	m_UIMenu->SetMainParent(this);
 	m_UIMenu->hide();
@@ -219,6 +228,7 @@ void UIAuxiliaryWnd::clickToday()
 	ui.today_widget->setVisible(true);
 	ui.live1V1_widget->setVisible(false);
 	ui.all_widget->setVisible(false);
+	ui.Exclusive_widget->setVisible(false);
 }
 
 void UIAuxiliaryWnd::clickAll()
@@ -226,6 +236,7 @@ void UIAuxiliaryWnd::clickAll()
 	ui.live1V1_widget->setVisible(false);
 	ui.today_widget->setVisible(false);
 	ui.all_widget->setVisible(true);
+	ui.Exclusive_widget->setVisible(false);
 }
 
 void UIAuxiliaryWnd::click1V1()
@@ -233,8 +244,6 @@ void UIAuxiliaryWnd::click1V1()
 	ui.today_widget->setVisible(false);
 	ui.all_widget->setVisible(false);
 	ui.live1V1_widget->setVisible(true);
-<<<<<<< Updated upstream
-=======
 	ui.Exclusive_widget->setVisible(false);
 }
 
@@ -290,7 +299,6 @@ void UIAuxiliaryWnd::AddExclusive(QString picUrl, QString courseName, QString gr
 		m_spacerExclusive = new QSpacerItem(5, 5, QSizePolicy::Minimum, QSizePolicy::Expanding);
 		m_VerExclusive->addSpacerItem(m_spacerExclusive);
 	}
->>>>>>> Stashed changes
 }
 
 void UIAuxiliaryWnd::AddTodayAuxiliary(QString lessonName, QString courseID, QString courseName, QString time, QString status, QString lessonid, int mLessonType)

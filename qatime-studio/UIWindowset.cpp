@@ -20,7 +20,6 @@ extern int		m_AutoAudioState;
 extern bool		m_IsAudioPlaying;
 int m_PublicCameraStatus;	// 1v1直播时，摄像头状态（1打开，0关闭），用于判断教师是否进行了白板和桌面的切换
 
-
 #define MAINWINDOW_X_MARGIN 10
 #define MAINWINDOW_Y_MARGIN 10
 #define MAINWINDOW_TITLE_HEIGHT 0
@@ -169,7 +168,6 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	m_BulletScreen->setMainWindow(this);
 	m_BulletScreen->hide();
 	SetWindowPos((HWND)m_BulletScreen->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-
 
 	ui.live1v1_widget->setVisible(false);
 	ChangeBtnStyle(false);
@@ -2225,20 +2223,14 @@ void UIWindowSet::ErrorStop()
 	{
 		m_CameraInfo->StopLiveVideo();
 		m_CameraInfo->StopCaptureVideo();
-<<<<<<< Updated upstream
-=======
 		m_CameraInfo->DeleteThread();	// add by zbc 20170920
->>>>>>> Stashed changes
 	}
 		
 	if (m_VideoInfo)
 	{
 		m_VideoInfo->StopLiveVideo();
 		m_VideoInfo->StopCaptureVideo();
-<<<<<<< Updated upstream
-=======
 		m_VideoInfo->DeleteThread();	// add by zbc 20170920
->>>>>>> Stashed changes
 	}
 		
 }

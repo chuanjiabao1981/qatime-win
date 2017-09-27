@@ -395,8 +395,6 @@ void UIMainNewWindow::Return1v1AuxiliaryRequestFinished()
 	ShowExclusive();
 }
 
-<<<<<<< Updated upstream
-=======
 void UIMainNewWindow::ShowExclusive()
 {	
 
@@ -500,7 +498,6 @@ void UIMainNewWindow::GetURLInfo(QString strUrl, QJsonObject &urlValue)
 
 }
 
->>>>>>> Stashed changes
 void UIMainNewWindow::RequestKey()
 {
 	QString strUrl;
@@ -619,11 +616,7 @@ void UIMainNewWindow::returnClick()
 	//Ω· ¯œﬂ≥Ã
 	if (m_AuxiliaryWnd)
 	{
-<<<<<<< Updated upstream
-		emit m_AuxiliaryWnd->sig_Close();
-=======
 		emit m_AuxiliaryWnd->sig_Close();	
->>>>>>> Stashed changes
 	}
 	if (m_LoginWindow)
 	{
