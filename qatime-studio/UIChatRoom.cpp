@@ -2921,7 +2921,6 @@ void UIChatRoom::slot_AutoPlayAudio()
 		return;
 	}
 	qDebug() << __FILE__ << __LINE__ << "AutoAudioState is " << m_AutoAudioState;
-
 }
 
 // 做个保险机制
