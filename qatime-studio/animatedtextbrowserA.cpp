@@ -34,6 +34,7 @@ void AnimatedTextBrowserA::slot_onTimeout()
 	{
 		int h = this->document()->size().rheight();
 		this->setFixedHeight(h);
+		m_bTimer = false;  // 如果滚动条已消失，则设置为不需要再改变自身状态 add by zbc 20171013
 	}
 
 	emit sig_scrollDown();
@@ -95,7 +96,7 @@ void AnimatedTextBrowserA::mousePressEvent(QMouseEvent *e)
 
 void AnimatedTextBrowserA::autoHeight()
 {
-//	m_timer->start(200);
+	m_timer->start(200);
 }
 
 void AnimatedTextBrowserA::paintEvent(QPaintEvent *e)

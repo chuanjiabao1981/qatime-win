@@ -711,7 +711,6 @@ bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, lo
 		{
 			MSG* Msg = pMsg;
 			nim::IMMessage* pIMsg = (nim::IMMessage*)Msg->wParam;
-
 			if (m_WindowSet)
 			{
 				m_WindowSet->ReceiverMsg(pIMsg);

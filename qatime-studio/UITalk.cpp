@@ -132,17 +132,20 @@ void UITalk::InsertChat(QPixmap* pixmap, QString name, QString time, QString tex
 	// 第二行（聊天内容）
 	QHBoxLayout* SecRow = new QHBoxLayout();
 	SecRow->setContentsMargins(30, 0, 10, 0);
+
 	if (isDigitStr(text))
 	{
-		AnimatedTextBrowserA* Text = new AnimatedTextBrowserA(true, this);
-		Text->setOpenLinks(true);
-		Text->setMinimumWidth(245);
-		Text->setFont(font);
-		Text->setStyleSheet("color: rgb(85, 85, 85);");
-		Text->append(text);
-		SecRow->addWidget(Text);
-		Text->autoHeight();
-		connect(Text, SIGNAL(sig_scrollDown()), this, SLOT(slot_scrollDown()));
+		AnimatedTextBrowserA* mText = new AnimatedTextBrowserA(true, this);
+		mText->setOpenLinks(true);
+		mText->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);	//设置滚动条不可见 add by zbc 20171013
+		mText->setFrameShape(QFrame::NoFrame);
+		mText->setMinimumWidth(245);
+		mText->setFont(font);
+		mText->setStyleSheet("color: rgb(85, 85, 85);");
+		mText->append(text);
+		SecRow->addWidget(mText);
+		mText->autoHeight();
+		connect(mText, SIGNAL(sig_scrollDown()), this, SLOT(slot_scrollDown()));
 	}
 	else
 	{
@@ -522,9 +525,6 @@ void UITalk::InsertPic(QPixmap* pixmap, QString name, QString time, QString url,
 		m_Ver->addSpacerItem(m_spacer);
 	}
 
-//	m_timerDelay->start(TIME_DELAY);
-// 	sleep(50);
-// 	ScrollDown();
 }
 
 // 插入图片聊天信息
@@ -696,6 +696,8 @@ void UITalk::InsertEmoji(QPixmap* pixmap, QString name, QString time, QString te
 	SecRow->setContentsMargins(30, 0, 0, 0);
 
 	AnimatedTextBrowserA* Anim = new AnimatedTextBrowserA(true,this);
+	Anim->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);	//设置滚动条不可见 add by zbc 20171013
+	Anim->setFrameShape(QFrame::NoFrame);
 	Anim->setOpenLinks(true);
 	Anim->setMinimumWidth(240);
 	Anim->setFont(font);
@@ -1095,6 +1097,8 @@ void UITalk::InsertNewNotice(QString name, QString text)
 	SecRow->setContentsMargins(30, 0, 30, 0);
 
 	AnimatedTextBrowserA* EditNotice = new AnimatedTextBrowserA(true, this);
+	EditNotice->setOpenLinks(true);
+	EditNotice->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);	//设置滚动条不可见 add by zbc 20171013
 	EditNotice->setText(text);
 	EditNotice->setFont(font1);
 	EditNotice->setStyleSheet("color: rgb(102,102,102);border-radius:5px;border-image:url(./images/notice_back.png);"); //学生名字颜色

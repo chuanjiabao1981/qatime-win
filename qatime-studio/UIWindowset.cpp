@@ -903,7 +903,7 @@ void UIWindowSet::DeleteTag(UITags* tag)
 							mWhiteBoard->cleanUp();
 					}
 					else 
-					if (tags->GetLessonType() == d_AuxiliryLesson)	// 是直播课
+						if ((tags->GetLessonType() == d_AuxiliryLesson) || (tags->GetLessonType() == d_ExclusiveLesson))  // 是直播课或者专属课
 					{
 						m_CameraInfo->StopCaptureVideo();
 						m_VideoInfo->StopCaptureVideo();
@@ -2262,7 +2262,16 @@ void UIWindowSet::AudioStatus(int iStatus)
 {
 	if (iStatus)
 	{
-		m_VideoInfo->SetPauseAudio(NULL);
+		try
+		{
+			m_VideoInfo->SetPauseAudio(NULL);
+		}
+		catch (...)
+		{
+			qDebug() << __FILE__ << __LINE__ << "音频结束失败" << "状态值为："<< iStatus;
+			m_VideoInfo->SetPauseAudio(NULL);
+		}
+		
 	}
 	else
 	{
@@ -3019,6 +3028,7 @@ void UIWindowSet::setAudioChange1v1(QString path)
 	{
 		if (!path.isNull())
 		{
+			
 			IMInterface::getInstance()->endDevice(AudioDevice);
 			IMInterface::getInstance()->startDevice(AudioDevice, path.toStdString(), 0, 0, 0);
 		}

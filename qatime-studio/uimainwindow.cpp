@@ -797,7 +797,6 @@ bool UIMainWindow::nativeEvent(const QByteArray &eventType, void *message, long 
 		{
 		case MSG_CLIENT_RECEIVE:  // 接收聊天消息
 		{
-			qDebug() << "接收到消息";
 			MSG* Msg = pMsg;
 			nim::IMMessage* pIMsg = (nim::IMMessage*)Msg->wParam;
 

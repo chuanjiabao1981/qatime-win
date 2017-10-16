@@ -122,14 +122,16 @@ void UITalkRecord::InsertChat(QPixmap* pixmap, QString name, QString time, QStri
 	SecRow->setContentsMargins(30, 0, 0, 0);
 	if (isDigitStr(text))
 	{
-		AnimatedTextBrowser* Text = new AnimatedTextBrowser(this);
-		Text->setFont(font);
-		Text->append(text);
-		Text->setStyleSheet("color: rgb(85, 85, 85);");
-		Text->setFixedHeight(Text->document()->size().height());
-		Text->autoHeight();
-		connect(Text, SIGNAL(sig_scrollDown()), this, SLOT(slot_scrollDown()));
-		SecRow->addWidget(Text);
+		AnimatedTextBrowser* mText = new AnimatedTextBrowser(this);
+		mText->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);	//设置滚动条不可见 add by zbc 20171013
+		mText->setFrameShape(QFrame::NoFrame);
+		mText->setFont(font);
+		mText->append(text);
+		mText->setStyleSheet("color: rgb(85, 85, 85);");
+		mText->setFixedHeight(mText->document()->size().height());
+		mText->autoHeight();
+		connect(mText, SIGNAL(sig_scrollDown()), this, SLOT(slot_scrollDown()));
+		SecRow->addWidget(mText);
 	}
 	else
 	{
@@ -515,6 +517,9 @@ void UITalkRecord::InsertEmoji(QPixmap* pixmap, QString name, QString time, QStr
 	SecRow->setContentsMargins(30, 0, 0, 0);
 
 	AnimatedTextBrowserA* Anim = new AnimatedTextBrowserA(true,this);
+	Anim->setOpenLinks(true);
+	Anim->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);	//设置滚动条不可见 add by zbc 20171013
+	Anim->setFrameShape(QFrame::NoFrame);
 	Anim->setOpenLinks(true);
 	Anim->setMinimumWidth(263);
 	Anim->setFont(font);
