@@ -804,8 +804,11 @@ void UIChatRoom::PackageMsg(nim::IMMessage &msg)
 bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 {
 	bool bValid = false;
+	
+	/*// 不接受超时5分钟的消息
 	if (MathTime(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_)))
 		return bValid;
+	*/
 #pragma region 过滤系统消息
 	if (pMsg->type_ == nim::kNIMMessageTypeNotification) // 过滤系统消息
 	{
@@ -879,6 +882,10 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 		mType = mJson["type"].asString();
 		mContentBody = mJson["body"].asString();
 		mTitle = mJson["title"].asString();
+		if (mTitle == "")
+		{
+			return false;
+		}
 		mEvent = mJson["event"].asString();
 		mTaskID = mJson["taskable_id"].asString();
 		std::string strID = pMsg->sender_accid_;
@@ -912,8 +919,6 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 	}
 #pragma endregion
 
-	
-
 	// 判断当前过来的消息，是不是此会话窗口
 	if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0 && pMsg->type_ == nim::kNIMMessageTypeText)
 	{
@@ -938,7 +943,10 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 		if (IsHasFace(qContent))
 			m_uitalk->InsertEmoji(img, qName, qTime, qContent, false);
 		else
+		{
 			m_uitalk->InsertChat(img, qName, qTime, qContent, false);
+		}
+			
 		bValid = true;
 	}
 	else if (strcmp(pMsg->local_talk_id_.c_str(), m_CurChatID.c_str()) == 0 && pMsg->type_ == nim::kNIMMessageTypeImage)
@@ -1239,6 +1247,10 @@ void UIChatRoom::ShowMsg(nim::IMMessage pMsg)
 		mType = mJson["type"].asString();
 		mContentBody = mJson["body"].asString();
 		mTitle = mJson["title"].asString();
+		if (mTitle == "")
+		{
+			return ;
+		}
 		mEvent = mJson["event"].asString();
 		mTaskID = mJson["taskable_id"].asString();
 		std::string strID = pMsg.sender_accid_;
