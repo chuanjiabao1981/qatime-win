@@ -500,16 +500,10 @@ void UIChatRoom::clickSendMessage()
 	SendSelfDefineMessageScreen(true, mOnlineState1);
 	SendSelfDefineMessageScreen(true, mOnlineState1);
 	return;
+	SendSelfDefineNotification("SwitchVedioObject", "Board");
+	ui.textEdit->toPlainText() == "2"
 */
 
-	SendSelfDefineNotification("SwitchVedioObject", "Board");
-	//return;
-	// Test 测试
-// 	if (ui.textEdit->toPlainText() == "2")
-// 	{
-// 		SendFullScreen(false);
-// 		return;
-// 	}
 	if (strcmp(m_CurChatID.c_str(),"") == 0)
 	{
 		QToolTip::showText(QCursor::pos(), "请选择直播间！");
@@ -1000,9 +994,15 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 		std::string msgid;	// 当前消息ID
 		Json::Value values;
 		Json::Reader reader;
+		std::string mTempPath;	// 用于存储前一个语音的MD5值
 		if (reader.parse(pMsg->attach_, values) && values.isObject())
 		{
 			path = values["md5"].asString();
+			// IM会重复发送多条语音消息过来，这边对于重复的语音做忽略处理 add by zbc 20171026
+			if (path == mTempPath)
+			{
+				return bValid;
+			}
 			path = m_AudioPath + path;
 			sid = pMsg->local_talk_id_;
 			msgid = pMsg->client_msg_id_;
@@ -1028,7 +1028,7 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 		if (Buddy)
 			img = (QPixmap*)Buddy->head->pixmap();
 
-
+		mTempPath = path;
 		m_uitalk->InsertAudioChatNew(img, qName, qTime, qduration, path, sid, msgid, false, false);
 		
 		m_parent->SendStudentBullet(qName, "[语音消息]", QString::fromStdString(m_CurChatID));
@@ -2910,8 +2910,7 @@ void UIChatRoom::slot_AutoPlayAudio()
 		m_AutoAudioState = 1;
 		m_IsAudioPlaying = false;
 		ui.Btn_AutoAudio->setStyleSheet("QPushButton{border-image:url(./images/AutoAudio1.png);}");
-		//m_uitalk->AutoPlayAudio();	20170712屏蔽掉之前逻辑，该按钮只负责开关功能，不具有自动播放功能
-
+		//m_uitalk->AutoPlayAudio();	20170712屏蔽掉之前逻辑，该按钮只负责开关功能，不具有自动播放功能	
 	}
 	else
 	if (m_AutoAudioState == 1)

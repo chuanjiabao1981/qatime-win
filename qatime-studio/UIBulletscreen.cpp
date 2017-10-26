@@ -118,6 +118,7 @@ UIBulletScreen::~UIBulletScreen()
 	}
 }
 
+
 bool UIBulletScreen::eventFilter(QObject *target, QEvent *event)
 {
 	if (target == ui.talk_pushButton) {
@@ -474,7 +475,7 @@ void UIBulletScreen::ReciverStudent(QString name, QString content, QString chati
 {
 	if (chatid != m_chatID)
 		return;
-
+	/*
 	for (int i = 1; i < 75; i++)
 	{
 		QString face = "";
@@ -482,6 +483,7 @@ void UIBulletScreen::ReciverStudent(QString name, QString content, QString chati
 		QString path = "[表情]";
 		content.replace(face, path);
 	}
+	*/
 
 	stringToHtml(name, m_StudentColor);
 	stringToHtml(content, m_ContentColor);
@@ -505,7 +507,7 @@ void UIBulletScreen::ReciverTeacher(QString name, QString content, QString chati
 {
 	if (chatid != m_chatID)
 		return;
-
+	/*
 	for (int i = 1; i < 75; i++)
 	{
 		QString face = "";
@@ -513,6 +515,8 @@ void UIBulletScreen::ReciverTeacher(QString name, QString content, QString chati
 		QString path = "[表情]";
 		content.replace(face, path);
 	}
+	*/
+
 
 	stringToHtml(name, m_TeacherColor);
 	stringToHtml(content, m_ContentColor);

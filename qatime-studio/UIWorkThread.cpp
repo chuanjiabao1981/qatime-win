@@ -34,6 +34,12 @@ void Worker::slot_StartLiveStream()
     if (m_hNlssService != NULL)
 	{
         iRet = Nlss_StartLiveStream(m_hNlssService);
+		/*
+		// 获取网易云视频库版本号
+		char **pm_Version = new char *[20];
+		Nlss_GetSDKVersion(pm_Version);
+		delete pm_Version;
+		*/
 	}
 	else
 		iRet = NLSS_ERR;

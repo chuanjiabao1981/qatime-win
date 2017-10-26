@@ -16,6 +16,8 @@
 #include "ZWeb.h"
 
 
+
+
 extern int		m_AutoAudioState;
 extern bool		m_IsAudioPlaying;
 int m_PublicCameraStatus;	// 1v1直播时，摄像头状态（1打开，0关闭），用于判断教师是否进行了白板和桌面的切换
@@ -31,6 +33,9 @@ int m_PublicCameraStatus;	// 1v1直播时，摄像头状态（1打开，0关闭），用于判断教师
 #define Video 3				//视频设备
 #define VIDEO_FPS 50  
 
+#define CameraIsClose	1	// 摄像头关闭
+#define CameraIsOpen	2	// 摄像头打开
+#define CameraIsPulling	3	// 摄像头推流
 
 
 
@@ -64,6 +69,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	, m_VideoRecordInfo(NULL)
 	, m_bQueryMsg(false)
 	, m_bEveryTime(false)
+	, m_PullCamera(0)
 {
 	ui.setupUi(this);
 	m_This = this;
@@ -1224,9 +1230,20 @@ void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString board
 	m_lessonName = name;
 	ui.lesson_label->setText(m_lessonName);
 	m_lessonid = id;
+
+	if (ui.Audio_checkBox->checkState() == 2)
+	{
+		emit ui.Audio_checkBox->stateChanged(2);
+	}
+
+
 	// 判断如果是1V1的话
 	if (mLessonType == d_1V1Lesson)
 	{
+		if (ui.Audio1v1_checkBox->checkState() == 2)
+		{
+			emit ui.Audio1v1_checkBox->stateChanged(2);
+		}
 		QString chatID = m_curTags->ChatID();
 		createRtsRoom(chatID);
 	}
@@ -1239,6 +1256,7 @@ void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString board
 		m_cameraUrl = m_curTags->CameraStream();
 //		m_cameraUrl = "rtmp://pdl1f3ddaa0.live.126.net/live/a41d93c303a84f8b9d1e197e7bc421b5?wsSecret=4689c5753a21b5e5c5b404ddf5d07c03&wsTime=1497959678  ";
 		qDebug() << "摄像头推流地址：" << m_cameraUrl;
+
 		m_VideoInfo->setPlugFlowUrl(m_boardUrl);
 		m_VideoInfo->StartLiveVideo();
 		//插入消息栏通知
@@ -2144,6 +2162,17 @@ void UIWindowSet::UpatateLiveStatus(QWidget* widget, bool bSuc)
 				m_LiveStatusManager->SendStartLiveHttpMsg(1, m_EnumStatus, m_lessonid, m_Token, m_curTags->GetLessonType());
 				setLiveBtnEnable(true);
 			}
+			/*
+			else
+			{
+				//if (m_PullCamera == CameraIsOpen)
+				{
+					m_tempTimers->start(50);
+					m_PullCamera = CameraIsPulling;
+				}
+										
+			}
+			*/
 		}
 	}
 	else
@@ -2260,6 +2289,7 @@ void UIWindowSet::AddTodayToLesson(QString  id, QString courseid, QString boardU
 /****************************推流参数设置**************************************/
 void UIWindowSet::AudioStatus(int iStatus)
 {
+	qDebug() << __FILE__ << __LINE__ << "音频结束" << "状态值为：" << iStatus;
 	if (iStatus)
 	{
 		try
@@ -2290,13 +2320,27 @@ void UIWindowSet::BulletStatus(int iStatus)
 void UIWindowSet::SendStudentBullet(QString name, QString content, QString chatid)
 {
 	if (m_BulletScreen)
-		m_BulletScreen->ReciverStudent(name, content,chatid);
+	{
+		//正则表达式匹配表情符号
+		QString StrEmoji;
+		StrEmoji = "\\[em_[0-9]{1,2}\\]";
+		content.replace(QRegExp(StrEmoji), "[表情]");
+		m_BulletScreen->ReciverStudent(name, content, chatid);
+	}
+		
 }
 
 void UIWindowSet::SendTeacherBullet(QString name, QString content, QString chatid)
 {
 	if (m_BulletScreen)
-		m_BulletScreen->ReciverTeacher(name, content,chatid);
+	{
+		//正则表达式匹配表情符号
+		QString StrEmoji;
+		StrEmoji = "\\[em_[0-9]{1,2}\\]";
+		content.replace(QRegExp(StrEmoji), "[表情]");
+		m_BulletScreen->ReciverTeacher(name, content, chatid);
+	}
+
 }
 
 
@@ -2337,6 +2381,7 @@ void UIWindowSet::VideoStatus(int iStatus)
 {
 	if (iStatus)
 	{
+		m_PullCamera = CameraIsClose;
 		//隐藏
 		m_CameraInfo->setVisible(false);
 		if (m_VideoInfo)
@@ -2351,7 +2396,8 @@ void UIWindowSet::VideoStatus(int iStatus)
 
 			ui.video_checkBox->setEnabled(false);
 			m_CameraInfo->StopLiveVideo();
-			if (m_curTags->GetLessonType() == d_1V1Lesson)
+			//m_CameraInfo->SetPauseVideo();
+			if (m_curTags->GetLessonType() != d_1V1Lesson)
 			{
 				m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
 			}
@@ -2359,6 +2405,7 @@ void UIWindowSet::VideoStatus(int iStatus)
 	}
 	else
 	{
+		m_PullCamera = CameraIsOpen;
 		//显示
 		m_CameraInfo->setVisible(true);
 		if (m_VideoInfo)
@@ -2374,7 +2421,8 @@ void UIWindowSet::VideoStatus(int iStatus)
 			ui.video_checkBox->setEnabled(false);
 			m_CameraInfo->setPlugFlowUrl(m_cameraUrl);
 			m_CameraInfo->StartLiveVideo();
-			if (m_curTags->GetLessonType() == d_1V1Lesson)
+			//m_CameraInfo->SetResumeVideo();
+			if (m_curTags->GetLessonType() != d_1V1Lesson)
 			{
 				m_LiveStatusManager->SendCameraSwitchMsg(1, m_EnumStatus);
 			}		
@@ -3088,7 +3136,7 @@ void UIWindowSet::clickLive1v1()
 			QString mOnline = "";
 			QString mStartText = "直播结束";
 			mOnline = "ScheduledLesson";
-			m_curChatRoom->SendSelfDefineMessageScreen(true, mOnline);
+			m_curChatRoom->SendSelfDefineMessageScreen(false, mOnline);
 			m_curChatRoom->m_uitalk->InsertOneNotice(mStartText);
 
 		}

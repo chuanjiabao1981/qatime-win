@@ -562,6 +562,11 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 	QString strError;
 	int mErrorCode = 0;
 	mErrorCode = error["code"].toInt();
+	if (m_newParent)
+	{
+		
+	}
+	
 	if (mErrorCode == 1002)
 	{
 		qDebug() << __FILE__ << __LINE__ << "其他用户登录！";
@@ -611,6 +616,7 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 		if (m_newParent)
 		{	
 			qDebug() << __FILE__ << __LINE__ << "网络异常断开";
+			//先结束相关线程
 			m_newParent->ErrorStop();
 			m_newParent->EndDev();
 			StopTimer();

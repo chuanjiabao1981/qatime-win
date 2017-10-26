@@ -1,6 +1,7 @@
 <RCC>
   <qresource prefix="/LoginWindow">
     <file>images/audioCancel1.png</file>
+    <file>images/camera_2.png</file>
     <file>images/audioCancel.png</file>
     <file>images/audioSend.png</file>
     <file>images/audioSend1.png</file>

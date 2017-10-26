@@ -141,6 +141,7 @@ public:
 	QString							m_BoardPushURL;			// 1v1白板推流地址
 	QString							m_cameraUrl;			// 当前直播的摄像头地址
 	QTimer*							m_tempTimers;			// 推摄像头流
+	int								m_PullCamera;			// 摄像头推流状态三个状态
 
 	UIVideo*						m_VideoInfo;			// 直播全屏窗口
 	UICamera*						m_CameraInfo;			// 直播摄像头窗口
