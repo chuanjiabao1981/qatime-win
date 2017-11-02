@@ -205,8 +205,16 @@ void UIVideoRecord::EnumAvailableMediaDevices()
 			m_pAudioDevices[i].paFriendlyName = new char[1024];
 		}
 	}
-	// 获取视频和音频设备
-	Nlss_GetFreeDeviceInf(m_pVideoDevices,10, m_pAudioDevices,10);
+	try
+	{
+		// 获取视频和音频设备
+		Nlss_GetFreeDeviceInf(m_pVideoDevices, 10, m_pAudioDevices, 10);
+	}
+	catch (...)
+	{
+		qDebug() << __FILE__<<__LINE__ <<"音视频输入设备异常";
+	}
+	
 }
 
 void UIVideoRecord::InitDeviceParam()

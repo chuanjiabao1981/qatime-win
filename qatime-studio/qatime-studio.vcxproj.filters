@@ -88,15 +88,6 @@
     <ClCompile Include="course.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UIMainwindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UIMainwindow.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UIMainwindow.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="lesson.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -116,15 +107,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_UIVideo.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="UIAuxiliaryPanel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UIAuxiliaryPanel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UIAuxiliaryPanel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="UIAudiochange.cpp">
@@ -238,15 +220,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_myLabel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="UILessontable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UILessontable.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UILessontable.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="UICamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -254,33 +227,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_UICamera.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="UISetparam.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UISetparam.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UISetparam.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="UIHoverwindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UIHoverwindow.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UIHoverwindow.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="UISeelivewnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UISeelivewnd.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UISeelivewnd.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="UIScreentip.cpp">
@@ -730,15 +676,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_DefineCalendar.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="UIVideoRecord.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_UIVideoRecord.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_UIVideoRecord.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="UIAboutversion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -801,12 +738,6 @@
     <CustomBuild Include="UIButton.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="UIMainwindow.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UIMainwindow.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="UIWorkThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -814,12 +745,6 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="UIVideo.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UIAuxiliaryPanel.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UIAuxiliaryPanel.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="UIAudiochange.h">
@@ -870,34 +795,10 @@
     <CustomBuild Include="myLabel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="UILessontable.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UILessontable.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="UICamera.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="UICamera.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UISetparam.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UISetparam.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UIHoverwindow.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UIHoverwindow.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UISeelivewnd.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="UISeelivewnd.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="UIScreentip.h">
@@ -1149,9 +1050,6 @@
     <CustomBuild Include="calendar\DefineCalendar.h">
       <Filter>Calendar</Filter>
     </CustomBuild>
-    <CustomBuild Include="UIVideoRecord.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="UIAboutversion.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -1187,16 +1085,10 @@
     <ClInclude Include="course.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UIMainwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="lesson.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIVideo.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UIAuxiliaryPanel.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIAudiochange.h">
@@ -1211,22 +1103,10 @@
     <ClInclude Include="member.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UILessontable.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UICamera.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIChatRoom.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UISetparam.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UIHoverwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_UISeelivewnd.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_UIScreentip.h">
@@ -1361,6 +1241,9 @@
     <ClInclude Include="GeneratedFiles\ui_UIHomework.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="qatime-studio_zh.ts">
@@ -1369,5 +1252,10 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
+    <Image Include="icon2.ico" />
+    <Image Include="icon.ico" />
   </ItemGroup>
 </Project>

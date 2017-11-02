@@ -10,12 +10,12 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QTimer>
-#include "uimainwindow.h"
+#include "UIMainNewWindow.h"
 #include "UIWindowset.h"
 
 #pragma execution_character_set("utf-8")
 
-class UIMainWindow;
+class UIMainNewWindow;
 class UIWindowSet;
 class LiveStatusManager : public QObject
 {
@@ -31,7 +31,7 @@ private:
 	QUrl url;
 	QNetworkAccessManager	manager;
 	QNetworkReply*			reply;
-	UIMainWindow*			m_parent;
+	//UIMainNewWindow*		m_parent;
 	UIWindowSet*			m_newParent;
 	QString					m_sToken;				// token
 	QString					m_sLiveToken;			// ÐÄÌøtoken

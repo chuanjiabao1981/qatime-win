@@ -349,7 +349,6 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 	}
 
 
-
 }
 
 // 插入语音聊天信息(未下载)

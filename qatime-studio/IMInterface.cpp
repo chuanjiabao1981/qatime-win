@@ -595,7 +595,7 @@ void CallbackStartDevice(nim::NIMDeviceType type, bool ret, const char *json_ext
 {
 	if (ret)
 	{
-		qDebug() << VChat::Start(kNIMVideoChatModeVideo, "", "", "");
+		qDebug() << __FILE__ << __LINE__ << VChat::Start(kNIMVideoChatModeVideo, "", "", "");
 		emit IMInterface::getInstance()->startDeviceSuccessfully(type);
 	}
 }

@@ -7,6 +7,8 @@
 #include "app_dump.h"
 #include <gdiplus.h>
 #include <QDir>
+#include <QProcess>
+
 using namespace Gdiplus;
 
 void registerMetaType()
@@ -115,5 +117,14 @@ int main(int argc, char *argv[])
 		qDebug() << "fatal: CreateSaveImageDir";
 	}
 
-	return a.exec();
+	//return a.exec();
+
+	int ret = a.exec();
+	if (ret == 773)			// ASSIC 773 = 'r'+'e'+'s'+'t'+'a'+'r'+'t';
+	{
+		CloseHandle(hMutex);
+		bool mstate = QProcess::startDetached(a.applicationFilePath(), QStringList());
+		return 0;
+	}
+	return ret;
 }

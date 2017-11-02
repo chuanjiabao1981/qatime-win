@@ -9,7 +9,7 @@
 #include "UIButton.h"
 #include <string.h>
 #include <wtypes.h>
-#include "UIMainwindow.h"
+//#include "UIMainwindow.h"
 #include <QSystemTrayIcon>
 #include "UITraymenu.h"
 #include "UIMainNewWindow.h"
@@ -17,7 +17,7 @@
 #pragma execution_character_set("utf-8")
 
 class UIMainNewWindow;
-class UIMainWindow;
+//class UIMainWindow;
 class UITrayMenu;
 
 class LoginWindow : public QMainWindow

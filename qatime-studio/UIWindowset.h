@@ -29,6 +29,8 @@
 #include "UIVideo1v1.h"
 #include "UIAppWnd.h"
 #include "UIAppWndTool.h"
+#include "UIVideochange.h"
+#include "UIVideo.h"
 //---云信
 #include "nim_client_def.h"
 #include "assert.h"
@@ -78,7 +80,7 @@ class UIWhiteBoardTool;
 class UIVideo1v1;
 class UIAppWnd;
 class UIAppWndTool;
-class UIVideoRecord;
+//class UIVideoRecord;
 class UIWindowSet : public QWidget
 {
 	Q_OBJECT
@@ -172,7 +174,7 @@ public:
 	UIAppWnd*						m_AppWnd1v1;			// 选择分享窗口
 	UIAppWndTool*					m_AppWndTool1v1;		// 1v1窗口分享工具条
 	QTimer*							m_QueryOnlieTimers;		// 定时查询在线人数
-	UIVideoRecord*					m_VideoRecordInfo;		// 旁路直播
+	//UIVideoRecord*					m_VideoRecordInfo;		// 旁路直播
 
 public:
 	bool							m_bQueryMsg;		// 是否在查询消息记录

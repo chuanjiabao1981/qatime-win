@@ -9,14 +9,14 @@
 #include <QTimer>
 #include <QMutex>
 #include "UIWorkThread.h"
-#include "UIMainwindow.h"
+#include "UIMainNewWindow.h"
 #include "UIWindowset.h"
 //#include <stdint.h>
 
 #define STARTLS_ASYNC
 #pragma execution_character_set("utf-8")
 
-class UIMainWindow;
+class UIMainNewWindow;
 class UIWindowSet;
 class UIVideo : public QWidget
 {
@@ -60,7 +60,7 @@ public:
 	int								m_CurrentVideoIndex;// 当前摄像头索引
 	bool							m_bStopLiveFinish;	// 停止直播流
 
-	UIMainWindow*					m_Parent;			// 主窗口
+	UIMainNewWindow*				m_Parent;			// 主窗口
 	UIWindowSet*					m_NewParent;		// 新主窗口
 	QTimer*							m_refreshTimer;		// 刷新窗口
 	static UIVideo*					m_pThis;

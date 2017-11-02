@@ -4,6 +4,7 @@
 #include <iosfwd>
 #include <sstream>
 #include "define.h"
+#include "UICamera.h"
 
 _HNLSSCHILDSERVICE hChildFullVideoService1;
 
@@ -30,7 +31,7 @@ UIVideo::UIVideo(QWidget *parent)
 	, m_CurrentMicIndex(0)
 	, m_CurrentVideoIndex(0)
 	, m_bStopLiveFinish(true)
-	, m_Parent(NULL)
+//	, m_Parent(NULL)
 	, m_NewParent(NULL)
 	, m_pBkImage(NULL)
 	, m_refreshTimer(NULL)
@@ -100,8 +101,8 @@ UIVideo::~UIVideo()
 		m_SvideoSampler.puaData = NULL;
 	}
 
-	if (m_Parent)
-		m_Parent = NULL;
+// 	if (m_Parent)
+// 		m_Parent = NULL;
 
 	if (m_pBkImage)
 	{
@@ -262,6 +263,7 @@ void UIVideo::EnumAvailableMediaDevices()
 	if (m_iVideoDeviceNum <= 0)
 	{
 		MessageBox(NULL, L"请连接摄像头设备", L"答疑时间", MB_OK);
+		return;		// 检测无设备则返回
 	}
 	else
 	{
@@ -282,6 +284,7 @@ void UIVideo::EnumAvailableMediaDevices()
 	if (m_iAudioDeviceNum <= 0)
 	{
 		MessageBox(NULL, L"请连接麦克风设备", L"答疑时间", MB_OK);
+		return;		// 检测无设备则返回
 	}
 	else
 	{
@@ -299,8 +302,16 @@ void UIVideo::EnumAvailableMediaDevices()
 			m_pAudioDevices[i].paFriendlyName = new char[1024];
 		}
 	}
-	// 获取视频和音频设备
-	Nlss_GetFreeDeviceInf(m_pVideoDevices,10, m_pAudioDevices,10);
+	try
+	{
+		// 获取视频和音频设备
+		Nlss_GetFreeDeviceInf(m_pVideoDevices, 10, m_pAudioDevices, 10);
+	}
+	catch (...)
+	{
+		qDebug() << __FILE__ << __LINE__ << "音视频输入设备异常";
+	}
+
 }
 
 void UIVideo::InitDeviceParam()

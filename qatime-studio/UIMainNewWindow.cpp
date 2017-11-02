@@ -26,7 +26,7 @@ UIMainNewWindow::UIMainNewWindow(QWidget *parent)
 	m_WindowSet->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowMinMaxButtonsHint);
 	m_WindowSet->setMainWindow(this);
 	m_WindowSet->hide();
-
+	
 	m_AuxiliaryWnd = new UIAuxiliaryWnd();
 	m_AuxiliaryWnd->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 	m_AuxiliaryWnd->setMainWindow(this);
@@ -55,7 +55,7 @@ void UIMainNewWindow::SetEnvironmental(bool EnvironmentalTyle,QString homePage)
 {
 	m_homePage = homePage;
 	m_EnvironmentalTyle = EnvironmentalTyle;
-	m_WindowSet->SetEnvironmental(m_EnvironmentalTyle,m_homePage);
+	m_WindowSet->SetEnvironmental(m_EnvironmentalTyle, m_homePage);
 	m_AuxiliaryWnd->SetEnvironmental(m_EnvironmentalTyle, m_homePage);
 }
 
@@ -566,6 +566,8 @@ void UIMainNewWindow::setKeyAndLogin(QString key)
 //	ShowLesson();
 }
 
+
+
 void UIMainNewWindow::OnLoginCallback(const nim::LoginRes& login_res, const void* user_data)
 {
 //	m_This->m_WindowSet->ReceiverLoginMsg(login_res);
@@ -902,7 +904,16 @@ void UIMainNewWindow::OnLogOutCallback(nim::NIMResCode res_code)
 
 void UIMainNewWindow::slot_QueryLesson()
 {
-	
 	GetUserInfo();
+	//InitWindowSet();
+}
+
+void UIMainNewWindow::InitWindowSet()
+{
+	m_WindowSet = new UIWindowSet();
+	m_WindowSet->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowMinMaxButtonsHint);
+	m_WindowSet->setMainWindow(this);
+	m_WindowSet->hide();
+	
 }
 

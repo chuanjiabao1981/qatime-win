@@ -955,14 +955,17 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 		QString qName = QString::fromStdString(strName);
 		QString qContent = QString::fromStdString(pMsg->local_res_path_);
 		QString qContentNew = qContent;
-		qContentNew += ".png";
+		qContentNew += "1.png";
+	
 		qContentNew.replace("\\", "/");
+
 		// 聊天头像
-		QPixmap* img=NULL;
+		QPixmap* img = NULL;
 		personListBuddy* Buddy = NULL;
 		Buddy = ui.student_list->findID(QString::fromStdString(strID));
 		if (Buddy)
 			img = (QPixmap*)Buddy->head->pixmap();
+
 
 		// 如果下载失败
 		if (!QFile::copy(qContent, qContentNew))
@@ -978,6 +981,7 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 			ImgInfo.chatID = pMsg->local_talk_id_;
 			m_VerReceiveImg.push_back(ImgInfo);
 			m_LoadImgTimer->start(500);
+			m_parent->SendStudentBullet(qName, "[图片消息]", QString::fromStdString(m_CurChatID));
 			return false;
 		}
 
@@ -2181,6 +2185,7 @@ void UIChatRoom::clickPic()
 	ui.textEdit->setFocus();
 }
 
+// 此处为对已下载的图片的插入方式处理逻辑
 void UIChatRoom::LoadImgTimeout()
 {
 	if (m_VerReceiveImg.size() == 0)

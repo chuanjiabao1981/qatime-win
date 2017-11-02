@@ -380,7 +380,8 @@ void LoginWindow::ReturnLogin()
 		delete mainWin;
 		mainWin = NULL;
 	}
-	this->show();
+	//this->show();
+	QApplication::exit(773);
 }
 
 bool LoginWindow::IsAutoLogin()

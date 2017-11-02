@@ -5,7 +5,7 @@
 #include "ui_UIChatRoom.h"
 #include "myemotionwidget.h"
 #include <QLabel>
-#include "uimainwindow.h"
+//#include "uimainwindow.h"
 #include "UITalk.h"
 #include "UITalkRecord.h"
 #include <vector>

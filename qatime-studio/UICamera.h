@@ -9,7 +9,7 @@
 #include <QTimer>
 #include <QMutex>
 #include "UIWorkThread.h"
-#include "UIMainwindow.h"
+//#include "UIMainwindow.h"
 #include <stdint.h>
 #include "UIWindowset.h"
 
@@ -22,7 +22,7 @@ bool SetVideoInParam(ST_NLSS_VIDEOIN_PARAM *pstVideoParam, EN_NLSS_VIDEOIN_TYPE 
 bool SetVideoOutParam(ST_NLSS_VIDEOOUT_PARAM *pstVideoParam, EN_NLSS_VIDEOQUALITY_LVL enVideoQ, bool bWideScreen);
 int GetOutBitrate(int iWidth, int iHeight, int iFps);
 
-class UIMainWindow;
+//class UIMainWindow;
 class UIWindowSet;
 class UICamera : public QWidget
 {

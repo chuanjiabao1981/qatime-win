@@ -66,7 +66,11 @@ LiveStatusManager::~LiveStatusManager()
 	if (m_HeartTimer)
 	{
 		if (m_HeartTimer->isActive())
+		{
+			qDebug() << __FILE__ << __LINE__ << "关闭定时器1";
 			m_HeartTimer->stop();
+		}
+		qDebug() << __FILE__ << __LINE__ << "删除定时器1";
 		delete m_HeartTimer;
 		m_HeartTimer = NULL;
 	}
@@ -253,8 +257,14 @@ void LiveStatusManager::ReturnHeartBeat()
 	}
 	else if (mStatus == 0)
 	{
+		qDebug() << __FILE__ << __LINE__ << "关闭定时器2";
 		m_HeartTimer->stop();
 		RequestError(error);
+	}
+	if (m_HeartTimer->isActive() == false)
+	{
+		qDebug() << __FILE__ << __LINE__ << "关闭定时器4";
+		m_HeartTimer->start(m_iBeatStep * 1000);
 	}
 
 }
@@ -474,6 +484,7 @@ void LiveStatusManager::StopTimer()
 		m_HeartFailTimer && m_SwitchFailTimer&&
 		m_1v1HeartTimer && m_1v1HeartFailTimer)
 	{
+		qDebug() << __FILE__ << __LINE__ << "关闭定时器3";
 		m_TGetRtmpTimer->stop();
 		m_HeartTimer->stop();
 		m_HeartFailTimer->stop();
@@ -899,7 +910,6 @@ void LiveStatusManager::FinishStopLive1v1()
 		{
 			// 更新课程状态
 			m_newParent->SendRequestStatus("已直播");
-
 			m_iStopLiveCount = STOP_LIVE_FAIL_COUNT;
 		}
 	}

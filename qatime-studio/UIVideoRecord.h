@@ -7,13 +7,13 @@
 #include "nlss_define.h"
 #include <QTimer>
 #include "UIWorkThread.h"
-#include "UIMainwindow.h"
+//#include "UIMainwindow.h"
 #include "UIWindowset.h"
 
 #define STARTLS_ASYNC
 #pragma execution_character_set("utf-8")
 
-class UIMainWindow;
+//class UIMainWindow;
 class UIWindowSet;
 class UIVideoRecord : public QWidget
 {

@@ -123,6 +123,7 @@ public:
 	void	LogOut();										// 退出云信登录
 	void	RequestError(QJsonObject &error);				// 检测网络错误
 	void	GetURLInfo(QString strUrl, QJsonObject &urlValue);		// 获取URL相关信息
+	void	InitWindowSet();								// 初始化Windowset类
 
 signals:
 	void sig_QueryLesson();									// 查询课程

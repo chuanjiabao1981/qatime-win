@@ -15,7 +15,7 @@ UIHoverWindow::~UIHoverWindow()
 		m_Parent = NULL;
 }
 
-void UIHoverWindow::setParentWindow(UIMainWindow* parent)
+void UIHoverWindow::setParentWindow(UIMainNewWindow* parent)
 {
 	m_Parent = parent;
 }

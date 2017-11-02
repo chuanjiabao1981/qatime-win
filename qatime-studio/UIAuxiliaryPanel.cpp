@@ -56,7 +56,7 @@ void UIAuxiliaryPanel::init()
 	m_teacher_treewidget->setHeaderHidden(true);
 }
 
-void UIAuxiliaryPanel::setParent(UIMainWindow* parent)
+void UIAuxiliaryPanel::setParent(UIMainNewWindow* parent)
 {
 	m_Parent = parent;
 }

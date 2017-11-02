@@ -14,11 +14,11 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTreeWidget>
-#include "UIMainwindow.h"
+#include "UIMainNewWindow.h"
 
 #pragma execution_character_set("utf-8")
 
-class UIMainWindow;
+class UIMainNewWindow;
 
 enum SelLessonStatus {
 	Finished,
@@ -42,7 +42,7 @@ private:
 	QNetworkAccessManager			manager;
 	QNetworkReply*					reply;
 
-	UIMainWindow*					m_Parent;
+	UIMainNewWindow*				m_Parent;
 	QString							m_teacherID;			//老师ID
 	QString							m_teacherName;			//老师名字
 	QString							m_auxiliaryID;			//当前辅导班ID

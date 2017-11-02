@@ -11,7 +11,7 @@
 #include "IMInterface.h"
 #include "HttpRequest.h"
 
-#include "UIVideoRecord.h"
+//#include "UIVideoRecord.h"
 #include "ZPublicDefine.h"
 #include "ZWeb.h"
 
@@ -66,7 +66,7 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	, m_VideoInfo1v1(NULL)
 	, m_AppWnd1v1(NULL)
 	, m_QueryOnlieTimers(NULL)
-	, m_VideoRecordInfo(NULL)
+	//, m_VideoRecordInfo(NULL)
 	, m_bQueryMsg(false)
 	, m_bEveryTime(false)
 	, m_PullCamera(0)
@@ -129,8 +129,8 @@ UIWindowSet::UIWindowSet(QWidget *parent)
 	ui.verticalLayout_6->addWidget(m_VideoInfo);
 	m_VideoInfo->show();
 
-	// 旁路直播
-	m_VideoRecordInfo = new UIVideoRecord();
+	// 旁路直播 目前没有这个选项，关闭
+	//m_VideoRecordInfo = new UIVideoRecord();
 
 	m_CameraInfo = new UICamera(ui.widget_5);//camera1_widget
 	m_CameraInfo->setWindowFlags(Qt::FramelessWindowHint);
@@ -2317,8 +2317,15 @@ void UIWindowSet::BulletStatus(int iStatus)
 		m_BulletScreen->hide();
 }
 
+int mDelayed = 0; // 定义延时触发的次数
 void UIWindowSet::SendStudentBullet(QString name, QString content, QString chatid)
 {
+	// 当消息连续接收超过十条时，接收函数延迟0.5秒，之后重置延时次数
+	if (mDelayed >= 10)
+	{
+		Sleep(500);
+		mDelayed = 0;
+	}
 	if (m_BulletScreen)
 	{
 		//正则表达式匹配表情符号
@@ -2326,6 +2333,7 @@ void UIWindowSet::SendStudentBullet(QString name, QString content, QString chati
 		StrEmoji = "\\[em_[0-9]{1,2}\\]";
 		content.replace(QRegExp(StrEmoji), "[表情]");
 		m_BulletScreen->ReciverStudent(name, content, chatid);
+		mDelayed++;
 	}
 		
 }

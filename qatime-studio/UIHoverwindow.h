@@ -3,9 +3,9 @@
 
 #include <QWidget>
 #include "ui_UIHoverwindow.h"
-#include "UIMainwindow.h"
+#include "UIMainNewWindow.h"
 
-class UIMainWindow;
+class UIMainNewWindow;
 
 class UIHoverWindow : public QWidget
 {
@@ -17,7 +17,7 @@ public:
 
 private:
 	Ui::UIHoverWindow ui;
-	UIMainWindow*     m_Parent;
+	UIMainNewWindow*  m_Parent;
 	int				  m_iCount;
 
 protected:
@@ -25,7 +25,7 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent *event);
 
 public:
-	void setParentWindow(UIMainWindow* parent);
+	void setParentWindow(UIMainNewWindow* parent);
 	void SetLiveTimer(QString sTimer);
 	void UpdateChatNumber();					  // 更新聊天个数
 	void SetNumber();
