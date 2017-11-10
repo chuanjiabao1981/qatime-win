@@ -216,7 +216,7 @@ public:
 	bool		IsClickPic();										// 当前是否点击图片
 	void		TalkDown();											// 聊天内容置底
 	void		OnPlayAudio(std::string path, std::string sid, std::string msgid, bool isPlay);
-	void		OnStopPlayAudio(char* msgid);
+	void		OnStopPlayAudio(std::string msgid);
 	
 	/**
 	* 开始播放语音消息的回调（播放语音消息需要和sdk交互，并非一定播放成功）

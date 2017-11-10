@@ -28,12 +28,16 @@ void Worker::SetMediaCapture(_HNLSSERVICE hNlssService)
     m_hNlssService = hNlssService;
 }
 
-void Worker::slot_StartLiveStream()
+void Worker::slot_StartLiveStream(bool bAudio)
 {
 	NLSS_RET iRet = 0;
     if (m_hNlssService != NULL)
 	{
         iRet = Nlss_StartLiveStream(m_hNlssService);
+		if (bAudio == false)
+		{
+			Nlss_PauseAudioLiveStream(m_hNlssService);
+		}
 		/*
 		// 获取网易云视频库版本号
 		char **pm_Version = new char *[20];

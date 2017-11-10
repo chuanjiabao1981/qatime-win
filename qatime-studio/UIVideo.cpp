@@ -53,7 +53,7 @@ UIVideo::UIVideo(QWidget *parent)
 	connect(this, SIGNAL(sig_livestreamErrorHappened()), this, SLOT(slot_livestreamErrorHappened()));
 #ifdef STARTLS_ASYNC
 	m_pWorker = new Worker();
-	connect(this, SIGNAL(sig_StartLiveStream()), m_pWorker, SLOT(slot_StartLiveStream()));
+	connect(this, SIGNAL(sig_StartLiveStream(bool)), m_pWorker, SLOT(slot_StartLiveStream(bool)));
 	connect(m_pWorker, SIGNAL(sig_ResultReady(int)), this, SLOT(slot_FinishStartLiveStream(int)));
 	connect(this, SIGNAL(sig_StopLiveStream()), m_pWorker, SLOT(slot_StopLiveStream()), Qt::DirectConnection);
 	connect(m_pWorker, SIGNAL(sig_StopResult(int)), this, SLOT(slot_FinishStopLiveStream(int)));
@@ -381,7 +381,7 @@ void UIVideo::StartLiveVideo()
 	}
 	m_bPaint = false;
  	m_pWorker->SetMediaCapture(m_hNlssService);
- 	emit sig_StartLiveStream();
+	emit sig_StartLiveStream(m_bAudio);
 	m_bLiving = true;
 }
 

@@ -46,6 +46,7 @@ private:
 	int								m_iCompareCount;	// 对比相等的计数
 
 public:
+	bool							m_bAudio;			// 是否发送声音
 	bool							m_bLiving;			// 直播
 	EN_NLSS_VIDEOIN_TYPE			m_videoSourceType;  // 视频源类型
 	EN_NLSS_AUDIOIN_TYPE			m_audioSourceType;	// 音频源类型
@@ -80,7 +81,7 @@ Q_SIGNALS:
 	void sig_livestreamErrorHappened();
 	void sig_StopCapture();
 #ifdef STARTLS_ASYNC
-	void sig_StartLiveStream();
+	void sig_StartLiveStream(bool bAudio);
 	void sig_StopLiveStream();
 #endif
 

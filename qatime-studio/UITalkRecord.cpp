@@ -785,10 +785,10 @@ void UITalkRecord::slot_Audioclicked(std::string path, std::string sid, std::str
 		m_parent->OnPlayAudio(path, sid, msgid, isPlay);
 }
 
-void UITalkRecord::stopAudio(char* msgid)
+void UITalkRecord::stopAudio(std::string msgid)
 {
-	QString strMsgid = QString(QLatin1String(msgid));
-	QString sMsgid = strMsgid.mid(0, 32);
+	QString strMsgid = QString::fromStdString(msgid);
+	//QString sMsgid = strMsgid.mid(0, 32);
 
 	if (m_vecAudio.size() > 0)
 	{
@@ -796,7 +796,7 @@ void UITalkRecord::stopAudio(char* msgid)
 		for (it = m_vecAudio.begin(); it != m_vecAudio.end(); it++)
 		{
 			CBtnAudio* img = *it;
-			if (img->GetMsgID() == sMsgid)
+			if (img->GetMsgID() == strMsgid)
 			{
 				img->stopPlay();
 				return;

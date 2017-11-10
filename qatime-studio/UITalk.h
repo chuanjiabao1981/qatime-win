@@ -65,7 +65,7 @@ public:
 	void SendStatus(QString msgid);													// 发送状态
 	void setMainWindow(UIChatRoom* parent);											// 设置父窗口
 	void ClearAll();																// 清空
-	void stopAudio(char* msgid);													// 停止语音播放
+	void stopAudio(std::string msgid);												// 停止语音播放
 	void AutoPlayAudio();															// 自动播放语音
 	void InsertSpacer();
 };

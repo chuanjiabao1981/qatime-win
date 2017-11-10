@@ -1061,7 +1061,7 @@ void UIWindowSet::SendStatus(nim::SendMessageArc* arcNew)
 	}
 }
 
-void UIWindowSet::OnStopPlayAudio(std::string sid, char* msgid)
+void UIWindowSet::OnStopPlayAudio(std::string sid, std::string msgid)
 {
 	if (m_vecChatRoom.size() > 0)
 	{
@@ -1233,9 +1233,12 @@ void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString board
 
 	if (ui.Audio_checkBox->checkState() == 2)
 	{
-		emit ui.Audio_checkBox->stateChanged(2);
+		m_VideoInfo->m_bAudio = false;
 	}
-
+	else
+	{
+		m_VideoInfo->m_bAudio = true;
+	}
 
 	// 判断如果是1V1的话
 	if (mLessonType == d_1V1Lesson)
@@ -1259,6 +1262,8 @@ void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString board
 
 		m_VideoInfo->setPlugFlowUrl(m_boardUrl);
 		m_VideoInfo->StartLiveVideo();
+
+
 		//插入消息栏通知
 		QString mOnline = "";
 		QString mStartText = "直播开始";
@@ -1275,6 +1280,8 @@ void UIWindowSet::slot_PullStreaming(QString id, QString courseid, QString board
 		m_curChatRoom->SendSelfDefineMessageScreen(true, mOnline);
 		m_curChatRoom->m_uitalk->InsertOneNotice(mStartText);
 		setLiveBtnEnable(false);
+
+		
 	}
 }
 
@@ -1828,6 +1835,8 @@ void UIWindowSet::returnCourse()
 			courseStart = mFun_ToTimeString(data["customized_group"].toObject()["start_at"].toInt());
 			courseEnd = mFun_ToTimeString(data["customized_group"].toObject()["end_at"].toInt());
 			courseDesc = data["customized_group"].toObject()["description"].toString();
+			mCourseTarget = data["customized_group"].toObject()["objective"].toString();
+			mFitPeople = data["customized_group"].toObject()["suit_crowd"].toString();
 		}
 
 		// 年级信息
@@ -1979,7 +1988,7 @@ void UIWindowSet::returnLesson()
 		{
 			if (m_curTags->GetLessonType() == d_ExclusiveLesson)
 			{
-				lesson = data["customized_group"].toObject()["offline_lessons"].toArray();
+				lesson = data["customized_group"].toObject()["scheduled_lessons"].toArray();
 				QString mLessonTitle;
 				if (lesson.count() > 0)
 				{
@@ -2000,7 +2009,7 @@ void UIWindowSet::returnLesson()
 					if (m_LessonWnd)
 						m_LessonWnd->AddLesson(QString().sprintf("%02d", iCount), strClassDate, strName, strStatus);
 				}
-				lesson = data["customized_group"].toObject()["scheduled_lessons"].toArray();
+				lesson = data["customized_group"].toObject()["offline_lessons"].toArray();
 				if (lesson.count() > 0)
 				{
 					mLessonTitle = "线下讲课";
@@ -3398,18 +3407,17 @@ void UIWindowSet::QueryOnlinePersonNum()
 		return;
 
 	QString strUrl;
-	if (m_EnvironmentalTyle)
+	strUrl += m_homePage;
+	if (m_curTags->GetLessonType() == d_ExclusiveLesson)
 	{
-		strUrl += m_homePage;
-		strUrl += "/api/v1/live_studio/courses/{id}/status";
-		strUrl.replace("{id}", strCourseID);
+		strUrl += "/api/v1/live_studio/customized_groups/{id}/realtime";
+		
 	}
 	else
 	{
-		strUrl += m_homePage;
 		strUrl += "/api/v1/live_studio/courses/{id}/status";
-		strUrl.replace("{id}", strCourseID);
 	}
+	strUrl.replace("{id}", strCourseID);
 
 	HttpRequest http;
 	http.setRawHeader("Remember-Token", m_Token.toUtf8());

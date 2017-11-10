@@ -193,7 +193,7 @@ UICamera::UICamera(QWidget *parent)
 	connect(this, SIGNAL(sig_livestreamErrorHappened()), this, SLOT(slot_livestreamErrorHappened()));
 #ifdef STARTLS_ASYNC
 	m_pWorker = new Worker();
-	connect(this, SIGNAL(sig_StartLiveStream()), m_pWorker, SLOT(slot_StartLiveStream()));
+	connect(this, SIGNAL(sig_StartLiveStream(bool)), m_pWorker, SLOT(slot_StartLiveStream(bool)));
 	connect(m_pWorker, SIGNAL(sig_ResultReady(int)), this, SLOT(slot_FinishStartLiveStream(int)));
 	connect(this, SIGNAL(sig_StopLiveStream()), m_pWorker, SLOT(slot_StopLiveStream()), Qt::DirectConnection);
 	

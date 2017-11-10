@@ -296,7 +296,7 @@ public:
 	void	ReceiverLoginMsg(const nim::LoginRes& pLogMsg);			// 返回登录结果
 	void	ReceiverMemberMsg(std::string sid, std::list<nim::TeamMemberProperty>* pMemberMsg);	// 返回成员
 	void	SendStatus(nim::SendMessageArc* arcNew);			// 接收消息状态
-	void	OnStopPlayAudio(std::string sid, char* msgid);		// 语音播放结束消息
+	void	OnStopPlayAudio(std::string sid, std::string msgid);		// 语音播放结束消息
 	void    OnSendAnnouncements(QString text);					// 发送群公告
 	//语音完成并发送 add by zbc 20170704
 	void	SendAudio(std::string sid, std::string msgid, std::string mPath, long mSize, int dur, std::string mfileEx);

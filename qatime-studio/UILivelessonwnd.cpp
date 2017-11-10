@@ -264,6 +264,7 @@ void UILiveLessonWnd::slot_dbClick(QString id, QString courseid, QString boardur
 			return;
 		}
 		id = QString::number(mUrlJson["data"].toObject()["id"].toInt());
+		name = "»¥¶¯´ðÒÉ";
 		emit sig_PullStreaming(id, courseid, boardurl, cameraurl, name, m_CurrentLessonType, bEveryTime);
 		hide();
 		//delete mZWeb;

@@ -31,6 +31,7 @@ private:
 	QUrl url;
 	QNetworkAccessManager	manager;
 	QNetworkReply*			reply;
+	QNetworkReply*			m_HeartReply;
 	//UIMainNewWindow*		m_parent;
 	UIWindowSet*			m_newParent;
 	QString					m_sToken;				// token

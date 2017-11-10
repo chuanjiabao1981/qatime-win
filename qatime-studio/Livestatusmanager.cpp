@@ -201,13 +201,14 @@ void LiveStatusManager::HeartBeatTimer()
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
-	QUrl url = QUrl(strUrl);
-	QNetworkRequest request(url);
-
 	qint64 date = QDateTime::currentMSecsSinceEpoch();
 	qint64 currentSec = date / 1000;
 	QString time = QString::number(currentSec);
 	m_Time = time;
+
+	//strUrl = strUrl + "?t=" + time;
+	QUrl mUrl = QUrl(strUrl);
+	QNetworkRequest mRequest(mUrl);
 
 	QByteArray append("live_token=");
 	append += m_sLiveToken;
@@ -220,16 +221,17 @@ void LiveStatusManager::HeartBeatTimer()
 	QString strHeartBeat = "HearBeat:";
 	strHeartBeat += append;
 //	qDebug()<<strHeartBeat;
-	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
-	reply = manager.post(request, append);
-	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat);
+	mRequest.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	qDebug() << __FILE__ << __LINE__ << m_sToken;
+	m_HeartReply = manager.post(mRequest, append);
+	connect(m_HeartReply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat);
 }
 
 // 心跳返回的结果
 void LiveStatusManager::ReturnHeartBeat()
 {
-	QByteArray result = reply->readAll();
-	int mNetErrorCode = reply->error();
+	QByteArray mResult = m_HeartReply->readAll();
+	int mNetErrorCode = m_HeartReply->error();
 	// 更改逻辑为若断网状态，则无限循环心跳
 	if (mNetErrorCode != QNetworkReply::NoError)
 	{
@@ -237,36 +239,36 @@ void LiveStatusManager::ReturnHeartBeat()
 		m_iHeartCount--;
 		if (m_iHeartCount < 0)
 		{
-			m_iHeartCount = HEARTBEAT_FAIL_COUNT;
-			
+			m_iHeartCount = HEARTBEAT_FAIL_COUNT;		
 		}
 		m_HeartFailTimer->start(300);
 		return;
 	}
-	QJsonDocument document(QJsonDocument::fromJson(result));
-	QJsonObject obj = document.object();
-	QJsonObject data = obj["data"].toObject();
-	QJsonObject error = obj["error"].toObject();
-	int mStatus = obj["status"].toInt();
+	QJsonDocument document(QJsonDocument::fromJson(mResult));
+	QJsonObject mObj = document.object();
+	QJsonObject mData = mObj["data"].toObject();
+	QJsonObject mError = mObj["error"].toObject();
+	int mStatus = mObj["status"].toInt();
 	//mStatus = 0;
 	if (mStatus == 1)
 	{
-		m_sLiveToken = data["live_token"].toString();
+		m_sLiveToken = mData["live_token"].toString();
 		// 成功以后次数重置
 		m_iHeartCount = HEARTBEAT_FAIL_COUNT;
 	}
 	else if (mStatus == 0)
 	{
+		// 如果解析消息失败，那么重新发送心跳，重新解析
+		if (mError["code"].toInt() == 0)
+		{
+			qDebug() << __FILE__ << __LINE__ << "解析消息失败！";
+			return;
+		}
 		qDebug() << __FILE__ << __LINE__ << "关闭定时器2";
 		m_HeartTimer->stop();
-		RequestError(error);
+		RequestError(mError);
+		return;
 	}
-	if (m_HeartTimer->isActive() == false)
-	{
-		qDebug() << __FILE__ << __LINE__ << "关闭定时器4";
-		m_HeartTimer->start(m_iBeatStep * 1000);
-	}
-
 }
 
 // 心跳失败重试
@@ -289,8 +291,8 @@ void LiveStatusManager::HeartBeatFailTimer()
 	}
 
 
-	QUrl url = QUrl(strUrl);
-	QNetworkRequest request(url);
+	QUrl mUrl = QUrl(strUrl);
+	QNetworkRequest mRequest(mUrl);
 
 	QByteArray append("live_token=");
 	append += m_sLiveToken;
@@ -303,9 +305,10 @@ void LiveStatusManager::HeartBeatFailTimer()
 	QString strHeartBeat = "HearBeat:";
 	strHeartBeat += append;
 //	qDebug() << strHeartBeat;
-	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
-	reply = manager.post(request, append);
-	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat);
+	mRequest.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	qDebug() << __FILE__ << __LINE__ << m_sToken;
+	m_HeartReply = manager.post(mRequest, append);
+	connect(m_HeartReply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat);
 }
 
 // 发送直播开始状态(0:未直播 1:直播中 2:已关闭)
@@ -343,6 +346,7 @@ void LiveStatusManager::SendStartLiveHttpMsg(int iBoard, int iCamera, QString sL
 	append += QString::number(mtTime);
 
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	qDebug() << __FILE__ << __LINE__ << m_sToken;
 	reply = manager.post(request,append);
 	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::FinishStartLive);
 }
@@ -425,6 +429,7 @@ void LiveStatusManager::SendStopLiveHttpMsg(bool bConnect)
 	append += QString::number(mtTime);
 
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	qDebug() << __FILE__ << __LINE__ << m_sToken;
 	reply = manager.post(request,append);
 	if (bConnect)
 		connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::FinishStopLive);
@@ -526,6 +531,7 @@ void LiveStatusManager::SendCameraSwitchMsg(int iBoard, int iCamera)
 	append += QString::number(iCamera);
 	qInfo(append, __FILE__, __LINE__);
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	qDebug() << __FILE__ << __LINE__ << m_sToken;
 	reply = manager.post(request,append);
 	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::FinishCameraSwitch);
 }
@@ -573,9 +579,14 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 	QString strError;
 	int mErrorCode = 0;
 	mErrorCode = error["code"].toInt();
+	qDebug() << __FILE__ << __LINE__ << "错误代码："<<mErrorCode;
 	if (m_newParent)
 	{
-		
+		qDebug() << __FILE__ << __LINE__ << "网络异常断开";
+		//先结束相关线程
+		m_newParent->ErrorStop();
+		StopTimer();
+		m_newParent->EndDev();		
 	}
 	
 	if (mErrorCode == 1002)
@@ -614,7 +625,7 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 	else if (mErrorCode == 9999)
 		strError = QString("服务器错误,请重新登录！");
 	else
-		return;
+		strError = QString("未知错误,请重新登录！");
 
 	int iStatus = CMessageBox::showMessage(
 		QString("答疑时间"),
@@ -626,11 +637,7 @@ void LiveStatusManager::RequestError(QJsonObject& error, bool bTrue)
 	{
 		if (m_newParent)
 		{	
-			qDebug() << __FILE__ << __LINE__ << "网络异常断开";
-			//先结束相关线程
-			m_newParent->ErrorStop();
-			m_newParent->EndDev();
-			StopTimer();
+			
 			if (m_newParent->m_ScreenTip)
 			{
 				m_newParent->m_ScreenTip->close();
@@ -686,6 +693,7 @@ void LiveStatusManager::SendStart1v1LiveHttpMsg(QString sLessonid,QString chatid
 	append += QString::number(mtTime);
 
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	qDebug() << __FILE__ << __LINE__ << m_sToken;
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::Finish1v1StartLive);
 }
@@ -759,8 +767,8 @@ void LiveStatusManager::HeartBeat1v1Timer()
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
-	QUrl url = QUrl(strUrl);
-	QNetworkRequest request(url);
+	QUrl mUrl = QUrl(strUrl);
+	QNetworkRequest request(mUrl);
 
 	qint64 date = QDateTime::currentMSecsSinceEpoch();
 	qint64 currentSec = date / 1000;
@@ -778,15 +786,16 @@ void LiveStatusManager::HeartBeat1v1Timer()
 	strHeartBeat += append;
 	qDebug() << __FILE__ << __LINE__ << strHeartBeat;
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
-	reply = manager.post(request, append);
-	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat1v1);
+	qDebug() << __FILE__ << __LINE__ << m_sToken;
+	m_HeartReply = manager.post(request, append);
+	connect(m_HeartReply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat1v1);
 }
 
 // 心跳返回的结果
 void LiveStatusManager::ReturnHeartBeat1v1()
 {
-	QByteArray result = reply->readAll();
-	int mNetErrorCode = reply->error();
+	QByteArray mResult = m_HeartReply->readAll();
+	int mNetErrorCode = m_HeartReply->error();
 	// 更改逻辑为若断网状态，则无限循环心跳
 	if (mNetErrorCode != QNetworkReply::NoError)
 	{
@@ -800,19 +809,19 @@ void LiveStatusManager::ReturnHeartBeat1v1()
 		m_1v1HeartFailTimer->start(300);
 		return;
 	}
-	QJsonDocument document(QJsonDocument::fromJson(result));
-	QJsonObject obj = document.object();
-	QJsonObject data = obj["data"].toObject();
-	QJsonObject error = obj["error"].toObject();
-	if (obj["status"].toInt() == 1)
+	QJsonDocument document(QJsonDocument::fromJson(mResult));
+	QJsonObject mObj = document.object();
+	QJsonObject mData = mObj["data"].toObject();
+	QJsonObject mError = mObj["error"].toObject();
+	if (mObj["status"].toInt() == 1)
 	{
-		m_sLiveToken = data["live_token"].toString();
+		m_sLiveToken = mData["live_token"].toString();
 		// 成功以后次数重置
 		m_iHeartCount = HEARTBEAT_FAIL_COUNT;
 	}
-	else if (obj["status"].toInt() == 0)
+	else if (mObj["status"].toInt() == 0)
 	{
-		RequestError(error);
+		RequestError(mError);
 	}
 
 }
@@ -836,8 +845,8 @@ void LiveStatusManager::HeartBeatFailTimer1v1()
 		strUrl.replace("{lessons_id}", m_lessonID);
 	}
 
-	QUrl url = QUrl(strUrl);
-	QNetworkRequest request(url);
+	QUrl mUrl = QUrl(strUrl);
+	QNetworkRequest request(mUrl);
 
 	QByteArray append("live_token=");
 	append += m_sLiveToken;
@@ -851,6 +860,7 @@ void LiveStatusManager::HeartBeatFailTimer1v1()
 	strHeartBeat += append;
 	qDebug() << "失败"<<strHeartBeat;
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	qDebug() << __FILE__ << __LINE__ << m_sToken;
 	reply = manager.post(request, append);
 	connect(reply, &QNetworkReply::finished, this, &LiveStatusManager::ReturnHeartBeat1v1);
 }
@@ -884,6 +894,7 @@ void LiveStatusManager::SendStopLiveHttpMsg1v1(bool bConnect)
 
 
 	request.setRawHeader("Remember-Token", m_sToken.toUtf8());
+	qDebug() << __FILE__ << __LINE__ << m_sToken;
 	reply = manager.post(request, "");
 // 	if (bConnect)
 // 	{

@@ -85,7 +85,7 @@ Q_SIGNALS:
 	void sig_changeLiveStatus(bool bTrue);
 	void sig_livestreamErrorHappened();
 #ifdef STARTLS_ASYNC
-	void sig_StartLiveStream();
+	void sig_StartLiveStream(bool bAudio = true);
 	void sig_StopLiveStream();
 	void sig_StopCapture();
 #endif

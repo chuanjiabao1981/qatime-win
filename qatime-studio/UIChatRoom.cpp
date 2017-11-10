@@ -803,6 +803,7 @@ bool UIChatRoom::ReceiverMsg(const nim::IMMessage* pMsg)
 	if (MathTime(QDateTime::fromMSecsSinceEpoch(pMsg->timetag_)))
 		return bValid;
 	*/
+
 #pragma region 过滤系统消息
 	if (pMsg->type_ == nim::kNIMMessageTypeNotification) // 过滤系统消息
 	{
@@ -1902,6 +1903,7 @@ void UIChatRoom::QueryMember()
 	QNetworkRequest request(url);
 
 	request.setRawHeader("Remember-Token", mRemeberToken.toUtf8());
+	qDebug() << __FILE__ << __LINE__ << mRemeberToken;
 	reply = manager.get(request);
 	connect(reply, &QNetworkReply::finished, this, &UIChatRoom::returnMember);
 }
@@ -1913,13 +1915,13 @@ void UIChatRoom::returnMember()
 	QJsonObject obj = document.object();
 	QJsonObject data = obj["data"].toObject();
 	QJsonObject error = obj["error"].toObject();
-	if (obj["status"].toInt() == 1 && data.contains("members"))
+	if (obj["status"].toInt() == 1 && (data.contains("members") || data.contains("customized_group")))
 	{
 		QJsonArray members;
 		if (m_mLessonType == d_ExclusiveLesson)
 		{
 			// 群成员信息
-			members = data["chat_team"].toObject()["accounts"].toArray();
+			members = data["customized_group"].toObject()["chat_team"].toObject()["accounts"].toArray();
 		}
 		else
 		{
@@ -2285,7 +2287,7 @@ void UIChatRoom::OnPlayAudio(std::string path, std::string sid, std::string msgi
 	}
 }
 
-void UIChatRoom::OnStopPlayAudio(char* msgid)
+void UIChatRoom::OnStopPlayAudio(std::string msgid)
 {
 	if (m_uitalk)
 		m_uitalk->stopAudio(msgid);
@@ -2379,6 +2381,7 @@ void UIChatRoom::RequestMember()
 	QString str = this->mRemeberToken;
 
 	request.setRawHeader("Remember-Token", this->mRemeberToken.toUtf8());
+	qDebug() << __FILE__ << __LINE__ << mRemeberToken;
 	reply = manager.get(request);
 	connect(reply, &QNetworkReply::finished, this, &UIChatRoom::returnAllMember);
 }

@@ -287,7 +287,6 @@ void UITalk::InsertAudioChat(QPixmap* pixmap, QString name, QString time, QStrin
 	FirstRow->addWidget(head);
 	FirstRow->addWidget(LName);
 	FirstRow->addWidget(LTime);
-
 	// 第二行（聊天内容）
 	QHBoxLayout* SecRow = new QHBoxLayout();
 	SecRow->setContentsMargins(30, 0, 0, 0);
@@ -366,8 +365,10 @@ void UITalk::slot_AudioLoadEnd(QPixmap* pixmap, QString name, QString time, QStr
 	try
 	{
 		if (pAudio)
-		{
-			delete pAudio;
+		{	
+			qDebug() << __FILE__ << __LINE__ << "删除语音1！";
+			delete pAudio;	
+			qDebug() << __FILE__ << __LINE__ << "删除语音2！";
 			pAudio = NULL;
 		}
 	}
@@ -948,10 +949,10 @@ void UITalk::slot_Audioclicked(std::string path, std::string sid, std::string ms
 		m_parent->OnPlayAudio(path, sid, msgid, isPlay);
 }
 
-void UITalk::stopAudio(char* msgid)
+void UITalk::stopAudio(std::string msgid)
 {
-	QString strMsgid = QString(QLatin1String(msgid));
-	QString sMsgid = strMsgid.mid(0, 32);
+	QString strMsgid = QString::fromStdString(msgid);
+	//QString sMsgid = strMsgid.mid(0, 32);
 	//如果语音播放停止，且自动播放状态也关闭时
 	if (m_AutoAudioState == 0)
 	{
@@ -965,10 +966,10 @@ void UITalk::stopAudio(char* msgid)
 	{
 		std::vector<CBtnAudio*>::iterator it;
 		for (it = m_vecAudio.begin(); it != m_vecAudio.end(); it++)
-		{
-			
+		{		
 			CBtnAudio* img = *it;
-			if (img->GetMsgID() == sMsgid)
+			QString mTestID = img->GetMsgID();
+			if (img->GetMsgID() == strMsgid)
 			{
 				img->stopPlay();
 				return;

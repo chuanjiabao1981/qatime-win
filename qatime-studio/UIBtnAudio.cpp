@@ -225,9 +225,10 @@ void CBtnAudio::setLastAudio(CBtnAudio* pLastAudio)
 
 void CBtnAudio::setMsgAll(QPixmap* pixmap, QString name, QString time, QString text, std::string path, std::string sid, std::string msgid, bool bTeacher, bool bRead)
 {
+	/*
 	if (!pixmap)
 		pixmap = &QPixmap("./images/teacherPhoto.png");
-
+	*/
 	m_pixmap = pixmap;
 	m_name = name;
 	m_time = time;

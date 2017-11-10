@@ -25,7 +25,7 @@ Q_SIGNALS:
 	void sig_ResultReady(int);
     void sig_StopResult(int);
 protected Q_SLOTS :
-	void slot_StartLiveStream();
+	void slot_StartLiveStream(bool bAudio);
     void slot_StopLiveStream();
 	void slot_StopCapture();
 

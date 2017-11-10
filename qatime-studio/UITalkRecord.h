@@ -71,7 +71,7 @@ public:
 	void setMainWindow(UIChatRoom* parent);											// 设置父窗口
 	void ClearAll();																// 清空
 	void DelaySrcoll();
-	void stopAudio(char* msgid);													// 停止语音
+	void stopAudio(std::string msgid);												// 停止语音
 	void InsertBtn();																// 点击查看更多
 };
 

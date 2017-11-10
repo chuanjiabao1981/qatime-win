@@ -691,9 +691,9 @@ void UIMainNewWindow::InitAudio()
 void UIMainNewWindow::OnStopAudioCallback(int code, const char* file_path, const char* sid, const char* cid)
 {
 	QString strSid = QString(QLatin1String(sid));
-	char* pData = new char[strlen(cid)]; 
-	memcpy(pData, cid, strlen(cid));
-	
+	int mCidLength = strlen(cid) + 1; // 字符串末尾/0 一定要加上
+	char* pData = new char[mCidLength];
+	memcpy(pData, cid, mCidLength);
 	PostMessage((HWND)m_This->winId(), MSG_SEND_AUDIO_MSG, (WPARAM)(int)strSid.toInt(), (LPARAM)pData);
 }
 
@@ -760,11 +760,14 @@ bool UIMainNewWindow::nativeEvent(const QByteArray &eventType, void *message, lo
 		{
 			MSG* Msg = pMsg;
 			char* msgid = (char*)Msg->lParam;
+			std::string mMsgid = msgid;
+			delete msgid;
 			int   sid = Msg->wParam;
 			std::string strSid = QString::number(sid).toStdString();
-
+			
 			if (m_WindowSet)
-				m_WindowSet->OnStopPlayAudio(strSid, msgid);
+				m_WindowSet->OnStopPlayAudio(strSid, mMsgid);
+			
 		}
 		break;
 // 		case MSG_LOGIN:  // 接收登录返回结果
