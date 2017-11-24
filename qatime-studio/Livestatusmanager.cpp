@@ -813,14 +813,22 @@ void LiveStatusManager::ReturnHeartBeat1v1()
 	QJsonObject mObj = document.object();
 	QJsonObject mData = mObj["data"].toObject();
 	QJsonObject mError = mObj["error"].toObject();
-	if (mObj["status"].toInt() == 1)
+	int mStatus = mObj["status"].toInt();
+	if (mStatus == 1)
 	{
 		m_sLiveToken = mData["live_token"].toString();
 		// 成功以后次数重置
 		m_iHeartCount = HEARTBEAT_FAIL_COUNT;
 	}
-	else if (mObj["status"].toInt() == 0)
+	else if (mStatus == 0)
 	{
+		// 如果解析消息失败，那么重新发送心跳，重新解析
+		if (mError["code"].toInt() == 0)
+		{
+			qDebug() << __FILE__ << __LINE__ << "1v1解析消息失败！";
+			return;
+		}
+		m_1v1HeartTimer->stop();
 		RequestError(mError);
 	}
 

@@ -390,7 +390,7 @@ QRadioButton::indicator:unchecked:hover {border-image: url(:/LoginWindow/images/
             <cursorShape>PointingHandCursor</cursorShape>
            </property>
            <property name="toolTip">
-            <string>专属课程</string>
+            <string>小班课</string>
            </property>
            <property name="styleSheet">
             <string notr="true">QRadioButton:checked {border-image: url(:/LoginWindow/images/Exclusive_hover.png);}

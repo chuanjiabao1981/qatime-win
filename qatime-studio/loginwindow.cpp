@@ -101,6 +101,10 @@ LoginWindow::~LoginWindow()
 		delete trayIcon;
 		trayIcon = NULL;
 	}
+	if (m_TrayMenu)
+	{
+		delete m_TrayMenu;
+	}
 }
 
 void LoginWindow::mousePressEvent(QMouseEvent *e)

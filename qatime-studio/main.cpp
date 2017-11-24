@@ -9,6 +9,7 @@
 #include <QDir>
 #include <QProcess>
 
+
 using namespace Gdiplus;
 
 void registerMetaType()
